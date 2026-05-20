@@ -2,9 +2,11 @@ from enum import Enum
 
 
 class PlaqueCategory(Enum):
+    UNKNOWN = "UNKNOWN"
     NONE = "NONE"
     MILD = "MILD"
     MODERATE = "MODERATE"
+    SEVERE = "SEVERE"
     HIGH = "HIGH"
     EXTENSIVE = "EXTENSIVE"
 

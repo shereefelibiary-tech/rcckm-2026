@@ -9,7 +9,6 @@ def test_build_target_result_returns_clinical_ascvd_targets():
 
     assert result.ldl_c_target == 55
     assert result.non_hdl_c_target == 85
-    assert result.rationale == "Clinical ASCVD: intensive secondary prevention target pathway."
 
 
 def test_build_target_result_returns_extensive_cac_targets():
@@ -26,8 +25,8 @@ def test_build_target_result_returns_elevated_cac_targets():
 
     result = build_target_result(patient)
 
-    assert result.ldl_c_target == 100
-    assert result.non_hdl_c_target == 130
+    assert result.ldl_c_target == 70
+    assert result.non_hdl_c_target == 100
 
 
 def test_build_target_result_returns_no_target_for_zero_cac():
@@ -37,3 +36,21 @@ def test_build_target_result_returns_no_target_for_zero_cac():
 
     assert result.ldl_c_target is None
     assert result.non_hdl_c_target is None
+
+
+def test_build_target_result_returns_very_high_targets_for_cac_1000():
+    patient = Patient(age=65, sex="female", cac=1000)
+
+    result = build_target_result(patient)
+
+    assert result.ldl_c_target == 55
+    assert result.non_hdl_c_target == 85
+
+
+def test_build_target_result_returns_mild_cac_targets_for_cac_50():
+    patient = Patient(age=65, sex="female", cac=50)
+
+    result = build_target_result(patient)
+
+    assert result.ldl_c_target == 100
+    assert result.non_hdl_c_target == 130

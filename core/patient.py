@@ -20,3 +20,6 @@ class Patient:
     hypertension: Optional[bool] = None
     smoker: Optional[bool] = None
     clinical_ascvd: Optional[bool] = None
+    hscrp: Optional[float] = None
+    ckd: Optional[bool] = None
+    family_history_premature_ascvd: Optional[bool] = None

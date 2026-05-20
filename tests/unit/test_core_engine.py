@@ -18,7 +18,7 @@ def test_evaluate_patient_returns_combined_results():
 
     result = evaluate_patient(patient)
 
-    assert result.plaque_category == PlaqueCategory.EXTENSIVE
+    assert result.plaque_category == PlaqueCategory.SEVERE
     assert result.decision_stability == DecisionStability.HIGH
     assert len(result.targets) == 1
     assert any(c.name == "Chronic kidney disease" for c in result.diagnosis_candidates)
