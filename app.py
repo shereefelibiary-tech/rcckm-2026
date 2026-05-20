@@ -37,6 +37,11 @@ def main():
             for candidate in result.diagnosis_candidates:
                 st.write(f"- {candidate.name}")
 
+        if result.snapshot_lines:
+            st.write("### Snapshot")
+            for line in result.snapshot_lines:
+                st.write(line)
+
 
 if __name__ == "__main__":
     main()
