@@ -84,6 +84,23 @@ def main():
                 f"{contribution.rationale}"
             )
 
+        st.write("### Domain Subtotals")
+        domain_points = {}
+        for contribution in rss_contributions:
+            domain_points[contribution.domain] = (
+                domain_points.get(contribution.domain, 0) + contribution.points
+            )
+        st.table(
+            sorted(
+                [
+                    {"Domain": domain, "Points": points}
+                    for domain, points in domain_points.items()
+                ],
+                key=lambda row: row["Points"],
+                reverse=True,
+            )
+        )
+
         st.table(
             [
                 {
