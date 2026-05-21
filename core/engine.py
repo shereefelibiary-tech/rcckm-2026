@@ -5,6 +5,7 @@ from modules.risk.engine import assign_risk_level
 from modules.snapshot.engine import build_snapshot_lines
 from modules.stability.engine import assess_decision_stability
 from modules.targets.engine import build_target_result
+from modules.recommendations.engine import build_dominant_action
 
 
 def evaluate_patient(patient):
@@ -22,6 +23,7 @@ def evaluate_patient(patient):
         diagnosis_candidates=diagnosis_candidates,
     )
 
+    rcckm_result.dominant_action = build_dominant_action(patient, rcckm_result)
     rcckm_result.snapshot_lines = build_snapshot_lines(rcckm_result)
 
     return rcckm_result
