@@ -5,6 +5,24 @@ from core.engine import evaluate_patient
 from modules.rss.engine import build_rss_contributions, calculate_rss_total
 
 
+def format_signal(contribution):
+    value = contribution.actual_value
+    if value is None or isinstance(value, bool):
+        return contribution.label
+
+    value_labels = {
+        "CAC plaque burden": f"CAC {value}",
+        "ApoB elevation": f"ApoB {value} mg/dL",
+        "Elevated Lp(a)": f"Lp(a) {value}",
+        "Inflammatory risk": f"hsCRP {value} mg/L",
+        "Reduced eGFR": f"eGFR {value}",
+        "Albuminuria": f"UACR {value} mg/g",
+        "Hypertriglyceridemia": f"Triglycerides {value} mg/dL",
+    }
+    value_label = value_labels.get(contribution.label, str(value))
+    return f"{contribution.label} ({value_label})"
+
+
 def main():
     st.title("RCCKM 2026")
 
@@ -62,7 +80,7 @@ def main():
         for contribution in top_drivers:
             st.write(
                 f"+{contribution.points} "
-                f"{contribution.label}: "
+                f"{format_signal(contribution)}: "
                 f"{contribution.rationale}"
             )
 
@@ -71,7 +89,7 @@ def main():
                 {
                     "Points": contribution.points,
                     "Domain": contribution.domain,
-                    "Signal": contribution.label,
+                    "Signal": format_signal(contribution),
                     "Severity": contribution.severity or "",
                     "Rationale": contribution.rationale,
                 }
