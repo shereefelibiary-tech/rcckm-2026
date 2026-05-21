@@ -53,13 +53,18 @@ def main():
         st.write("### RSS")
         st.write(f"Total RSS: {rss_total}")
 
-        for contribution in rss_contributions:
-            st.write(
-                f"+{contribution.points} | "
-                f"{contribution.domain} | "
-                f"{contribution.label} | "
-                f"{contribution.severity}"
-            )
+        st.table(
+            [
+                {
+                    "Points": contribution.points,
+                    "Domain": contribution.domain,
+                    "Signal": contribution.label,
+                    "Severity": contribution.severity or "",
+                    "Rationale": contribution.rationale,
+                }
+                for contribution in rss_contributions
+            ]
+        )
 
 
 if __name__ == "__main__":
