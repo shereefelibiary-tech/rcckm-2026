@@ -90,7 +90,7 @@ def main():
             domain_points[contribution.domain] = (
                 domain_points.get(contribution.domain, 0) + contribution.points
             )
-        st.table(
+        st.dataframe(
             sorted(
                 [
                     {"Domain": domain, "Points": points}
@@ -98,10 +98,11 @@ def main():
                 ],
                 key=lambda row: row["Points"],
                 reverse=True,
-            )
+            ),
+            hide_index=True,
         )
 
-        st.table(
+        st.dataframe(
             [
                 {
                     "Points": contribution.points,
@@ -111,7 +112,8 @@ def main():
                     "Rationale": contribution.rationale,
                 }
                 for contribution in rss_contributions
-            ]
+            ],
+            hide_index=True,
         )
 
 
