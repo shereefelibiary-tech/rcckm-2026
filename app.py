@@ -53,6 +53,19 @@ def main():
         st.write("### RSS")
         st.write(f"Total RSS: {rss_total}")
 
+        st.write("### Top Drivers")
+        top_drivers = sorted(
+            rss_contributions,
+            key=lambda contribution: contribution.points,
+            reverse=True,
+        )[:3]
+        for contribution in top_drivers:
+            st.write(
+                f"+{contribution.points} "
+                f"{contribution.label}: "
+                f"{contribution.rationale}"
+            )
+
         st.table(
             [
                 {
