@@ -1,0 +1,22 @@
+﻿PowerChart Lab Flowsheet synthetic
+Demographics 55 M
+Vitals: BP 132/82
+TOTAL CHOL 205
+LDL-C 132
+HDL-C 48
+TG 180
+ApoB 110
+Lp(a) 80 nmol/L
+A1c 7.1
+eGFR 55
+Creatinine 1.15
+UACR 45
+CAC 350
+Diabetes: true
+Tobacco: never
+Father MI age 49
+hsCRP 2.4
+Antihypertensive: losartan
+Stopped atorvastatin last year.
+BMI 31
+

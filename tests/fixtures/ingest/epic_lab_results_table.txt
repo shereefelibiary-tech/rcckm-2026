@@ -1,0 +1,18 @@
+﻿Epic MyChart synthetic lab results table
+Age: 55  Sex: Male
+Vitals BP: 132/82
+Component | Value | Units
+Total Cholesterol | 205 | mg/dL
+LDL Cholesterol Calc | 132 | mg/dL
+HDL Cholesterol | 48 | mg/dL
+Triglycerides | 180 | mg/dL
+Apo B | 110 | mg/dL
+Lp(a) | 80 nmol/L
+Hemoglobin A1c | 7.1 | %
+eGFR | 55 | mL/min/1.73m2
+Creatinine | 1.15 | mg/dL
+Albumin/Creatinine Ratio | 45 | mg/g
+CAC Score | 350
+Tobacco: Never smoker. Father MI age 49. hsCRP 2.4. Hypertension meds: lisinopril. Lipid lowering: none.
+BMI 31
+

@@ -1,0 +1,879 @@
+[
+  {
+    "name": "minimal_signal_cac_0",
+    "patient": {
+      "age": 45,
+      "sex": "male",
+      "cac": 0,
+      "apob": 70,
+      "ldl_c": 90,
+      "a1c": 5.2
+    },
+    "expected": {
+      "risk_continuum_level": 1,
+      "ckm_stage": 0,
+      "rss_category": "Low",
+      "required_action": "Check Lp(a)",
+      "required_clarifier": "Lp(a)"
+    },
+    "forbidden_phrases": [
+      "<div class=",
+      "phenotype",
+      "inherited risk",
+      "genetics",
+      "Supporting actions:"
+    ]
+  },
+  {
+    "name": "minimal_signal_plaque_unmeasured",
+    "patient": {
+      "age": 45,
+      "sex": "female",
+      "apob": 70,
+      "ldl_c": 90,
+      "a1c": 5.2
+    },
+    "expected": {
+      "risk_continuum_level": [
+        1,
+        2
+      ],
+      "risk_continuum_sublevel": [
+        null,
+        "2A"
+      ],
+      "ckm_stage": 0,
+      "required_clarifier": "Lp(a)"
+    },
+    "forbidden_phrases": [
+      "<div class=",
+      "phenotype",
+      "inherited risk",
+      "genetics",
+      "Supporting actions:"
+    ]
+  },
+  {
+    "name": "isolated_mild_apob",
+    "patient": {
+      "age": 50,
+      "sex": "male",
+      "apob": 92,
+      "ldl_c": 118,
+      "a1c": 5.2
+    },
+    "expected": {
+      "risk_continuum_level": 2,
+      "risk_continuum_sublevel": "2A",
+      "required_clarifier": "Lp(a)"
+    },
+    "forbidden_phrases": [
+      "<div class=",
+      "phenotype",
+      "inherited risk",
+      "genetics",
+      "Supporting actions:"
+    ]
+  },
+  {
+    "name": "converging_mild_signals",
+    "patient": {
+      "age": 50,
+      "sex": "male",
+      "apob": 92,
+      "a1c": 5.9,
+      "family_history_premature_ascvd": true
+    },
+    "expected": {
+      "risk_continuum_level": 2,
+      "risk_continuum_sublevel": "2B",
+      "ckm_stage": 1,
+      "required_driver": "family history",
+      "required_diagnosis": "Prediabetes"
+    },
+    "forbidden_phrases": [
+      "<div class=",
+      "phenotype",
+      "inherited risk",
+      "genetics",
+      "Supporting actions:"
+    ]
+  },
+  {
+    "name": "apob_actionable_biology",
+    "patient": {
+      "age": 55,
+      "sex": "male",
+      "apob": 118
+    },
+    "expected": {
+      "risk_continuum_level": [
+        2,
+        3
+      ],
+      "risk_continuum_sublevel": "3A",
+      "required_driver": "ApoB",
+      "required_diagnosis": "Elevated ApoB",
+      "required_action": "Lipid-lowering"
+    },
+    "forbidden_phrases": [
+      "<div class=",
+      "phenotype",
+      "inherited risk",
+      "genetics",
+      "Supporting actions:"
+    ]
+  },
+  {
+    "name": "apob_plus_family_history_enhancer",
+    "patient": {
+      "age": 55,
+      "sex": "male",
+      "apob": 118,
+      "family_history_premature_ascvd": true
+    },
+    "expected": {
+      "risk_continuum_level": 3,
+      "risk_continuum_sublevel": "3B",
+      "required_driver": "ApoB",
+      "required_diagnosis": "Elevated ApoB",
+      "required_clarifier": "Lp(a)"
+    },
+    "forbidden_phrases": [
+      "<div class=",
+      "phenotype",
+      "inherited risk",
+      "genetics",
+      "Supporting actions:"
+    ]
+  },
+  {
+    "name": "smoking_driven_actionable_biology",
+    "patient": {
+      "age": 55,
+      "sex": "male",
+      "smoker": true,
+      "smoking": true
+    },
+    "expected": {
+      "risk_continuum_level": 3,
+      "required_driver": "Smoking",
+      "required_action": "smoking"
+    },
+    "forbidden_phrases": [
+      "<div class=",
+      "phenotype",
+      "inherited risk",
+      "genetics",
+      "Supporting actions:"
+    ]
+  },
+  {
+    "name": "diabetes_range_glycemia",
+    "patient": {
+      "age": 55,
+      "sex": "male",
+      "a1c": 7.1,
+      "diabetes": true
+    },
+    "expected": {
+      "risk_continuum_level": 3,
+      "ckm_stage": [
+        2,
+        3,
+        4
+      ],
+      "required_driver": "A1c",
+      "required_diagnosis": "Type 2 diabetes",
+      "required_action": "glycemic",
+      "required_clarifier": "UACR"
+    },
+    "forbidden_phrases": [
+      "<div class=",
+      "phenotype",
+      "inherited risk",
+      "genetics",
+      "Supporting actions:"
+    ]
+  },
+  {
+    "name": "diabetes_plus_ckd_albuminuria",
+    "patient": {
+      "age": 60,
+      "sex": "female",
+      "a1c": 7.4,
+      "diabetes": true,
+      "egfr": 52,
+      "uacr": 210
+    },
+    "expected": {
+      "risk_continuum_level": 3,
+      "ckm_stage": 3,
+      "kdigo": "G3aA2",
+      "required_driver": "T2DM with CKD",
+      "required_diagnosis": "diabetic chronic kidney disease",
+      "required_action": "kidney-protective"
+    },
+    "forbidden_phrases": [
+      "<div class=",
+      "phenotype",
+      "inherited risk",
+      "genetics",
+      "Supporting actions:"
+    ]
+  },
+  {
+    "name": "prediabetes_only",
+    "patient": {
+      "age": 45,
+      "sex": "female",
+      "a1c": 5.8,
+      "diabetes": false
+    },
+    "expected": {
+      "risk_continuum_level": [
+        1,
+        2
+      ],
+      "risk_continuum_sublevel": [
+        null,
+        "2A"
+      ],
+      "ckm_stage": 1,
+      "required_diagnosis": "Prediabetes"
+    },
+    "forbidden_phrases": [
+      "<div class=",
+      "phenotype",
+      "inherited risk",
+      "genetics",
+      "Supporting actions:"
+    ]
+  },
+  {
+    "name": "near_diabetes_convergence",
+    "patient": {
+      "age": 52,
+      "sex": "male",
+      "a1c": 6.4,
+      "apob": 96
+    },
+    "expected": {
+      "risk_continuum_level": 2,
+      "risk_continuum_sublevel": "2B",
+      "ckm_stage": 1,
+      "required_diagnosis": "Prediabetes",
+      "required_clarifier": "UACR"
+    },
+    "forbidden_phrases": [
+      "<div class=",
+      "phenotype",
+      "inherited risk",
+      "genetics",
+      "Supporting actions:"
+    ]
+  },
+  {
+    "name": "cac_0_with_mild_biology",
+    "patient": {
+      "age": 55,
+      "sex": "male",
+      "cac": 0,
+      "apob": 92,
+      "a1c": 5.8
+    },
+    "expected": {
+      "risk_continuum_level": [
+        1,
+        2
+      ],
+      "ckm_stage": 1,
+      "required_diagnosis": "Prediabetes",
+      "required_action": "Check Lp(a)"
+    },
+    "forbidden_phrases": [
+      "<div class=",
+      "phenotype",
+      "inherited risk",
+      "genetics",
+      "Supporting actions:"
+    ]
+  },
+  {
+    "name": "cac_25",
+    "patient": {
+      "age": 55,
+      "sex": "male",
+      "cac": 25
+    },
+    "expected": {
+      "risk_continuum_level": 4,
+      "ckm_stage": 3,
+      "required_driver": "CAC 25",
+      "required_diagnosis": "Subclinical coronary atherosclerosis",
+      "required_action": "Lipid-lowering"
+    },
+    "forbidden_phrases": [
+      "<div class=",
+      "phenotype",
+      "inherited risk",
+      "genetics",
+      "Supporting actions:"
+    ]
+  },
+  {
+    "name": "cac_120",
+    "patient": {
+      "age": 55,
+      "sex": "male",
+      "cac": 120
+    },
+    "expected": {
+      "risk_continuum_level": 4,
+      "ckm_stage": 3,
+      "required_driver": "CAC 120",
+      "required_diagnosis": "Subclinical coronary atherosclerosis",
+      "required_action": "Lipid-lowering"
+    },
+    "forbidden_phrases": [
+      "<div class=",
+      "phenotype",
+      "inherited risk",
+      "genetics",
+      "Supporting actions:"
+    ]
+  },
+  {
+    "name": "cac_350",
+    "patient": {
+      "age": 55,
+      "sex": "male",
+      "cac": 350
+    },
+    "expected": {
+      "risk_continuum_level": 5,
+      "ckm_stage": 3,
+      "required_driver": "CAC 350",
+      "required_diagnosis": "Severe subclinical coronary atherosclerosis",
+      "required_action": "Lipid-lowering"
+    },
+    "forbidden_phrases": [
+      "<div class=",
+      "phenotype",
+      "inherited risk",
+      "genetics",
+      "Supporting actions:"
+    ]
+  },
+  {
+    "name": "clinical_ascvd",
+    "patient": {
+      "age": 60,
+      "sex": "female",
+      "clinical_ascvd": true
+    },
+    "expected": {
+      "risk_continuum_level": 5,
+      "ckm_stage": 4,
+      "required_driver": "Clinical ASCVD",
+      "required_diagnosis": "Clinical ASCVD",
+      "required_action": "Lipid-lowering"
+    },
+    "forbidden_phrases": [
+      "<div class=",
+      "phenotype",
+      "inherited risk",
+      "genetics",
+      "Supporting actions:"
+    ]
+  },
+  {
+    "name": "high_prevent_cac_missing",
+    "patient": {
+      "age": 60,
+      "sex": "male",
+      "prevent_10y_ascvd": 12.0
+    },
+    "expected": {
+      "risk_continuum_level": 3,
+      "required_clarifier": "CAC",
+      "required_discordance": "plaque unmeasured"
+    },
+    "forbidden_phrases": [
+      "<div class=",
+      "phenotype",
+      "inherited risk",
+      "genetics",
+      "Supporting actions:"
+    ]
+  },
+  {
+    "name": "high_prevent_cac_0",
+    "patient": {
+      "age": 60,
+      "sex": "male",
+      "prevent_10y_ascvd": 12.0,
+      "cac": 0
+    },
+    "expected": {
+      "risk_continuum_level": 3,
+      "required_action": "Check Lp(a)",
+      "required_discordance": "exceeds measured plaque"
+    },
+    "forbidden_phrases": [
+      "<div class=",
+      "phenotype",
+      "inherited risk",
+      "genetics",
+      "Supporting actions:"
+    ]
+  },
+  {
+    "name": "low_prevent_cac_420",
+    "patient": {
+      "age": 55,
+      "sex": "male",
+      "prevent_10y_ascvd": 4.0,
+      "cac": 420
+    },
+    "expected": {
+      "risk_continuum_level": 5,
+      "ckm_stage": 3,
+      "required_driver": "CAC 420",
+      "required_diagnosis": "Severe subclinical coronary atherosclerosis",
+      "required_action": "Lipid-lowering",
+      "required_discordance": "Plaque burden exceeds"
+    },
+    "forbidden_phrases": [
+      "<div class=",
+      "phenotype",
+      "inherited risk",
+      "genetics",
+      "Supporting actions:"
+    ]
+  },
+  {
+    "name": "ldl_severe_hypercholesterolemia",
+    "patient": {
+      "age": 45,
+      "sex": "male",
+      "ldl_c": 212
+    },
+    "expected": {
+      "risk_continuum_level": 3,
+      "required_driver": "LDL-C 212",
+      "required_diagnosis": "hypercholesterolemia",
+      "required_action": "ApoB",
+      "required_clarifier": "ApoB"
+    },
+    "forbidden_phrases": [
+      "<div class=",
+      "phenotype",
+      "inherited risk",
+      "genetics",
+      "Supporting actions:"
+    ]
+  },
+  {
+    "name": "ldl_high_apob_normal_discordance",
+    "patient": {
+      "age": 55,
+      "sex": "male",
+      "ldl_c": 165,
+      "apob": 82
+    },
+    "expected": {
+      "risk_continuum_level": 2,
+      "risk_continuum_sublevel": "2A",
+      "required_driver": "discordance",
+      "required_clarifier": "Lp(a)"
+    },
+    "forbidden_phrases": [
+      "<div class=",
+      "phenotype",
+      "inherited risk",
+      "genetics",
+      "Supporting actions:"
+    ]
+  },
+  {
+    "name": "apob_high_ldl_modest",
+    "patient": {
+      "age": 55,
+      "sex": "male",
+      "ldl_c": 108,
+      "apob": 125
+    },
+    "expected": {
+      "risk_continuum_level": 3,
+      "risk_continuum_sublevel": "3A",
+      "required_driver": "ApoB 125",
+      "required_diagnosis": "Elevated ApoB"
+    },
+    "forbidden_phrases": [
+      "<div class=",
+      "phenotype",
+      "inherited risk",
+      "genetics",
+      "Supporting actions:"
+    ]
+  },
+  {
+    "name": "elevated_lpa_nmol_l",
+    "patient": {
+      "age": 50,
+      "sex": "female",
+      "lp_a_value": 180,
+      "lp_a_unit": "nmol/L"
+    },
+    "expected": {
+      "risk_continuum_level": 3,
+      "required_driver": "Lp(a) 180",
+      "required_diagnosis": "Elevated lipoprotein(a)"
+    },
+    "forbidden_phrases": [
+      "<div class=",
+      "phenotype",
+      "inherited risk",
+      "genetics",
+      "Supporting actions:"
+    ]
+  },
+  {
+    "name": "elevated_lpa_mg_dl",
+    "patient": {
+      "age": 50,
+      "sex": "female",
+      "lp_a_value": 65,
+      "lp_a_unit": "mg/dL"
+    },
+    "expected": {
+      "risk_continuum_level": 3,
+      "required_driver": "Lp(a) 65",
+      "required_diagnosis": "Elevated lipoprotein(a)"
+    },
+    "forbidden_phrases": [
+      "<div class=",
+      "phenotype",
+      "inherited risk",
+      "genetics",
+      "Supporting actions:"
+    ]
+  },
+  {
+    "name": "uacr_a2_preserved_egfr",
+    "patient": {
+      "age": 55,
+      "sex": "female",
+      "egfr": 84,
+      "uacr": 75
+    },
+    "expected": {
+      "ckm_stage": 3,
+      "kdigo": "G2A2",
+      "required_driver": "UACR",
+      "required_diagnosis": "Albuminuria"
+    },
+    "forbidden_phrases": [
+      "<div class=",
+      "phenotype",
+      "inherited risk",
+      "genetics",
+      "Supporting actions:"
+    ]
+  },
+  {
+    "name": "uacr_a3",
+    "patient": {
+      "age": 55,
+      "sex": "female",
+      "uacr": 420
+    },
+    "expected": {
+      "ckm_stage": 3,
+      "required_driver": "UACR 420",
+      "required_diagnosis": "Severely increased albuminuria"
+    },
+    "forbidden_phrases": [
+      "<div class=",
+      "phenotype",
+      "inherited risk",
+      "genetics",
+      "Supporting actions:"
+    ]
+  },
+  {
+    "name": "ckd_g3b",
+    "patient": {
+      "age": 65,
+      "sex": "male",
+      "egfr": 38
+    },
+    "expected": {
+      "kdigo": "G3b",
+      "required_driver": "CKD",
+      "required_diagnosis": "Chronic kidney disease, stage 3b",
+      "required_clarifier": "UACR"
+    },
+    "forbidden_phrases": [
+      "<div class=",
+      "phenotype",
+      "inherited risk",
+      "genetics",
+      "Supporting actions:"
+    ]
+  },
+  {
+    "name": "hypertriglyceridemia",
+    "patient": {
+      "age": 50,
+      "sex": "male",
+      "triglycerides": 240
+    },
+    "expected": {
+      "ckm_stage": 2,
+      "required_diagnosis": "Hypertriglyceridemia",
+      "required_clarifier": "UACR"
+    },
+    "forbidden_phrases": [
+      "<div class=",
+      "phenotype",
+      "inherited risk",
+      "genetics",
+      "Supporting actions:"
+    ]
+  },
+  {
+    "name": "severe_hypertriglyceridemia",
+    "patient": {
+      "age": 50,
+      "sex": "male",
+      "triglycerides": 620
+    },
+    "expected": {
+      "ckm_stage": 2,
+      "required_driver": "TG 620",
+      "required_diagnosis": "Severe hypertriglyceridemia",
+      "required_action": "Repeat fasting lipid",
+      "required_clarifier": "fasting_lipids"
+    },
+    "forbidden_phrases": [
+      "<div class=",
+      "phenotype",
+      "inherited risk",
+      "genetics",
+      "Supporting actions:"
+    ]
+  },
+  {
+    "name": "inflammatory_phenotype",
+    "patient": {
+      "age": 55,
+      "sex": "female",
+      "hscrp": 4.5,
+      "inflammatory_disease": true
+    },
+    "expected": {
+      "risk_continuum_level": 3,
+      "risk_continuum_sublevel": "3B",
+      "required_driver": "Inflammatory disease",
+      "required_clarifier": "Lp(a)"
+    },
+    "forbidden_phrases": [
+      "<div class=",
+      "phenotype",
+      "inherited risk",
+      "genetics",
+      "Supporting actions:"
+    ]
+  },
+  {
+    "name": "prevent_low_category",
+    "patient": {
+      "age": 55,
+      "sex": "male",
+      "prevent_10y_ascvd": 2.99
+    },
+    "expected": {
+      "prevent_category": "LOW",
+      "risk_continuum_level": [
+        1,
+        2
+      ],
+      "required_action": "Check Lp(a)"
+    },
+    "forbidden_phrases": [
+      "phenotype",
+      "inherited risk",
+      "genetics"
+    ]
+  },
+  {
+    "name": "prevent_borderline_category",
+    "patient": {
+      "age": 55,
+      "sex": "male",
+      "prevent_10y_ascvd": 3.0
+    },
+    "expected": {
+      "prevent_category": "BORDERLINE",
+      "risk_continuum_level": 2
+    },
+    "forbidden_phrases": [
+      "phenotype",
+      "inherited risk",
+      "genetics"
+    ]
+  },
+  {
+    "name": "prevent_intermediate_category",
+    "patient": {
+      "age": 55,
+      "sex": "male",
+      "prevent_10y_ascvd": 5.0
+    },
+    "expected": {
+      "prevent_category": "INTERMEDIATE",
+      "risk_continuum_level": [
+        2,
+        3
+      ],
+      "required_clarifier": "CAC"
+    },
+    "forbidden_phrases": [
+      "phenotype",
+      "inherited risk",
+      "genetics"
+    ]
+  },
+  {
+    "name": "prevent_high_category",
+    "patient": {
+      "age": 55,
+      "sex": "male",
+      "prevent_10y_ascvd": 10.0
+    },
+    "expected": {
+      "prevent_category": "HIGH",
+      "risk_continuum_level": 3,
+      "required_action": "Lipid-lowering therapy is indicated"
+    },
+    "forbidden_phrases": [
+      "phenotype",
+      "inherited risk",
+      "genetics"
+    ]
+  },
+  {
+    "name": "cac_1000_extreme_plaque",
+    "patient": {
+      "age": 55,
+      "sex": "male",
+      "cac": 1200
+    },
+    "expected": {
+      "risk_continuum_level": 5,
+      "ckm_stage": 3,
+      "required_diagnosis": "Severe subclinical coronary atherosclerosis",
+      "target_ldl": 55,
+      "target_non_hdl": 85
+    },
+    "forbidden_phrases": [
+      "phenotype",
+      "inherited risk",
+      "genetics"
+    ]
+  },
+  {
+    "name": "clinical_ascvd_with_cac_0",
+    "patient": {
+      "age": 60,
+      "sex": "male",
+      "clinical_ascvd": true,
+      "clinical_ascvd_context": "prior NSTEMI and PCI/stent",
+      "cac": 0,
+      "prevent_10y_ascvd": 2.5
+    },
+    "expected": {
+      "risk_continuum_level": 5,
+      "ckm_stage": 4,
+      "required_diagnosis": "Clinical ASCVD",
+      "required_action": "Secondary-prevention lipid-lowering therapy",
+      "forbidden_diagnosis": "Subclinical coronary atherosclerosis"
+    },
+    "forbidden_phrases": [
+      "no calcified plaque detected",
+      "phenotype",
+      "inherited risk",
+      "genetics"
+    ]
+  },
+  {
+    "name": "tg_1000_very_severe",
+    "patient": {
+      "age": 50,
+      "sex": "male",
+      "triglycerides": 1000
+    },
+    "expected": {
+      "required_diagnosis": "Severe hypertriglyceridemia",
+      "required_action": "Very severe hypertriglyceridemia"
+    },
+    "forbidden_phrases": [
+      "phenotype",
+      "inherited risk",
+      "genetics"
+    ]
+  },
+  {
+    "name": "lpa_80_not_major",
+    "patient": {
+      "age": 50,
+      "sex": "female",
+      "lp_a_value": 80,
+      "lp_a_unit": "nmol/L"
+    },
+    "expected": {
+      "forbidden_diagnosis": "Elevated lipoprotein(a)"
+    },
+    "forbidden_phrases": [
+      "major driver",
+      "inherited risk",
+      "genetics"
+    ]
+  },
+  {
+    "name": "uacr_missing_is_missing",
+    "patient": {
+      "age": 55,
+      "sex": "female",
+      "egfr": 84
+    },
+    "expected": {
+      "kdigo": "G2",
+      "forbidden_diagnosis": "Albuminuria"
+    },
+    "forbidden_phrases": [
+      "UACR 0",
+      "phenotype"
+    ]
+  },
+  {
+    "name": "uacr_zero_measured_low",
+    "patient": {
+      "age": 55,
+      "sex": "female",
+      "egfr": 84,
+      "uacr": 0
+    },
+    "expected": {
+      "kdigo": "G2A1",
+      "forbidden_diagnosis": "Albuminuria"
+    },
+    "forbidden_phrases": [
+      "missing UACR",
+      "UACR missing",
+      "phenotype"
+    ]
+  }
+]

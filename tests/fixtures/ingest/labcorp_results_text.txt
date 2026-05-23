@@ -1,0 +1,17 @@
+﻿Labcorp synthetic results text
+Age: 55 Sex: M
+BP 132/82
+Cholesterol, Total 205
+LDL Chol Calc 132
+HDL Cholesterol 48
+Triglycerides 180
+Apolipoprotein B 110
+Lipoprotein (a) 80 nmol/L
+Hemoglobin A1c 7.1
+Glom Filt Rate, Est eGFR 55
+Creatinine 1.15
+Albumin/Creatinine Ratio 45
+hsCRP 2.4
+Clinical note: diabetes yes; never smoker; father MI age 49; CAC 350; BP treated yes; no lipid-lowering medication.
+BMI 31
+

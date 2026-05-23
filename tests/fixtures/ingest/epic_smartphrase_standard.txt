@@ -1,0 +1,5 @@
+﻿EPIC SmartPhrase synthetic example
+55M BP 132/82. BP treated: yes. Total cholesterol 205. LDL-C 132. HDL-C 48. TG 180.
+ApoB 110. Lp(a) 80 nmol/L. A1c 7.1. Diabetes: yes. BMI 31. eGFR 55. Creatinine 1.15. UACR 45.
+CAC 350. Never smoker. Father MI age 49. hsCRP 2.4. No clinical ASCVD. Not on statin.
+Meds: lisinopril. Fasting lipid panel.

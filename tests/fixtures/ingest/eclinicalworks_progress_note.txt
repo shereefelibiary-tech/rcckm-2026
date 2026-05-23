@@ -1,0 +1,7 @@
+﻿eClinicalWorks synthetic progress note
+55M here for prevention review. BP: 132/82, on antihypertensive therapy.
+Lipid panel non-fasting: Total cholesterol 205, LDL 132, HDL 48, TG 180, ApoB 110, Lp(a) 80 nmol/L.
+A1c 7.1 with diabetes. BMI 31. eGFR 55, creatinine 1.15, urine albumin creatinine ratio 45.
+CAC 350. Smoking: no. Father MI age 49. hsCRP 2.4. Denies ASCVD.
+No lipid lowering therapy.
+

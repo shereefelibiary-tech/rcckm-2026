@@ -1,0 +1,13 @@
+﻿athenahealth synthetic visit summary
+Patient: 55 y/o male
+Vitals BP 132/82; HTN meds yes
+Labs TC 205 LDL-C 132 HDL-C 48 TG 180 ApoB 110 Lp(a) 80 nmol/L A1c 7.1
+Kidney eGFR 55 Creatinine 1.15 UACR 45
+Imaging coronary artery calcium score 350
+Social history: never smoker
+Family history: Father MI age 49
+hsCRP 2.4
+Diabetes: yes
+Medications: lisinopril, metformin. No lipid lowering therapy.
+BMI 31
+

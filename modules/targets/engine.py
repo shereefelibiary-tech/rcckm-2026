@@ -1,6 +1,55 @@
 from core.results import TargetResult
 
 
+def _age_40_to_75(patient):
+    try:
+        age = float(patient.age)
+    except (TypeError, ValueError):
+        return False
+    return 40 <= age <= 75
+
+
+def _has_diabetes(patient):
+    a1c = getattr(patient, "a1c", None)
+    return bool(getattr(patient, "diabetes", False)) or (
+        a1c is not None and a1c >= 6.5
+    )
+
+
+def _has_ckd_stage_3_or_higher(patient):
+    egfr = getattr(patient, "egfr", None)
+    return bool(getattr(patient, "ckd", False)) or (
+        egfr is not None and egfr < 60
+    )
+
+
+def _has_diabetes_risk_enhancer(patient):
+    return (
+        (getattr(patient, "uacr", None) is not None and patient.uacr >= 30)
+        or (getattr(patient, "egfr", None) is not None and patient.egfr < 60)
+        or bool(getattr(patient, "smoker", False))
+        or bool(getattr(patient, "smoking", False))
+        or bool(getattr(patient, "hypertension", False))
+        or bool(getattr(patient, "bp_treated", False))
+        or (getattr(patient, "sbp", None) is not None and patient.sbp >= 130)
+        or (getattr(patient, "triglycerides", None) is not None and patient.triglycerides >= 150)
+        or (getattr(patient, "prevent_10y_ascvd", None) is not None and patient.prevent_10y_ascvd >= 10)
+    )
+
+
+def _cac_zero_can_defer(patient):
+    ldl_c = getattr(patient, "ldl_c", None)
+    age = getattr(patient, "age", None)
+    return not (
+        (ldl_c is not None and ldl_c >= 190)
+        or (_has_diabetes(patient) and age is not None and age > 40)
+        or bool(getattr(patient, "smoker", False))
+        or bool(getattr(patient, "smoking", False))
+        or bool(getattr(patient, "premature_fhx_ascvd", False))
+        or bool(getattr(patient, "family_history_premature_ascvd", False))
+    )
+
+
 def build_target_result(patient):
     if patient.clinical_ascvd:
         return TargetResult(
@@ -26,7 +75,7 @@ def build_target_result(patient):
             non_hdl_c_target=100,
             apob_target=80,
             rationale=(
-                "CAC 300-999: severe subclinical plaque burden; treat toward high-risk target."
+                "CAC 300-999: severe subclinical plaque burden; treat toward high-risk target. Intensification to very-high-risk targets may be reasonable."
             ),
         )
 
@@ -50,12 +99,83 @@ def build_target_result(patient):
             ),
         )
 
-    if patient.cac == 0:
+    if patient.cac == 0 and _cac_zero_can_defer(patient):
         return TargetResult(
             ldl_c_target=None,
             non_hdl_c_target=None,
             apob_target=None,
             rationale="CAC 0: no target assigned from plaque burden alone.",
+        )
+
+    if _has_diabetes(patient) and _age_40_to_75(patient):
+        if _has_diabetes_risk_enhancer(patient):
+            return TargetResult(
+                ldl_c_target=70,
+                non_hdl_c_target=100,
+                apob_target=80,
+                rationale=(
+                    "Diabetes age 40-75 with additional risk factors: high-intensity statin reasonable; high-risk targets."
+                ),
+            )
+        return TargetResult(
+            ldl_c_target=100,
+            non_hdl_c_target=130,
+            apob_target=90,
+            rationale="Diabetes age 40-75: moderate-intensity statin target range.",
+        )
+
+    if _has_ckd_stage_3_or_higher(patient) and _age_40_to_75(patient):
+        return TargetResult(
+            ldl_c_target=100,
+            non_hdl_c_target=130,
+            apob_target=90,
+            rationale="CKD stage 3 or higher age 40-75: moderate-intensity statin or statin plus ezetimibe pathway.",
+        )
+
+    if patient.cac is None and patient.prevent_10y_ascvd is not None:
+        prevent_value = float(patient.prevent_10y_ascvd)
+
+        if prevent_value >= 10:
+            return TargetResult(
+                ldl_c_target=70,
+                non_hdl_c_target=100,
+                apob_target=80,
+                rationale=(
+                    "PREVENT 10-year ASCVD risk >=10% without CAC: treat toward high-risk primary prevention target."
+                ),
+            )
+
+        if prevent_value >= 3:
+            return TargetResult(
+                ldl_c_target=100,
+                non_hdl_c_target=130,
+                apob_target=90,
+                rationale=(
+                    "PREVENT 10-year ASCVD risk 3-<10% without CAC: treat toward primary prevention lipid target."
+                ),
+            )
+
+        ldl_c = getattr(patient, "ldl_c", None)
+        prevent_30y = getattr(patient, "prevent_30y_ascvd", None)
+        if (ldl_c is not None and 160 <= ldl_c <= 189) or (
+            prevent_30y is not None and prevent_30y >= 10
+        ):
+            return TargetResult(
+                ldl_c_target=100,
+                non_hdl_c_target=130,
+                apob_target=90,
+                rationale=(
+                    "Low 10-year PREVENT risk with LDL-C 160-189 or 30-year risk >=10%: moderate statin reasonable if chosen."
+                ),
+            )
+
+        return TargetResult(
+            ldl_c_target=None,
+            non_hdl_c_target=None,
+            apob_target=None,
+            rationale=(
+                "PREVENT 10-year ASCVD risk <3% without CAC: no formal lipid target assigned from PREVENT alone."
+            ),
         )
 
     return TargetResult(

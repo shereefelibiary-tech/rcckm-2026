@@ -1,0 +1,7 @@
+﻿MEDITECH Expanse synthetic visit summary
+55-year-old male. BP=132/82. BP treated with lisinopril.
+Total chol: 205; LDL: 132; HDL: 48; Trigs: 180; Apo B: 110; Lp(a): 80 nmol/L.
+A1c: 7.1; diabetes = yes; BMI: 31; e-GFR: 55; creatinine: 1.15; ACR: 45.
+Agatston score: 350. Never smoker. Father MI age 49. High sensitivity CRP: 2.4. Clinical ASCVD: no.
+No lipid lowering therapy.
+

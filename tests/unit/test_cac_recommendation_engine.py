@@ -1,0 +1,89 @@
+from core.enums import RiskLevel
+from core.patient import Patient
+from core.results import RCCKMResult
+from modules.cac_recommendation.engine import build_cac_recommendation
+
+
+def test_build_cac_recommendation_returns_none_when_cac_present():
+    patient = Patient(age=60, sex="male", cac=0)
+    result = RCCKMResult(prevent_risk_category=RiskLevel.INTERMEDIATE)
+
+    assert build_cac_recommendation(patient, result) is None
+
+
+def test_build_cac_recommendation_for_borderline_prevent_without_cac():
+    patient = Patient(
+        age=60,
+        sex="male",
+        cac=None,
+        family_history_premature_ascvd=True,
+    )
+    result = RCCKMResult(prevent_risk_category=RiskLevel.BORDERLINE)
+
+    assert (
+        build_cac_recommendation(patient, result)
+        == "CAC scoring may help refine preventive risk classification."
+    )
+
+
+def test_build_cac_recommendation_for_intermediate_prevent_without_cac():
+    patient = Patient(age=60, sex="male", cac=None)
+    result = RCCKMResult(prevent_risk_category=RiskLevel.INTERMEDIATE)
+
+    assert (
+        build_cac_recommendation(patient, result)
+        == "CAC scoring may help refine preventive risk classification."
+    )
+
+
+def test_build_cac_recommendation_for_high_prevent_without_cac():
+    patient = Patient(age=60, sex="male", cac=None)
+    result = RCCKMResult(prevent_risk_category=RiskLevel.HIGH)
+
+    assert (
+        build_cac_recommendation(patient, result)
+        == "CAC scoring may help clarify plaque burden but should not delay treatment of high estimated risk."
+    )
+
+
+def test_build_cac_recommendation_returns_none_for_low_prevent_without_cac():
+    patient = Patient(age=60, sex="male", cac=None)
+    result = RCCKMResult(prevent_risk_category=RiskLevel.LOW)
+
+    assert build_cac_recommendation(patient, result) is None
+
+
+def test_cac_age_gate_for_men():
+    result = RCCKMResult(prevent_risk_category=RiskLevel.INTERMEDIATE)
+
+    assert build_cac_recommendation(Patient(age=39, sex="male", cac=None), result) is None
+    assert (
+        build_cac_recommendation(Patient(age=40, sex="male", cac=None), result)
+        == "CAC scoring may help refine preventive risk classification."
+    )
+
+
+def test_cac_age_gate_for_women():
+    result = RCCKMResult(prevent_risk_category=RiskLevel.INTERMEDIATE)
+
+    assert build_cac_recommendation(Patient(age=44, sex="female", cac=None), result) is None
+    assert (
+        build_cac_recommendation(Patient(age=45, sex="female", cac=None), result)
+        == "CAC scoring may help refine preventive risk classification."
+    )
+
+
+def test_cac_not_recommended_for_clinical_ascvd_measured_cac_or_ldl_190():
+    result = RCCKMResult(prevent_risk_category=RiskLevel.INTERMEDIATE)
+
+    assert build_cac_recommendation(Patient(age=55, sex="male", clinical_ascvd=True, cac=None), result) is None
+    assert build_cac_recommendation(Patient(age=55, sex="male", cac=0), result) is None
+    assert build_cac_recommendation(Patient(age=55, sex="male", cac=120), result) is None
+    assert build_cac_recommendation(Patient(age=55, sex="male", ldl_c=190, cac=None), result) is None
+
+
+def test_cac_not_recommended_when_therapy_already_indicated_by_diabetes_or_ckd():
+    result = RCCKMResult(prevent_risk_category=RiskLevel.INTERMEDIATE, egfr_stage="G3a")
+
+    assert build_cac_recommendation(Patient(age=55, sex="male", diabetes=True, cac=None), result) is None
+    assert build_cac_recommendation(Patient(age=55, sex="male", egfr=55, cac=None), result) is None

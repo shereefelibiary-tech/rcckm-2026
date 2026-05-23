@@ -1,0 +1,6 @@
+﻿Generic patient portal lab copy synthetic
+55M
+BP 132/82
+TC 205 LDL 132 HDL 48 TG 180 ApoB 110 Lp(a) 80 nmol/L
+A1c 7.1 eGFR 55 Creatinine 1.15 UACR 45 CAC 350 hsCRP 2.4 BMI 31
+No smoking. Diabetes yes. Father MI age 49. BP meds yes. No statin or ezetimibe.

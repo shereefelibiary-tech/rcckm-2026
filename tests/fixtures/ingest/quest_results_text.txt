@@ -1,0 +1,16 @@
+﻿Quest Diagnostics synthetic results
+Age 55; Sex male; BP: 132/82
+CHOLESTEROL, TOTAL: 205
+LDL-CHOLESTEROL: 132
+HDL CHOLESTEROL: 48
+TRIGLYCERIDES: 180
+APOLIPOPROTEIN B: 110
+LIPOPROTEIN (a): 80 nmol/L
+HEMOGLOBIN A1c: 7.1
+EGFR: 55
+CREATININE: 1.15
+ALBUMIN/CREATININE RATIO: 45
+CARDIO IQ hsCRP: 2.4
+Patient-reported: diabetes yes, never smoker, father MI age 49, CAC 350, lisinopril, no statin.
+BMI 31
+

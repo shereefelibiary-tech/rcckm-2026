@@ -1,0 +1,264 @@
+from html import escape
+
+from modules.levels.definitions import (
+    LEVEL_DEFS,
+    classify_continuum_position,
+)
+from ui.theme import component_theme_css
+
+
+def _fmt_num(value):
+    try:
+        return f"{float(value):g}"
+    except (TypeError, ValueError):
+        return ""
+
+
+def _selected_level_copy(patient, level):
+    if patient is None:
+        return "", ""
+
+    if level == 5 and bool(getattr(patient, "clinical_ascvd", False)):
+        return "Clinical ASCVD", "Secondary prevention"
+
+    if bool(getattr(patient, "clinical_ascvd", False)):
+        return "", "Clinical ASCVD"
+
+    cac = getattr(patient, "cac", None)
+    if cac is None:
+        return "", "Plaque unmeasured"
+    try:
+        cac_value = float(cac)
+    except (TypeError, ValueError):
+        return "", ""
+
+    if cac_value >= 300:
+        context = "CAC ≥1000" if cac_value >= 1000 else f"CAC {_fmt_num(cac)}"
+        return ("Very high risk", context) if level == 5 else ("", context)
+    if cac_value > 0:
+        return "", f"Plaque present (CAC {_fmt_num(cac)})"
+    return "", "CAC 0"
+
+
+def build_continuum_bar_html(patient, result):
+    position = classify_continuum_position(patient, result)
+    active_level = position["level"]
+    active_sublevel = position.get("sublevel")
+    current_label = f"Level {active_level}"
+    if active_sublevel:
+        current_label = f"{current_label} ({active_sublevel})"
+    selected_subtitle, selected_context = _selected_level_copy(patient, active_level)
+
+    cards = []
+    for level, payload in sorted(LEVEL_DEFS.items()):
+        display_label = payload["label"]
+        if level == 5:
+            display_label = "Very high risk"
+        if level == active_level and selected_subtitle:
+            display_label = selected_subtitle
+        active_class = " rc-card-active" if level == active_level else ""
+        caret = '<div class="rc-caret">▼</div>' if level == active_level else ""
+        context = (
+            f'<div class="rc-context">{escape(selected_context)}</div>'
+            if level == active_level and selected_context
+            else ""
+        )
+        cards.append(
+            f"""
+            <div class="rc-card-wrap">
+                {caret}
+                    <div class="rc-card rc-level-{level}{active_class}">
+                    <div class="rc-level-title">{escape(payload['title'])}</div>
+                    <div class="rc-level-subtitle">{escape(display_label)}</div>
+                    {context}
+                </div>
+            </div>
+            """
+        )
+
+    return f"""
+<style>
+{component_theme_css()}
+.rc-shell,
+.rc-shell * {{
+    box-sizing: border-box;
+}}
+.rc-shell {{
+    width: 100%;
+    padding: 16px 14px 14px;
+    margin: 18px 0 20px;
+    overflow: visible;
+    font-family: var(--rc-font-body);
+}}
+.rc-header {{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 12px;
+}}
+.rc-title {{
+    color: var(--rc-text);
+    font-family: var(--rc-font-body);
+    font-size: 1.04rem;
+    font-weight: 750;
+    letter-spacing: 0;
+    line-height: 1.15;
+    margin-bottom: 8px;
+}}
+.rc-current {{
+    color: var(--rc-garnet);
+    font-size: 1rem;
+    font-weight: 850;
+    white-space: nowrap;
+}}
+.rc-grid {{
+    display: grid;
+    grid-template-columns: repeat(5, minmax(118px, 1fr));
+    gap: clamp(4px, 0.58vw, 8px);
+    align-items: stretch;
+    overflow: visible;
+}}
+.rc-card-wrap {{
+    position: relative;
+    min-width: 0;
+    overflow: visible;
+    padding-top: 10px;
+}}
+.rc-card {{
+    min-height: 98px;
+    border-radius: 10px;
+    border: 1px solid rgba(11, 31, 58, 0.18);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 9px 6px;
+    color: var(--rc-text);
+    height: 100%;
+    min-width: 0;
+    overflow-wrap: normal;
+    position: relative;
+    transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
+}}
+.rc-card-active {{
+    border: 2px solid var(--rc-garnet);
+    box-shadow: 0 9px 18px rgba(115, 0, 10, 0.14);
+    transform: translateY(6px);
+    z-index: 2;
+}}
+.rc-caret {{
+    align-self: center;
+    color: rgba(11, 31, 58, 0.70);
+    display: flex;
+    font-size: 10px;
+    font-weight: 900;
+    justify-content: center;
+    line-height: 1;
+    margin: 0 0 3px;
+    pointer-events: none;
+}}
+.rc-level-1 {{ background: #edf3fb; }}
+.rc-level-2 {{ background: #eef4ef; }}
+.rc-level-3 {{ background: #fbf1df; }}
+.rc-level-4 {{ background: #f8e9df; }}
+.rc-level-5 {{
+    background: var(--rc-garnet);
+    border-color: var(--rc-garnet);
+    color: #ffffff;
+}}
+.rc-level-5.rc-card-active {{
+    border-color: var(--rc-garnet-deep);
+    box-shadow: 0 9px 18px rgba(75, 0, 7, 0.22);
+}}
+.rc-level-title {{
+    font-size: clamp(0.95rem, 1.02vw, 1.05rem);
+    font-weight: 800;
+    line-height: 1.05;
+    margin-bottom: 4px;
+}}
+.rc-level-subtitle {{
+    font-size: clamp(0.72rem, 0.84vw, 0.82rem);
+    font-weight: 650;
+    line-height: 1.16;
+    max-width: 100%;
+}}
+.rc-context {{
+    border-top: 1px solid rgba(11, 31, 58, 0.13);
+    color: rgba(7, 26, 47, 0.68);
+    font-size: clamp(0.70rem, 0.74vw, 0.78rem);
+    font-weight: 850;
+    line-height: 1.12;
+    margin-top: 6px;
+    padding-top: 5px;
+    white-space: nowrap;
+}}
+.rc-level-5 .rc-context {{
+    border-top-color: rgba(255, 255, 255, 0.35);
+    color: rgba(255, 255, 255, 0.90);
+}}
+.rc-footer {{
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    color: #5D6B7A;
+    font-size: 0.82rem;
+    font-weight: 700;
+    margin-top: 16px;
+}}
+@media (max-width: 760px) {{
+    .rc-shell {{
+        padding-left: 10px;
+        padding-right: 10px;
+    }}
+    .rc-grid {{
+        grid-template-columns: repeat(5, minmax(96px, 1fr));
+        gap: 4px;
+        overflow-x: auto;
+        padding-bottom: 4px;
+    }}
+    .rc-card {{
+        border-radius: 8px;
+        min-height: 96px;
+        padding: 8px 5px;
+    }}
+    .rc-card-active {{
+        transform: translateY(4px);
+    }}
+    .rc-current {{
+        font-size: 0.92rem;
+    }}
+    .rc-footer {{
+        font-size: 0.76rem;
+    }}
+}}
+</style>
+<div class="rc-shell rc-panel">
+    <div class="rc-header">
+        <div class="rc-title rc-card-title">Risk Continuum</div>
+        <div class="rc-current">Current: {escape(current_label)}</div>
+    </div>
+    <div class="rc-grid">
+        {''.join(cards)}
+    </div>
+    <div class="rc-footer">
+        <div>Lower signal / lower urgency</div>
+        <div>Higher signal / higher urgency</div>
+    </div>
+</div>
+"""
+
+
+def render_continuum_bar(patient, result):
+    import streamlit as st
+
+    from ui.html import render_html
+
+    render_html(st, build_continuum_bar_html(patient, result))
+
+
+def render_continuum_bar_with_streamlit(st_module, patient, result):
+    from ui.html import render_html
+
+    render_html(st_module, build_continuum_bar_html(patient, result))

@@ -1,0 +1,7 @@
+﻿NextGen synthetic clinical summary
+Age 55 Gender M
+Blood pressure 132/82; BP treated.
+TC: 205 LDL: 132 HDL: 48 Triglycerides: 180 ApoB: 110 Lp(a): 80 nmol/L
+HbA1c: 7.1 Diabetes: present BMI: 31 eGFR: 55 Creatinine: 1.15 Alb/Cr Ratio: 45
+CAC: 350 Never smoker. Father MI age 49. hs-CRP: 2.4. No clinical ASCVD.
+Meds: losartan, metformin. Lipid lowering: no.

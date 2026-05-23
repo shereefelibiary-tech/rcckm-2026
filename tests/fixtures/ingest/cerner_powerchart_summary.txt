@@ -1,0 +1,7 @@
+﻿Cerner PowerChart synthetic cardiovascular summary
+Age/Sex: 55/M
+Blood Pressure: 132 / 82 mmHg; antihypertensive medication active.
+Lipids: TC 205, LDL 132, HDL 48, Triglycerides 180. ApoB: 110. Lp(a): 80 nmol/L.
+HbA1c: 7.1. Type 2 diabetes present. BMI: 31. eGFR: 55. Cr: 1.15. Urine albumin creatinine ratio: 45.
+Coronary calcium: 350. Smoking: no. Family history: Father MI age 49. hs-CRP: 2.4. No ASCVD.
+Current meds include lisinopril; no statin.

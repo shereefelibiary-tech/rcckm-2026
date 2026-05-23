@@ -28,6 +28,7 @@ def test_rss_hscrp_scoring():
     contributions = build_rss_contributions(patient, None)
 
     assert any(c.label == "Inflammatory risk" and c.points == 7 for c in contributions)
+    assert any(c.domain == "hsCRP" for c in contributions)
 
 
 def test_rss_egfr_scoring():

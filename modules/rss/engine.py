@@ -130,7 +130,7 @@ def build_rss_contributions(patient, result) -> List[SignalContribution]:
         if 2 <= hscrp <= 4.9:
             contributions.append(
                 SignalContribution(
-                    domain="Inflammation",
+                    domain="hsCRP",
                     label="Inflammatory risk",
                     actual_value=hscrp,
                     points=4,
@@ -141,7 +141,7 @@ def build_rss_contributions(patient, result) -> List[SignalContribution]:
         elif hscrp >= 5:
             contributions.append(
                 SignalContribution(
-                    domain="Inflammation",
+                    domain="hsCRP",
                     label="Inflammatory risk",
                     actual_value=hscrp,
                     points=7,
@@ -252,7 +252,7 @@ def build_rss_contributions(patient, result) -> List[SignalContribution]:
             SignalContribution(
                 domain="Metabolic",
                 label="Diabetes",
-                actual_value=True,
+                actual_value=getattr(patient, "a1c", None) or True,
                 points=8,
                 severity=None,
                 rationale="Diabetes is a risk enhancer for ASCVD.",

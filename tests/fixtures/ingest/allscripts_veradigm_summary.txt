@@ -1,0 +1,17 @@
+﻿Allscripts Veradigm synthetic summary
+55 year-old male
+BP 132/82 mmHg. Antihypertensive: valsartan.
+Total Cholesterol: 205
+LDL-C: 132
+HDL-C: 48
+Triglycerides: 180
+ApoB: 110
+Lp(a): 80 nmol/L
+A1c: 7.1
+Diabetes: yes
+BMI: 31
+eGFR: 55
+Creatinine: 1.15
+UACR: 45
+Calcium score: 350
+No smoking. Father MI age 49. hsCRP: 2.4. Clinical ASCVD: no. No statin.

@@ -1,0 +1,2 @@
+SOURCE_STYLE = "quest"
+

@@ -1,0 +1,29 @@
+﻿{
+    "source_style":  "va_cprs",
+    "extracted":  {
+                      "age":  55,
+                      "sex":  "male",
+                      "sbp":  132,
+                      "dbp":  82,
+                      "bpTreated":  true,
+                      "tc":  205,
+                      "ldl":  132,
+                      "hdl":  48,
+                      "tg":  180,
+                      "apob":  110,
+                      "lpa":  80,
+                      "lpa_unit":  "nmol/L",
+                      "a1c":  7.1,
+                      "diabetes":  true,
+                      "bmi":  31,
+                      "egfr":  55,
+                      "creatinine":  1.15,
+                      "uacr":  45,
+                      "cac":  350,
+                      "smoker":  false,
+                      "fhx":  true,
+                      "fhx_text":  "Father MI age 49",
+                      "hscrp":  2.4,
+                      "lipidLowering":  false
+                  }
+}
