@@ -88,15 +88,21 @@ def build_top_drivers(patient, result):
         else:
             drivers.append(cac_driver)
 
+    ldl_c = getattr(patient, "ldl_c", None)
+    severe_ldl = ldl_c is not None and ldl_c >= 190
+    if severe_ldl:
+        drivers.append(
+            f"Severe hypercholesterolemia / LDL-C {ldl_c:g} mg/dL (>=190)"
+        )
+
     apob = getattr(patient, "apob", None)
     if apob is not None and apob >= 100:
         drivers.append(_format_value("ApoB", apob, " mg/dL"))
 
-    ldl_c = getattr(patient, "ldl_c", None)
     if ldl_c is not None and ldl_c >= 160 and apob is not None and apob < 100:
         drivers.append("LDL/ApoB discordance")
 
-    if ldl_c is not None and ldl_c >= 190:
+    if ldl_c is not None and ldl_c >= 190 and not severe_ldl:
         drivers.append(_format_value("LDL-C", ldl_c, " mg/dL"))
 
     if compressed_diabetes_ckd:

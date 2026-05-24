@@ -36,7 +36,6 @@ class ParseReport:
 
 
 NUMERIC_PATTERNS = {
-    "age": r"\bage\b",
     "sbp": r"\b(?:sbp|systolic)\b",
     "dbp": r"\b(?:dbp|diastolic)\b",
     "tc": r"\b(?:tc|total cholesterol|cholesterol,\s*total|total-c|total chol)\b",
@@ -175,20 +174,31 @@ def _label_regex(labels: list[str]) -> str:
     return r"(?:" + "|".join(parts) + r")"
 
 
-def parse_explicit_bool_line(raw: str, labels: list[str]) -> bool | None:
-    """Parse explicit yes/no condition lines without treating label mentions as positive."""
+UNKNOWN_VALUE_RE = (
+    r"(?:unknown|not\s+documented|unavailable|not\s+available|not\s+found|"
+    r"not\s+assessed|unclear|unable\s+to\s+determine|not\s+reported|missing)"
+)
+
+
+def _parse_explicit_bool_line_status(raw: str, labels: list[str]) -> tuple[bool, bool | None]:
+    """Parse explicit boolean condition lines.
+
+    Returns (found_labeled_line, value). Unknown/not documented returns (True, None);
+    absent labels return (False, None).
+    """
     if not raw or not labels:
-        return None
+        return False, None
 
     label = _label_regex(labels)
-    negative_value = r"(?:no|false|absent|negative|none|never|denies|denied|not present)"
-    positive_value = r"(?:yes|true|present|positive|active)"
+    negative_value = r"(?:no|n|false|absent|negative|none|never|denies|denied|not present)"
+    positive_value = r"(?:yes|y|true|present|positive|active|current)"
     negative_prefix = r"(?:no|denies|denied|without|negative for|absent|no history of|not present)"
     positive_prefix = r"(?:has|with|known|history of|hx of|diagnosed with|positive for|present)"
 
     for segment in _bool_segments(raw):
         if not re.search(rf"\b{label}\b", segment, re.IGNORECASE):
             continue
+        found = True
 
         negative_patterns = [
             rf"\b{label}\b\s*(?:=|:|-|is|was)?\s*{negative_value}\b",
@@ -196,16 +206,35 @@ def parse_explicit_bool_line(raw: str, labels: list[str]) -> bool | None:
             rf"\b{label}\b[^\n.;]*\b(?:negative|absent|denied|none|not present)\b",
         ]
         if any(re.search(pattern, segment, re.IGNORECASE) for pattern in negative_patterns):
-            return False
+            return True, False
 
-        positive_patterns = [
+        direct_positive_patterns = [
             rf"\b{label}\b\s*(?:=|:|-|is|was)?\s*{positive_value}\b",
+        ]
+        if any(re.search(pattern, segment, re.IGNORECASE) for pattern in direct_positive_patterns):
+            return True, True
+
+        unknown_patterns = [
+            rf"\b{label}\b\s*(?:=|:|-|is|was)?\s*{UNKNOWN_VALUE_RE}\b",
+            rf"\b{UNKNOWN_VALUE_RE}\b[^\n.;]*\b{label}\b",
+            rf"\b{label}\b[^\n.;]*\b{UNKNOWN_VALUE_RE}\b",
+        ]
+        if any(re.search(pattern, segment, re.IGNORECASE) for pattern in unknown_patterns):
+            return found, None
+
+        prefix_positive_patterns = [
             rf"\b{positive_prefix}\b[^\n.;]*\b{label}\b",
         ]
-        if any(re.search(pattern, segment, re.IGNORECASE) for pattern in positive_patterns):
-            return True
+        if any(re.search(pattern, segment, re.IGNORECASE) for pattern in prefix_positive_patterns):
+            return True, True
 
-    return None
+    return False, None
+
+
+def parse_explicit_bool_line(raw: str, labels: list[str]) -> bool | None:
+    """Parse explicit yes/no condition lines without treating label mentions as positive."""
+    _found, value = _parse_explicit_bool_line_status(raw, labels)
+    return value
 
 
 def _keyword_present_without_explicit_negation(raw: str, labels: list[str]) -> bool | None:
@@ -216,6 +245,13 @@ def _keyword_present_without_explicit_negation(raw: str, labels: list[str]) -> b
     for segment in _bool_segments(raw):
         if not re.search(rf"\b{label}\b", segment, re.IGNORECASE):
             continue
+        unknown_patterns = [
+            rf"\b{label}\b\s*(?:=|:|-|is|was)?\s*{UNKNOWN_VALUE_RE}\b",
+            rf"\b{UNKNOWN_VALUE_RE}\b[^\n.;]*\b{label}\b",
+            rf"\b{label}\b[^\n.;]*\b{UNKNOWN_VALUE_RE}\b",
+        ]
+        if any(re.search(pattern, segment, re.IGNORECASE) for pattern in unknown_patterns):
+            return None
         negative_patterns = [
             rf"\b{label}\b\s*(?:=|:|-|is|was)?\s*(?:no|false|absent|negative|none|never|denies|denied|not present)\b",
             rf"\b(?:no|denies|denied|without|negative for|absent|no history of|not present)\b[^\n.;]*\b{label}\b",
@@ -227,52 +263,143 @@ def _keyword_present_without_explicit_negation(raw: str, labels: list[str]) -> b
     return None
 
 
-def _clinical_ascvd_explicit_bool(raw: str) -> bool | None:
-    labels = [
-        r"clinical\s+ascvd",
-        r"personal\s+ascvd",
-        r"known\s+ascvd",
-        r"prior\s+mi",
-        r"prior\s+stroke",
-        r"history\s+of\s+cva",
-        r"pad",
+def _without_gestational_diabetes_context(raw: str) -> str:
+    """Remove reproductive-history diabetes segments before current-diabetes parsing."""
+    segments = [
+        segment
+        for segment in _bool_segments(raw)
+        if not re.search(r"\b(?:gestational\s+diabetes|gdm)\b", segment, re.IGNORECASE)
     ]
+    return "\n".join(segments)
+
+
+ASCVD_EVENT_LABELS = {
+    "stemi": [r"stemi", r"st[-\s]+elevation\s+mi", r"st[-\s]+elevation\s+myocardial\s+infarction"],
+    "nstemi": [r"nstemi", r"non[-\s]+st[-\s]+elevation\s+mi", r"non[-\s]+st[-\s]+elevation\s+myocardial\s+infarction"],
+    "mi": [r"myocardial\s+infarction", r"\bmi\b", r"heart\s+attack", r"\bacs\b", r"acute\s+coronary\s+syndrome"],
+    "pci": [r"\bpci\b", r"percutaneous\s+coronary\s+intervention"],
+    "stent": [r"\bstent(?:s|ed)?\b", r"drug[-\s]+eluting\s+stent", r"\bdes\b"],
+    "cabg": [r"\bcabg\b", r"coronary\s+artery\s+bypass"],
+    "ischemic_stroke": [r"ischemic\s+stroke", r"ischaemic\s+stroke", r"\bstroke\b", r"\bcva\b"],
+    "tia": [r"\btia\b", r"transient\s+ischemic\s+attack"],
+    "pad": [r"\bpad\b", r"peripheral\s+artery\s+disease"],
+}
+
+ASCVD_EVENT_DISPLAY = {
+    "stemi": "prior STEMI",
+    "nstemi": "prior NSTEMI",
+    "mi": "prior MI",
+    "pci_stent": "PCI/stent",
+    "pci": "PCI",
+    "stent": "coronary stent",
+    "cabg": "CABG",
+    "ischemic_stroke": "ischemic stroke",
+    "tia": "TIA",
+    "pad": "PAD",
+}
+
+
+def _segment_has_event_term(segment: str, labels: list[str]) -> bool:
+    return any(re.search(rf"\b{label}\b", segment, re.IGNORECASE) for label in labels)
+
+
+def _segment_negates_event(segment: str, labels: list[str]) -> bool:
+    label = _label_regex(labels)
+    return bool(
+        re.search(rf"\b(?:no|denies|denied|without|negative for|absent|no history of)\b[^\n.;]*\b{label}\b", segment, re.IGNORECASE)
+        or re.search(rf"\b{label}\b[^\n.;]*\b(?:no|false|absent|negative|none|denies|denied|not present)\b", segment, re.IGNORECASE)
+    )
+
+
+def _segment_affirms_event(segment: str, labels: list[str]) -> bool:
+    label = _label_regex(labels)
+    return bool(
+        re.search(rf"\b(?:history of|hx of|prior|previous|s/p|status post|with|known|personal history of)\b[^\n.;]*\b{label}\b", segment, re.IGNORECASE)
+        or re.search(rf"\b{label}\b[^\n.;]*\b(?:history|prior|s/p|status post|treated with|in \d{{4}})\b", segment, re.IGNORECASE)
+    )
+
+
+def extract_ascvd_events(raw: str) -> dict:
+    events = {key: None for key in ASCVD_EVENT_LABELS}
+    events["acs"] = None
     for segment in _bool_segments(raw):
         if re.search(r"\b(?:family history|fhx|father|mother|brother|sister)\b", segment, re.IGNORECASE):
             continue
-        value = parse_explicit_bool_line(segment, labels)
-        if value is not None:
-            return value
-    return None
+        for event, labels in ASCVD_EVENT_LABELS.items():
+            if not _segment_has_event_term(segment, labels):
+                continue
+            if _segment_negates_event(segment, labels):
+                events[event] = False
+            elif _segment_affirms_event(segment, labels) or re.search(
+                r"\b(?:stemi|nstemi|pci|stent|cabg|ischemic\s+stroke|ischaemic\s+stroke)\b",
+                segment,
+                re.IGNORECASE,
+            ):
+                events[event] = True
+        if re.search(r"\b(?:acs|acute\s+coronary\s+syndrome)\b", segment, re.IGNORECASE):
+            events["acs"] = False if _segment_negates_event(segment, [r"acs", r"acute\s+coronary\s+syndrome"]) else True
+            if events["acs"] is True and events["mi"] is None:
+                events["mi"] = True
+
+    clinical_explicit = parse_explicit_bool_line(
+        raw,
+        [r"clinical\s+ascvd", r"personal\s+ascvd", r"known\s+ascvd", r"ascvd"],
+    )
+    positives = {key for key, value in events.items() if value is True}
+    clinical_ascvd = clinical_explicit
+    if positives:
+        clinical_ascvd = True
+    elif clinical_explicit is None and any(value is False for value in events.values()):
+        clinical_ascvd = False
+
+    parts: list[str] = []
+    if events.get("stemi") is True:
+        parts.append(ASCVD_EVENT_DISPLAY["stemi"])
+    elif events.get("nstemi") is True:
+        parts.append(ASCVD_EVENT_DISPLAY["nstemi"])
+    elif events.get("mi") is True:
+        parts.append(ASCVD_EVENT_DISPLAY["mi"])
+    if events.get("pci") is True and events.get("stent") is True:
+        parts.append(ASCVD_EVENT_DISPLAY["pci_stent"])
+    else:
+        if events.get("pci") is True:
+            parts.append(ASCVD_EVENT_DISPLAY["pci"])
+        if events.get("stent") is True:
+            parts.append(ASCVD_EVENT_DISPLAY["stent"])
+    for event in ("cabg", "ischemic_stroke", "tia", "pad"):
+        if events.get(event) is True:
+            parts.append(ASCVD_EVENT_DISPLAY[event])
+
+    if len(parts) == 2:
+        event_summary = f"{parts[0]} and {parts[1]}"
+    elif len(parts) > 2:
+        event_summary = ", ".join(parts[:-1]) + f", and {parts[-1]}"
+    elif parts:
+        event_summary = parts[0]
+    else:
+        event_summary = ""
+    return {"clinical_ascvd": clinical_ascvd, "events": events, "event_summary": event_summary}
+
+
+def _clinical_ascvd_explicit_bool(raw: str) -> bool | None:
+    return extract_ascvd_events(raw)["clinical_ascvd"]
 
 
 def _clinical_ascvd_context(raw: str) -> str:
-    text = raw or ""
-    parts: list[str] = []
-    if re.search(r"\bnstemi\b", text, re.IGNORECASE):
-        parts.append("prior NSTEMI")
-    elif re.search(r"\bstemi\b", text, re.IGNORECASE):
-        parts.append("prior STEMI")
-    elif re.search(r"\b(?:prior|history of|hx of)\s+(?:mi|myocardial infarction)\b", text, re.IGNORECASE):
-        parts.append("prior MI")
+    return extract_ascvd_events(raw)["event_summary"]
 
-    if re.search(r"\b(?:pci|percutaneous coronary intervention)\b", text, re.IGNORECASE) and re.search(
-        r"\b(?:stent|stents|des)\b", text, re.IGNORECASE
-    ):
-        parts.append("PCI/stent")
-    elif re.search(r"\b(?:pci|percutaneous coronary intervention)\b", text, re.IGNORECASE):
-        parts.append("PCI")
-    elif re.search(r"\b(?:stent|stents|des)\b", text, re.IGNORECASE):
-        parts.append("coronary stent")
 
-    if re.search(r"\bcabg\b", text, re.IGNORECASE):
-        parts.append("CABG")
-    if re.search(r"\b(?:prior|history of|hx of)\s+(?:stroke|cva)\b", text, re.IGNORECASE):
-        parts.append("prior stroke")
-    if re.search(r"\b(?:pad|peripheral artery disease)\b", text, re.IGNORECASE):
-        parts.append("PAD")
-
-    return " and ".join(dict.fromkeys(parts))
+def _premature_family_history_from_event(relationship: str, age_at_event: float) -> bool:
+    relationship_value = str(relationship or "").strip().lower()
+    try:
+        age_value = float(age_at_event)
+    except (TypeError, ValueError):
+        return False
+    if relationship_value in {"father", "brother"}:
+        return age_value < 55
+    if relationship_value in {"mother", "sister"}:
+        return age_value < 65
+    return False
 
 
 def _extract_unavailable_reason(text: str, label: str) -> str | None:
@@ -283,7 +410,12 @@ def _extract_unavailable_reason(text: str, label: str) -> str | None:
     ):
         return f"{label} unavailable or not done"
     unavailable_terms = r"not available|unavailable|not done|deferred|unable to calculate|not reported|not performed|unknown|no [a-z ]{0,30}available"
-    label_pattern = r"(?:CAC|coronary calcium|calcium score)" if label == "CAC" else re.escape(label)
+    if label == "CAC":
+        label_pattern = r"(?:CAC|coronary calcium|calcium score)"
+    elif label == "LDL-C":
+        label_pattern = r"(?:LDL-C|LDL|low density lipoprotein)"
+    else:
+        label_pattern = re.escape(label)
     pattern = rf"\b{label_pattern}\b[^\n.;:]*?\b(?:{unavailable_terms})\b(?:\s*(?:because|due to|reason:?)\s*([^.;\n]+))?"
     match = re.search(pattern, text, re.IGNORECASE)
     if not match:
@@ -380,6 +512,8 @@ def _parse_medications(report: ParseReport, text: str) -> None:
 
     if structured.get("statin_intensity"):
         _record(report, "statin_intensity", structured["statin_intensity"], "inferred", "active statin dose")
+    if structured.get("statin_intolerance") is True:
+        _record(report, "statin_intolerance", True, "inferred", "inactive statin intolerance/allergy")
 
     inactive_mentions = [
         f"{m.get('normalized_name')} {str(m.get('source_line') or '').strip()}"
@@ -388,6 +522,67 @@ def _parse_medications(report: ParseReport, text: str) -> None:
     ]
     for mention in inactive_mentions:
         report.warnings.append(f"Medication mentioned but not counted as active: {mention}.")
+
+
+def _parse_reproductive_history(report: ParseReport, text: str) -> None:
+    reproductive_labels = {
+        "early_menopause": [r"early\s+menopause"],
+        "premature_menopause": [r"premature\s+menopause", r"primary\s+ovarian\s+insufficiency", r"poi"],
+        "preeclampsia": [r"preeclampsia", r"pre-eclampsia"],
+        "gestational_hypertension": [r"gestational\s+hypertension", r"hypertensive\s+disorder\s+of\s+pregnancy"],
+        "gestational_diabetes": [r"gestational\s+diabetes", r"gdm"],
+        "preterm_delivery": [r"preterm[-\s]+(?:delivery|birth)", r"delivery\s+before\s+37\s+weeks"],
+        "small_for_gestational_age": [
+            r"small[-\s]+for[-\s]+gestational[-\s]+age(?:[-\s]+(?:infant|baby|birth))?",
+            r"\bsga\s+(?:infant|baby|birth)",
+            r"\bsga\b",
+        ],
+        "recurrent_pregnancy_loss": [
+            r"recurrent[-\s]+(?:pregnancy[-\s]+loss|miscarriage)",
+            r"recurrent\s+spontaneous\s+pregnancy\s+loss",
+        ],
+        "pcos_or_irregular_menses": [r"pcos", r"polycystic\s+ovary\s+syndrome", r"irregular\s+menses", r"irregular\s+periods"],
+        "early_menarche": [r"early\s+menarche"],
+    }
+
+    for field, labels in reproductive_labels.items():
+        found, value = _parse_explicit_bool_line_status(text, labels)
+        if found:
+            _record(report, field, value, "parsed", "reproductive history")
+
+    menopause_age = re.search(
+        r"\b(?:menopause|menopausal)\s+(?:at\s+)?(?:age\s+)?(\d{1,2})\b",
+        text,
+        re.IGNORECASE,
+    )
+    if not menopause_age:
+        menopause_age = re.search(
+            r"\b(?:menopause_age|menopause\s+age)\s*(?:=|:)?\s*(\d{1,2})\b",
+            text,
+            re.IGNORECASE,
+        )
+    if menopause_age:
+        age = float(menopause_age.group(1))
+        _record(report, "menopause_age", age, "parsed", "menopause age")
+        _record(report, "early_menopause", age < 45, "inferred", "menopause age")
+        _record(report, "premature_menopause", age < 40, "inferred", "menopause age")
+
+    menarche_age = re.search(
+        r"\b(?:menarche)\s+(?:at\s+)?(?:age\s+)?(\d{1,2})\b",
+        text,
+        re.IGNORECASE,
+    )
+    if menarche_age:
+        age = float(menarche_age.group(1))
+        _record(report, "menarche_age", age, "parsed", "menarche age")
+        _record(report, "early_menarche", age < 10, "inferred", "menarche age")
+
+    for field, labels in reproductive_labels.items():
+        if field in report.extracted:
+            continue
+        value = _keyword_present_without_explicit_negation(text, labels)
+        if value is not None:
+            _record(report, field, value, "parsed", "reproductive history mention")
 
 
 def parse_smartphrase_report(text: str) -> ParseReport:
@@ -416,6 +611,10 @@ def parse_smartphrase_report(text: str) -> ParseReport:
         _record(report, "sex", "male" if sex_value in {"m", "male", "man"} else "female", "parsed", "age/sex prose")
 
     age_explicit = re.search(r"\bage\s*(?:=|:)?\s*(\d{2,3})\b", text, re.IGNORECASE)
+    if age_explicit and "age" not in report.extracted:
+        age_context = text[max(0, age_explicit.start() - 24): age_explicit.start()].lower()
+        if re.search(r"\b(?:menopause|menopausal|menarche)\b", age_context):
+            age_explicit = None
     if age_explicit and "age" not in report.extracted:
         _record(report, "age", float(age_explicit.group(1)), "parsed", "explicit age")
 
@@ -473,7 +672,7 @@ def parse_smartphrase_report(text: str) -> ParseReport:
             }
             report.warnings.append("Lp(a) value parsed without units; please review nmol/L vs mg/dL.")
 
-    for field, label in (("egfr", "eGFR"), ("uacr", "UACR"), ("cac", "CAC")):
+    for field, label in (("egfr", "eGFR"), ("uacr", "UACR"), ("cac", "CAC"), ("ldl", "LDL-C")):
         if field not in report.extracted:
             reason = _extract_unavailable_reason(text, label)
             if reason:
@@ -491,17 +690,35 @@ def parse_smartphrase_report(text: str) -> ParseReport:
         text,
         re.IGNORECASE,
     )
+    explicit_premature_fhx_found, explicit_premature_fhx = _parse_explicit_bool_line_status(
+        text,
+        [
+            r"premature\s+family\s+history",
+            r"premature\s+ascvd\s+in\s+first[-\s]?degree\s+relative",
+            r"premature\s+first[-\s]?degree\s+(?:family\s+)?history",
+            r"family\s+history",
+        ],
+    )
     if fhx_match:
-        _record(report, "fhx", True, "inferred", "structured family history")
+        relationship = fhx_match.group(1).lower()
+        event_age = float(fhx_match.group(3))
+        premature = _premature_family_history_from_event(relationship, event_age)
+        if explicit_premature_fhx is not None and explicit_premature_fhx != premature:
+            report.conflicts.append(
+                "Family history conflict: explicit premature flag differs from event age."
+            )
+        _record(report, "fhx", premature, "inferred", "structured family history")
         _record(report, "fhx_text", fhx_match.group(0), "parsed", "family history")
-        _record(report, "family_history_relationship", fhx_match.group(1).lower(), "parsed", "family history")
+        _record(report, "family_history_relationship", relationship, "parsed", "family history")
         event = fhx_match.group(2).lower()
         if event in {"pci", "cabg"}:
             event = "PCI/CABG"
         elif event == "scd":
             event = "sudden cardiac death"
         _record(report, "family_history_event_type", event, "parsed", "family history")
-        _record(report, "family_history_age_at_event", float(fhx_match.group(3)), "parsed", "family history")
+        _record(report, "family_history_age_at_event", event_age, "parsed", "family history")
+    elif explicit_premature_fhx_found:
+        _record(report, "fhx", explicit_premature_fhx, "parsed", "explicit premature family history")
     elif re.search(r"\bfamily history\b|\bfhx\b", text, re.IGNORECASE):
         report.field_meta["fhx"] = {
             "confidence": "uncertain",
@@ -509,17 +726,21 @@ def parse_smartphrase_report(text: str) -> ParseReport:
         }
         report.warnings.append("Family history mentioned but relationship, event, or age was incomplete.")
 
-    diabetes_explicit = parse_explicit_bool_line(
-        text,
+    diabetes_text = _without_gestational_diabetes_context(text)
+    diabetes_lowered = diabetes_text.lower()
+    diabetes_found, diabetes_explicit = _parse_explicit_bool_line_status(
+        diabetes_text,
         [r"type\s+2\s+diabetes", r"diabetes", r"dm2", r"t2dm"],
     )
     diabetes_positive = bool(
         re.search(
             r"\b(?:has|history of|hx of|known|with|treated for|type 2|t2dm|dm2)\s+(?:diabetes|dm2|t2dm|type 2 diabetes)\b",
-            lowered,
+            diabetes_lowered,
         )
     )
-    if diabetes_explicit is False:
+    if diabetes_found and diabetes_explicit is None:
+        _record(report, "diabetes", None, "parsed", "diabetes unknown/not documented")
+    elif diabetes_explicit is False:
         _record(report, "diabetes", False, "parsed", "diabetes negation")
         if "a1c" in report.extracted and report.extracted["a1c"] >= 6.5:
             report.conflicts.append("diabetes: text says no diabetes but A1c is >=6.5")
@@ -527,6 +748,26 @@ def parse_smartphrase_report(text: str) -> ParseReport:
         _record(report, "diabetes", True, "parsed", "diabetes text")
     elif "a1c" in report.extracted and report.extracted["a1c"] >= 6.5:
         _record(report, "diabetes", True, "inferred", "A1c >=6.5")
+
+    diabetes_duration = re.search(
+        r"\b(?:diabetes|t2dm|dm2)\s+(?:duration\s*)?(?:for\s*)?(\d{1,2})\s*(?:years|yrs|y)\b",
+        text,
+        re.IGNORECASE,
+    )
+    if not diabetes_duration:
+        diabetes_duration = re.search(
+            r"\bdiabetes\s+duration\s*(?:=|:)?\s*(\d{1,2})\s*(?:years|yrs|y)?\b",
+            text,
+            re.IGNORECASE,
+        )
+    if diabetes_duration:
+        _record(report, "diabetes_duration_years", float(diabetes_duration.group(1)), "parsed", "diabetes duration")
+
+    abi_match = re.search(r"\bABI\s*(?:=|:)?\s*(0?\.\d+|1(?:\.0+)?)\b", text, re.IGNORECASE)
+    if abi_match:
+        abi_value = float(abi_match.group(1))
+        _record(report, "abi", abi_value, "parsed", "ABI")
+        _record(report, "abi_lt_0_9", abi_value < 0.9, "inferred", "ABI")
 
     explicit_bool_labels = {
         "smoker": [r"current\s+smoker", r"smoker", r"smoking", r"tobacco"],
@@ -543,15 +784,23 @@ def parse_smartphrase_report(text: str) -> ParseReport:
         "glp1": [r"glp1", r"glp-1", r"incretin"],
         "ace_arb": [r"ace\s+inhibitor", r"arb", r"ace/arb"],
         "inflammatory_disease": [r"inflammatory\s+disease", r"inflammatory\s+condition", r"inflammatory/immune\s+condition"],
+        "diabetic_retinopathy": [r"(?:diabetic\s+)?retinopathy"],
+        "diabetic_neuropathy": [r"(?:diabetic\s+)?neuropathy"],
+        "abi_lt_0_9": [r"abi\s*<\s*0\.9", r"abi\s+less\s+than\s+0\.9"],
     }
     for field, labels in explicit_bool_labels.items():
-        value = parse_explicit_bool_line(text, labels)
-        if value is not None:
+        found, value = _parse_explicit_bool_line_status(text, labels)
+        if found:
             confidence = "inferred" if field in {"bpTreated", "lipidLowering", "sglt2", "glp1", "ace_arb"} else "parsed"
             _record(report, field, value, confidence, "explicit boolean line")
 
-    clinical_ascvd_value = _clinical_ascvd_explicit_bool(text)
-    if clinical_ascvd_value is not None:
+    clinical_found, clinical_ascvd_value = _parse_explicit_bool_line_status(
+        text,
+        [r"clinical\s+ascvd", r"personal\s+ascvd", r"known\s+ascvd", r"ascvd"],
+    )
+    if not clinical_found:
+        clinical_ascvd_value = _clinical_ascvd_explicit_bool(text)
+    if clinical_found or clinical_ascvd_value is not None:
         _record(report, "ascvd_clinical", clinical_ascvd_value, "parsed", "explicit clinical ASCVD line")
         if clinical_ascvd_value is True:
             context = _clinical_ascvd_context(text)
@@ -595,6 +844,12 @@ def parse_smartphrase_report(text: str) -> ParseReport:
                 if context:
                     _record(report, "clinical_ascvd_context", context, "parsed", "clinical ASCVD event/procedure")
 
+    ascvd_events = extract_ascvd_events(text)
+    if "ascvd_clinical" not in report.extracted and ascvd_events["clinical_ascvd"] is not None:
+        _record(report, "ascvd_clinical", ascvd_events["clinical_ascvd"], "parsed", "structured ASCVD event extraction")
+    if ascvd_events["event_summary"] and "clinical_ascvd_context" not in report.extracted:
+        _record(report, "clinical_ascvd_context", ascvd_events["event_summary"], "parsed", "structured ASCVD event extraction")
+
     for field in ("rheumatoid_arthritis", "sle", "psoriasis", "ibd", "hiv", "osa", "masld"):
         if field in report.extracted:
             continue
@@ -602,10 +857,35 @@ def parse_smartphrase_report(text: str) -> ParseReport:
         if value is True:
             _record(report, field, True, "parsed", "condition mention")
 
-    if any(report.extracted.get(key) is True for key in ("rheumatoid_arthritis", "sle", "psoriasis", "ibd", "hiv")):
-        _record(report, "inflammatory_disease", True, "inferred", "inflammatory/immune condition")
+    specific_inflammatory_present = any(
+        report.extracted.get(key) is True
+        for key in ("rheumatoid_arthritis", "sle", "psoriasis", "ibd")
+    )
+    if specific_inflammatory_present:
+        if report.extracted.get("inflammatory_disease") is False:
+            report.conflicts.append(
+                "Inflammatory disease conflict: specific condition present despite generic inflammatory disease marked No."
+            )
+            report.extracted["inflammatory_disease"] = True
+            report.field_meta["inflammatory_disease"] = {
+                "confidence": "inferred",
+                "source": "specific inflammatory condition",
+            }
+        elif "inflammatory_disease" not in report.extracted:
+            _record(report, "inflammatory_disease", True, "inferred", "specific inflammatory condition")
 
     _parse_medications(report, text)
+    _parse_reproductive_history(report, text)
+
+    if re.search(
+        r"\b(?:red\s+yeast\s+rice|garlic|berberine|plant\s+sterols?|fish\s+oil|omega[-\s]?3\s+supplements?|dietary\s+supplements?)\b",
+        text,
+        re.IGNORECASE,
+    ) and re.search(r"\b(?:cholesterol|lipid|ldl|triglycerides?|tg|lowering)\b", text, re.IGNORECASE):
+        _record(report, "lipid_supplements", True, "parsed", "lipid-lowering supplement mention")
+        report.warnings.append(
+            "Dietary supplement mentioned for lipid lowering; do not count as evidence-based lipid-lowering therapy."
+        )
 
     if re.search(r"\bfasting\b", lowered) and re.search(r"\b(?:lipids|lipid panel|tc|ldl|hdl|tg)\b", lowered):
         _record(report, "fasting_lipids", True, "parsed", "fasting lipid language")

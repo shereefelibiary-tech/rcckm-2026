@@ -53,6 +53,48 @@ def test_build_cac_recommendation_returns_none_for_low_prevent_without_cac():
     assert build_cac_recommendation(patient, result) is None
 
 
+def test_build_cac_recommendation_for_near_level_3_lipid_trajectory():
+    patient = Patient(
+        age=40,
+        sex="male",
+        cac=None,
+        ldl_c=158,
+        apob=116,
+    )
+    result = RCCKMResult(
+        prevent_risk_category=RiskLevel.LOW,
+        prevent_10y_ascvd=1.41,
+        prevent_30y_ascvd=9.82,
+    )
+
+    assert (
+        build_cac_recommendation(patient, result)
+        == "CAC reasonable if treatment decision remains uncertain."
+    )
+
+
+def test_build_cac_recommendation_for_treatment_relevant_lipid_trajectory():
+    patient = Patient(
+        age=42,
+        sex="male",
+        cac=None,
+        ldl_c=166,
+        apob=121,
+        non_hdl_c=202,
+        triglycerides=182,
+    )
+    result = RCCKMResult(
+        prevent_risk_category=RiskLevel.LOW,
+        prevent_10y_ascvd=1.73,
+        prevent_30y_ascvd=11.85,
+    )
+
+    assert (
+        build_cac_recommendation(patient, result)
+        == "CAC may clarify plaque burden if treatment intensity remains uncertain."
+    )
+
+
 def test_cac_age_gate_for_men():
     result = RCCKMResult(prevent_risk_category=RiskLevel.INTERMEDIATE)
 

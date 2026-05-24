@@ -1,0 +1,24 @@
+Age: 52
+Sex: female
+LDL-C: 136
+TG: 180
+Smoking status: Unknown
+Current smoker: Unknown
+Diabetes status: Unknown
+Premature ASCVD in first-degree relative: Unknown
+Early menopause: Unknown
+History of preeclampsia: Unknown
+Gestational hypertension: Unknown
+Gestational diabetes: Unknown
+Preterm delivery: Unknown
+Small for gestational age infant: Unknown
+Recurrent pregnancy loss: Unknown
+PCOS: Unknown
+OSA: Unknown
+MASLD: Unknown
+Inflammatory disease: Unknown
+HIV: Unknown
+RA/SLE/Psoriasis/IBD: Unknown
+Clinical ASCVD: Unknown
+BP treated: Unknown
+Lipid-lowering therapy: Unknown

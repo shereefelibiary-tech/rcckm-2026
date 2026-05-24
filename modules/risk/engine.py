@@ -14,6 +14,12 @@ def assign_risk_level(patient):
         if 300 <= patient.cac <= 999:
             return RiskLevel.HIGH
 
+    ldl_c = getattr(patient, "ldl_c", None)
+    apob = getattr(patient, "apob", None)
+    if (ldl_c is not None and ldl_c >= 190) or (apob is not None and apob >= 140):
+        return RiskLevel.HIGH
+
+    if patient.cac is not None:
         if 100 <= patient.cac <= 299:
             return RiskLevel.INTERMEDIATE
 

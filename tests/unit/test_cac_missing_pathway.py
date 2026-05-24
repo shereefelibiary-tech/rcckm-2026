@@ -42,7 +42,7 @@ def test_cac_missing_high_prevent_shows_plaque_unmeasured_without_plaque_diagnos
     assert all(contribution.label != "CAC plaque burden" for contribution in rss_contributions)
     assert rss_total == 0
     assert result.dominant_action == "Lipid-lowering therapy is indicated; treat toward high-risk targets."
-    assert "Coronary calcium reasonable for plaque clarification." in result.recommendations
+    assert "CAC reasonable for risk clarification if treatment decision remains uncertain." in result.recommendations
 
 
 def test_cac_missing_borderline_prevent_family_history_recommends_cac_without_plaque_diagnosis():
@@ -64,7 +64,7 @@ def test_cac_missing_borderline_prevent_family_history_recommends_cac_without_pl
     assert result.prevent_risk_category == RiskLevel.BORDERLINE
     assert result.cac_recommendation == "CAC scoring may help refine preventive risk classification."
     assert result.clarification["recommend_cac"] is True
-    assert "Coronary calcium reasonable for plaque clarification." in result.recommendations
+    assert "CAC reasonable for risk clarification if treatment decision remains uncertain." in result.recommendations
     assert "subclinical coronary atherosclerosis" not in " ".join(_diagnosis_names(result)).lower()
 
 

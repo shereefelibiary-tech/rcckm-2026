@@ -87,6 +87,13 @@ This document separates official guideline behavior from RCCKM interpretation-la
 - hsCRP `>=2 mg/L` is a risk enhancer when present on more than one occasion and without an identifiable underlying cause.
 - A single hsCRP value should not be overcalled as a major driver by itself.
 
+### Reproductive Risk Markers
+
+- In adults without clinical ASCVD, reproductive history can personalize ASCVD risk assessment during primary-prevention lipid discussions.
+- Supported markers include early menopause `<45`, premature menopause `<40`, preeclampsia, gestational hypertension, gestational diabetes, preterm delivery `<37 weeks`, small-for-gestational-age infant, recurrent spontaneous pregnancy loss, PCOS / irregular menses, and early menarche `<10` when documented.
+- These markers are not PREVENT inputs and do not independently mandate treatment in RCCKM.
+- RCCKM treats documented markers as mild RSS contributors/context and uses them to support risk discussion when lipid-lowering therapy is being considered.
+
 ## Module Concordance
 
 | Module | Status | Notes |
@@ -97,6 +104,7 @@ This document separates official guideline behavior from RCCKM interpretation-la
 | `modules/risk_enhancers/engine.py` | Updated / mostly aligned | Lp(a) threshold aligned. ApoB `>=120` added as guideline enhancer. hsCRP wording now asks to confirm persistence. TG `>=150` is represented, but fasting vs nonfasting persistence is not fully modeled. |
 | `modules/actions/engine.py` | Updated / partially aligned | TG `>=500` and `>=1000` now use pancreatitis-risk wording. Other action wording remains RCCKM clinical synthesis. |
 | `modules/rss/engine.py` | RCCKM interpretation layer | RSS point values are RCCKM-specific and were not changed. ApoB 100-119 and single hsCRP may contribute to RSS as biologic burden, not as official guideline risk-enhancer thresholds. |
+| `modules/risk_enhancers/reproductive.py` | Guideline-supporting context / RCCKM interpretation layer | Reproductive markers are captured as primary-prevention risk enhancers, shown in RSS/roadmap/context when present, and not used as PREVENT inputs. |
 | `modules/drivers/engine.py` | RCCKM interpretation layer | Top drivers are display synthesis. Lp(a) is suppressed unless above threshold; hsCRP requires supportive context. |
 | `modules/cac_recommendation/engine.py` | Partially aligned | CAC clarification logic is consistent with guideline concept, but percentile-based CAC is not implemented. |
 | `modules/ckm/engine.py` | RCCKM interpretation layer | CKM staging supports context but is not itself a dyslipidemia guideline target algorithm. |

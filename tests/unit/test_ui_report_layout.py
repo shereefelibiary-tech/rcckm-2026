@@ -1,4 +1,5 @@
-from ui.input_worksheet import build_patient_from_inputs
+from ui.input_worksheet import build_patient_from_inputs, label_with_unit
+from ui.report_state import hash_worksheet_state, worksheet_payload_from_source
 from core.results import DiagnosisCandidate
 from ui.diagnosis_confirm_panel import prioritize_linked_diagnoses
 from ui.report_layout import (
@@ -11,7 +12,11 @@ from renderers.clarifier_renderer import build_clarifier_card_html
 from renderers.continuum_bar import build_continuum_bar_html
 from renderers.prevent_card import render_prevent_card
 from renderers.patient_roadmap import render_patient_roadmap
-from renderers.rss_renderer import build_rss_panel_html, get_rss_display_contributions
+from renderers.rss_renderer import (
+    build_rss_panel_html,
+    format_tower_value,
+    get_rss_display_contributions,
+)
 from renderers.where_patient_falls import build_where_patient_falls_html
 
 
@@ -170,15 +175,19 @@ def test_report_uses_component_html_for_custom_renderers():
     assert "rc-shell" in combined
     assert "prevent-card" in inline_html
     assert "roadmap-card" in inline_html
-    assert "rss-module" in combined
-    assert "Why Risk Is Elevated" in combined
-    assert "grid-template-columns: 205px 1fr" in combined
-    assert "Largest contribution first" not in combined
-    assert "ordered by contribution size" not in combined
-    assert "Tower shows RSS burden" not in combined
-    assert "Contributor explanations" not in combined
-    assert "drivers-card" not in combined
-    assert "rss-support-card" not in combined
+    assert "rss-module" in inline_html
+    assert "Why Risk Is Elevated" in inline_html
+    assert "grid-template-columns: 220px minmax(0, 1fr)" in inline_html
+    assert "rss-tower-zone" in inline_html
+    assert "rss-list-zone" in inline_html
+    assert "rss-card" in inline_html
+    assert "rss-contributor-heading" in inline_html
+    assert "Largest contribution first" not in inline_html
+    assert "ordered by contribution size" not in inline_html
+    assert "Tower shows RSS burden" not in inline_html
+    assert "Contributor explanations" not in inline_html
+    assert "drivers-card" not in inline_html
+    assert "rss-support-card" not in inline_html
     assert "wpf-card" in inline_html
     assert "clarifier-card" in inline_html
     assert "ckm-kdigo-strip" in inline_html
@@ -328,7 +337,11 @@ def test_unified_rss_module_returns_unescaped_contributor_rows():
     assert "rss-module" in html
     assert "Why Risk Is Elevated" in html
     assert "rss-driver-row" in html
-    assert "grid-template-columns: 205px 1fr" in html
+    assert "grid-template-columns: 220px minmax(0, 1fr)" in html
+    assert "rss-tower-zone" in html
+    assert "rss-list-zone" in html
+    assert "rss-card" in html
+    assert "rss-contributor-heading" in html
     assert "Largest contribution first" not in html
     assert "ordered by contribution size" not in html
     assert "Tower shows RSS burden" not in html
@@ -366,13 +379,14 @@ def test_rss_module_uses_shared_visual_order_for_tower_and_list():
 
     assert row_indexes == sorted(row_indexes)
     assert tower_indexes == sorted(tower_indexes)
-    assert [item.label for item in get_rss_display_contributions(contributions)] == [
-        "Diabetes",
-        "Albuminuria",
-        "Reduced eGFR",
-        "ApoB elevation",
-        "CAC plaque burden",
-    ]
+    display_contributions = get_rss_display_contributions(contributions)
+    assert {item.label for item in display_contributions} == {
+        item.label for item in contributions if item.points > 0
+    }
+    for item in display_contributions:
+        tower_value = format_tower_value(item)
+        assert tower_value in tower
+        assert tower_value in driver_list
     assert "CAC 350" in html
     assert "ApoB 110 mg/dL" in html
     assert "eGFR 55" in html
@@ -454,7 +468,7 @@ def test_assessment_candidates_are_compact_and_deduped():
     assert "Suppress" not in button_labels
 
 
-def test_assessment_candidates_show_review_suggested_codes_when_contextual():
+def test_assessment_candidates_do_not_show_family_history_context_as_review_item():
     from core.results import DiagnosisCandidate, RCCKMResult
     from ui.diagnosis_confirm_panel import render_diagnosis_confirm_panel
 
@@ -474,15 +488,16 @@ def test_assessment_candidates_show_review_suggested_codes_when_contextual():
     render_diagnosis_confirm_panel(fake_st, result)
 
     combined = "\n".join(str(message) for message in fake_st.messages)
-    assert "Review suggested" in combined
-    assert "Suggested ICD: Z82.49" in combined
+    assert "Premature family history of ASCVD" not in combined
+    assert "Review suggested" not in combined
+    assert "Suggested ICD: Z82.49" not in combined
     assert "confirm_dx" not in combined
     assert "Accept" not in combined
     assert "Suppress" not in combined
-    assert any(message[1] == "Confirm" for message in fake_st.messages if message[0] == "button")
+    assert not any(message[1] == "Confirm" for message in fake_st.messages if message[0] == "button")
 
 
-def test_assessment_candidate_accept_moves_review_item_to_confirmed():
+def test_assessment_candidate_accept_does_not_apply_to_family_history_context():
     from core.results import DiagnosisCandidate, RCCKMResult
     from ui.diagnosis_confirm_panel import render_diagnosis_confirm_panel
 
@@ -500,16 +515,16 @@ def test_assessment_candidate_accept_moves_review_item_to_confirmed():
     first = _FakeStreamlit(clicked_key="dx_accept__Premature family history of ASCVD")
     render_diagnosis_confirm_panel(first, result)
 
-    assert "Premature family history of ASCVD" in first.session_state["dx_review_accepted_ids"]
-    assert first.rerun_requested is True
+    assert "dx_review_accepted_ids" not in first.session_state
+    assert first.rerun_requested is False
 
     second = _FakeStreamlit()
     second.session_state.update(first.session_state)
     render_diagnosis_confirm_panel(second, result)
     combined = "\n".join(str(message) for message in second.messages)
 
-    assert "Confirmed / accepted" in combined
-    assert "ICD: Z82.49" in combined
+    assert "Premature family history of ASCVD" not in combined
+    assert "ICD: Z82.49" not in combined
     assert "dx-status'>Review suggested" not in combined
 
 
@@ -568,9 +583,13 @@ def test_prioritize_linked_diagnoses_suppresses_fragment_duplicates():
 
 def _value_by_label(widgets, label):
     for widget in widgets:
-        if widget.label == label:
+        if widget.label == label or str(widget.label).startswith(f"{label} "):
             return widget.value
     raise AssertionError(f"Missing widget {label}")
+
+
+def _label_matches(widget, label):
+    return widget.label == label or str(widget.label).startswith(f"{label} ")
 
 
 def _click_button_by_label(app_test, label):
@@ -602,7 +621,7 @@ def test_ingest_populates_editable_worksheet_fields():
     assert _value_by_label(at.selectbox, "Event type") == "MI"
 
     for widget in at.text_input:
-        if widget.label == "LDL-C":
+        if _label_matches(widget, "LDL-C"):
             widget.set_value("130").run(timeout=10)
             break
 
@@ -649,9 +668,128 @@ def test_app_loads_with_demo_patient_and_unified_input_flow():
     assert _value_by_label(at.text_input, "A1c") == "7.1"
     assert _value_by_label(at.text_input, "eGFR") == "55"
     assert _value_by_label(at.text_input, "UACR") == "45"
+    assert at.session_state["report_generated"] is False
+    assert at.session_state["current_result"] is None
+    assert at.session_state["active_patient"] is None
     assert any(button.label == "Parse" for button in at.button)
     assert any(button.label == "Clear" for button in at.button)
     assert any(button.label == "Interpret reviewed worksheet" for button in at.button)
+    markdown_text = "\n".join(str(message.value) for message in at.markdown)
+    assert "Review the worksheet, then click Interpret reviewed worksheet." in markdown_text
+    assert "10-Year Cardiovascular Risk" not in markdown_text
+
+
+def test_worksheet_numeric_labels_include_compact_units():
+    from streamlit.testing.v1 import AppTest
+
+    at = AppTest.from_file("app.py")
+    at.run(timeout=10)
+
+    labels = {widget.label for widget in at.text_input}
+    expected_labels = {
+        label_with_unit("SBP", "mmHg"),
+        label_with_unit("DBP", "mmHg"),
+        label_with_unit("TC", "mg/dL"),
+        label_with_unit("LDL-C", "mg/dL"),
+        label_with_unit("HDL-C", "mg/dL"),
+        label_with_unit("TG", "mg/dL"),
+        label_with_unit("ApoB", "mg/dL"),
+        label_with_unit("Lp(a)", "value"),
+        label_with_unit("A1c", "%"),
+        label_with_unit("BMI", "kg/m²"),
+        label_with_unit("eGFR", "mL/min/1.73m²"),
+        label_with_unit("UACR", "mg/g"),
+        label_with_unit("CAC score", "Agatston"),
+        label_with_unit("hsCRP", "mg/L"),
+    }
+
+    assert expected_labels.issubset(labels)
+    assert any(widget.label == "Lp(a) unit" for widget in at.selectbox)
+    assert "US lipid units shown; convert mmol/L before entry." in "\n".join(
+        caption.value for caption in at.caption
+    )
+    assert not any("<span" in label or "</span>" in label for label in labels)
+
+
+def test_hash_worksheet_state_uses_canonical_fields_only():
+    first = {
+        "input_age": "55",
+        "input_ldl_c": "132",
+        "input_uacr": "",
+        "unrelated_debug_toggle": True,
+    }
+    second = {
+        "age": "55",
+        "ldl_c": "132",
+        "uacr": "",
+        "unrelated_debug_toggle": False,
+    }
+
+    assert worksheet_payload_from_source(first)["uacr"] == ""
+    assert hash_worksheet_state(first) == hash_worksheet_state(second)
+
+
+def test_pasting_new_text_after_interpret_clears_existing_report():
+    from streamlit.testing.v1 import AppTest
+
+    at = AppTest.from_file("app.py")
+    at.run(timeout=10)
+    _click_button_by_label(at, "Interpret reviewed worksheet")
+
+    assert at.session_state["report_generated"] is True
+    assert at.session_state["current_result"] is not None
+
+    at.text_area[0].set_value("60M BP 132/78 TC 210 LDL 142 HDL 42 TG 180").run(timeout=10)
+
+    assert len(at.exception) == 0
+    assert at.session_state["report_generated"] is False
+    assert at.session_state["current_result"] is None
+    assert at.session_state["worksheet_dirty"] is True
+    markdown_text = "\n".join(str(message.value) for message in at.markdown)
+    assert "Worksheet changed. Click Interpret reviewed worksheet to update the report." in markdown_text
+
+
+def test_parse_new_text_updates_worksheet_but_keeps_report_cleared_until_interpret():
+    from streamlit.testing.v1 import AppTest
+
+    at = AppTest.from_file("app.py")
+    at.run(timeout=10)
+    _click_button_by_label(at, "Interpret reviewed worksheet")
+    assert at.session_state["report_generated"] is True
+
+    at.text_area[0].set_value("60M BP 132/78 TC 210 LDL 142 HDL 42 TG 180")
+    _click_button_by_label(at, "Parse")
+
+    assert len(at.exception) == 0
+    assert _value_by_label(at.text_input, "LDL-C") == "142"
+    assert at.session_state["report_generated"] is False
+    assert at.session_state["current_result"] is None
+    assert at.session_state["worksheet_dirty"] is True
+
+
+def test_manual_edit_after_interpret_hides_stale_report_until_reinterpreted():
+    from streamlit.testing.v1 import AppTest
+
+    at = AppTest.from_file("app.py")
+    at.run(timeout=10)
+    _click_button_by_label(at, "Interpret reviewed worksheet")
+    assert at.session_state["report_generated"] is True
+
+    for widget in at.text_input:
+        if _label_matches(widget, "LDL-C"):
+            widget.set_value("120").run(timeout=10)
+            break
+
+    assert len(at.exception) == 0
+    assert at.session_state["report_generated"] is False
+    assert at.session_state["current_result"] is None
+    assert at.session_state["worksheet_dirty"] is True
+    markdown_text = "\n".join(str(message.value) for message in at.markdown)
+    assert "Worksheet changed. Click Interpret reviewed worksheet to update the report." in markdown_text
+
+    _click_button_by_label(at, "Interpret reviewed worksheet")
+    assert at.session_state["report_generated"] is True
+    assert at.session_state["worksheet_dirty"] is False
 
 
 def test_no_cac_button_sets_no_cac_state_and_numeric_entry_clears_it():
@@ -667,7 +805,7 @@ def test_no_cac_button_sets_no_cac_state_and_numeric_entry_clears_it():
     assert "Plaque burden unmeasured." in "\n".join(caption.value for caption in at.caption)
 
     for widget in at.text_input:
-        if widget.label == "CAC score":
+        if _label_matches(widget, "CAC score"):
             widget.set_value("0").run(timeout=10)
             break
 

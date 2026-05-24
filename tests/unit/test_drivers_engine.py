@@ -55,7 +55,10 @@ def test_build_top_drivers_suppresses_ldl_when_apob_present_unless_ldl_190():
 
     drivers = build_top_drivers(patient, RCCKMResult())
 
-    assert drivers == ["ApoB 118 mg/dL", "LDL-C 190 mg/dL"]
+    assert drivers == [
+        "Severe hypercholesterolemia / LDL-C 190 mg/dL (>=190)",
+        "ApoB 118 mg/dL",
+    ]
 
 
 def test_build_top_drivers_compresses_diabetes_ckd_albuminuria():
@@ -89,8 +92,8 @@ def test_build_top_drivers_returns_max_four_drivers():
 
     assert drivers == [
         "CAC 350",
+        "Severe hypercholesterolemia / LDL-C 190 mg/dL (>=190)",
         "ApoB 118 mg/dL",
-        "LDL-C 190 mg/dL",
         "A1c 7.1%",
     ]
 

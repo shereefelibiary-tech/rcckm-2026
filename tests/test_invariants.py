@@ -5,6 +5,7 @@ from tests.validation_helpers import (
     diagnosis_names,
     evaluate_dict,
 )
+from modules.levels.definitions import classify_continuum_position
 from renderers.emr_renderer import render_emr_note
 
 
@@ -60,6 +61,52 @@ def test_prevent_high_alone_does_not_imply_plaque_present():
     assert "plaque unmeasured" in text
 
 
+def test_prevent_category_does_not_overwrite_rcckm_level_when_albuminuria_is_actionable():
+    patient, result = evaluate_dict(
+        {
+            "age": 55,
+            "sex": "female",
+            "prevent_10y_ascvd": 3.74,
+            "prevent_30y_ascvd": 18.8,
+            "uacr": 34,
+            "egfr": 82,
+            "a1c": 6.1,
+            "triglycerides": 162,
+            "apob": 92,
+            "ldl_c": 126,
+            "bp_treated": True,
+            "cac": None,
+            "cac_not_done": True,
+        }
+    )
+
+    assert str(getattr(result.prevent_risk_category, "value", result.prevent_risk_category)) == "BORDERLINE"
+    assert classify_continuum_position(patient, result) == {"level": 3, "sublevel": "3B"}
+    assert "Risk level: Level 3B - actionable early CKM / kidney risk" in render_emr_note(patient, result)
+
+
+def test_elevated_30_year_prevent_trajectory_sets_at_least_level_3_without_plaque():
+    patient, result = evaluate_dict(
+        {
+            "age": 45,
+            "sex": "male",
+            "prevent_10y_ascvd": 1.2,
+            "prevent_30y_ascvd": 10.5,
+            "cac": None,
+            "cac_not_done": True,
+        }
+    )
+    position = classify_continuum_position(patient, result)
+    names = diagnosis_names(result)
+    text = clinical_visible_text(patient, result)
+
+    assert position["level"] >= 3
+    assert position["level"] < 4
+    assert not any("Subclinical coronary atherosclerosis" in name for name in names)
+    assert "Plaque: unmeasured / CAC not performed" in render_emr_note(patient, result)
+    assert "30-year risk trajectory supports prevention discussion" in text
+
+
 def test_missing_uacr_is_not_normal_albuminuria_but_zero_is_measured():
     missing_patient, missing_result = evaluate_dict({"age": 55, "sex": "female", "egfr": 84})
     zero_patient, zero_result = evaluate_dict({"age": 55, "sex": "female", "egfr": 84, "uacr": 0})
@@ -85,7 +132,7 @@ def test_aspirin_not_routinely_recommended_and_cac_not_repeated_when_measured():
     patient, result = evaluate_dict({"age": 55, "sex": "male", "cac": 350})
     text = clinical_visible_text(patient, result)
 
-    assert "Aspirin may be considered if bleeding risk is low after shared decision-making." in text
+    assert "Aspirin may be considered only if bleeding risk is low after shared decision-making." in text
     assert "CAC 350 already measured" in text
     assert "Coronary calcium reasonable for plaque clarification" not in "\n".join(action_lines(result))
 
@@ -94,7 +141,7 @@ def test_ldl_190_pathway_not_derisked_by_cac_zero():
     _patient, result = evaluate_dict({"age": 55, "sex": "male", "ldl_c": 190, "cac": 0})
 
     assert any("Severe hypercholesterolemia" in name for name in diagnosis_names(result))
-    assert any("Lipid-lowering" in action or "ApoB" in action for action in action_lines(result))
+    assert any("maximally tolerated statin therapy indicated" in action for action in action_lines(result))
 
 
 def test_rendered_outputs_do_not_expose_raw_html_or_unwanted_language():

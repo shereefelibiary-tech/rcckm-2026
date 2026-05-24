@@ -12,7 +12,7 @@ def test_build_clarifier_items_marks_action_domain_recommendations():
             "apob_testing": "Obtain ApoB to define atherogenic particle burden.",
             "lpa_testing": "Check Lp(a) once.",
             "cac_testing": "Coronary calcium reasonable for plaque clarification.",
-            "uacr_testing": "Obtain UACR to assess albuminuria/kidney risk.",
+            "uacr_testing": "Obtain UACR to complete kidney-risk assessment.",
             "hscrp_testing": "Consider hsCRP to clarify inflammatory residual risk.",
             "fasting_lipids": "Repeat fasting lipid panel to confirm severe hypertriglyceridemia.",
         }

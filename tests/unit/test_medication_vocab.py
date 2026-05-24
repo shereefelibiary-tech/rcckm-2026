@@ -40,6 +40,27 @@ def test_stopped_statin_is_detected_but_not_counted_active():
     assert result["statin"] is None
 
 
+def test_active_moderate_statin_ezetimibe_with_prior_high_intensity_intolerance():
+    result = extract_medications_structured(
+        "Current medications: pravastatin 40 mg daily, ezetimibe 10 mg daily. "
+        "Prior atorvastatin intolerance. Prior rosuvastatin intolerance."
+    )
+    active_pravastatin = _first_med(result, "pravastatin")
+    active_ezetimibe = _first_med(result, "ezetimibe")
+    inactive_atorvastatin = _first_med(result, "atorvastatin")
+    inactive_rosuvastatin = _first_med(result, "rosuvastatin")
+
+    assert active_pravastatin["active"] is True
+    assert active_ezetimibe["active"] is True
+    assert inactive_atorvastatin["active"] is False
+    assert inactive_rosuvastatin["active"] is False
+    assert result["lipidLowering"] is True
+    assert result["statin"] is True
+    assert result["ezetimibe"] is True
+    assert result["statin_intensity"] == "moderate"
+    assert result["statin_intolerance"] is True
+
+
 def test_statin_allergy_is_not_active_lipid_lowering():
     parsed = parse_ingest_text("Allergy to simvastatin. LDL-C 135.")
 

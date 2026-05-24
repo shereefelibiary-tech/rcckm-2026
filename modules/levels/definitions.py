@@ -1,3 +1,6 @@
+from modules.levels.level_classifier import classify_rcckm_level
+
+
 LEVEL_DEFS = {
     1: {
         "title": "Level 1",
@@ -9,8 +12,8 @@ LEVEL_DEFS = {
         "label": "Emerging risk signals",
         "description": "Early or mild risk signals without measured plaque or major actionable biology.",
         "sublevels": {
-            "2A": "Emerging isolated/mild",
-            "2B": "Emerging converging/rising",
+            "2A": "Early isolated risk signal",
+            "2B": "Converging early risk signals",
         },
     },
     3: {
@@ -18,8 +21,8 @@ LEVEL_DEFS = {
         "label": "Actionable biologic risk",
         "description": "Actionable biology or elevated estimated population risk without measured subclinical plaque.",
         "sublevels": {
-            "3A": "Actionable biology, limited enhancers",
-            "3B": "Actionable biology plus accelerators",
+            "3A": "Elevated long-term risk trajectory",
+            "3B": "Actionable early CKM / atherogenic risk",
         },
     },
     4: {
@@ -90,6 +93,42 @@ def _has_supportive_inflammatory_context(patient):
 def _has_premature_family_history(patient):
     return bool(getattr(patient, "premature_fhx_ascvd", False)) or bool(
         getattr(patient, "family_history_premature_ascvd", False)
+    )
+
+
+def _has_albuminuria(patient):
+    uacr = getattr(patient, "uacr", None)
+    return uacr is not None and uacr >= 30
+
+
+def _age_30_to_59(patient):
+    age = getattr(patient, "age", None)
+    return age is not None and 30 <= age <= 59
+
+
+def _has_elevated_30y_trajectory(patient, result):
+    prevent_30y = getattr(result, "prevent_30y_ascvd", None)
+    return bool(_age_30_to_59(patient) and prevent_30y is not None and prevent_30y >= 10)
+
+
+def _has_additional_ckm_signal(patient, result):
+    a1c = getattr(patient, "a1c", None)
+    apob = getattr(patient, "apob", None)
+    ldl_c = getattr(patient, "ldl_c", None)
+    triglycerides = getattr(patient, "triglycerides", None)
+    prevent_category = _risk_value(getattr(result, "prevent_risk_category", None))
+    return bool(
+        (a1c is not None and a1c >= 5.7)
+        or _has_diabetes(patient)
+        or bool(getattr(patient, "bp_treated", False))
+        or bool(getattr(patient, "elevated_bp", False))
+        or bool(getattr(patient, "hypertension", False))
+        or (apob is not None and apob >= 80)
+        or (ldl_c is not None and ldl_c >= 100)
+        or (triglycerides is not None and triglycerides >= 150)
+        or bool(getattr(patient, "osa", False))
+        or bool(getattr(patient, "masld", False))
+        or (prevent_category in {"BORDERLINE", "INTERMEDIATE", "HIGH"})
     )
 
 
@@ -167,31 +206,17 @@ def _major_actionable_drivers(patient, result):
     if _risk_value(getattr(result, "prevent_risk_category", None)) == "HIGH":
         drivers.append("PREVENT high estimated population risk")
 
+    if _has_albuminuria(patient) and _has_additional_ckm_signal(patient, result):
+        drivers.append("Albuminuria with CKM risk")
+
     return drivers
 
 
 def classify_continuum_position(patient, result):
-    cac = getattr(patient, "cac", None)
-
-    if getattr(patient, "clinical_ascvd", False) or (cac is not None and cac >= 300):
-        return {"level": 5, "sublevel": None}
-
-    if cac is not None and 0 < cac < 300:
-        return {"level": 4, "sublevel": None}
-
-    major_drivers = _major_actionable_drivers(patient, result)
-    if major_drivers:
-        accelerators = len(major_drivers)
-        if _has_premature_family_history(patient) and not any(
-            "family" in driver.lower() for driver in major_drivers
-        ):
-            accelerators += 1
-        sublevel = "3B" if accelerators >= 2 else "3A"
-        return {"level": 3, "sublevel": sublevel}
-
-    mild_signals = _mild_signals(patient, result)
-    if mild_signals:
-        sublevel = "2B" if len(mild_signals) >= 2 else "2A"
-        return {"level": 2, "sublevel": sublevel}
-
-    return {"level": 1, "sublevel": None}
+    classification = classify_rcckm_level(patient, result)
+    level = classification.level
+    if level in {"2A", "2B"}:
+        return {"level": 2, "sublevel": level}
+    if level in {"3A", "3B"}:
+        return {"level": 3, "sublevel": level}
+    return {"level": int(level), "sublevel": None}

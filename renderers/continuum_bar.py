@@ -46,12 +46,16 @@ def build_continuum_bar_html(patient, result):
     active_sublevel = position.get("sublevel")
     current_label = f"Level {active_level}"
     if active_sublevel:
-        current_label = f"{current_label} ({active_sublevel})"
+        current_label = f"Level {active_sublevel}"
     selected_subtitle, selected_context = _selected_level_copy(patient, active_level)
 
     cards = []
     for level, payload in sorted(LEVEL_DEFS.items()):
+        title = payload["title"]
         display_label = payload["label"]
+        if level == active_level and active_sublevel:
+            title = f"Level {active_sublevel}"
+            display_label = payload.get("sublevels", {}).get(active_sublevel, display_label)
         if level == 5:
             display_label = "Very high risk"
         if level == active_level and selected_subtitle:
@@ -68,7 +72,7 @@ def build_continuum_bar_html(patient, result):
             <div class="rc-card-wrap">
                 {caret}
                     <div class="rc-card rc-level-{level}{active_class}">
-                    <div class="rc-level-title">{escape(payload['title'])}</div>
+                    <div class="rc-level-title">{escape(title)}</div>
                     <div class="rc-level-subtitle">{escape(display_label)}</div>
                     {context}
                 </div>
@@ -162,6 +166,14 @@ def build_continuum_bar_html(patient, result):
 .rc-level-1 {{ background: #edf3fb; }}
 .rc-level-2 {{ background: #eef4ef; }}
 .rc-level-3 {{ background: #fbf1df; }}
+.rc-level-3.rc-card-active {{
+    border-color: rgba(115,0,10,0.72);
+    box-shadow: 0 10px 20px rgba(115, 0, 10, 0.13), inset 0 0 0 2px rgba(245, 158, 11, 0.20);
+    background: linear-gradient(180deg, #fff6e7 0%, #f7dfb5 100%);
+}}
+.rc-level-3.rc-card-active .rc-level-title {{
+    color: var(--rc-garnet-deep);
+}}
 .rc-level-4 {{ background: #f8e9df; }}
 .rc-level-5 {{
     background: var(--rc-garnet);

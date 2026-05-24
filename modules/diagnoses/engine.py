@@ -68,29 +68,24 @@ def build_diagnosis_candidates(patient):
 
     has_reduced_egfr = patient.egfr is not None and patient.egfr < 60
     has_albuminuria = patient.uacr is not None and patient.uacr >= 30
-    if patient.diabetes and (has_reduced_egfr or has_albuminuria):
+    if patient.diabetes and has_reduced_egfr:
         add_candidate(
             name="Type 2 diabetes mellitus with diabetic chronic kidney disease",
-            source="diabetes flag with eGFR <60 or UACR >=30 mg/g",
+            source="diabetes flag with eGFR <60",
             icd10_code="E11.22",
         )
 
-    if patient.diabetes and has_albuminuria:
+    if patient.diabetes and has_albuminuria and not has_reduced_egfr:
         add_candidate(
-            name="Type 2 diabetes mellitus with albuminuria",
+            name="Type 2 diabetes mellitus with albuminuria / kidney involvement",
             source="diabetes flag with UACR >=30 mg/g",
             icd10_code="E11.29",
         )
 
-    if has_reduced_egfr or has_albuminuria:
-        sources = []
-        if has_reduced_egfr:
-            sources.append("eGFR <60")
-        if has_albuminuria:
-            sources.append("UACR >=30 mg/g")
+    if has_reduced_egfr:
         add_candidate(
             name="Chronic kidney disease",
-            source=", ".join(sources),
+            source="eGFR <60",
             icd10_code="N18.9",
         )
 
@@ -190,16 +185,6 @@ def build_diagnosis_candidates(patient):
             name="Severe hypertriglyceridemia",
             source="triglycerides >=500 mg/dL",
             icd10_code="E78.1",
-        )
-
-    if getattr(patient, "premature_fhx_ascvd", False) or getattr(
-        patient, "family_history_premature_ascvd", False
-    ):
-        add_candidate(
-            name="Premature family history of ASCVD",
-            source=getattr(patient, "family_history_summary", None)
-            or "premature first-degree relative ASCVD history",
-            icd10_code=None,
         )
 
     return candidates

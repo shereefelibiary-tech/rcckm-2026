@@ -144,6 +144,46 @@ def test_parser_ra_yes_sets_ra_and_inflammatory_group():
     assert parsed["inflammatory_disease"] is True
 
 
+def test_parser_hiv_yes_does_not_create_inflammatory_conflict():
+    report = parse_ingest_report(
+        """
+        HIV: Yes
+        Inflammatory disease: No
+        RA: No
+        SLE: No
+        Psoriasis: No
+        IBD: No
+        """
+    )
+    parsed = report["parsed"]
+
+    assert parsed["hiv"] is True
+    assert parsed["inflammatory_disease"] is False
+    assert parsed["rheumatoid_arthritis"] is False
+    assert parsed["sle"] is False
+    assert parsed["psoriasis"] is False
+    assert parsed["ibd"] is False
+    assert report["conflicts"] == []
+
+
+def test_parser_hiv_no_and_inflammatory_no_are_both_false():
+    report = parse_ingest_report("HIV: No\nInflammatory disease: No")
+
+    assert report["parsed"]["hiv"] is False
+    assert report["parsed"]["inflammatory_disease"] is False
+    assert report["conflicts"] == []
+
+
+def test_parser_specific_inflammatory_positive_with_generic_no_uses_clear_conflict():
+    report = parse_ingest_report("Inflammatory disease: No\nRA: Yes")
+
+    assert report["parsed"]["rheumatoid_arthritis"] is True
+    assert report["parsed"]["inflammatory_disease"] is True
+    assert report["conflicts"] == [
+        "Inflammatory disease conflict: specific condition present despite generic inflammatory disease marked No."
+    ]
+
+
 def test_parser_diabetes_no_high_a1c_reports_conflict():
     report = parse_ingest_report("Diabetes: No. A1c 6.9.")
 
@@ -163,7 +203,27 @@ def test_parser_captures_clinical_ascvd_event_and_procedure_context():
 
     assert parsed["clinical_ascvd"] is True
     assert parsed["clinical_ascvd_context"] == "prior NSTEMI and PCI/stent"
-    assert parsed["cac"] == 0
+
+
+def test_parser_clinical_ascvd_event_negation_does_not_add_cabg_or_pad():
+    parsed = parse_ingest_text("History of STEMI with PCI/stent. No history of PAD or CABG.")
+
+    assert parsed["clinical_ascvd"] is True
+    assert parsed["clinical_ascvd_context"] == "prior STEMI and PCI/stent"
+
+
+def test_parser_all_negated_ascvd_events_returns_false():
+    parsed = parse_ingest_text("No history of MI, stroke, TIA, PAD, PCI, stent, or CABG.")
+
+    assert parsed["clinical_ascvd"] is False
+    assert "clinical_ascvd_context" not in parsed
+
+
+def test_parser_ischemic_stroke_with_negated_cabg_pad_context():
+    parsed = parse_ingest_text("History of ischemic stroke. Denies CAD, PAD, CABG.")
+
+    assert parsed["clinical_ascvd"] is True
+    assert parsed["clinical_ascvd_context"] == "ischemic stroke"
 
 
 def test_apply_parsed_to_session_state_populates_worksheet_keys():

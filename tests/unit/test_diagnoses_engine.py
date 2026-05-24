@@ -112,17 +112,26 @@ def test_build_diagnosis_candidates_adds_diabetes_with_albuminuria_candidate():
     candidates = build_diagnosis_candidates(patient)
 
     assert any(
-        c.name == "Type 2 diabetes mellitus with albuminuria"
+        c.name == "Type 2 diabetes mellitus with albuminuria / kidney involvement"
         for c in candidates
     )
 
 
-def test_build_diagnosis_candidates_adds_chronic_kidney_disease_from_uacr():
+def test_build_diagnosis_candidates_does_not_add_generic_ckd_from_albuminuria_alone():
     patient = Patient(age=60, sex="male", uacr=45)
 
     candidates = build_diagnosis_candidates(patient)
 
-    assert any(c.name == "Chronic kidney disease" for c in candidates)
+    assert not any(c.name == "Chronic kidney disease" for c in candidates)
+
+
+def test_build_diagnosis_candidates_uses_diabetes_kidney_involvement_for_g2a2():
+    patient = Patient(age=60, sex="male", diabetes=True, egfr=64, uacr=38)
+
+    names = [candidate.name for candidate in build_diagnosis_candidates(patient)]
+
+    assert "Type 2 diabetes mellitus with albuminuria / kidney involvement" in names
+    assert "Chronic kidney disease" not in names
 
 
 def test_build_diagnosis_candidates_adds_albuminuria_candidate():

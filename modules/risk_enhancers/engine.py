@@ -29,12 +29,12 @@ def identify_risk_enhancers(patient) -> list[str]:
         inflammatory_contexts.append("psoriasis")
     if getattr(patient, "ibd", False):
         inflammatory_contexts.append("IBD")
-    if getattr(patient, "hiv", False):
-        inflammatory_contexts.append("HIV")
     if inflammatory_contexts:
         enhancers.append("Inflammatory/immune context: " + ", ".join(inflammatory_contexts))
     elif getattr(patient, "inflammatory_disease", False):
         enhancers.append("Inflammatory disease")
+    if getattr(patient, "hiv", False):
+        enhancers.append("HIV-related risk enhancer")
 
     if getattr(patient, "osa", False):
         enhancers.append("Sleep/hypoxia context: OSA")
@@ -45,6 +45,25 @@ def identify_risk_enhancers(patient) -> list[str]:
     triglycerides = getattr(patient, "triglycerides", None)
     if triglycerides is not None and triglycerides >= 150:
         enhancers.append("Hypertriglyceridemia")
+
+    if getattr(patient, "diabetes", False):
+        diabetes_specific = []
+        duration = getattr(patient, "diabetes_duration_years", None)
+        abi = getattr(patient, "abi", None)
+        if duration is not None and duration >= 10:
+            diabetes_specific.append("diabetes duration >=10 years")
+        if getattr(patient, "uacr", None) is not None and patient.uacr >= 30:
+            diabetes_specific.append("albuminuria >=30 mg/g")
+        if getattr(patient, "egfr", None) is not None and patient.egfr < 60:
+            diabetes_specific.append("eGFR <60")
+        if getattr(patient, "diabetic_retinopathy", False):
+            diabetes_specific.append("retinopathy")
+        if getattr(patient, "diabetic_neuropathy", False):
+            diabetes_specific.append("neuropathy")
+        if getattr(patient, "abi_lt_0_9", False) or (abi is not None and abi < 0.9):
+            diabetes_specific.append("ABI <0.9")
+        if diabetes_specific:
+            enhancers.append("Diabetes-specific enhancer: " + ", ".join(diabetes_specific))
 
     if getattr(patient, "ckd", False):
         enhancers.append("CKD")

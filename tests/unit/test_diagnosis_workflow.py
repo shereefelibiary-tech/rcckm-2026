@@ -67,7 +67,7 @@ def test_apply_confirmations_promotes_codes_and_split_lists():
     assert confirmed[0]["hcc_confirmed"] == ["HCC 19"]
 
 
-def test_contextual_diagnosis_remains_review_suggested():
+def test_family_history_context_is_not_diagnosis_workflow_item():
     rows = normalize_diagnosis_entries(
         {
             "diagnosisSynthesis": {
@@ -85,8 +85,8 @@ def test_contextual_diagnosis_remains_review_suggested():
     confirmed, review = split_diagnoses(rows)
 
     assert confirmed == []
-    assert len(review) == 1
-    assert review[0]["status"] == "review_suggested"
+    assert review == []
+    assert rows == []
 
 
 def test_build_confirmed_code_exports_and_assessment_section():

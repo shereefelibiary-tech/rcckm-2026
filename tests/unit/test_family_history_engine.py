@@ -39,7 +39,23 @@ def test_family_history_payload_sets_summary_and_boolean():
     assert payload["premature_fhx_ascvd"] is True
 
 
-def test_family_history_supports_level_drivers_clarification_snapshot_and_diagnoses():
+def test_structured_nonpremature_family_history_overrides_legacy_premature_flag():
+    patient = Patient(
+        age=39,
+        sex="male",
+        family_history_relationship="father",
+        family_history_event_type="MI",
+        family_history_age_at_event=61,
+        family_history_premature_ascvd=True,
+    )
+
+    payload = build_family_history_payload(patient)
+
+    assert payload["summary"] == "Father MI age 61"
+    assert payload["premature_fhx_ascvd"] is False
+
+
+def test_family_history_supports_level_drivers_clarification_snapshot_without_diagnosis_candidate():
     patient = Patient(
         age=60,
         sex="male",
@@ -69,8 +85,25 @@ def test_family_history_supports_level_drivers_clarification_snapshot_and_diagno
     assert "Family history: Father MI age 49" in build_snapshot_lines(result)
 
     diagnoses = build_diagnosis_candidates(patient)
-    assert any(
-        candidate.name == "Premature family history of ASCVD"
-        and candidate.source == "Father MI age 49"
-        for candidate in diagnoses
+    assert all(candidate.name != "Premature family history of ASCVD" for candidate in diagnoses)
+
+
+def test_nonpremature_family_history_does_not_become_premature_context_or_diagnosis():
+    patient = Patient(
+        age=60,
+        sex="male",
+        family_history_relationship="father",
+        family_history_event_type="MI",
+        family_history_age_at_event=61,
     )
+    payload = build_family_history_payload(patient)
+    patient.family_history_summary = payload["summary"]
+    patient.premature_fhx_ascvd = payload["premature_fhx_ascvd"]
+    patient.family_history_premature_ascvd = payload["premature_fhx_ascvd"]
+
+    result = RCCKMResult(family_history_summary=patient.family_history_summary)
+
+    assert payload["summary"] == "Father MI age 61"
+    assert payload["premature_fhx_ascvd"] is False
+    assert build_top_drivers(patient, result) == []
+    assert all(candidate.name != "Premature family history of ASCVD" for candidate in build_diagnosis_candidates(patient))

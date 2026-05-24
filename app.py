@@ -10,7 +10,16 @@ from ui.input_worksheet import (
     patient_to_payload,
     render_manual_worksheet,
 )
-from ui.report_layout import demo_patient, render_report
+from ui.html import render_html
+from ui.report_layout import demo_patient, render_report, run_patient
+from ui.report_state import (
+    clear_report_state,
+    hash_worksheet_state,
+    initialize_report_state,
+    mark_dirty_if_worksheet_changed,
+    report_can_render,
+    store_interpretation,
+)
 from ui.theme import apply_global_theme, render_brand_header, section_heading
 from modules.prevent.calculator import calculate_prevent_summary
 
@@ -23,6 +32,7 @@ def _init_session_state():
     st.session_state.setdefault("active_patient_source", None)
     st.session_state.setdefault("show_raw_renderer_html", False)
     st.session_state.setdefault("demo_defaults_loaded", False)
+    initialize_report_state(st.session_state)
 
 
 def _set_active_patient(patient, source):
@@ -35,8 +45,8 @@ def _load_demo_defaults_once():
         return
     patient = demo_patient()
     apply_patient_to_session_state(st.session_state, patient, overwrite=False)
-    _set_active_patient(patient, "Default demo patient")
     st.session_state.demo_defaults_loaded = True
+    clear_report_state(st.session_state, dirty=False)
 
 
 def _reset_to_demo_patient():
@@ -46,7 +56,7 @@ def _reset_to_demo_patient():
     st.session_state.parse_report = {"parsed": {}, "meta": {}, "warnings": []}
     st.session_state.parsed_needs_review = False
     st.session_state.confirmed_diagnosis_names = []
-    _set_active_patient(patient, "Default demo patient")
+    clear_report_state(st.session_state, dirty=True)
 
 
 def _render_patient_debug(patient, source=None):
@@ -102,19 +112,46 @@ def main():
         "Parsed values fill the worksheet. Edited values are used for interpretation.",
     )
     inputs = render_manual_worksheet(st, parsed)
+    current_worksheet_hash = hash_worksheet_state(inputs)
+    worksheet_changed = mark_dirty_if_worksheet_changed(
+        st.session_state, current_worksheet_hash
+    )
 
     if st.button("Interpret reviewed worksheet", type="primary"):
         st.session_state.parsed_needs_review = False
         st.session_state.confirmed_diagnosis_names = []
         patient = build_patient_from_inputs(inputs)
-        _set_active_patient(patient, "Reviewed worksheet")
+        result, _rss_total, _rss_contributions = run_patient(patient)
+        store_interpretation(
+            st.session_state,
+            patient=patient,
+            result=result,
+            worksheet_hash=current_worksheet_hash,
+            source="Reviewed worksheet",
+        )
+        worksheet_changed = False
 
-    if st.session_state.active_patient is not None:
+    if report_can_render(st.session_state, current_worksheet_hash):
         _render_patient_debug(
             st.session_state.active_patient,
             st.session_state.active_patient_source,
         )
         render_report(st, st.session_state.active_patient)
+    else:
+        message = "Review the worksheet, then click Interpret reviewed worksheet."
+        if worksheet_changed or (
+            st.session_state.get("worksheet_dirty")
+            and st.session_state.get("last_interpreted_worksheet_hash")
+        ):
+            message = "Worksheet changed. Click Interpret reviewed worksheet to update the report."
+        render_html(
+            st,
+            f"""
+            <div class="rc-panel-compact" style="margin-top: 14px;">
+              <div class="rc-muted">{message}</div>
+            </div>
+            """,
+        )
 
 
 if __name__ == "__main__":

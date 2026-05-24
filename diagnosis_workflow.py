@@ -221,6 +221,8 @@ def normalize_diagnosis_entries(out: Any) -> list[dict[str, Any]]:
         label = str(item.get("label") or item.get("name") or item.get("text") or "").strip()
         if not label:
             continue
+        if "family history" in label.lower():
+            continue
         if not dx_id:
             dx_id = label
 
@@ -291,8 +293,6 @@ def _normalize_status(status_raw: str, label: str, source: str = "") -> str:
     if status.startswith("sus") or status in {"review", "review_suggested"}:
         return "review_suggested"
 
-    if "family history" in label_l:
-        return "review_suggested"
     if "confirm" in label_l or "confirm" in source_l or "incomplete" in source_l:
         return "review_suggested"
 
@@ -360,9 +360,10 @@ def prioritize_linked_diagnoses(candidates: list[Any]) -> list[Any]:
         "severely increased albuminuria": 9,
         "albuminuria": 10,
         "type 2 diabetes mellitus": 11,
-        "elevated apob": 12,
-        "severe hypertriglyceridemia": 13,
-        "hypertriglyceridemia": 14,
+        "severe hypercholesterolemia": 12,
+        "elevated apob": 13,
+        "severe hypertriglyceridemia": 14,
+        "hypertriglyceridemia": 15,
     }
 
     visible = [candidate for candidate in rows if _diagnosis_key(candidate) not in suppressed]
@@ -377,17 +378,32 @@ def _result_kdigo_stage(out: Any) -> str:
     return ""
 
 
+def _result_albuminuria_stage(out: Any) -> str:
+    if hasattr(out, "albuminuria_stage"):
+        return str(getattr(out, "albuminuria_stage") or "").strip()
+    if isinstance(out, dict):
+        return str(out.get("albuminuria_stage") or out.get("albuminuriaStage") or "").strip()
+    return ""
+
+
 def _compact_display_label(label: str, out: Any) -> str:
     key = str(label or "").strip().lower()
     kdigo_stage = _result_kdigo_stage(out)
+    albuminuria_stage = _result_albuminuria_stage(out)
+    has_albuminuria = albuminuria_stage in {"A2", "A3"}
 
     if key == "severe subclinical coronary atherosclerosis":
         return "Severe subclinical coronary atherosclerosis / high CAC burden"
 
     if key == "type 2 diabetes mellitus with diabetic chronic kidney disease":
         if kdigo_stage:
-            return f"Type 2 diabetes mellitus with CKD {kdigo_stage} and albuminuria"
-        return "Type 2 diabetes mellitus with CKD and albuminuria"
+            suffix = " and albuminuria" if has_albuminuria else ""
+            return f"Type 2 diabetes mellitus with CKD {kdigo_stage}{suffix}"
+        return (
+            "Type 2 diabetes mellitus with CKD and albuminuria"
+            if has_albuminuria
+            else "Type 2 diabetes mellitus with CKD"
+        )
 
     if key == "elevated apob":
         return "Elevated ApoB / atherogenic particle burden"

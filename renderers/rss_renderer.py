@@ -13,6 +13,8 @@ DOMAIN_COLORS = {
     "hsCRP": "#B45309",
     "Sleep / Hypoxia": "#0891B2",
     "Liver / MASLD": "#65A30D",
+    "Family History": "#9333EA",
+    "Reproductive History": "#C2410C",
     "Kidney": "#0F8B8D",
     "Lipids": "#2F5F8F",
     "Metabolic": "#7C3AED",
@@ -30,16 +32,58 @@ CONTRIBUTION_ORDER = {
     "Elevated Lp(a)": 60,
     "Hypertriglyceridemia": 70,
     "Inflammatory risk": 80,
-    "Smoking": 90,
+    "Premature family history": 82,
+    "RA": 84,
+    "SLE": 85,
+    "Psoriasis": 86,
+    "IBD": 87,
+    "HIV": 88,
+    "Inflammatory disease": 89,
+    "OSA": 92,
+    "MASLD": 94,
+    "Premature menopause": 95,
+    "Early menopause": 95.1,
+    "Preeclampsia": 95.2,
+    "Gestational hypertension": 95.3,
+    "Gestational diabetes": 95.4,
+    "Preterm delivery": 95.5,
+    "SGA infant": 95.6,
+    "Recurrent pregnancy loss": 95.7,
+    "PCOS / irregular menses": 95.8,
+    "Early menarche": 95.9,
+    "Smoking": 81,
 }
 
 RSS_DISPLAY_ORDER_TOP_TO_BOTTOM = {
     "Diabetes": 10,
     "A1c elevation": 10,
-    "Albuminuria": 20,
-    "Reduced eGFR": 30,
-    "ApoB elevation": 40,
-    "CAC plaque burden": 50,
+    "Inflammatory risk": 20,
+    "OSA": 24,
+    "MASLD": 25,
+    "Inflammatory disease": 26,
+    "RA": 26.1,
+    "SLE": 26.2,
+    "Psoriasis": 26.3,
+    "IBD": 26.4,
+    "HIV": 26.5,
+    "Premature menopause": 28.1,
+    "Early menopause": 28.2,
+    "Preeclampsia": 28.3,
+    "Gestational hypertension": 28.4,
+    "Gestational diabetes": 28.5,
+    "Preterm delivery": 28.6,
+    "SGA infant": 28.7,
+    "Recurrent pregnancy loss": 28.8,
+    "PCOS / irregular menses": 28.9,
+    "Early menarche": 29.0,
+    "Premature family history": 30,
+    "Smoking": 35,
+    "Hypertriglyceridemia": 40,
+    "Albuminuria": 50,
+    "Reduced eGFR": 51,
+    "Elevated Lp(a)": 60,
+    "ApoB elevation": 70,
+    "CAC plaque burden": 80,
 }
 
 
@@ -54,37 +98,162 @@ def ordered_contributions(rss_contributions):
     )
 
 
-def get_rss_display_contributions(rss_contributions):
-    """Return tower/list contributions in the visual top-to-bottom display order."""
+def get_rss_display_contributions(result=None, rss_contributions=None):
+    """Return the canonical scored RSS display list used by both tower and rows."""
+    if rss_contributions is None and isinstance(result, (list, tuple)):
+        rss_contributions = result
+        result = None
+    if rss_contributions is None and result is not None:
+        rss_contributions = getattr(result, "rss_contributors", None) or []
     return sorted(
         [
             contribution
             for contribution in rss_contributions
             if contribution.points > 0
-            and contribution.label in RSS_DISPLAY_ORDER_TOP_TO_BOTTOM
         ],
         key=lambda contribution: (
             RSS_DISPLAY_ORDER_TOP_TO_BOTTOM.get(contribution.label, 500),
+            -contribution.points,
             contribution.label,
         ),
     )
 
 
+def _contribution_id(contribution):
+    ids = {
+        "CAC plaque burden": "cac",
+        "ApoB elevation": "apob",
+        "Elevated Lp(a)": "lpa",
+        "Reduced eGFR": "egfr",
+        "Albuminuria": "uacr",
+        "Diabetes": "diabetes",
+        "A1c elevation": "a1c",
+        "Hypertriglyceridemia": "triglycerides",
+        "Inflammatory risk": "hscrp",
+        "Premature family history": "family_history",
+        "Inflammatory disease": "inflammatory_disease",
+        "RA": "ra",
+        "SLE": "sle",
+        "Psoriasis": "psoriasis",
+        "IBD": "ibd",
+        "HIV": "hiv",
+        "OSA": "osa",
+        "MASLD": "masld",
+        "Premature menopause": "premature_menopause",
+        "Early menopause": "early_menopause",
+        "Preeclampsia": "preeclampsia",
+        "Gestational hypertension": "gestational_hypertension",
+        "Gestational diabetes": "gestational_diabetes",
+        "Preterm delivery": "preterm_delivery",
+        "SGA infant": "small_for_gestational_age",
+        "Recurrent pregnancy loss": "recurrent_pregnancy_loss",
+        "PCOS / irregular menses": "pcos_or_irregular_menses",
+        "Early menarche": "early_menarche",
+        "Smoking": "smoking",
+    }
+    return ids.get(contribution.label, contribution.label.lower().replace(" ", "_"))
+
+
+def _domain_key(contribution):
+    keys = {
+        "CAC": "plaque",
+        "ApoB": "atherogenic_burden",
+        "Lp(a)": "lpa",
+        "Kidney": "kidney",
+        "Metabolic": "metabolic",
+        "Lipids": "lipids",
+        "hsCRP": "inflammation",
+        "Family History": "family_history",
+        "Inflammatory Disease": "inflammatory",
+        "Sleep / Hypoxia": "sleep_hypoxia",
+        "Liver / MASLD": "liver_metabolic",
+        "Reproductive History": "reproductive_history",
+        "Behavioral": "behavioral",
+    }
+    return keys.get(contribution.domain, str(contribution.domain or "").lower())
+
+
+def _color_key(contribution):
+    keys = {
+        "CAC": "cac",
+        "ApoB": "apob",
+        "Lp(a)": "lpa",
+        "Kidney": "kidney",
+        "Metabolic": "metabolic",
+        "Lipids": "lipids",
+        "hsCRP": "hscrp",
+        "Family History": "family_history",
+        "Inflammatory Disease": "inflammatory",
+        "Sleep / Hypoxia": "osa",
+        "Liver / MASLD": "masld",
+        "Reproductive History": "reproductive",
+        "Behavioral": "behavioral",
+    }
+    return keys.get(contribution.domain, str(contribution.domain or "").lower())
+
+
+def _contribution_to_display_item(contribution):
+    primary, detail = contributor_explanation(contribution)
+    return {
+        "id": _contribution_id(contribution),
+        "domain": _domain_key(contribution),
+        "label": primary,
+        "value_label": detail,
+        "points": contribution.points,
+        "severity": contribution.severity or _severity_for_points(contribution.points),
+        "color_key": _color_key(contribution),
+        "display": getattr(contribution, "display", True),
+        "stack_in_tower": contribution.points > 0,
+        "contribution": contribution,
+    }
+
+
+def _severity_for_points(points):
+    if points >= 30:
+        return "very_high"
+    if points >= 8:
+        return "major"
+    if points >= 5:
+        return "moderate"
+    if points >= 3:
+        return "mild"
+    return "tiny"
+
+
+def get_rss_display_items(result=None, rss_contributions=None, rss_total=None):
+    contributors = [
+        _contribution_to_display_item(contribution)
+        for contribution in get_rss_display_contributions(result, rss_contributions)
+    ]
+    score = rss_total
+    if score is None:
+        score = sum(item["points"] for item in contributors if item["stack_in_tower"])
+    interpretation = rss_interpretation(score)
+    return {
+        "score": score,
+        "score_label": interpretation,
+        "contributors": contributors,
+        "context": [],
+        "missing_clarifiers": [],
+    }
+
+
 def format_signal(contribution):
     value = contribution.actual_value
     if contribution.label == "Diabetes" and value is not None and not isinstance(value, bool):
-        return f"{contribution.label} (A1c {value}%)"
+        return f"{contribution.label} (A1c {_format_number(value)}%)"
     if value is None or isinstance(value, bool):
         return contribution.label
 
     value_labels = {
-        "CAC plaque burden": f"CAC {value}",
-        "ApoB elevation": f"ApoB {value} mg/dL",
+        "CAC plaque burden": f"CAC {_format_number(value)}",
+        "ApoB elevation": f"ApoB {_format_number(value)} mg/dL",
         "Elevated Lp(a)": f"Lp(a) {value}",
-        "Inflammatory risk": f"hsCRP {value} mg/L",
-        "Reduced eGFR": f"eGFR {value}",
-        "Albuminuria": f"UACR {value} mg/g",
-        "Hypertriglyceridemia": f"Triglycerides {value} mg/dL",
+        "Inflammatory risk": f"hsCRP {_format_number(value)} mg/L",
+        "Reduced eGFR": f"eGFR {_format_number(value)}",
+        "Albuminuria": f"UACR {_format_number(value)} mg/g",
+        "Hypertriglyceridemia": f"Triglycerides {_format_number(value)} mg/dL",
+        "Premature family history": str(value),
     }
     value_label = value_labels.get(contribution.label, str(value))
     return f"{contribution.label} ({value_label})"
@@ -93,25 +262,38 @@ def format_signal(contribution):
 def format_tower_value(contribution):
     value = contribution.actual_value
     if contribution.label == "Diabetes" and value is not None and not isinstance(value, bool):
-        return f"A1c {value}%"
+        return f"A1c {_format_number(value)}%"
     if contribution.label == "Diabetes":
         return "Diabetes"
     if value is None:
         return contribution.label
     if isinstance(value, bool):
         return contribution.label
+    if contribution.domain == "Reproductive History":
+        detail = str(value)
+        if detail and detail.lower() not in contribution.label.lower():
+            return f"{contribution.label} {detail}"
+        return contribution.label
 
     value_labels = {
-        "CAC plaque burden": f"CAC {value}",
-        "ApoB elevation": f"ApoB {value} mg/dL",
+        "CAC plaque burden": f"CAC {_format_number(value)}",
+        "ApoB elevation": f"ApoB {_format_number(value)} mg/dL",
         "Elevated Lp(a)": f"Lp(a) {value}",
-        "Inflammatory risk": f"hsCRP {value} mg/L",
-        "Reduced eGFR": f"eGFR {value}",
-        "Albuminuria": f"UACR {value} mg/g",
-        "Hypertriglyceridemia": f"TG {value} mg/dL",
-        "A1c elevation": f"A1c {value}%",
+        "Inflammatory risk": f"hsCRP {_format_number(value)} mg/L",
+        "Reduced eGFR": f"eGFR {_format_number(value)}",
+        "Albuminuria": f"UACR {_format_number(value)} mg/g",
+        "Hypertriglyceridemia": f"TG {_format_number(value)} mg/dL",
+        "A1c elevation": f"A1c {_format_number(value)}%",
+        "Premature family history": str(value),
     }
     return value_labels.get(contribution.label, "")
+
+
+def _format_number(value):
+    try:
+        return f"{float(value):g}"
+    except (TypeError, ValueError):
+        return str(value)
 
 
 def teaching_label(contribution):
@@ -127,6 +309,25 @@ def teaching_label(contribution):
         "Elevated Lp(a)": "Lp(a)",
         "Inflammatory risk": "elevated inflammatory biomarker",
         "Hypertriglyceridemia": "elevated triglycerides",
+        "Premature family history": "premature family history",
+        "RA": "inflammatory risk enhancer",
+        "SLE": "inflammatory risk enhancer",
+        "Psoriasis": "inflammatory risk enhancer",
+        "IBD": "inflammatory risk enhancer",
+        "HIV": "HIV-related risk enhancer",
+        "Inflammatory disease": "inflammatory risk enhancer",
+        "OSA": "sleep-hypoxia risk enhancer",
+        "MASLD": "liver-metabolic risk enhancer",
+        "Premature menopause": "reproductive risk marker",
+        "Early menopause": "reproductive risk marker",
+        "Preeclampsia": "reproductive risk marker",
+        "Gestational hypertension": "reproductive risk marker",
+        "Gestational diabetes": "reproductive risk marker",
+        "Preterm delivery": "reproductive risk marker",
+        "SGA infant": "reproductive risk marker",
+        "Recurrent pregnancy loss": "reproductive risk marker",
+        "PCOS / irregular menses": "reproductive risk marker",
+        "Early menarche": "reproductive risk marker",
         "Smoking": "modifiable risk driver",
     }
     return f"{value}: {notes.get(label, contribution.rationale)}"
@@ -134,21 +335,46 @@ def teaching_label(contribution):
 
 def contributor_explanation(contribution):
     label = contribution.label
+    value = numeric_value(contribution)
     primary = {
         "CAC plaque burden": "High plaque burden"
-        if numeric_value(contribution) and numeric_value(contribution) >= 100
+        if value and value >= 100
         else "Plaque present",
         "ApoB elevation": "Elevated particle burden",
         "Reduced eGFR": "Reduced kidney function",
         "Albuminuria": "Albuminuria",
         "Diabetes": "Diabetes-range A1c",
-        "A1c elevation": "Diabetes-range A1c",
+        "A1c elevation": "Prediabetes-range A1c"
+        if value is not None and value < 6.5
+        else "Diabetes-range A1c",
         "Elevated Lp(a)": "Lp(a)",
         "Hypertriglyceridemia": "Elevated triglycerides",
         "Inflammatory risk": "Elevated inflammatory biomarker",
+        "Premature family history": "Premature family history",
+        "RA": "RA",
+        "SLE": "SLE",
+        "Psoriasis": "Psoriasis",
+        "IBD": "IBD",
+        "HIV": "HIV",
+        "Inflammatory disease": "Inflammatory disease",
+        "OSA": "OSA",
+        "MASLD": "MASLD",
+        "Premature menopause": "Premature menopause",
+        "Early menopause": "Early menopause",
+        "Preeclampsia": "Preeclampsia",
+        "Gestational hypertension": "Gestational hypertension",
+        "Gestational diabetes": "Gestational diabetes",
+        "Preterm delivery": "Preterm delivery",
+        "SGA infant": "SGA infant",
+        "Recurrent pregnancy loss": "Recurrent pregnancy loss",
+        "PCOS / irregular menses": "PCOS / irregular menses",
+        "Early menarche": "Early menarche",
         "Smoking": "Current smoking",
     }.get(label, contribution.rationale or label)
-    detail = format_tower_value(contribution) or contribution.label
+    if label == "HIV":
+        detail = "HIV-related risk enhancer"
+    else:
+        detail = format_tower_value(contribution) or contribution.label
     return primary, detail
 
 
@@ -206,6 +432,11 @@ def evidence_note(contribution):
         )
 
     if label == "Elevated Lp(a)":
+        if value is not None and value < 125:
+            return (
+                "Borderline Lp(a) band",
+                "Borderline Lp(a) is shown as a small RSS contributor.",
+            )
         if value is not None and value >= 430:
             return (
                 "Lp(a) >=430 nmol/L band",
@@ -276,9 +507,50 @@ def evidence_note(contribution):
         )
 
     if label in {"Diabetes", "A1c elevation"}:
+        if label == "A1c elevation" and value is not None and value < 6.5:
+            return (
+                "Prediabetes-range A1c",
+                "Prediabetes-range A1c is shown as a small metabolic contributor.",
+            )
         return (
             "Diabetes-range A1c",
             "Dysglycemia adds cardiometabolic risk beyond lipid burden alone.",
+        )
+
+    if label == "Premature family history":
+        return (
+            "Premature family history",
+            "Premature first-degree family history is shown as a small risk-enhancing contributor.",
+        )
+
+    if label == "HIV":
+        return (
+            "HIV-related risk enhancer",
+            "HIV is shown as its own guideline risk-enhancing pathway.",
+        )
+
+    if label in {"RA", "SLE", "Psoriasis", "IBD", "Inflammatory disease"}:
+        return (
+            "Inflammatory condition",
+            f"{label} is shown as a small inflammatory risk-enhancing contributor.",
+        )
+
+    if label == "OSA":
+        return (
+            "Sleep-hypoxia context",
+            "OSA is shown as a small sleep and cardiometabolic risk contributor.",
+        )
+
+    if label == "MASLD":
+        return (
+            "Liver-metabolic context",
+            "MASLD is shown as a small liver-metabolic risk contributor.",
+        )
+
+    if contribution.domain == "Reproductive History":
+        return (
+            "Reproductive risk marker",
+            f"{label} is shown as a small reproductive risk-enhancing contributor.",
         )
 
     return (
@@ -316,8 +588,11 @@ def rss_interpretation(rss_total):
 
 def build_rss_tower_html(rss_contributions):
     segments = []
-    filled_points = sum(contribution.points for contribution in rss_contributions)
+    tower_items = [item for item in (rss_contributions or []) if item["points"] > 0 and item["stack_in_tower"]]
+    filled_points = sum(item["points"] for item in tower_items)
     empty_capacity = max(0, 100 - filled_points)
+    tower_height_px = 440
+    label_height_threshold_px = 24
     if empty_capacity:
         segments.append(
             f'<div class="rss-tower-empty" '
@@ -325,35 +600,69 @@ def build_rss_tower_html(rss_contributions):
             f'style="height: {empty_capacity:.2f}%;"></div>'
         )
 
-    for contribution in rss_contributions:
-        percentage = contribution.points
-        tooltip = format_tower_tooltip(contribution)
+    for item in tower_items:
+        contribution = item["contribution"]
+        percentage = item["points"]
         label = ""
-        tower_value = format_tower_value(contribution)
-        if tower_value:
+        tower_value = item["value_label"]
+        segment_height_px = (percentage / 100) * tower_height_px
+        label_visible = bool(tower_value and segment_height_px >= label_height_threshold_px)
+        if label_visible:
             label = (
                 f'<span class="rss-tower-label">'
                 f'{html.escape(tower_value)}'
                 f"</span>"
             )
+        compact_title = (
+            f'{item["label"]} - {tower_value or contribution.label} - '
+            f'+{item["points"]:g} RSS points'
+        )
         segments.append(
             f'<div class="rss-tower-segment" '
-            f'title="{html.escape(tooltip, quote=True)}" '
-            f'style="height: {percentage:.2f}%; '
+            f'data-rss-id="{html.escape(str(item["id"]), quote=True)}" '
+            f'data-rss-value="{html.escape(str(tower_value), quote=True)}" '
+            f'data-rss-points="{item["points"]:g}" '
+            f'data-rss-severity="{html.escape(str(item["severity"]), quote=True)}" '
+            f'data-rss-label-visible="{str(bool(label_visible)).lower()}" '
+            f'title="{html.escape(compact_title, quote=True)}" '
+            f'style="height: max(4px, {percentage:.2f}%); '
             f'background: {domain_color(contribution.domain)};">'
             f"{label}</div>"
         )
 
-    return f"""
-<div class="rss-tower-wrap">
-    <div class="rss-tower-axis">
-        <span>100</span>
-        <span>50</span>
-        <span>0</span>
-    </div>
-    <div class="rss-tower">{''.join(segments)}</div>
-</div>
-"""
+    low_score_callout = ""
+    if 0 < filled_points < 25 and tower_items:
+        top_item = max(
+            tower_items,
+            key=lambda item: (
+                item["points"],
+                str(item["value_label"] or item["label"]),
+            ),
+        )
+        top_label = top_item["value_label"] or top_item["label"]
+        contributor_count = len(tower_items)
+        contributor_word = "contributor" if contributor_count == 1 else "contributors"
+        low_score_callout = (
+            '<div class="rss-low-callout" data-rss-low-callout="true">'
+            f'<span><strong>Top:</strong> {html.escape(str(top_label))} '
+            f'<em>(+{top_item["points"]:g})</em></span>'
+            f'<span>{contributor_count} {contributor_word} total</span>'
+            "</div>"
+        )
+
+    return (
+        '<div class="rss-tower-zone">'
+        '<div class="rss-tower-wrap">'
+        '<div class="rss-tower-stack">'
+        '<div class="rss-tower-row">'
+        '<div class="rss-tower-axis"><span>100</span><span>50</span><span>0</span></div>'
+        f'<div class="rss-tower">{"".join(segments)}</div>'
+        "</div>"
+        f"{low_score_callout}"
+        "</div>"
+        "</div>"
+        "</div>"
+    )
 
 
 def render_rss_tower(rss_total, rss_contributions):
@@ -477,31 +786,64 @@ def render_rss_tower(rss_total, rss_contributions):
         <div class="rss-score-chip">{interpretation}</div>
     </div>
 </div>
-{build_rss_tower_html(rss_contributions)}
+{build_rss_tower_html(get_rss_display_items(None, rss_contributions, rss_total)["contributors"])}
 """
     render_html(st, tower_html)
 
 
-def build_rss_panel_html(rss_total, rss_contributions):
-    interpretation = rss_interpretation(rss_total)
-    display_contributions = get_rss_display_contributions(rss_contributions)
+def _context_row(item, class_name="rss-context-row"):
+    label = html.escape(str(item.get("label", "") if isinstance(item, dict) else getattr(item, "label", "") or ""))
+    detail_raw = item.get("value_label", "") if isinstance(item, dict) else getattr(item, "detail", "") or ""
+    note_raw = item.get("note", "") if isinstance(item, dict) else getattr(item, "note", "") or ""
+    detail = html.escape(str(detail_raw))
+    note = html.escape(str(note_raw))
+    return (
+        f'<div class="{class_name}" title="{note}">'
+        f'<strong>{label}</strong>'
+        f'<span>{detail}</span>'
+        f'</div>'
+    )
+
+
+def build_rss_panel_html(rss_total, rss_contributions, result=None):
+    display = get_rss_display_items(result, rss_contributions, rss_total)
+    interpretation = display["score_label"]
+    display_contributors = display["contributors"]
+    stacked_points = sum(
+        item["points"]
+        for item in display_contributors
+        if item["points"] > 0 and item["stack_in_tower"]
+    )
+    if round(stacked_points, 1) != round(float(display["score"] or 0), 1):
+        raise ValueError("RSS display item points do not match visible RSS score.")
     driver_row_parts = []
-    for contribution in display_contributions:
-        primary, detail = contributor_explanation(contribution)
+    for item in display_contributors:
+        contribution = item["contribution"]
+        primary = item["label"]
+        detail = item["value_label"]
+        evidence_heading, evidence_detail = evidence_note(contribution)
+        row_title = f"{evidence_heading}. {evidence_detail}".strip()
         color = domain_color(contribution.domain)
         driver_row_parts.append(
-            f'<div class="rss-driver-row">'
-            f'<div class="rss-driver-color" style="background:{color};"></div>'
+            f'<div class="rss-row rss-driver-row rss-driver-row--{html.escape(str(item["severity"]))}" '
+            f'data-rss-id="{html.escape(str(item["id"]), quote=True)}" '
+            f'data-rss-points="{item["points"]:g}" '
+            f'title="{html.escape(row_title, quote=True)}">'
+            f'<div class="rss-marker rss-driver-color" style="background:{color};"></div>'
             f'<div class="rss-driver-copy">'
-            f'<strong>{html.escape(primary)}</strong>'
-            f'<span>{html.escape(detail)}</span></div>'
-            f'<div class="rss-driver-points" style="color:{color};">+{contribution.points:g}</div>'
+            f'<strong class="rss-row-label">{html.escape(primary)}</strong>'
+            f'<span class="rss-row-value rss-muted">{html.escape(detail)}</span></div>'
+            f'<div class="rss-row-points rss-driver-points" style="color:{color};">+{contribution.points:g}</div>'
             f'</div>'
         )
     driver_rows = "".join(driver_row_parts)
+    driver_list_class = "rss-driver-list"
+    if len(display_contributors) > 12:
+        driver_list_class += " rss-driver-list--scroll"
     return f"""
 <style>
 {component_theme_css()}
+.rss-card,
 .rss-module {{
     margin: 12px 0 16px;
     padding: 14px 16px 16px;
@@ -515,6 +857,7 @@ def build_rss_panel_html(rss_total, rss_contributions):
     padding-bottom: 10px;
     margin-bottom: 12px;
 }}
+.rss-title,
 .rss-module-title {{
     color: var(--rc-text);
     font-family: var(--rc-font-body);
@@ -536,6 +879,7 @@ def build_rss_panel_html(rss_total, rss_contributions):
     gap: 10px;
     white-space: nowrap;
 }}
+.rss-score,
 .rss-score-number {{
     color: var(--rc-text);
     font-size: 2.05rem;
@@ -550,6 +894,7 @@ def build_rss_panel_html(rss_total, rss_contributions):
     letter-spacing: 0;
     margin-left: 1px;
 }}
+.rss-score-chip,
 .rss-score-band {{
     border: 1px solid rgba(115, 0, 10, 0.22);
     border-radius: 999px;
@@ -559,25 +904,38 @@ def build_rss_panel_html(rss_total, rss_contributions):
     font-weight: 850;
     padding: 0.22rem 0.58rem;
 }}
+.rss-body,
 .rss-module-body {{
     display: grid;
-    grid-template-columns: 205px 1fr;
-    gap: 18px;
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: 28px;
     align-items: start;
 }}
+.rss-tower-zone {{
+    min-width: 180px;
+}}
 .rss-tower-wrap {{
-    display: flex;
-    align-items: center;
+    display: grid;
+    align-items: start;
     justify-content: center;
-    gap: 0.62rem;
     margin: 0;
     padding: 0;
+}}
+.rss-tower-stack {{
+    display: grid;
+    gap: 8px;
+    justify-items: center;
+}}
+.rss-tower-row {{
+    display: flex;
+    align-items: center;
+    gap: 0.72rem;
 }}
 .rss-tower {{
     display: flex;
     flex-direction: column;
-    width: 112px;
-    height: 330px;
+    width: 136px;
+    height: 440px;
     overflow: hidden;
     border-radius: 17px;
     background: linear-gradient(180deg, #fffdf8 0%, #eef2f7 100%);
@@ -588,6 +946,10 @@ def build_rss_panel_html(rss_total, rss_contributions):
     display: flex;
     align-items: center;
     justify-content: center;
+    box-sizing: border-box;
+    min-height: 4px;
+    overflow: hidden;
+    position: relative;
     width: 100%;
     border-top: 1px solid rgba(255, 255, 255, 0.72);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.24);
@@ -599,11 +961,15 @@ def build_rss_panel_html(rss_total, rss_contributions):
 }}
 .rss-tower-label {{
     color: white;
-    font-size: 0.70rem;
+    display: block;
+    font-size: 0.72rem;
     font-weight: 800;
     line-height: 1;
+    max-width: 100%;
     overflow: hidden;
     padding: 0 0.32rem;
+    pointer-events: none;
+    position: relative;
     text-align: center;
     text-shadow: 0 1px 1px rgba(7, 26, 47, 0.28);
     text-overflow: ellipsis;
@@ -616,10 +982,36 @@ def build_rss_panel_html(rss_total, rss_contributions):
     flex-direction: column;
     font-size: 0.74rem;
     font-weight: 800;
-    height: 330px;
+    height: 440px;
     justify-content: space-between;
     padding: 0.12rem 0;
     text-align: right;
+}}
+.rss-low-callout {{
+    border-top: 1px solid rgba(11, 31, 58, 0.12);
+    color: rgba(7, 26, 47, 0.64);
+    display: grid;
+    font-size: 0.76rem;
+    font-weight: 640;
+    gap: 2px;
+    line-height: 1.18;
+    max-width: 168px;
+    padding-top: 7px;
+    text-align: left;
+}}
+.rss-low-callout strong {{
+    color: var(--rc-black);
+    font-weight: 820;
+}}
+.rss-low-callout em {{
+    color: var(--rc-garnet);
+    font-style: normal;
+    font-weight: 860;
+}}
+.rss-low-callout span:last-child {{
+    color: rgba(7, 26, 47, 0.48);
+    font-size: 0.72rem;
+    font-weight: 620;
 }}
 .rss-drivers {{
     min-width: 0;
@@ -627,10 +1019,15 @@ def build_rss_panel_html(rss_total, rss_contributions):
     border-left: 1px solid rgba(11, 31, 58, 0.10);
     padding-left: 16px;
 }}
+.rss-list-zone {{
+    min-width: 0;
+    overflow: visible;
+}}
+.rss-contributor-heading,
 .rss-driver-heading {{
     color: var(--rc-black);
     font-family: var(--rc-font-title);
-    font-size: 0.92rem;
+    font-size: 0.95rem;
     font-weight: 720;
     letter-spacing: -0.01em;
     margin: 1px 0 7px;
@@ -640,7 +1037,15 @@ def build_rss_panel_html(rss_total, rss_contributions):
     display: flex;
     flex-direction: column;
     gap: 2px;
+    overflow: visible;
+    padding-bottom: 3px;
 }}
+.rss-driver-list--scroll {{
+    max-height: none;
+    overflow: visible;
+    padding-right: 7px;
+}}
+.rss-row,
 .rss-driver-row {{
     display: grid;
     grid-template-columns: 11px minmax(0, 1fr) auto;
@@ -652,6 +1057,60 @@ def build_rss_panel_html(rss_total, rss_contributions):
 .rss-driver-row:last-child {{
     border-bottom: 0;
 }}
+.rss-driver-row--tiny,
+.rss-driver-row--mild {{
+    border-bottom-color: rgba(11, 31, 58, 0.07);
+}}
+.rss-driver-row--tiny {{
+    grid-template-columns: 8px minmax(0, 1fr) auto;
+    gap: 8px;
+    padding: 3px 0 4px;
+}}
+.rss-driver-row--mild {{
+    padding: 4px 0 5px;
+}}
+.rss-driver-row--tiny .rss-driver-color,
+.rss-driver-row--mild .rss-driver-color {{
+    opacity: 0.72;
+}}
+.rss-driver-row--tiny .rss-driver-color {{
+    border-radius: 2px;
+    height: 8px;
+    width: 8px;
+}}
+.rss-driver-row--tiny .rss-driver-copy strong {{
+    color: rgba(17, 17, 17, 0.78);
+    font-size: 0.88rem;
+    font-weight: 700;
+}}
+.rss-driver-row--tiny .rss-driver-copy span {{
+    color: rgba(7, 26, 47, 0.52);
+    font-size: 0.78rem;
+    margin-top: 1px;
+}}
+.rss-driver-row--tiny .rss-driver-points {{
+    font-size: 0.85rem;
+    font-weight: 800;
+    opacity: 0.84;
+}}
+.rss-driver-row--mild .rss-driver-copy strong {{
+    color: rgba(17, 17, 17, 0.84);
+    font-size: 0.89rem;
+    font-weight: 720;
+}}
+.rss-driver-row--mild .rss-driver-points {{
+    font-size: 0.86rem;
+    font-weight: 810;
+}}
+.rss-driver-row--major .rss-driver-copy strong,
+.rss-driver-row--very_high .rss-driver-copy strong {{
+    font-weight: 820;
+}}
+.rss-driver-row--major .rss-driver-points,
+.rss-driver-row--very_high .rss-driver-points {{
+    font-weight: 880;
+}}
+.rss-marker,
 .rss-driver-color {{
     border-radius: 3px;
     height: 11px;
@@ -660,26 +1119,30 @@ def build_rss_panel_html(rss_total, rss_contributions):
 .rss-driver-copy {{
     color: rgba(7, 26, 47, 0.74);
     font-size: 0.84rem;
-    font-weight: 650;
+    font-weight: 560;
     line-height: 1.18;
     min-width: 0;
     border-left: 0 solid transparent;
 }}
+.rss-row-label,
 .rss-driver-copy strong {{
     color: var(--rc-black);
     display: block;
-    font-weight: 880;
+    font-weight: 720;
 }}
+.rss-muted,
+.rss-row-value,
 .rss-driver-copy span {{
     color: rgba(7, 26, 47, 0.56);
     display: block;
     font-size: 0.74rem;
-    font-weight: 720;
+    font-weight: 560;
     margin-top: 2px;
 }}
+.rss-row-points,
 .rss-driver-points {{
     font-size: 0.88rem;
-    font-weight: 900;
+    font-weight: 820;
     text-align: right;
 }}
 .rss-empty-drivers {{
@@ -687,7 +1150,44 @@ def build_rss_panel_html(rss_total, rss_contributions):
     font-size: 0.86rem;
     font-weight: 650;
 }}
-@media (max-width: 560px) {{
+.rss-context-block {{
+    border-top: 1px solid rgba(11, 31, 58, 0.10);
+    margin-top: 9px;
+    padding-top: 8px;
+}}
+.rss-context-heading {{
+    color: var(--rc-black);
+    font-family: var(--rc-font-title);
+    font-size: 0.86rem;
+    font-weight: 720;
+    margin-bottom: 4px;
+}}
+.rss-context-list {{
+    display: grid;
+    gap: 3px;
+}}
+.rss-context-row {{
+    display: grid;
+    grid-template-columns: minmax(120px, 0.72fr) minmax(0, 1fr);
+    gap: 10px;
+    align-items: baseline;
+    color: rgba(7, 26, 47, 0.66);
+    font-size: 0.78rem;
+    line-height: 1.2;
+    padding: 2px 0;
+}}
+.rss-context-row strong {{
+    color: var(--rc-black);
+    font-weight: 820;
+}}
+.rss-context-row span {{
+    color: rgba(7, 26, 47, 0.55);
+    font-weight: 650;
+}}
+.rss-missing-row strong {{
+    color: #9A6700;
+}}
+@media (max-width: 760px) {{
     .rss-module-body {{
         grid-template-columns: 1fr;
     }}
@@ -698,30 +1198,49 @@ def build_rss_panel_html(rss_total, rss_contributions):
         padding-top: 11px;
     }}
     .rss-tower {{
-        height: 350px;
+        height: 260px;
+        width: 118px;
     }}
     .rss-tower-axis {{
-        height: 350px;
+        height: 260px;
+    }}
+}}
+@media (min-width: 761px) and (max-width: 900px) {{
+    .rss-module-body {{
+        grid-template-columns: 1fr;
+    }}
+    .rss-drivers {{
+        border-left: 0;
+        border-top: 1px solid rgba(11, 31, 58, 0.10);
+        padding-left: 0;
+        padding-top: 11px;
+    }}
+    .rss-tower {{
+        height: 330px;
+        width: 122px;
+    }}
+    .rss-tower-axis {{
+        height: 330px;
     }}
 }}
 </style>
-<div class="rss-module rc-panel">
-    <div class="rss-module-head">
-        <div>
-            <div class="rss-module-title rc-card-title">Why Risk Is Elevated</div>
-        </div>
-        <div class="rss-score-compact">
-            <div class="rss-score-number">{rss_total:g}<span class="rss-score-den">/100</span></div>
-            <div class="rss-score-band">{html.escape(interpretation)}</div>
-        </div>
-    </div>
-    <div class="rss-module-body">
-        {build_rss_tower_html(display_contributions) if rss_total > 0 and display_contributions else '<div class="rss-empty-drivers">No active RSS contributions.</div>'}
-        <div class="rss-drivers">
-            <div class="rss-driver-heading">Contributors</div>
-            <div class="rss-driver-list">{driver_rows or '<div class="rss-empty-drivers">No active RSS contributors.</div>'}</div>
-        </div>
-    </div>
+<div class="rss-card rss-module rc-panel">
+<div class="rss-module-head">
+<div>
+<div class="rss-title rss-module-title rc-card-title">Why Risk Is Elevated</div>
+</div>
+<div class="rss-score-compact">
+<div class="rss-score rss-score-number">{rss_total:g}<span class="rss-score-den">/100</span></div>
+<div class="rss-score-chip rss-score-band">{html.escape(interpretation)}</div>
+</div>
+</div>
+<div class="rss-body rss-module-body">
+{build_rss_tower_html(display_contributors) if rss_total > 0 and display_contributors else '<div class="rss-empty-drivers">No active RSS contributions.</div>'}
+<div class="rss-list-zone rss-drivers">
+<div class="rss-contributor-heading rss-driver-heading">RSS contributors</div>
+<div class="{driver_list_class}">{driver_rows or '<div class="rss-empty-drivers">No active RSS contributors.</div>'}</div>
+</div>
+</div>
 </div>
 """
 

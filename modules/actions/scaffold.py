@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from modules.cac_recommendation.engine import build_cac_age_gate_note
+from modules.risk_enhancers.reproductive import has_reproductive_risk_markers
 
 
 @dataclass
@@ -14,8 +15,8 @@ class ActionSection:
 TESTING_LABELS = {
     "apob_testing": "ApoB - particle burden clarification",
     "lpa_testing": "Lp(a) - one-time risk assessment",
-    "uacr_testing": "UACR - kidney risk clarification",
-    "cac_testing": "CAC - plaque burden clarification",
+    "uacr_testing": "Obtain UACR to complete kidney-risk assessment.",
+    "cac_testing": "CAC - risk clarification",
     "hscrp_testing": "hsCRP - inflammatory residual risk",
     "fasting_lipids": "Repeat fasting lipids - confirm triglyceride burden",
 }
@@ -89,12 +90,64 @@ def _prevent_high(result: Any) -> bool:
     return category == "HIGH" or (risk is not None and risk >= 10)
 
 
+def _prevent_low(result: Any) -> bool:
+    category = getattr(getattr(result, "prevent_risk_category", None), "value", None)
+    category = category or getattr(result, "prevent_risk_category", None)
+    risk = _num(getattr(result, "prevent_10y_ascvd", None))
+    return category == "LOW" or (risk is not None and risk < 3)
+
+
+def _prevent_intermediate(result: Any) -> bool:
+    category = getattr(getattr(result, "prevent_risk_category", None), "value", None)
+    category = category or getattr(result, "prevent_risk_category", None)
+    return category == "INTERMEDIATE"
+
+
+def _level_3b_intermediate_prevent_path(result: Any) -> bool:
+    classification = getattr(result, "level_classification", None) or {}
+    return bool(
+        _prevent_intermediate(result)
+        and str(classification.get("level") or "") == "3B"
+    )
+
+
+def _has_elevated_lpa(patient: Any) -> bool:
+    value = _num(getattr(patient, "lp_a_value", None))
+    unit = str(getattr(patient, "lp_a_unit", "") or "").strip()
+    return bool(
+        (unit == "nmol/L" and value is not None and value >= 125)
+        or (unit == "mg/dL" and value is not None and value >= 50)
+    )
+
+
+def _has_premature_family_history(patient: Any) -> bool:
+    return bool(
+        getattr(patient, "premature_fhx_ascvd", False)
+        or getattr(patient, "family_history_premature_ascvd", False)
+    )
+
+
+def _low_with_lpa_family_context(patient: Any, result: Any) -> bool:
+    return bool(_prevent_low(result) and _has_elevated_lpa(patient) and _has_premature_family_history(patient))
+
+
+def _low_with_lpa_reproductive_context(patient: Any, result: Any) -> bool:
+    return bool(_prevent_low(result) and _has_elevated_lpa(patient) and has_reproductive_risk_markers(patient))
+
+
 def _clinical_ascvd(patient: Any) -> bool:
     return bool(getattr(patient, "clinical_ascvd", False))
 
 
+def _triglycerides(patient: Any) -> float | None:
+    return _num(getattr(patient, "triglycerides", None))
+
+
 def _lipid_line(patient: Any, result: Any) -> str:
     if _clinical_ascvd(patient):
+        line = _domain_line(result, "lipids")
+        if line:
+            return line
         return "Secondary-prevention lipid-lowering therapy indicated; treat toward ASCVD targets."
 
     line = _domain_line(result, "lipids")
@@ -113,6 +166,7 @@ def _lipid_line(patient: Any, result: Any) -> str:
         "Obtain ",
         "Check ",
         "Coronary calcium",
+        "CAC ",
         "Consider hsCRP",
         "Repeat fasting",
         "No escalation",
@@ -123,13 +177,30 @@ def _lipid_line(patient: Any, result: Any) -> str:
 
     ldl = _num(getattr(patient, "ldl_c", None))
     if ldl is not None and ldl >= 190:
-        return "Lipid-lowering therapy is indicated; treat toward severe hypercholesterolemia pathway."
+        return "High-intensity or maximally tolerated statin therapy indicated."
+    if _low_with_lpa_reproductive_context(patient, result):
+        return "No medication escalation required today; clinician-patient risk discussion recommended given high Lp(a) and reproductive risk markers."
+    if _low_with_lpa_family_context(patient, result):
+        return "No medication escalation required today; clinician-patient risk discussion recommended given elevated Lp(a) and premature family history."
     if _prevent_high(result):
         return "Lipid-lowering therapy is indicated; treat toward high-risk targets."
     return "No medication escalation today."
 
 
-def _cac_line(patient: Any, result: Any) -> str:
+def _lipid_monitoring_item(patient: Any, result: Any) -> str | None:
+    line = _lipid_line(patient, result).lower()
+    if (
+        "lipid-lowering therapy indicated" in line
+        or "intensify lipid-lowering therapy" in line
+        or "lipid-lowering therapy is reasonable" in line
+        or "statin therapy" in line
+        or "consider lipid-lowering therapy" in line
+    ):
+        return "Recheck lipid profile 4-12 weeks after starting or intensifying therapy, then every 6-12 months."
+    return None
+
+
+def _cac_line(patient: Any, result: Any) -> str | None:
     cac = _num(getattr(patient, "cac", None))
     cac_testing = _has_domain(result, "cac_testing")
 
@@ -143,6 +214,9 @@ def _cac_line(patient: Any, result: Any) -> str:
     if cac is not None:
         cac_s = f"{cac:g}"
         if cac == 0:
+            ldl = _num(getattr(patient, "ldl_c", None))
+            if ldl is not None and ldl >= 190:
+                return "CAC 0 measured; do not use CAC 0 to defer lipid-lowering therapy in LDL-C >=190 / possible FH pathway."
             return f"CAC {cac_s} measured; no calcified plaque detected."
         if 1 <= cac <= 99:
             return f"CAC {cac_s} measured; plaque present."
@@ -158,11 +232,23 @@ def _cac_line(patient: Any, result: Any) -> str:
         line = "Plaque burden unmeasured."
 
     if cac_testing and not _clinical_ascvd(patient):
-        line += " CAC reasonable if treatment decision or intensity remains uncertain."
+        return _domain_line(result, "cac_testing") or "CAC reasonable for risk clarification if treatment decision remains uncertain."
     elif not cac_testing:
         age_gate_note = build_cac_age_gate_note(patient, result)
         if age_gate_note:
-            line += f" {age_gate_note}"
+            if getattr(patient, "cac_not_done", False):
+                line = "CAC not performed; below usual age threshold, use only if it would change management."
+            else:
+                line += f" {age_gate_note}"
+        elif _prevent_low(result) and _num(getattr(patient, "age", None)) is not None:
+            sex = str(getattr(patient, "sex", "") or "").strip().lower()
+            age = _num(getattr(patient, "age", None))
+            below_usual_age = (
+                (sex.startswith("f") and age < 45)
+                or (sex.startswith("m") and age < 40)
+            )
+            if below_usual_age:
+                return None
     return line
 
 
@@ -176,14 +262,42 @@ def _aspirin_line(patient: Any, result: Any) -> str:
         return "Aspirin not indicated for routine primary prevention."
     if cac is None:
         return "Aspirin not indicated for routine primary prevention."
+    if age is not None and 40 <= age <= 69 and 100 <= cac <= 299:
+        return "Aspirin not routine for primary prevention; consider only if bleeding risk is low and shared decision-making supports it."
     if age is not None and 40 <= age <= 69 and (cac >= 100 or _prevent_high(result)):
-        return "Aspirin may be considered if bleeding risk is low after shared decision-making."
+        return "Aspirin may be considered only if bleeding risk is low after shared decision-making."
     return "Aspirin not indicated for routine primary prevention."
 
 
 def _clarifier_items(result: Any) -> list[str]:
     domains = _domains(result)
-    items = [TESTING_LABELS[key] for key in TESTING_LABELS if key in domains]
+    items = []
+    for key in TESTING_LABELS:
+        if key not in domains:
+            continue
+        if key == "cac_testing":
+            continue
+        if key == "fasting_lipids" and _domain_line(result, key):
+            items.append(_domain_line(result, key))
+        else:
+            items.append(TESTING_LABELS[key])
+    if "treatment_timing" in domains and items:
+        items.append("Clarification testing should not delay treatment.")
+    return _unique(items)
+
+
+def _clarifier_items_without(result: Any, excluded: set[str]) -> list[str]:
+    domains = _domains(result)
+    items = []
+    for key in TESTING_LABELS:
+        if key in excluded or key not in domains:
+            continue
+        if key == "cac_testing":
+            continue
+        if key == "fasting_lipids" and _domain_line(result, key):
+            items.append(_domain_line(result, key))
+        else:
+            items.append(TESTING_LABELS[key])
     if "treatment_timing" in domains and items:
         items.append("Clarification testing should not delay treatment.")
     return _unique(items)
@@ -191,11 +305,15 @@ def _clarifier_items(result: Any) -> list[str]:
 
 def _supporting_items(result: Any) -> list[str]:
     mapping = {
-        "kidney": "Optimize kidney-protective therapy.",
+        "kidney": _domain_line(result, "kidney") or "Optimize kidney-protective therapy.",
         "glycemia": "Optimize glycemic therapy.",
         "blood_pressure": "Treat blood pressure toward individualized goal.",
         "smoking": "Prioritize smoking cessation support.",
         "triglycerides": _domain_line(result, "triglycerides"),
+        "tg_diet": _domain_line(result, "tg_diet"),
+        "rdn_referral": _domain_line(result, "rdn_referral"),
+        "tg_pharmacotherapy": _domain_line(result, "tg_pharmacotherapy"),
+        "supplements": _domain_line(result, "supplements"),
     }
     domains = _domains(result)
     items = [mapping[key] for key in mapping if key in domains]
@@ -203,17 +321,101 @@ def _supporting_items(result: Any) -> list[str]:
 
 
 def build_action_scaffold(patient: Any, result: Any) -> list[ActionSection]:
-    sections = [
-        ActionSection("Lipid therapy", _lipid_line(patient, result)),
-        ActionSection("Coronary calcium", _cac_line(patient, result)),
-        ActionSection("Aspirin", _aspirin_line(patient, result)),
-    ]
+    sections: list[ActionSection] = []
+    domains = _domains(result)
+    triglycerides = _triglycerides(patient)
+    prioritize_uacr = bool(
+        "uacr_testing" in domains and _level_3b_intermediate_prevent_path(result)
+    )
 
-    supporting = _supporting_items(result)
+    if triglycerides is not None and triglycerides >= 1000:
+        sections.append(
+            ActionSection(
+                "Triglycerides",
+                _domain_line(result, "triglycerides")
+                or "Very severe hypertriglyceridemia: lower TG to reduce pancreatitis risk.",
+                items=[
+                    item
+                    for item in [
+                        _domain_line(result, "tg_diet"),
+                        _domain_line(result, "rdn_referral"),
+                        _domain_line(result, "tg_pharmacotherapy"),
+                    ]
+                    if item
+                ],
+            )
+        )
+
+    lipid_line = _lipid_line(patient, result)
+    sections.append(ActionSection("Lipid therapy", lipid_line))
+    if lipid_line.startswith("No medication escalation"):
+        sections.append(ActionSection("Lifestyle", "Continue lifestyle-based prevention."))
+    if "statin_intolerance" in domains:
+        sections.append(
+            ActionSection(
+                "Statin intolerance",
+                "Given prior high-intensity statin intolerance, consider maximally tolerated statin strategy and nonstatin intensification.",
+            )
+        )
+
+    if "secondary_causes" in domains:
+        sections.append(
+            ActionSection(
+                "Secondary causes",
+                "Evaluate secondary causes of severe hypercholesterolemia.",
+            )
+        )
+    if "fh_evaluation" in domains:
+        sections.append(
+            ActionSection(
+                "FH evaluation",
+                "Consider FH evaluation/cascade screening when clinical suspicion is present.",
+            )
+        )
+
+    monitoring = _lipid_monitoring_item(patient, result)
+    if monitoring:
+        sections.append(ActionSection("Monitoring", monitoring))
+
+    if prioritize_uacr:
+        sections.append(
+            ActionSection(
+                "Clarifiers",
+                items=["Obtain UACR to complete kidney-risk assessment."],
+            )
+        )
+
+    if prioritize_uacr:
+        supporting = _supporting_items(result)
+        if supporting:
+            sections.append(ActionSection("Supporting actions", items=supporting))
+
+    cac_line = _cac_line(patient, result)
+    if cac_line:
+        sections.append(ActionSection("Coronary calcium", cac_line))
+    sections.append(ActionSection("Aspirin", _aspirin_line(patient, result)))
+
+    supporting = [] if prioritize_uacr else _supporting_items(result)
+    if triglycerides is not None and triglycerides >= 1000:
+        supporting = [
+            item
+            for item in supporting
+            if item
+            not in {
+                _domain_line(result, "triglycerides"),
+                _domain_line(result, "tg_diet"),
+                _domain_line(result, "rdn_referral"),
+                _domain_line(result, "tg_pharmacotherapy"),
+            }
+        ]
     if supporting:
         sections.append(ActionSection("Supporting actions", items=supporting))
 
-    clarifiers = _clarifier_items(result)
+    clarifiers = (
+        _clarifier_items_without(result, {"uacr_testing"})
+        if prioritize_uacr
+        else _clarifier_items(result)
+    )
     if clarifiers:
         sections.append(ActionSection("Clarifiers", items=clarifiers))
 

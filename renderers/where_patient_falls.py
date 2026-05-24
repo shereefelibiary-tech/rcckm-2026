@@ -1,8 +1,15 @@
 from html import escape
 
 from modules.levels.definitions import classify_continuum_position
+from modules.risk_enhancers.reproductive import reproductive_marker_items
 from ui.html import render_html
 from ui.theme import component_theme_css
+
+
+LPA_THRESHOLD_TEXT = (
+    "nmol/L: <75 reference; 75-124 mild; >=125 elevated; >=250 high; >=430 very high. "
+    "mg/dL: <30 reference; 30-49 mild; >=50 elevated; >=100 high; >=180 very high"
+)
 
 
 def _fmt_num(value, decimals=0):
@@ -68,16 +75,42 @@ def _supportive_hscrp_context(patient):
 
 def _effect_for_lpa(value, unit):
     if value is None:
-        return "missing"
-    if (unit == "nmol/L" and value >= 125) or (unit == "mg/dL" and value >= 50):
-        return "major driver"
+        return "clarifier"
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return "clarifier"
+    unit = str(unit or "").strip()
+    if unit == "nmol/L":
+        if number >= 430:
+            return "very high"
+        if number >= 250:
+            return "high"
+        if number >= 125:
+            return "elevated"
+        if number >= 75:
+            return "mild/context"
+        return "no major signal"
+    if unit == "mg/dL":
+        if number >= 180:
+            return "very high"
+        if number >= 100:
+            return "high"
+        if number >= 50:
+            return "elevated"
+        if number >= 30:
+            return "mild/context"
     return "no major signal"
 
 
 def _effect_for_apob_ldl(apob, ldl):
     if apob is not None:
+        if apob >= 140:
+            return "severe particle burden"
+        if apob >= 120:
+            return "major driver / risk-enhancing"
         if apob >= 100:
-            return "major driver"
+            return "elevated"
         if apob >= 80:
             return "mild signal"
         return "no major signal"
@@ -125,7 +158,18 @@ def _effect_for_hscrp(hscrp, patient):
 
 
 def _is_active_effect(effect):
-    return effect in {"mild signal", "moderate signal", "major driver", "very high risk"}
+    return effect in {
+        "mild signal",
+        "moderate signal",
+        "major driver",
+        "very high risk",
+        "mild/context",
+        "elevated",
+        "high",
+        "very high",
+        "major driver / risk-enhancing",
+        "severe particle burden",
+    }
 
 
 def _signal_line(label, value, effect):
@@ -166,18 +210,48 @@ def _plain_value(value, class_name=""):
     return f"<span{cls}>{escape(value)}</span>"
 
 
-def _patient_values(values, *, active=False, missing=False):
+def _patient_value_html(value, class_name="", *, uacr_attention=False):
+    if uacr_attention and value == "UACR missing":
+        return _plain_value(value, "wpf-patient-uacr-missing")
+    return _plain_value(value, class_name)
+
+
+def _patient_values(values, *, active=False, missing=False, uacr_attention=False):
     clean = [str(value).strip() for value in values if str(value).strip()]
     if not clean:
         return _plain_value("Not available", "wpf-patient-muted")
     if missing:
-        return "".join(_plain_value(value, "wpf-patient-missing") for value in clean)
+        return "".join(
+            _patient_value_html(
+                value,
+                "wpf-patient-missing",
+                uacr_attention=uacr_attention,
+            )
+            for value in clean
+        )
     if active:
         head, *tail = clean
-        html = _patient_pill(head)
-        html += "".join(_plain_value(value, "wpf-patient-secondary") for value in tail)
+        if uacr_attention and head == "UACR missing":
+            html = _patient_value_html(head, uacr_attention=True)
+        else:
+            html = _patient_pill(head)
+        html += "".join(
+            _patient_value_html(
+                value,
+                "wpf-patient-secondary",
+                uacr_attention=uacr_attention,
+            )
+            for value in tail
+        )
         return html
-    return "".join(_plain_value(value) for value in clean)
+    return "".join(
+        _patient_value_html(
+            value,
+            "wpf-patient-line",
+            uacr_attention=uacr_attention,
+        )
+        for value in clean
+    )
 
 
 def _marker(label, threshold=""):
@@ -190,11 +264,15 @@ def _marker(label, threshold=""):
 def _row(marker, threshold, values, effect, active=False):
     active_class = " wpf-active" if active and effect != "none" else ""
     effect_html = _chip(effect) if effect and effect != "none" else ""
-    missing = effect == "missing"
+    missing = effect in {"missing", "clarifier"}
+    uacr_attention = "UACR missing" in {str(value).strip() for value in values} and effect in {
+        "needed",
+        "major driver",
+    }
     return (
         f'<tr class="wpf-row{active_class}">'
         f'<td class="wpf-marker">{_marker(marker, threshold)}</td>'
-        f'<td class="wpf-patient">{_patient_values(values, active=active and effect != "none", missing=missing)}</td>'
+        f'<td class="wpf-patient">{_patient_values(values, active=active and effect != "none", missing=missing, uacr_attention=uacr_attention)}</td>'
         f'<td class="wpf-effect">{effect_html}</td>'
         "</tr>"
     )
@@ -219,6 +297,8 @@ def _build_grouped_rows(patient, result):
         "SMOKING": [],
         "HSCRP": [],
         "INFLAMMATORY DISEASE": [],
+        "HIV": [],
+        "REPRODUCTIVE HISTORY": [],
         "SLEEP / HYPOXIA": [],
         "LIVER / MASLD": [],
         "PLAQUE / CAC": [],
@@ -247,7 +327,7 @@ def _build_grouped_rows(patient, result):
     groups["ATHEROGENIC BURDEN"].append(
         _row(
             "ApoB / LDL-C",
-            "ApoB 80-99 mild; >=100 major. LDL-C fallback if ApoB unavailable.",
+            "<80 optimal/goal if treated; 80-99 mild; 100-119 elevated; >=120 risk-enhancing; >=140 severe. LDL-C fallback if ApoB unavailable.",
             values,
             effect,
             active=_is_active_effect(effect),
@@ -302,7 +382,7 @@ def _build_grouped_rows(patient, result):
     groups["LP(A)"].append(
         _row(
             "Lp(a)",
-            "major: >=125 nmol/L or >=50 mg/dL",
+            LPA_THRESHOLD_TEXT,
             [value],
             effect,
             active=_is_active_effect(effect),
@@ -362,7 +442,6 @@ def _build_grouped_rows(patient, result):
             ("sle", "SLE"),
             ("psoriasis", "psoriasis"),
             ("ibd", "IBD"),
-            ("hiv", "HIV"),
         ],
     )
     inflammatory = bool(getattr(patient, "inflammatory_disease", False))
@@ -375,12 +454,40 @@ def _build_grouped_rows(patient, result):
     groups["INFLAMMATORY DISEASE"].append(
         _row(
             "Immune/inflammatory context",
-            "RA, SLE, psoriasis, IBD, HIV",
+            "RA, SLE, psoriasis, IBD",
             [value],
             effect,
             active=False,
         )
     )
+
+    if bool(getattr(patient, "hiv", False)):
+        groups["HIV"].append(
+            _row(
+                "HIV",
+                "guideline risk-enhancing pathway",
+                ["HIV reported"],
+                "enhancer context",
+                active=False,
+            )
+        )
+
+    reproductive_items = reproductive_marker_items(patient)
+    if reproductive_items:
+        values = []
+        for item in reproductive_items:
+            detail = str(item.get("detail") or "").strip()
+            label = str(item.get("label") or "").strip()
+            values.append(f"{label} {detail}".strip())
+        groups["REPRODUCTIVE HISTORY"].append(
+            _row(
+                "Reproductive history",
+                "pregnancy and menopause risk markers",
+                values,
+                "mild signal",
+                active=True,
+            )
+        )
 
     if bool(getattr(patient, "osa", False)):
         groups["SLEEP / HYPOXIA"].append(
@@ -567,12 +674,18 @@ def build_where_patient_falls_html(patient, result):
     padding: 6px 10px;
 }}
 .wpf-patient-secondary,
+.wpf-patient-line,
 .wpf-patient-muted {{
     display: block;
     color: #536b86;
     font-size: 0.66rem;
     font-weight: 650;
     margin-top: 2px;
+}}
+.wpf-patient-line {{
+    color: var(--rc-black);
+    font-size: 0.72rem;
+    font-weight: 850;
 }}
 .wpf-patient-missing {{
     border: 1px solid #cbd5e1;
@@ -584,6 +697,19 @@ def build_where_patient_falls_html(patient, result):
     font-weight: 850;
     line-height: 1;
     padding: 5px 9px;
+}}
+.wpf-patient-uacr-missing {{
+    border: 2px solid rgba(115,0,10,0.78);
+    border-radius: 999px;
+    background: var(--rc-garnet-tint);
+    color: var(--rc-garnet-deep);
+    display: inline-flex;
+    font-size: 0.70rem;
+    font-weight: 950;
+    line-height: 1;
+    margin-top: 4px;
+    padding: 3px 9px;
+    white-space: nowrap;
 }}
 .wpf-effect {{
     text-align: left;
@@ -610,22 +736,54 @@ def build_where_patient_falls_html(patient, result):
     color: #475569;
     background: #e5e7eb;
 }}
+.wpf-chip-clarifier {{
+    border-color: #cbd5e1;
+    color: #475569;
+    background: #e5e7eb;
+}}
 .wpf-chip-needed {{
-    border-color: rgba(177, 83, 0, 0.24);
-    color: #8a4b00;
-    background: rgba(245, 158, 11, 0.14);
+    border: 2px solid rgba(115,0,10,0.58);
+    color: var(--rc-garnet-deep);
+    background: var(--rc-garnet-tint);
+    font-weight: 950;
 }}
 .wpf-chip-mild-signal {{
     color: #001426;
     background: #f59e0b;
 }}
+.wpf-chip-mild-context {{
+    border-color: #fed7aa;
+    color: #7a4b00;
+    background: #fff7ed;
+}}
 .wpf-chip-moderate-signal {{
     color: #ffffff;
     background: #ea580c;
 }}
+.wpf-chip-elevated {{
+    border-color: #bcd0e7;
+    color: #17304f;
+    background: #e8f1fb;
+}}
+.wpf-chip-high {{
+    color: #ffffff;
+    background: #ea580c;
+}}
+.wpf-chip-major-driver---risk-enhancing {{
+    color: #ffffff;
+    background: var(--rc-garnet);
+}}
+.wpf-chip-severe-particle-burden {{
+    color: #ffffff;
+    background: var(--rc-garnet-deep);
+}}
 .wpf-chip-major-driver {{
     color: #ffffff;
     background: var(--rc-garnet);
+}}
+.wpf-chip-very-high {{
+    color: #ffffff;
+    background: var(--rc-garnet-deep);
 }}
 .wpf-chip-very-high-risk {{
     color: #ffffff;

@@ -10,6 +10,10 @@ from ui.input_worksheet import build_patient_from_inputs
 from ui.report_layout import _build_ckm_kdigo_summary_html
 
 
+def _assessment_block(note):
+    return note.split("Assessment:", 1)[1].split("Recommendations:", 1)[0]
+
+
 def test_missing_uacr_remains_none_and_zero_remains_measured_zero():
     missing = build_patient_from_inputs({"age": 55, "sex": "male", "egfr": 84, "uacr": ""})
     measured_zero = build_patient_from_inputs({"age": 55, "sex": "male", "egfr": 84, "uacr": "0"})
@@ -39,7 +43,28 @@ def test_missing_uacr_triggers_clarifier_for_diabetes_and_bp_treated_contexts():
     assert diabetes_result.clarification["recommend_uacr"] is True
     assert bp_result.clarification["recommend_uacr"] is True
     assert "UACR" in build_clarifier_card_html(diabetes_result)
-    assert "kidney risk completion" in build_clarifier_card_html(diabetes_result)
+    assert "complete kidney-risk assessment" in build_clarifier_card_html(diabetes_result)
+
+
+def test_bp_treated_missing_uacr_is_visually_prominent_in_audit_and_kdigo():
+    patient = Patient(age=55, sex="male", bp_treated=True, egfr=76, uacr=None)
+    result = evaluate_patient(patient)
+
+    where_html = build_where_patient_falls_html(patient, result)
+    ckm_html = _build_ckm_kdigo_summary_html(result, patient)
+    clarifier_html = build_clarifier_card_html(result)
+    note = render_emr_note(patient, result)
+
+    assert "eGFR 76" in where_html
+    assert "UACR missing" in where_html
+    assert "wpf-patient-uacr-missing" in where_html
+    assert "wpf-chip-needed" in where_html
+    assert "eGFR 76UACR missing" not in where_html
+    assert "KDIGO incomplete: G2; UACR missing" in ckm_html
+    assert "UACR missing; albuminuria not measured" in ckm_html
+    assert "UACR" in clarifier_html
+    assert "complete kidney-risk assessment" in clarifier_html
+    assert "UACR not available; obtain to complete kidney-risk assessment." in note
 
 
 def test_uacr_present_a2_does_not_trigger_missing_clarifier():
@@ -49,6 +74,20 @@ def test_uacr_present_a2_does_not_trigger_missing_clarifier():
     assert result.albuminuria_stage == "A2"
     assert result.kdigo_stage == "G2A2"
     assert result.clarification["recommend_uacr"] is False
+
+
+def test_measured_uacr_values_do_not_render_missing_badge_or_clarifier():
+    for uacr in (0, 18, 34):
+        patient = Patient(age=55, sex="male", bp_treated=True, egfr=76, uacr=uacr)
+        result = evaluate_patient(patient)
+        html = build_where_patient_falls_html(patient, result)
+        clarifier_html = build_clarifier_card_html(result)
+
+        assert f"UACR {uacr} mg/g" in html
+        assert 'class="wpf-patient-uacr-missing"' not in html
+        assert "UACR missing" not in html
+        assert result.clarification["recommend_uacr"] is False
+        assert "complete kidney-risk assessment" not in clarifier_html
 
 
 def test_where_patient_falls_shows_missing_uacr_as_needed_not_normal():
@@ -92,9 +131,9 @@ def test_prevent_uses_base_model_with_compact_uacr_missing_note():
     assert prevent["model_used"] == "base"
     assert prevent["prevent_10y_ascvd"] is not None
     assert "UACR missing; base PREVENT model used." in prevent["warnings"]
-    assert "Model used" in html
-    assert "base" in html
-    assert "UACR missing; base PREVENT model used." in html
+    assert "Model used" not in html
+    assert "base PREVENT model used" not in html
+    assert "UACR missing; PREVENT calculated without UACR." in html
 
 
 def test_emr_note_includes_uacr_completion_only_when_relevant():
@@ -106,3 +145,45 @@ def test_emr_note_includes_uacr_completion_only_when_relevant():
 
     assert "UACR not available; obtain to complete kidney-risk assessment." in relevant_note
     assert "UACR not available" not in low_context_note
+
+
+def test_diabetes_ckd_missing_uacr_does_not_render_albuminuria_diagnosis():
+    patient = Patient(age=55, sex="male", diabetes=True, egfr=58, uacr=None)
+    result = evaluate_patient(patient)
+    note = render_emr_note(patient, result)
+    assessment = _assessment_block(note)
+
+    assert patient.uacr is None
+    assert result.albuminuria_stage is None
+    assert result.kdigo_stage == "G3a"
+    assert "Kidney: G3a; albuminuria not measured" in note
+    assert "Type 2 diabetes mellitus with CKD G3a" in assessment
+    assert "albuminuria" not in assessment.lower()
+    assert "CKD stage 3a ICD: N18.31" in assessment
+    assert "UACR not available; obtain to complete kidney-risk assessment." in note
+
+
+def test_diabetes_ckd_uacr_zero_is_measured_a1_without_albuminuria_diagnosis():
+    patient = Patient(age=55, sex="male", diabetes=True, egfr=58, uacr=0)
+    result = evaluate_patient(patient)
+    note = render_emr_note(patient, result)
+    assessment = _assessment_block(note)
+
+    assert patient.uacr == 0
+    assert result.albuminuria_stage == "A1"
+    assert result.kdigo_stage == "G3aA1"
+    assert "Kidney: G3aA1" in note
+    assert "Type 2 diabetes mellitus with CKD G3aA1" in assessment
+    assert "albuminuria" not in assessment.lower()
+    assert "UACR not available" not in note
+
+
+def test_diabetes_ckd_uacr_a2_allows_albuminuria_wording():
+    patient = Patient(age=55, sex="male", diabetes=True, egfr=58, uacr=45)
+    result = evaluate_patient(patient)
+    note = render_emr_note(patient, result)
+    assessment = _assessment_block(note)
+
+    assert result.albuminuria_stage == "A2"
+    assert result.kdigo_stage == "G3aA2"
+    assert "Type 2 diabetes mellitus with CKD G3aA2 and albuminuria" in assessment

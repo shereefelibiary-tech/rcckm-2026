@@ -26,6 +26,8 @@ class RCCKMResult:
     plaque_category: Optional[PlaqueCategory] = None
     risk_level: Optional[RiskLevel] = None
     clinical_ascvd: bool = False
+    severe_hypercholesterolemia: bool = False
+    possible_fh_pathway: bool = False
     prevent_available: bool = False
     prevent_missing_inputs: list[str] = field(default_factory=list)
     prevent_unsupported_reason: Optional[str] = None
@@ -57,6 +59,7 @@ class RCCKMResult:
     top_drivers: list[str] = field(default_factory=list)
     rss_total: Optional[float] = None
     rss_category: Optional[str] = None
+    level_classification: Optional[dict] = None
     family_history_summary: Optional[str] = None
     premature_fhx_ascvd: Optional[bool] = None
     decision_stability: Optional[DecisionStability] = None

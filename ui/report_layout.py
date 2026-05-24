@@ -4,7 +4,11 @@ from html import escape
 from core.engine import evaluate_patient
 from core.patient import Patient
 from modules.actions.scaffold import build_action_recommendation_lines
-from modules.rss.engine import build_rss_contributions, calculate_rss_total
+from modules.rss.engine import (
+    build_rss_contributions,
+    build_rss_transparency,
+    calculate_rss_total,
+)
 from modules.snapshot.engine import build_snapshot_lines
 
 from ui.diagnosis_confirm_panel import render_diagnosis_confirm_panel
@@ -68,6 +72,7 @@ def run_patient(patient):
     rss_total = calculate_rss_total(rss_contributions)
     result.rss_total = rss_total
     result.rss_category = _rss_interpretation(rss_total)
+    build_rss_transparency(patient, result, rss_contributions)
     result.snapshot_lines = build_snapshot_lines(result)
     return result, rss_total, rss_contributions
 
@@ -318,6 +323,10 @@ def _build_targets_html(result, patient=None):
         return ""
 
     context_line = _target_context_line(result, target, patient)
+    if target and target.apob_target is not None:
+        context_line = (
+            f"{context_line} ApoB is shown as an RCCKM advanced particle target."
+        )
     target_cells = "".join(
         (
             '<div class="target-cell">'
@@ -404,7 +413,7 @@ def _action_parts(line):
         lead, detail = text.split("; ", 1)
         return f"{lead}.", detail[:1].upper() + detail[1:]
 
-    if text == "Aspirin may be considered if bleeding risk is low after shared decision-making.":
+    if text == "Aspirin may be considered only if bleeding risk is low after shared decision-making.":
         return (
             "Aspirin may be considered only if bleeding risk is low.",
             "Use shared decision-making.",
@@ -576,15 +585,16 @@ def _build_ckm_kdigo_summary_html(result, patient=None):
     if uacr is not None:
         kidney_values.append(f"UACR {float(uacr):g} mg/g")
     elif egfr is not None:
-        kidney_values.append("albuminuria not measured")
-        kdigo = f"{kdigo_raw or getattr(result, 'egfr_stage', None) or 'KDIGO'} / albuminuria not measured"
+        kidney_values.append("UACR missing; albuminuria not measured")
+        egfr_stage = getattr(result, "egfr_stage", None) or kdigo_raw or "eGFR"
+        kdigo = f"KDIGO incomplete: {egfr_stage}; UACR missing"
     if not kidney_values:
         if getattr(result, "egfr_stage", None):
             kidney_values.append(str(result.egfr_stage))
         if getattr(result, "albuminuria_stage", None):
             kidney_values.append(str(result.albuminuria_stage))
         if getattr(result, "egfr_stage", None) and not getattr(result, "albuminuria_stage", None):
-            kdigo = f"{result.egfr_stage} / albuminuria not measured"
+            kdigo = f"KDIGO incomplete: {result.egfr_stage}; UACR missing"
     kidney_desc = "; ".join(kidney_values) if kidney_values else "Kidney staging not available."
 
     plaque_context = ""
@@ -725,9 +735,9 @@ def _build_where_patient_falls_html(patient, result):
     return renderer(patient, result)
 
 
-def _build_rss_html(rss_total, rss_contributions):
+def _build_rss_html(rss_total, rss_contributions, result=None):
     renderer = _load_renderer_function("renderers.rss_renderer", "build_rss_panel_html")
-    return renderer(rss_total, rss_contributions)
+    return renderer(rss_total, rss_contributions, result)
 
 
 def _build_prevent_card_html(result):
@@ -769,9 +779,7 @@ def render_report(st, patient):
     _safe_panel(
         st,
         "Why Risk Is Elevated",
-        lambda: _build_rss_html(rss_total, rss_contributions),
-        component=True,
-        height=535,
+        lambda: _build_rss_html(rss_total, rss_contributions, result),
     )
 
     render_html(st, _detail_section_header_html("CKM / KDIGO"))

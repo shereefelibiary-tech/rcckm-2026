@@ -24,9 +24,16 @@ def _has_ckd_stage_3_or_higher(patient):
 
 
 def _has_diabetes_risk_enhancer(patient):
+    diabetes_duration = getattr(patient, "diabetes_duration_years", None)
+    abi = getattr(patient, "abi", None)
     return (
         (getattr(patient, "uacr", None) is not None and patient.uacr >= 30)
         or (getattr(patient, "egfr", None) is not None and patient.egfr < 60)
+        or (diabetes_duration is not None and diabetes_duration >= 10)
+        or bool(getattr(patient, "diabetic_retinopathy", False))
+        or bool(getattr(patient, "diabetic_neuropathy", False))
+        or bool(getattr(patient, "abi_lt_0_9", False))
+        or (abi is not None and abi < 0.9)
         or bool(getattr(patient, "smoker", False))
         or bool(getattr(patient, "smoking", False))
         or bool(getattr(patient, "hypertension", False))
@@ -47,6 +54,21 @@ def _cac_zero_can_defer(patient):
         or bool(getattr(patient, "smoking", False))
         or bool(getattr(patient, "premature_fhx_ascvd", False))
         or bool(getattr(patient, "family_history_premature_ascvd", False))
+    )
+
+
+def _has_severe_hypercholesterolemia_high_risk_feature(patient):
+    cac = getattr(patient, "cac", None)
+    apob = getattr(patient, "apob", None)
+    return (
+        (apob is not None and apob >= 140)
+        or (cac is not None and cac > 0)
+        or bool(getattr(patient, "premature_fhx_ascvd", False))
+        or bool(getattr(patient, "family_history_premature_ascvd", False))
+        or _has_diabetes(patient)
+        or _has_ckd_stage_3_or_higher(patient)
+        or bool(getattr(patient, "smoker", False))
+        or bool(getattr(patient, "smoking", False))
     )
 
 
@@ -86,6 +108,25 @@ def build_target_result(patient):
             apob_target=80,
             rationale=(
                 "CAC 100-299: significant subclinical plaque burden; treat toward high-risk target."
+            ),
+        )
+
+    if patient.ldl_c is not None and patient.ldl_c >= 190:
+        if _has_severe_hypercholesterolemia_high_risk_feature(patient):
+            return TargetResult(
+                ldl_c_target=70,
+                non_hdl_c_target=100,
+                apob_target=80,
+                rationale=(
+                    "LDL-C >=190 with additional high-risk features or possible FH pathway: use high-risk lipid targets; CAC 0 should not de-risk therapy."
+                ),
+            )
+        return TargetResult(
+            ldl_c_target=100,
+            non_hdl_c_target=130,
+            apob_target=90,
+            rationale=(
+                "LDL-C >=190 severe hypercholesterolemia pathway: high-intensity therapy indicated; CAC 0 should not de-risk therapy."
             ),
         )
 

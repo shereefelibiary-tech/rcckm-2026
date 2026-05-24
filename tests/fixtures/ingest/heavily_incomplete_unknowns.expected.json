@@ -1,0 +1,31 @@
+{
+  "source_style": "unknown",
+  "extracted": {
+    "age": 52,
+    "sex": "female",
+    "ldl": 136,
+    "tg": 180,
+    "smoker": null,
+    "diabetes": null,
+    "bpTreated": null,
+    "lipidLowering": null,
+    "ascvd_clinical": null,
+    "fhx": null,
+    "early_menopause": null,
+    "preeclampsia": null,
+    "gestational_hypertension": null,
+    "gestational_diabetes": null,
+    "preterm_delivery": null,
+    "small_for_gestational_age": null,
+    "recurrent_pregnancy_loss": null,
+    "pcos_or_irregular_menses": null,
+    "osa": null,
+    "masld": null,
+    "inflammatory_disease": null,
+    "hiv": null,
+    "rheumatoid_arthritis": null,
+    "sle": null,
+    "psoriasis": null,
+    "ibd": null
+  }
+}

@@ -61,6 +61,8 @@ def build_family_history_payload(patient):
     )
     premature = is_premature_ascvd_family_history(relationship, age_at_event)
     legacy_flag = bool(getattr(patient, "family_history_premature_ascvd", False))
+    if relationship and age_at_event is not None:
+        legacy_flag = False
 
     return {
         "relationship": relationship,

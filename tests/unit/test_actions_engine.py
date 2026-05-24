@@ -50,6 +50,14 @@ def test_build_action_plan_uses_bp_action_when_bp_above_target():
     assert plan["domains"]["blood_pressure"] == "Optimize BP to <130/80."
 
 
+def test_build_action_plan_suppresses_borderline_untreated_bp_line():
+    patient = Patient(age=60, sex="male", sbp=130, dbp=80, bp_treated=False)
+
+    plan = build_action_plan(patient, RCCKMResult())
+
+    assert "blood_pressure" not in plan["domains"]
+
+
 def test_build_action_plan_uses_tg_action_for_severe_hypertriglyceridemia():
     patient = Patient(age=60, sex="male", triglycerides=500)
 
@@ -57,11 +65,11 @@ def test_build_action_plan_uses_tg_action_for_severe_hypertriglyceridemia():
 
     assert (
         plan["dominant_action"]
-        == "Address pancreatitis-risk hypertriglyceridemia; repeat fasting lipids and evaluate secondary causes."
+        == "Severe hypertriglyceridemia: lower TG to reduce pancreatitis risk; evaluate secondary causes and consider fibrate or prescription omega-3 therapy."
     )
     assert (
         plan["domains"]["triglycerides"]
-        == "Address pancreatitis-risk hypertriglyceridemia; repeat fasting lipids and evaluate secondary causes."
+        == "Severe hypertriglyceridemia: lower TG to reduce pancreatitis risk; evaluate secondary causes and consider fibrate or prescription omega-3 therapy."
     )
 
 
@@ -72,12 +80,71 @@ def test_build_action_plan_uses_tg_action_for_very_severe_hypertriglyceridemia()
 
     assert (
         plan["dominant_action"]
-        == "Very severe hypertriglyceridemia; prioritize pancreatitis risk reduction and nutrition/lipid specialist pathway."
+        == "Very severe hypertriglyceridemia: lower TG to reduce pancreatitis risk."
     )
     assert (
         plan["domains"]["triglycerides"]
-        == "Very severe hypertriglyceridemia; prioritize pancreatitis risk reduction and nutrition/lipid specialist pathway."
+        == "Very severe hypertriglyceridemia: lower TG to reduce pancreatitis risk."
     )
+    assert "Very-low-fat diet; eliminate alcohol and added sugars/refined carbohydrates." in plan["recommendations"]
+    assert "Refer to registered dietitian nutritionist." in plan["recommendations"]
+    assert "Consider fibrate or prescription omega-3 therapy to lower TG." in plan["recommendations"]
+    assert "Recheck fasting lipid profile after treatment changes." in plan["recommendations"]
+
+
+def test_build_action_plan_uses_non_hdl_apob_when_ldl_not_calculable_from_tg():
+    patient = Patient(
+        age=55,
+        sex="male",
+        tc=286,
+        hdl_c=32,
+        triglycerides=1040,
+        ldl_c=None,
+        apob=138,
+        diabetes=True,
+        a1c=8.2,
+        lipid_lowering=False,
+    )
+    patient.non_hdl_c = 254
+
+    plan = build_action_plan(patient, RCCKMResult())
+
+    assert "Address ASCVD risk with lipid-lowering therapy guided by non-HDL-C/ApoB." in plan["recommendations"]
+    assert plan["domains"]["lipids"] == "Address ASCVD risk with lipid-lowering therapy guided by non-HDL-C/ApoB."
+
+
+def test_clinical_ascvd_above_target_intensifies_secondary_prevention():
+    patient = Patient(age=60, sex="male", clinical_ascvd=True, ldl_c=132, non_hdl_c=160, apob=105)
+    result = RCCKMResult()
+    from modules.targets.engine import build_target_result
+
+    result.targets = [build_target_result(patient)]
+
+    plan = build_action_plan(patient, result)
+
+    assert plan["dominant_action"] == "Intensify secondary-prevention lipid-lowering therapy; treat toward ASCVD targets."
+
+
+def test_hiv_pathway_uses_specific_statin_wording():
+    plan = build_action_plan(Patient(age=55, sex="male", hiv=True), RCCKMResult())
+
+    assert plan["dominant_action"] == "Statin therapy reasonable in HIV; review antiretroviral drug interactions."
+
+
+def test_triglyceride_action_boundaries():
+    assert "triglycerides" not in build_action_plan(
+        Patient(age=60, sex="male", triglycerides=499),
+        RCCKMResult(),
+    )["domains"]
+
+    for tg in (500, 999):
+        plan = build_action_plan(Patient(age=60, sex="male", triglycerides=tg), RCCKMResult())
+        assert plan["domains"]["triglycerides"].startswith("Severe hypertriglyceridemia")
+        assert "fibrate or prescription omega-3" in plan["domains"]["triglycerides"]
+
+    plan = build_action_plan(Patient(age=60, sex="male", triglycerides=1000), RCCKMResult())
+    assert plan["domains"]["triglycerides"] == "Very severe hypertriglyceridemia: lower TG to reduce pancreatitis risk."
+    assert "Very-low-fat diet; eliminate alcohol and added sugars/refined carbohydrates." in plan["recommendations"]
 
 
 def test_build_action_plan_uses_clarification_when_no_treatment_escalation():
@@ -92,10 +159,10 @@ def test_build_action_plan_uses_clarification_when_no_treatment_escalation():
     plan = build_action_plan(Patient(age=60, sex="male"), result)
 
     assert plan["dominant_action"] == "Check Lp(a) once."
-    assert "Coronary calcium reasonable for plaque clarification." in plan["recommendations"]
+    assert "CAC reasonable for risk clarification if treatment decision remains uncertain." in plan["recommendations"]
     assert (
         plan["domains"]["cac_testing"]
-        == "Coronary calcium reasonable for plaque clarification."
+        == "CAC reasonable for risk clarification if treatment decision remains uncertain."
     )
 
 
@@ -155,7 +222,7 @@ def test_build_action_plan_adds_testing_after_treatment_actions():
         "Optimize glycemic therapy.",
         "Obtain ApoB to define atherogenic particle burden.",
         "Check Lp(a) once.",
-        "Obtain UACR to assess albuminuria/kidney risk.",
+        "Obtain UACR to complete kidney-risk assessment.",
     ]
     assert "cac_testing" not in plan["domains"]
 
@@ -171,8 +238,8 @@ def test_build_action_plan_adds_cac_for_borderline_risk_with_premature_family_hi
 
     plan = build_action_plan(patient, RCCKMResult(prevent_risk_category="BORDERLINE"))
 
-    assert plan["dominant_action"] == "Coronary calcium reasonable for plaque clarification."
-    assert plan["domains"]["cac_testing"] == "Coronary calcium reasonable for plaque clarification."
+    assert plan["dominant_action"] == "CAC reasonable for risk clarification if treatment decision remains uncertain."
+    assert plan["domains"]["cac_testing"] == "CAC reasonable for risk clarification if treatment decision remains uncertain."
 
 
 def test_build_action_plan_adds_uacr_for_diabetes_and_kidney_uncertainty():
@@ -187,8 +254,8 @@ def test_build_action_plan_adds_uacr_for_diabetes_and_kidney_uncertainty():
 
     plan = build_action_plan(patient, RCCKMResult())
 
-    assert "Obtain UACR to assess albuminuria/kidney risk." in plan["recommendations"]
-    assert plan["domains"]["uacr_testing"] == "Obtain UACR to assess albuminuria/kidney risk."
+    assert "Obtain UACR to complete kidney-risk assessment." in plan["recommendations"]
+    assert plan["domains"]["uacr_testing"] == "Obtain UACR to complete kidney-risk assessment."
 
 
 def test_build_action_plan_adds_hscrp_for_metabolic_or_family_history_context():

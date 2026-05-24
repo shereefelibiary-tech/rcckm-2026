@@ -86,6 +86,87 @@ def _has_strong_enhancer(patient):
     )
 
 
+def _has_lpa_plus_family_history(patient):
+    return bool(
+        _has_elevated_lpa(patient)
+        and (
+            getattr(patient, "premature_fhx_ascvd", False)
+            or getattr(patient, "family_history_premature_ascvd", False)
+        )
+    )
+
+
+def _has_reproductive_marker(patient):
+    return any(
+        bool(getattr(patient, field, False))
+        for field in (
+            "early_menopause",
+            "premature_menopause",
+            "preeclampsia",
+            "gestational_hypertension",
+            "gestational_diabetes",
+            "preterm_delivery",
+            "small_for_gestational_age",
+            "recurrent_pregnancy_loss",
+            "pcos_or_irregular_menses",
+            "early_menarche",
+        )
+    )
+
+
+def _has_lpa_plus_reproductive_marker(patient):
+    return bool(_has_elevated_lpa(patient) and _has_reproductive_marker(patient))
+
+
+def _has_albuminuria(patient):
+    uacr = getattr(patient, "uacr", None)
+    return uacr is not None and uacr >= 30
+
+
+def _has_elevated_30y_trajectory(patient, result):
+    age = getattr(patient, "age", None)
+    prevent_30y = getattr(result, "prevent_30y_ascvd", None)
+    return bool(age is not None and 30 <= age <= 59 and prevent_30y is not None and prevent_30y >= 10)
+
+
+def _has_near_level3_lipid_trajectory(patient, result):
+    age = getattr(patient, "age", None)
+    prevent_10y = getattr(result, "prevent_10y_ascvd", None)
+    prevent_30y = getattr(result, "prevent_30y_ascvd", None)
+    ldl_c = getattr(patient, "ldl_c", None)
+    apob = getattr(patient, "apob", None)
+    return bool(
+        age is not None
+        and 30 <= age <= 59
+        and prevent_10y is not None
+        and prevent_10y < 3
+        and prevent_30y is not None
+        and 8 <= prevent_30y < 10
+        and (ldl_c is None or ldl_c < 160)
+        and (apob is None or apob < 120)
+        and (
+            (ldl_c is not None and 150 <= ldl_c < 160)
+            or (apob is not None and 110 <= apob < 120)
+        )
+    )
+
+
+def _has_treatment_relevant_lipid_trajectory(patient, result):
+    age = getattr(patient, "age", None)
+    prevent_30y = getattr(result, "prevent_30y_ascvd", None)
+    ldl_c = getattr(patient, "ldl_c", None)
+    apob = getattr(patient, "apob", None)
+    return bool(
+        age is not None
+        and 30 <= age <= 59
+        and (
+            (prevent_30y is not None and prevent_30y >= 10)
+            or (ldl_c is not None and 160 <= ldl_c < 190)
+            or (apob is not None and apob >= 120)
+        )
+    )
+
+
 def _cac_available_for_decision(patient, result):
     if getattr(patient, "cac", None) is not None:
         return False
@@ -120,8 +201,24 @@ def build_cac_recommendation(patient, result):
     if risk_category == RiskLevel.INTERMEDIATE.value:
         return "CAC scoring may help refine preventive risk classification."
 
-    if risk_category == RiskLevel.BORDERLINE.value and _has_strong_enhancer(patient):
+    if risk_category == RiskLevel.BORDERLINE.value and (
+        _has_strong_enhancer(patient) or _has_albuminuria(patient)
+    ):
         return "CAC scoring may help refine preventive risk classification."
+
+    if risk_category == RiskLevel.LOW.value and (
+        _has_lpa_plus_family_history(patient) or _has_lpa_plus_reproductive_marker(patient)
+    ):
+        return "CAC reasonable for risk clarification if treatment decision remains uncertain."
+
+    if risk_category == RiskLevel.LOW.value and _has_treatment_relevant_lipid_trajectory(patient, result):
+        return "CAC may clarify plaque burden if treatment intensity remains uncertain."
+
+    if risk_category == RiskLevel.LOW.value and _has_elevated_30y_trajectory(patient, result):
+        return "CAC reasonable for risk clarification if treatment decision remains uncertain."
+
+    if risk_category == RiskLevel.LOW.value and _has_near_level3_lipid_trajectory(patient, result):
+        return "CAC reasonable if treatment decision remains uncertain."
 
     if risk_category == RiskLevel.HIGH.value:
         return (

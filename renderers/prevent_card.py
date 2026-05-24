@@ -89,13 +89,20 @@ def build_prevent_missing_reason(result):
     )
 
     if missing:
-        items = "".join(
-            f"<li>{escape(str(item))}</li>"
+        missing_items = [
+            str(item).strip()
             for item in missing
             if str(item).strip()
+        ]
+        missing_summary = ", ".join(missing_items)
+        items = "".join(
+            f"<li>{escape(str(item))}</li>"
+            for item in missing_items
         )
         return (
-            "<div class=\"prevent-missing\"><strong>Missing inputs:</strong>"
+            "<div class=\"prevent-missing\">"
+            f"<strong>PREVENT unavailable: missing {escape(missing_summary)}.</strong>"
+            "<div class=\"prevent-missing-subhead\">Missing inputs:</div>"
             f"<ul>{items}</ul>{warnings_block}</div>"
         )
 
@@ -111,6 +118,8 @@ def build_prevent_missing_reason(result):
 def _context_line(result):
     if _has_clinical_ascvd(result):
         return "Established ASCVD drives secondary-prevention management; PREVENT should not be used to de-risk treatment."
+    if bool(getattr(result, "severe_hypercholesterolemia", False)):
+        return "PREVENT is not used to de-risk LDL-C >=190 pathway."
 
     cac_value = _cac_value_from_result(result)
     cac_missing_line = (
@@ -277,6 +286,19 @@ def _prevent_category_legend_html(category: str) -> str:
     )
 
 
+def _rcckm_level_html(result) -> str:
+    classification = getattr(result, "level_classification", None) or {}
+    label = str(classification.get("label") or "").strip()
+    if not label:
+        return ""
+    return (
+        '<div class="prevent-line prevent-rcckm-note">'
+        "<span>RCCKM:</span> "
+        + escape(label.replace("—", "-"))
+        + "</div>"
+    )
+
+
 def render_prevent_card(result):
     risk = getattr(result, "prevent_10y_ascvd", None)
     total_cvd = _total_cvd_value(result)
@@ -302,6 +324,7 @@ def render_prevent_card(result):
     trajectory = _trajectory_line(ascvd_30y)
     context = _context_line(result)
     category_legend_html = _prevent_category_legend_html(category)
+    rcckm_level_html = _rcckm_level_html(result)
     matrix_html = (
         _prevent_matrix_html(risk_value, total_value, ascvd_30y_value, total_cvd_30y_value)
         if any((risk_value, total_value, ascvd_30y_value, total_cvd_30y_value))
@@ -309,8 +332,8 @@ def render_prevent_card(result):
     )
     extra_metrics = []
     model_used = str(getattr(result, "prevent_model_used", "") or "").strip()
-    if model_used:
-        extra_metrics.append(("Model used", model_used))
+    if model_used.lower() == "provided":
+        extra_metrics.append(("Source", "PREVENT values entered directly."))
     if prevent_age is not None:
         extra_metrics.append(("PREVENT-age", f"{float(prevent_age):g} years"))
     if prevent_percentile is not None:
@@ -329,11 +352,14 @@ def render_prevent_card(result):
         if available and risk is not None and (total_value or total_cvd_30y_value)
         else ""
     )
-    model_note_items = [
-        str(item).strip()
-        for item in (getattr(result, "prevent_warnings", None) or [])
-        if "UACR missing" in str(item)
-    ]
+    model_note_items = []
+    for item in (getattr(result, "prevent_warnings", None) or []):
+        text = str(item).strip()
+        if "UACR missing" not in text:
+            continue
+        if "PREVENT model used" in text:
+            text = "UACR missing; PREVENT calculated without UACR."
+        model_note_items.append(text)
     model_note_html = (
         f'<div class="prevent-line prevent-model-note">{escape(model_note_items[0])}</div>'
         if available and model_note_items
@@ -362,6 +388,7 @@ def render_prevent_card(result):
         extra_metrics_html = ""
         trajectory_html = ""
         category_legend_html = ""
+        rcckm_level_html = ""
 
     return f"""\
 <style>
@@ -532,6 +559,18 @@ def render_prevent_card(result):
     font-size: 0.78rem;
     font-weight: 700;
 }}
+.prevent-rcckm-note {{
+    background: rgba(115, 0, 10, 0.055);
+    border-left: 3px solid rgba(115, 0, 10, 0.34);
+    color: rgba(34, 34, 34, 0.78);
+    font-size: 0.80rem;
+    font-weight: 650;
+    padding: 5px 8px;
+}}
+.prevent-rcckm-note span {{
+    color: var(--rc-garnet);
+    font-weight: 850;
+}}
 .prevent-risk-legend {{
     color: rgba(7, 26, 47, 0.54);
     font-size: 0.76rem;
@@ -560,6 +599,11 @@ def render_prevent_card(result):
 .prevent-missing strong {{
     color: var(--rc-black);
     font-weight: 850;
+}}
+.prevent-missing-subhead {{
+    color: rgba(7, 26, 47, 0.66);
+    font-weight: 800;
+    margin-top: 5px;
 }}
 .prevent-missing ul {{
     columns: 2;
@@ -612,6 +656,7 @@ def render_prevent_card(result):
 {trajectory_html}
 <div class="prevent-line prevent-context">{escape(context)}</div>
 {model_note_html}
+{rcckm_level_html}
 {category_legend_html}
 {cvd_scope_html}
 {unavailable_html}

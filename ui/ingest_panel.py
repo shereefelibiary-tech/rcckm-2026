@@ -3,6 +3,7 @@ import re
 from renderers.parse_coverage import render_parse_coverage
 from smartphrase_ingest.parser import ParseReport, parse_smartphrase_report
 from ui.html import render_html
+from ui.report_state import clear_report_state, hash_text
 from ui.theme import section_heading
 
 PARSER_FIELD_TO_WORKSHEET_FIELD = {
@@ -31,6 +32,11 @@ WORKSHEET_KEY_BY_FIELD = {
     "lp_a_unit": "input_lp_a_unit",
     "a1c": "input_a1c",
     "diabetes": "input_diabetes",
+    "diabetes_duration_years": "input_diabetes_duration_years",
+    "diabetic_retinopathy": "input_diabetic_retinopathy",
+    "diabetic_neuropathy": "input_diabetic_neuropathy",
+    "abi": "input_abi",
+    "abi_lt_0_9": "input_abi_lt_0_9",
     "bmi": "input_bmi",
     "egfr": "input_egfr",
     "uacr": "input_uacr",
@@ -43,6 +49,18 @@ WORKSHEET_KEY_BY_FIELD = {
     "family_history_relationship": "input_family_history_relationship",
     "family_history_event_type": "input_family_history_event_type",
     "family_history_age_at_event": "input_family_history_age_at_event",
+    "early_menopause": "input_early_menopause",
+    "menopause_age": "input_menopause_age",
+    "premature_menopause": "input_premature_menopause",
+    "preeclampsia": "input_preeclampsia",
+    "gestational_hypertension": "input_gestational_hypertension",
+    "gestational_diabetes": "input_gestational_diabetes",
+    "preterm_delivery": "input_preterm_delivery",
+    "small_for_gestational_age": "input_small_for_gestational_age",
+    "recurrent_pregnancy_loss": "input_recurrent_pregnancy_loss",
+    "pcos_or_irregular_menses": "input_pcos_or_irregular_menses",
+    "early_menarche": "input_early_menarche",
+    "menarche_age": "input_menarche_age",
     "hscrp": "input_hscrp",
     "inflammatory_disease": "input_inflammatory_disease",
     "rheumatoid_arthritis": "input_rheumatoid_arthritis",
@@ -53,6 +71,7 @@ WORKSHEET_KEY_BY_FIELD = {
     "osa": "input_osa",
     "masld": "input_masld",
     "lipid_lowering": "input_lipid_lowering",
+    "lipid_supplements": "input_lipid_supplements",
     "bp_treated": "input_bp_treated",
     "sglt2": "input_sglt2",
     "glp1": "input_glp1",
@@ -62,6 +81,8 @@ WORKSHEET_KEY_BY_FIELD = {
 EXTRA_SESSION_KEY_BY_FIELD = {
     "medications_raw": "input_medications_raw",
     "dm_meds_raw": "input_dm_meds_raw",
+    "statin_intensity": "input_statin_intensity",
+    "statin_intolerance": "input_statin_intolerance",
     "fasting_lipids": "input_fasting_lipids",
     "fhx_text": "input_fhx_text",
 }
@@ -81,11 +102,53 @@ INTEGER_WORKSHEET_FIELDS = {
     "cac_not_done",
     "uacr",
     "egfr",
+    "diabetes_duration_years",
     "family_history_age_at_event",
+    "menopause_age",
+    "menarche_age",
 }
 
 ONE_DECIMAL_WORKSHEET_FIELDS = {"a1c", "bmi", "hscrp"}
 TWO_DECIMAL_WORKSHEET_FIELDS = {"creatinine"}
+PARSER_CONTROLLED_SESSION_KEYS = (
+    set(WORKSHEET_KEY_BY_FIELD.values())
+    | set(EXTRA_SESSION_KEY_BY_FIELD.values())
+    | {"input_bp_meds"}
+)
+
+BOOLEAN_WORKSHEET_FIELDS = {
+    "diabetes",
+    "diabetic_retinopathy",
+    "diabetic_neuropathy",
+    "abi_lt_0_9",
+    "clinical_ascvd",
+    "smoker",
+    "family_history_premature_ascvd",
+    "early_menopause",
+    "premature_menopause",
+    "preeclampsia",
+    "gestational_hypertension",
+    "gestational_diabetes",
+    "preterm_delivery",
+    "small_for_gestational_age",
+    "recurrent_pregnancy_loss",
+    "pcos_or_irregular_menses",
+    "early_menarche",
+    "inflammatory_disease",
+    "rheumatoid_arthritis",
+    "sle",
+    "psoriasis",
+    "ibd",
+    "hiv",
+    "osa",
+    "masld",
+    "lipid_lowering",
+    "lipid_supplements",
+    "bp_treated",
+    "sglt2",
+    "glp1",
+    "ace_arb",
+}
 
 REVIEW_FIELDS = [
     "age",
@@ -101,6 +164,11 @@ REVIEW_FIELDS = [
     "lp_a_unit",
     "a1c",
     "diabetes",
+    "diabetes_duration_years",
+    "diabetic_retinopathy",
+    "diabetic_neuropathy",
+    "abi",
+    "abi_lt_0_9",
     "bmi",
     "egfr",
     "uacr",
@@ -112,6 +180,18 @@ REVIEW_FIELDS = [
     "family_history_relationship",
     "family_history_event_type",
     "family_history_age_at_event",
+    "early_menopause",
+    "menopause_age",
+    "premature_menopause",
+    "preeclampsia",
+    "gestational_hypertension",
+    "gestational_diabetes",
+    "preterm_delivery",
+    "small_for_gestational_age",
+    "recurrent_pregnancy_loss",
+    "pcos_or_irregular_menses",
+    "early_menarche",
+    "menarche_age",
     "hscrp",
     "inflammatory_disease",
     "rheumatoid_arthritis",
@@ -122,6 +202,7 @@ REVIEW_FIELDS = [
     "osa",
     "masld",
     "lipid_lowering",
+    "lipid_supplements",
     "bp_treated",
     "sglt2",
     "glp1",
@@ -129,7 +210,6 @@ REVIEW_FIELDS = [
 ]
 
 NUMERIC_FIELDS = {
-    "age": r"\bage\b",
     "sbp": r"\b(?:sbp|systolic)\b",
     "dbp": r"\b(?:dbp|diastolic)\b",
     "tc": r"\b(?:tc|total cholesterol|total-c|total chol)\b",
@@ -254,13 +334,41 @@ def build_parse_review_rows(report):
     return rows
 
 
-def apply_parsed_to_session_state(state, parsed):
+def clear_parser_controlled_session_state(state):
+    for key in PARSER_CONTROLLED_SESSION_KEYS:
+        state.pop(key, None)
+    for key in list(state.keys()):
+        if str(key).startswith("_unknown_"):
+            state.pop(key, None)
+
+
+def _next_parse_id(state):
+    parse_id = int(state.get("_worksheet_parse_id", 0) or 0) + 1
+    state["_worksheet_parse_id"] = parse_id
+    state["_worksheet_field_sources"] = {}
+    return parse_id
+
+
+def _mark_parsed_source(state, widget_key, parse_id):
+    state.setdefault("_worksheet_field_sources", {})[widget_key] = {
+        "source": "parsed",
+        "parse_id": parse_id,
+    }
+
+
+def apply_parsed_to_session_state(state, parsed, *, clear_existing=True):
+    if clear_existing:
+        clear_parser_controlled_session_state(state)
+    parse_id = _next_parse_id(state)
     for field, value in (parsed or {}).items():
         widget_key = WORKSHEET_KEY_BY_FIELD.get(field)
         extra_key = EXTRA_SESSION_KEY_BY_FIELD.get(field)
         if widget_key:
             if field == "family_history_event_type" and value == "mi":
                 value = "MI"
+            elif field in BOOLEAN_WORKSHEET_FIELDS and value is None:
+                state[f"_unknown_{widget_key}"] = True
+                value = False
             elif field in INTEGER_WORKSHEET_FIELDS and value is not None:
                 try:
                     value = int(round(float(value)))
@@ -277,15 +385,27 @@ def apply_parsed_to_session_state(state, parsed):
                 except (TypeError, ValueError):
                     pass
             state[widget_key] = value
+            if field in BOOLEAN_WORKSHEET_FIELDS and value is not False:
+                state.pop(f"_unknown_{widget_key}", None)
+            _mark_parsed_source(state, widget_key, parse_id)
         elif extra_key:
             state[extra_key] = value
+            _mark_parsed_source(state, extra_key, parse_id)
         if field == "bp_treated":
             state["input_bp_meds"] = value
+            if parsed.get(field) is None:
+                state["_unknown_input_bp_meds"] = True
+            else:
+                state.pop("_unknown_input_bp_meds", None)
+            _mark_parsed_source(state, "input_bp_meds", parse_id)
         if field == "cac_not_done" and value:
             state["input_cac"] = None
             state["input_cac_not_done"] = True
+            _mark_parsed_source(state, "input_cac", parse_id)
+            _mark_parsed_source(state, "input_cac_not_done", parse_id)
         if field == "cac" and value is not None:
             state["input_cac_not_done"] = False
+            _mark_parsed_source(state, "input_cac_not_done", parse_id)
 
 
 def _snapshot_worksheet_state(state):
@@ -313,6 +433,9 @@ def render_ingest_panel(st):
                 "conflicts": [],
             }
             st.session_state["parsed_needs_review"] = False
+            st.session_state["last_parsed_text_hash"] = None
+            st.session_state["last_ingest_text_hash"] = hash_text("")
+            clear_report_state(st.session_state, dirty=True)
             _restore_worksheet_state(st.session_state, worksheet_snapshot)
 
         title_col, expand_col = st.columns([0.78, 0.22], vertical_alignment="center")
@@ -330,6 +453,15 @@ def render_ingest_panel(st):
             label_visibility="collapsed",
             key="ingest_pasted_text",
         )
+        current_text_hash = hash_text(pasted_text)
+        previous_text_hash = st.session_state.get("last_ingest_text_hash")
+        if (
+            previous_text_hash is not None
+            and current_text_hash != previous_text_hash
+            and st.session_state.get("report_generated")
+        ):
+            clear_report_state(st.session_state, dirty=True)
+        st.session_state["last_ingest_text_hash"] = current_text_hash
 
         c1, c2, _spacer = st.columns([0.105, 0.105, 0.79])
         with c1:
@@ -350,6 +482,9 @@ def render_ingest_panel(st):
                     report = parse_ingest_report(pasted_text)
                     st.session_state.parsed_ingest = report["parsed"]
                     st.session_state.parse_report = report
+                    st.session_state.last_parsed_text_hash = current_text_hash
+                    st.session_state.last_ingest_text_hash = current_text_hash
+                    clear_report_state(st.session_state, dirty=True)
                     apply_parsed_to_session_state(st.session_state, report["parsed"])
                     for warning in report.get("warnings", []):
                         st.warning(warning)

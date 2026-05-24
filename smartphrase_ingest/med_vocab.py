@@ -156,6 +156,11 @@ FREQUENCY_RE = re.compile(
     re.IGNORECASE,
 )
 
+STATIN_INTOLERANCE_RE = re.compile(
+    r"\b(allerg(?:y|ic)|intoleran(?:ce|t)|failed|could not tolerate)\b",
+    re.IGNORECASE,
+)
+
 
 def _line_fragments(raw: str) -> list[str]:
     lines: list[str] = []
@@ -333,6 +338,7 @@ def extract_medications_structured(raw: str) -> dict[str, Any]:
         "lipidLowering": None,
         "statin": None,
         "statin_intensity": None,
+        "statin_intolerance": None,
         "ezetimibe": None,
         "pcsk9": None,
         "bempedoic_acid": None,
@@ -378,5 +384,11 @@ def extract_medications_structured(raw: str) -> dict[str, Any]:
 
     for med in detected:
         _apply_flags(result, med)
+        if (
+            str(med.get("class") or "") == "statin"
+            and med.get("active") is False
+            and STATIN_INTOLERANCE_RE.search(str(med.get("source_line") or ""))
+        ):
+            result["statin_intolerance"] = True
 
     return result

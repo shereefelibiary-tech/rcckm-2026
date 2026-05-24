@@ -3,6 +3,10 @@ from textwrap import dedent
 
 from modules.actions.scaffold import build_action_recommendation_lines
 from modules.levels.definitions import classify_continuum_position, get_level_definition_payload
+from modules.risk_enhancers.reproductive import (
+    reproductive_history_summary,
+    reproductive_marker_items,
+)
 from ui.theme import component_theme_css
 
 
@@ -41,6 +45,46 @@ def _risk_category(result):
     if value < 10:
         return "intermediate"
     return "high"
+
+
+def _has_early_metabolic_risk(patient, result):
+    ckm_stage = getattr(result, "ckm_stage", None) or {}
+    return bool(
+        _risk_category(result) == "low"
+        and ckm_stage.get("stage") in {1, 2}
+        and (
+            getattr(patient, "a1c", None) is not None
+            or getattr(patient, "triglycerides", None) is not None
+            or getattr(patient, "apob", None) is not None
+            or reproductive_marker_items(patient)
+        )
+    )
+
+
+def _has_elevated_lpa(patient):
+    value = getattr(patient, "lp_a_value", None)
+    unit = str(getattr(patient, "lp_a_unit", "") or "").strip()
+    return bool(
+        (unit == "nmol/L" and value is not None and value >= 125)
+        or (unit == "mg/dL" and value is not None and value >= 50)
+    )
+
+
+def _has_premature_family_history(patient):
+    return bool(
+        getattr(patient, "premature_fhx_ascvd", False)
+        or getattr(patient, "family_history_premature_ascvd", False)
+    )
+
+
+def _has_lpa_family_context(patient):
+    return bool(_has_elevated_lpa(patient) and _has_premature_family_history(patient))
+
+
+def _has_elevated_30y_trajectory(patient, result):
+    age = getattr(patient, "age", None)
+    prevent_30y = getattr(result, "prevent_30y_ascvd", None)
+    return bool(age is not None and 30 <= age <= 59 and prevent_30y is not None and prevent_30y >= 10)
 
 
 def _value_from_fields(result, field_names):
@@ -207,7 +251,6 @@ def _inflammatory_context(patient):
         ("sle", "SLE"),
         ("psoriasis", "psoriasis"),
         ("ibd", "IBD"),
-        ("hiv", "HIV"),
     ):
         if getattr(patient, field, False):
             labels.append(label)
@@ -311,6 +354,10 @@ def _contributor_groups(patient, result):
 
     if getattr(patient, "masld", False):
         other_context.append("MASLD")
+
+    reproductive_summary = reproductive_history_summary(patient, patient_facing=True)
+    if reproductive_summary:
+        other_context.append(reproductive_summary)
 
     if other_context:
         groups.append(("Other context", "; ".join(other_context)))
@@ -450,12 +497,19 @@ def _patient_contributor_groups(patient, result):
     inflammatory = _inflammatory_context(patient)
     if inflammatory:
         other.append(", ".join(inflammatory))
+    reproductive_summary = reproductive_history_summary(patient, patient_facing=True)
+    if reproductive_summary:
+        other.append(reproductive_summary)
     if other:
         groups.append(
             (
                 "Other factors",
                 "; ".join(other),
-                "These details can shape the prevention plan with your clinician.",
+                (
+                    "Pregnancy or menopause history can affect long-term heart risk."
+                    if reproductive_marker_items(patient)
+                    else "These details can shape the prevention plan with your clinician."
+                ),
                 "gray",
             )
         )
@@ -583,6 +637,15 @@ def _patient_next_steps(patient, result):
         elif "aspirin" in lowered or "antiplatelet" in lowered:
             label = "Aspirin safety"
             detail = "Do not start aspirin unless your clinician recommends it."
+        elif "no medication escalation" in lowered:
+            label = "Medication plan"
+            if "risk discussion" in lowered:
+                detail = "No medication escalation required today; review Lp(a), family history, and long-term prevention options."
+            else:
+                detail = "No medication escalation today."
+        elif "continue lifestyle" in lowered:
+            label = "Long-term prevention"
+            detail = "Focus on weight, blood sugar, triglycerides, and long-term prevention."
         elif "clarification testing should not delay treatment" in lowered:
             label = "Optional testing"
             detail = "Do not delay treatment while completing optional testing."
@@ -601,9 +664,11 @@ def _patient_next_steps(patient, result):
         "Protect the kidneys": 1,
         "Improve blood sugar trajectory": 2,
         "Keep blood pressure in a safer range": 3,
-        "Aspirin safety": 4,
-        "Additional testing": 5,
-        "Optional testing": 6,
+        "Medication plan": 4,
+        "Long-term prevention": 5,
+        "Aspirin safety": 6,
+        "Additional testing": 7,
+        "Optional testing": 8,
     }
     rows.sort(key=lambda row: order.get(row[0], 99))
     return rows or [("Next step", "Continue prevention review with your clinician.")]
@@ -764,6 +829,8 @@ def _patient_driver_sections(patient, result):
         context.append("OSA")
     if getattr(patient, "masld", False):
         context.append("MASLD")
+    if getattr(patient, "hiv", False):
+        context.append("HIV")
     inflammatory = _inflammatory_context(patient)
     if inflammatory:
         context.extend(inflammatory)
@@ -852,6 +919,18 @@ def _text_lines(patient, result):
     )
     if risk is None:
         lines.insert(4, f"- {_prevent_unavailable_reason_text(result)}")
+    elif _risk_category(result) == "low":
+        lines.insert(6, "- Near-term estimated risk is low.")
+
+    if _has_early_metabolic_risk(patient, result):
+        lines.append("- Early metabolic signals are present.")
+    if _has_elevated_30y_trajectory(patient, result):
+        if _risk_category(result) == "borderline":
+            lines.append("- Near-term risk is borderline, but 30-year risk and multiple early risk markers support prevention discussion.")
+        else:
+            lines.append("- Near-term estimated risk may be low, but 30-year risk is elevated enough to justify prevention discussion.")
+    if _has_lpa_family_context(patient):
+        lines.append("- Lp(a) and family history increase long-term risk context.")
 
     for label, finding, note, _tone in _patient_contributor_groups(patient, result):
         lines.append(f"- {label}: {finding}. {note}")
@@ -1126,10 +1205,20 @@ def render_patient_roadmap(patient, result):
     stand_detail = ""
     if risk is None:
         stand_detail = _prevent_unavailable_reason_text(result)
+    elif _has_elevated_30y_trajectory(patient, result):
+        if _risk_category(result) == "borderline":
+            stand_detail = "Near-term risk is borderline, but 30-year risk and multiple early risk markers support prevention discussion."
+        else:
+            stand_detail = "Near-term estimated risk may be low, but 30-year risk is elevated enough to justify prevention discussion."
+    elif _has_lpa_family_context(patient):
+        stand_detail = "Near-term estimated risk is low. Lp(a) and family history increase long-term risk context."
+    elif _has_early_metabolic_risk(patient, result):
+        stand_detail = "Near-term estimated risk is low. Early metabolic signals are present."
 
     if risk is not None and ascvd_30y is None:
         unsupported = str(getattr(result, "prevent_unsupported_reason", "") or "").strip()
-        stand_detail = unsupported or "30-year estimate unavailable for the current data or age range."
+        if not stand_detail:
+            stand_detail = unsupported or "30-year estimate unavailable for the current data or age range."
 
     risk_cards_html = _patient_risk_cards_html(risk, ascvd_30y)
     plaque_html = escape(_patient_plaque_status(patient, result))

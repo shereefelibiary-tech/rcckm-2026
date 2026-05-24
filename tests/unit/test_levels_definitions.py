@@ -11,10 +11,10 @@ from modules.levels.definitions import (
 
 def test_level_definitions_include_prevent_era_labels_and_sublevels():
     assert LEVEL_DEFS[1]["label"] == "Minimal risk signal"
-    assert LEVEL_DEFS[2]["sublevels"]["2A"] == "Emerging isolated/mild"
-    assert LEVEL_DEFS[2]["sublevels"]["2B"] == "Emerging converging/rising"
-    assert LEVEL_DEFS[3]["sublevels"]["3A"] == "Actionable biology, limited enhancers"
-    assert LEVEL_DEFS[3]["sublevels"]["3B"] == "Actionable biology plus accelerators"
+    assert LEVEL_DEFS[2]["sublevels"]["2A"] == "Early isolated risk signal"
+    assert LEVEL_DEFS[2]["sublevels"]["2B"] == "Converging early risk signals"
+    assert LEVEL_DEFS[3]["sublevels"]["3A"] == "Elevated long-term risk trajectory"
+    assert LEVEL_DEFS[3]["sublevels"]["3B"] == "Actionable early CKM / atherogenic risk"
     assert "estimated population risk" in LEVEL_DEFS[3]["description"]
 
 
@@ -23,7 +23,7 @@ def test_get_level_definition_payload_adds_sublevel_label():
 
     assert payload["label"] == "Actionable biologic risk"
     assert payload["sublevel"] == "3B"
-    assert payload["sublevel_label"] == "Actionable biology plus accelerators"
+    assert payload["sublevel_label"] == "Actionable early CKM / atherogenic risk"
 
 
 def test_levels_legend_compact_returns_all_levels():
@@ -53,6 +53,38 @@ def test_prevent_intermediate_with_missing_cac_becomes_emerging_signal():
     position = classify_continuum_position(patient, result)
 
     assert position == {"level": 2, "sublevel": "2A"}
+
+
+def test_elevated_30_year_prevent_trajectory_becomes_level_3a_without_other_burden():
+    patient = Patient(age=45, sex="male", cac=None)
+    result = RCCKMResult(prevent_risk_category=RiskLevel.LOW, prevent_30y_ascvd=10.5)
+
+    position = classify_continuum_position(patient, result)
+
+    assert position == {"level": 3, "sublevel": "3A"}
+
+
+def test_elevated_30_year_prevent_with_biologic_burden_becomes_level_3b():
+    patient = Patient(age=38, sex="male", cac=None, ldl_c=164)
+    result = RCCKMResult(prevent_risk_category=RiskLevel.LOW, prevent_30y_ascvd=10.8)
+
+    position = classify_continuum_position(patient, result)
+
+    assert position == {"level": 3, "sublevel": "3B"}
+
+
+def test_elevated_30_year_prevent_does_not_override_cac_or_clinical_ascvd():
+    cac_position = classify_continuum_position(
+        Patient(age=45, sex="male", cac=25),
+        RCCKMResult(prevent_risk_category=RiskLevel.LOW, prevent_30y_ascvd=10.5),
+    )
+    ascvd_position = classify_continuum_position(
+        Patient(age=45, sex="male", clinical_ascvd=True),
+        RCCKMResult(prevent_risk_category=RiskLevel.LOW, prevent_30y_ascvd=10.5),
+    )
+
+    assert cac_position == {"level": 4, "sublevel": None}
+    assert ascvd_position == {"level": 5, "sublevel": None}
 
 
 def test_cac_50_becomes_level_4():

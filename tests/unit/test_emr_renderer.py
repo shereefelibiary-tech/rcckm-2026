@@ -45,8 +45,8 @@ def test_render_emr_note_outputs_plain_text_sections_in_order():
             "Risk Summary:",
             "- Risk level: HIGH",
             "- CKM stage: Stage 3 - Subclinical cardiovascular disease present.",
-            "- PREVENT 10-year ASCVD risk: 8.2%",
-            "- PREVENT 30-year ASCVD risk: 24.5%",
+            "- PREVENT 10-year atherosclerotic event risk: 8.2%",
+            "- PREVENT 30-year atherosclerotic event risk: 24.5%",
             "- Plaque: CAC 350",
             "- Kidney: G3aA2",
             "- RSS: 57/100",
@@ -63,8 +63,8 @@ def test_render_emr_note_outputs_plain_text_sections_in_order():
     assert expected_note
     assert "Risk Summary:" in note
     assert "- Risk level: HIGH" in note
-    assert "- PREVENT 10-year ASCVD risk: 8.2%" in note
-    assert "- PREVENT 30-year ASCVD risk: 24.5%" in note
+    assert "- PREVENT 10-year atherosclerotic event risk: 8.2%" in note
+    assert "- PREVENT 30-year atherosclerotic event risk: 24.5%" in note
     assert "- Plaque: CAC 350" in note
     assert "- Kidney: G3aA2" in note
     assert "- RSS: 57/100" in note
@@ -72,15 +72,17 @@ def test_render_emr_note_outputs_plain_text_sections_in_order():
     assert "- Type 2 diabetes mellitus (ICD: E11.9)" in note
     lipid_line = "- High-intensity lipid-lowering therapy indicated; treat toward high-risk targets."
     cac_line = "- CAC 350 already measured; no repeat CAC needed for current decision-making."
-    aspirin_line = "- Aspirin may be considered if bleeding risk is low after shared decision-making."
+    aspirin_line = "- Aspirin may be considered only if bleeding risk is low after shared decision-making."
+    monitoring_line = "- Recheck lipid profile 4-12 weeks after starting or intensifying therapy, then every 6-12 months."
     assert lipid_line in note
+    assert monitoring_line in note
     assert cac_line in note
     assert aspirin_line in note
     assert "- Lipid therapy:" not in note
     assert "- Coronary calcium:" not in note
     assert "- Supporting actions:" not in note
     assert "Aspirin: Aspirin" not in note
-    assert note.index(lipid_line) < note.index(cac_line) < note.index(aspirin_line)
+    assert note.index(lipid_line) < note.index(monitoring_line) < note.index(cac_line) < note.index(aspirin_line)
 
 
 def test_render_emr_note_uses_plaque_category_when_cac_missing():
@@ -121,8 +123,10 @@ def test_demo_emr_note_prioritizes_composite_diagnoses_and_decisive_actions():
 
     assert "Severe subclinical coronary atherosclerosis / high CAC burden" in assessment
     assert "Type 2 diabetes mellitus with CKD G3aA2 and albuminuria" in assessment
-    assert "Chronic kidney disease, stage 3a" in assessment
+    assert "CKD stage 3a ICD: N18.31" in assessment
+    assert "- Chronic kidney disease, stage 3a" not in assessment
     assert "Elevated ApoB / atherogenic particle burden" in assessment
+    assert "Premature family history of ASCVD" not in assessment
     assert "Subclinical coronary atherosclerosis (ICD:" not in assessment
     assert "- Type 2 diabetes mellitus (ICD:" not in assessment
     assert "- Type 2 diabetes mellitus with albuminuria" not in assessment
@@ -131,6 +135,19 @@ def test_demo_emr_note_prioritizes_composite_diagnoses_and_decisive_actions():
     assert "data-derived" not in assessment
 
     assert "High-intensity lipid-lowering therapy indicated; treat toward high-risk targets." in note
+    assert "Risk enhancer: premature family history of ASCVD" in note
     assert "Lipid-lowering therapy is reasonable." not in note
     assert "Optimize glycemic therapy." in note
     assert "Supporting actions:" not in note
+
+
+def test_emr_risk_summary_uses_compact_atherogenic_burden_line_for_demo():
+    from ui.report_layout import demo_patient, run_patient
+
+    patient = demo_patient()
+    result, _rss_total, _contributions = run_patient(patient)
+    note = render_emr_note(patient, result)
+
+    assert "- TG: 180 mg/dL." in note
+    assert "- Atherogenic burden: ApoB 110 mg/dL; LDL-C 132 mg/dL; non-HDL-C 157 mg/dL." in note
+    assert "use non-HDL-C/ApoB for atherogenic burden when TG is elevated" not in note

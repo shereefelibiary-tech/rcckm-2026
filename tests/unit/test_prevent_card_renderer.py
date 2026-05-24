@@ -83,9 +83,11 @@ def test_render_prevent_card_handles_unavailable_prevent_risk():
     assert "--" in html
     assert "unavailable" in html
     assert "PREVENT estimate unavailable" in html
+    assert "PREVENT unavailable: missing systolic BP, smoking status." in html
     assert "Missing inputs:" in html
     assert "systolic BP" in html
     assert "smoking status" in html
+    assert "Model used provided" not in html
 
 
 def test_render_prevent_card_missing_inputs_can_also_show_30_year_age_note():
@@ -126,6 +128,24 @@ def test_render_prevent_card_shows_30_year_risk_when_available():
     assert PREVENT_CVD_SCOPE_EXPLAINER in html
 
 
+def test_render_prevent_card_separates_rcckm_level_from_prevent_category():
+    result = RCCKMResult(
+        prevent_10y_ascvd=3.7,
+        prevent_30y_ascvd=18.8,
+        prevent_risk_category=RiskLevel.BORDERLINE,
+        level_classification={
+            "level": "3B",
+            "label": "Level 3B — actionable early CKM / kidney risk",
+        },
+    )
+
+    html = render_prevent_card(result)
+
+    assert "borderline" in html
+    assert "RCCKM:" in html
+    assert "Level 3B - actionable early CKM / kidney risk" in html
+
+
 def test_render_prevent_card_clinical_ascvd_suppresses_prevent_decision_values():
     result = RCCKMResult(
         clinical_ascvd=True,
@@ -161,6 +181,54 @@ def test_render_prevent_card_shows_prevent_age_and_percentile_when_supplied():
     assert "62 years" in html
     assert "PREVENT percentile" in html
     assert "74%" in html
+
+
+def test_render_prevent_card_never_shows_model_used_provided_phrase():
+    result = RCCKMResult(
+        prevent_available=True,
+        prevent_10y_ascvd=5.4,
+        prevent_risk_category=RiskLevel.INTERMEDIATE,
+        prevent_model_used="provided",
+    )
+
+    html = render_prevent_card(result)
+
+    assert "Model used provided" not in html
+    assert "Model used" not in html
+    assert "provided" not in html.lower()
+    assert "PREVENT values entered directly." in html
+
+
+def test_render_prevent_card_calculated_values_hide_source_label():
+    result = RCCKMResult(
+        prevent_available=True,
+        prevent_10y_ascvd=5.4,
+        prevent_risk_category=RiskLevel.INTERMEDIATE,
+        prevent_model_used="base",
+    )
+
+    html = render_prevent_card(result)
+
+    assert "Model used" not in html
+    assert "base model" not in html.lower()
+    assert "Calculated from worksheet inputs" not in html
+    assert "PREVENT values entered directly" not in html
+
+
+def test_render_prevent_card_translates_uacr_model_warning():
+    result = RCCKMResult(
+        prevent_available=True,
+        prevent_10y_ascvd=5.4,
+        prevent_risk_category=RiskLevel.INTERMEDIATE,
+        prevent_model_used="base",
+        prevent_warnings=["UACR missing; base PREVENT model used."],
+    )
+
+    html = render_prevent_card(result)
+
+    assert "UACR missing; PREVENT calculated without UACR." in html
+    assert "base PREVENT model used" not in html
+    assert "Model used" not in html
 
 
 def test_render_prevent_card_omits_30_year_when_missing_without_crashing():

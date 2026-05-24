@@ -71,6 +71,27 @@ def test_build_risk_continuum_html_level_5_clinical_ascvd_copy_is_compact():
     assert "Very high risk / high plaque burden" not in html
 
 
+def test_build_risk_continuum_html_level_3_is_attention_getting_not_red_alert():
+    html = build_continuum_bar_html(
+        Patient(age=42, sex="male"),
+        RCCKMResult(
+            prevent_risk_category=RiskLevel.LOW,
+            prevent_30y_ascvd=12.0,
+            level_classification={
+                "level": "3A",
+                "label": "Level 3A — elevated long-term risk trajectory",
+                "plaque_status": "Plaque unmeasured",
+            },
+        ),
+    )
+
+    assert "rc-level-3 rc-card-active" in html
+    assert ".rc-level-3.rc-card-active" in html
+    assert "Level 3A" in html
+    assert "Elevated long-term risk trajectory" in html
+    assert "background: linear-gradient(180deg, #fff6e7 0%, #f7dfb5 100%)" in html
+
+
 def test_build_risk_continuum_html_level_5_cac_1000_copy_is_compact():
     html = build_continuum_bar_html(
         Patient(age=60, sex="male", cac=1200),

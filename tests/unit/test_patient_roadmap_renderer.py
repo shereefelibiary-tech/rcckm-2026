@@ -52,7 +52,7 @@ def _result():
             "Lipid-lowering therapy is reasonable.",
             "Optimize kidney-protective therapy.",
             "Check Lp(a) once.",
-            "Obtain UACR to assess albuminuria/kidney risk.",
+            "Obtain UACR to complete kidney-risk assessment.",
         ],
     )
     result.prevent_10y_total_cvd = 12.4

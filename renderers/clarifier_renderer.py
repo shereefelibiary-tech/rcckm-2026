@@ -33,7 +33,7 @@ CLARIFIER_DEFS = [
         "label": "UACR",
         "domain": "uacr_testing",
         "clarification_flag": "recommend_uacr",
-        "reason": "diabetes/CKM kidney risk assessment",
+        "reason": "complete kidney-risk assessment",
         "priority": "High",
     },
     {
@@ -91,7 +91,7 @@ def build_clarifier_card_html(result, include_title=True):
             "ApoB": "particle burden clarification",
             "Lp(a)": "Lp(a) measurement",
             "CAC": "plaque burden clarification",
-            "UACR": "kidney risk completion",
+            "UACR": "complete kidney-risk assessment",
             "hsCRP": "inflammatory residual risk",
             "Repeat fasting lipids": "triglyceride confirmation",
         }

@@ -12,6 +12,7 @@ from modules.kdigo.engine import (
     classify_albuminuria_stage,
     classify_egfr_stage,
 )
+from modules.levels.level_classifier import classify_rcckm_level
 from modules.plaque.engine import build_plaque_result
 from modules.prevent.calculator import (
     calculate_prevent_summary,
@@ -24,6 +25,9 @@ from modules.targets.engine import build_target_result
 
 
 def evaluate_patient(patient):
+    if patient.non_hdl_c is None and patient.tc is not None and patient.hdl_c is not None:
+        patient.non_hdl_c = patient.tc - patient.hdl_c
+
     family_history = build_family_history_payload(patient)
     patient.family_history_summary = family_history["summary"]
     patient.premature_fhx_ascvd = family_history["premature_fhx_ascvd"]
@@ -47,11 +51,21 @@ def evaluate_patient(patient):
     egfr_stage = classify_egfr_stage(patient.egfr)
     albuminuria_stage = classify_albuminuria_stage(patient.uacr)
     kdigo_stage = build_kdigo_stage(patient)
+    severe_hypercholesterolemia = patient.ldl_c is not None and patient.ldl_c >= 190
+    possible_fh_pathway = bool(
+        severe_hypercholesterolemia
+        and (
+            family_history["premature_fhx_ascvd"]
+            or (patient.apob is not None and patient.apob >= 140)
+        )
+    )
 
     rcckm_result = RCCKMResult(
         plaque_category=plaque_result.plaque_category,
         risk_level=risk_level,
         clinical_ascvd=bool(patient.clinical_ascvd),
+        severe_hypercholesterolemia=severe_hypercholesterolemia,
+        possible_fh_pathway=possible_fh_pathway,
         prevent_available=bool(prevent_summary["available"]),
         prevent_missing_inputs=list(prevent_summary["missing_inputs"]),
         prevent_unsupported_reason=prevent_summary.get("unsupported_reason") or prevent_summary.get("unavailable_reason"),
@@ -93,6 +107,9 @@ def evaluate_patient(patient):
         patient, rcckm_result
     )
     rcckm_result.ckm_stage = classify_ckm_stage(patient, rcckm_result)
+    rcckm_result.level_classification = classify_rcckm_level(
+        patient, rcckm_result
+    ).to_dict()
     rcckm_result.top_drivers = build_top_drivers(patient, rcckm_result)
     action_plan = build_action_plan(patient, rcckm_result)
     rcckm_result.dominant_action = action_plan["dominant_action"]
