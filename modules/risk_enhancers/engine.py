@@ -27,6 +27,8 @@ def identify_risk_enhancers(patient) -> list[str]:
         inflammatory_contexts.append("SLE")
     if getattr(patient, "psoriasis", False):
         inflammatory_contexts.append("psoriasis")
+    if getattr(patient, "inflammatory_arthritis", False):
+        inflammatory_contexts.append("inflammatory arthritis")
     if getattr(patient, "ibd", False):
         inflammatory_contexts.append("IBD")
     if inflammatory_contexts:
@@ -34,7 +36,33 @@ def identify_risk_enhancers(patient) -> list[str]:
     elif getattr(patient, "inflammatory_disease", False):
         enhancers.append("Inflammatory disease")
     if getattr(patient, "hiv", False):
-        enhancers.append("HIV-related risk enhancer")
+        if getattr(patient, "stable_art", False):
+            enhancers.append("HIV on stable ART")
+        else:
+            enhancers.append("HIV-related risk enhancer")
+
+    if getattr(patient, "south_asian_ancestry", False):
+        enhancers.append("Higher-risk ancestry/context: South Asian ancestry")
+    if getattr(patient, "filipino_ancestry", False):
+        enhancers.append("Higher-risk ancestry/context: Filipino ancestry")
+    if getattr(patient, "higher_risk_ancestry_context", None):
+        enhancers.append(f"Higher-risk ancestry/context: {patient.higher_risk_ancestry_context}")
+
+    if getattr(patient, "suspected_fh_hefh", False):
+        enhancers.append("Suspected FH / HeFH pathway")
+
+    if getattr(patient, "incidental_cac", False):
+        severity = str(getattr(patient, "incidental_cac_severity", "") or "").strip()
+        suffix = f" ({severity})" if severity else ""
+        enhancers.append(f"Incidental CAC on noncardiac CT{suffix}")
+
+    if getattr(patient, "active_cancer", False):
+        enhancers.append("Active cancer context")
+    elif getattr(patient, "cancer_survivor", False):
+        if getattr(patient, "cancer_life_expectancy_gt_2y", False):
+            enhancers.append("Cancer survivor context; life expectancy >2 years")
+        else:
+            enhancers.append("Cancer survivor context")
 
     if getattr(patient, "osa", False):
         enhancers.append("Sleep/hypoxia context: OSA")

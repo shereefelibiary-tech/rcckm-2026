@@ -336,7 +336,7 @@ def test_level_taxonomy_golden_cases(name, patient, expected_level):
         assert "subclinical coronary atherosclerosis" not in diagnoses.lower()
     if patient.clinical_ascvd:
         assert "secondary prevention" in classification.treatment_posture
-        assert "PREVENT: not used for treatment decisions" in render_note_for(patient)
+        assert "PREVENT is not used for treatment decisions" in render_note_for(patient)
     if patient.ldl_c is not None and patient.ldl_c >= 190:
         assert classification.level != "1"
         assert "High-intensity or maximally tolerated statin therapy indicated" in actions
@@ -371,7 +371,7 @@ def test_level_3b_albuminuria_case_action_and_clarifiers_are_treatment_forward()
     assert "albuminuria" in " ".join(classification.drivers).lower()
     assert "Optimize kidney-protective therapy" in actions
     assert "Moderate-intensity lipid-lowering therapy is reasonable" in actions
-    assert "CAC reasonable for risk clarification" in actions
+    assert "CAC may clarify plaque burden if treatment intensity remains uncertain" in actions
     assert "subclinical coronary atherosclerosis" not in diagnoses.lower()
 
 
@@ -424,9 +424,9 @@ def test_high_lpa_reproductive_low_prevent_stays_level_2b_with_cac_clarification
 
     assert classification.level == "2B"
     assert "converging early risk" in classification.label.lower()
-    assert "Risk level: Level 2B - converging early risk signals" in note
-    assert "Lp(a): 268 nmol/L" in note
-    assert "Reproductive risk markers: Early menopause 44; Preeclampsia." in note
+    assert "Level 2B - converging early risk signals." in note
+    assert "Lp(a) 268 nmol/L" in note
+    assert "reproductive history: Early menopause 44; Preeclampsia." in note
     assert "CAC reasonable for risk clarification if treatment decision remains uncertain" in actions
     assert "No medication escalation required today; clinician-patient risk discussion recommended given high Lp(a) and reproductive risk markers" in actions
     assert "Aspirin not indicated for routine primary prevention" in note
@@ -462,15 +462,11 @@ def test_level_2b_converging_early_signals_low_prevent_uses_formal_taxonomy():
 
     assert classification.level == "2B"
     assert classification.prevent_category == "LOW"
-    assert "Risk level: Level 2B - converging early risk signals" in note
-    assert "PREVENT category: low 10-year risk" in note
-    assert "PREVENT 10-year atherosclerotic event risk: 0.8%" in note
-    assert "PREVENT 30-year atherosclerotic event risk: 5.76%" in note
-    assert "Plaque: unmeasured / CAC not performed" in note
-    assert "Kidney: G1A1" in note
-    assert "TG: 151 mg/dL" in note
-    assert "Atherogenic burden: ApoB 88 mg/dL; LDL-C 126 mg/dL; non-HDL-C 150 mg/dL" in note
-    assert "Reproductive risk marker: Preeclampsia." in note
+    assert "Level 2B - converging early risk signals." in note
+    assert "PREVENT 10-year risk 0.8%; 30-year risk 5.76%." in note
+    assert "kidney G1A1" in note
+    assert "Atherogenic/metabolic burden: ApoB 88 mg/dL; LDL-C 126 mg/dL; non-HDL-C 150 mg/dL; TG 151 mg/dL; Lp(a) 118 nmol/L." in note
+    assert "reproductive history: Preeclampsia." in note
     assert "No medication escalation today" in note
     assert "Continue lifestyle-based prevention" in note
 
@@ -496,7 +492,7 @@ def test_level_2b_near_level_3_threshold_uses_shared_decision_wording():
     assert result.prevent_30y_ascvd < 10
     assert patient.ldl_c < 160
     assert patient.apob < 120
-    assert "Risk level: Level 2B - converging early risk signals" in note
+    assert "Level 2B - converging early risk signals." in note
     assert "Near Level 3 threshold: 30-year risk 9.82%, LDL-C 158 mg/dL" in note
     assert "Clinician-patient risk discussion reasonable given near-threshold LDL/ApoB burden and 30-year trajectory" in actions
     assert "CAC reasonable if treatment decision remains uncertain" in actions
@@ -558,9 +554,8 @@ def test_level_3b_atherogenic_30y_ldl_apob_uses_intensity_cac_wording():
     assert "LDL-C 160-189" in classification.drivers
     assert "ApoB >=120" in classification.drivers
     assert "triglycerides >=150" in classification.drivers
-    assert "Risk level: Level 3B - actionable early CKM / atherogenic risk" in note
-    assert "PREVENT category: low 10-year risk" in note
-    assert "30-year risk trajectory supports prevention discussion" in note
+    assert "Level 3B - actionable early CKM / atherogenic risk." in note
+    assert "PREVENT 10-year risk 1.73%; 30-year risk 11.85%." in note
     assert "Moderate-intensity statin therapy is reasonable to reduce cumulative atherogenic exposure" in actions
     assert "CAC may clarify plaque burden if treatment intensity remains uncertain" in actions
     assert "CAC reasonable for risk clarification if treatment decision remains uncertain" not in actions
@@ -597,18 +592,18 @@ def test_level_3b_intermediate_prevent_uacr_missing_prioritizes_uacr_and_specifi
 
     assert classification.level == "3B"
     assert classification.prevent_category == "INTERMEDIATE"
-    assert "Kidney: G2; albuminuria not measured" in note
+    assert "kidney G2; albuminuria not measured" in note
     assert "UACR not available; obtain to complete kidney-risk assessment" in note
     assert result.dominant_action == (
         "Moderate-intensity lipid-lowering therapy is reasonable to reduce cumulative atherogenic exposure."
     )
     assert recommendation_lines[:6] == [
-        "Moderate-intensity lipid-lowering therapy is reasonable to reduce cumulative atherogenic exposure.",
-        "Recheck lipid profile 4-12 weeks after starting or intensifying therapy, then every 6-12 months.",
+        "Moderate-intensity lipid-lowering therapy reasonable.",
         "Obtain UACR to complete kidney-risk assessment.",
-        "Treat blood pressure toward individualized goal.",
+        "Treat BP toward goal <130/80.",
         "CAC may clarify plaque burden if treatment intensity remains uncertain.",
         "Aspirin not indicated for routine primary prevention.",
+        "hsCRP - inflammatory residual risk",
     ]
     assert "CAC reasonable for risk clarification if treatment decision remains uncertain" not in actions
     assert "subclinical coronary atherosclerosis" not in diagnoses.lower()
@@ -632,6 +627,6 @@ def test_level_3b_emr_not_rendered_as_simple_low_or_borderline():
     result = evaluate_patient(patient)
     note = render_emr_note(patient, result)
 
-    assert "Risk level: Level 3B" in note
-    assert "Risk level: BORDERLINE" not in note
-    assert "Risk level: LOW" not in note
+    assert "Level 3B" in note
+    assert "BORDERLINE." not in note
+    assert "LOW." not in note

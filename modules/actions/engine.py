@@ -68,7 +68,11 @@ def _age_40_to_75(patient):
 
 
 def _has_hiv_pathway(patient):
-    return bool(getattr(patient, "hiv", False)) and _age_40_to_75(patient)
+    return (
+        bool(getattr(patient, "hiv", False))
+        and bool(getattr(patient, "stable_art", False))
+        and _age_40_to_75(patient)
+    )
 
 
 def _tg_value(patient):
@@ -377,6 +381,27 @@ def _cac_testing_action_text(cac_recommendation, lipid_treatment_forward=False):
     return "CAC reasonable for risk clarification if treatment decision remains uncertain."
 
 
+def _lipid_line_is_treatment_forward(lipid_line):
+    text = str(lipid_line or "").strip().lower()
+    if (
+        text.startswith("no medication")
+        or text.startswith("no escalation")
+        or text.startswith("clinician-patient risk discussion")
+        or text.startswith("risk discussion")
+    ):
+        return False
+    return bool(
+        text.startswith("moderate-intensity")
+        or text.startswith("intensify")
+        or text.startswith("high-intensity")
+        or text.startswith("secondary-prevention")
+        or "lipid-lowering therapy recommended" in text
+        or "lipid-lowering therapy is indicated" in text
+        or "statin therapy reasonable" in text
+        or "statin therapy recommended" in text
+    )
+
+
 def _lipid_action_text(patient, result):
     if bool(getattr(patient, "clinical_ascvd", False)):
         target = (getattr(result, "targets", None) or [None])[0]
@@ -402,7 +427,7 @@ def _lipid_action_text(patient, result):
             return "Intensify lipid-lowering therapy; treat toward LDL-C <70 and non-HDL-C <100."
         return "Lipid-lowering therapy recommended; treat toward LDL-C <70 and non-HDL-C <100."
     if _has_hiv_pathway(patient):
-        return "Statin therapy reasonable in HIV; review antiretroviral drug interactions."
+        return "Statin therapy recommended/reasonable in HIV; review ART-statin interactions."
     if _low_with_lpa_reproductive_context(patient, result):
         return "No medication escalation required today; clinician-patient risk discussion recommended given high Lp(a) and reproductive risk markers."
     if _near_level3_lipid_trajectory(patient, result):
@@ -610,13 +635,7 @@ def _build_testing_actions(patient, result):
     cac_recommendation = build_cac_recommendation(patient, result)
     if cac_recommendation:
         lipid_line = _lipid_action_text(patient, result)
-        lipid_treatment_forward = bool(
-            _prevent_intermediate(result)
-            and (
-                lipid_line.startswith("Moderate-intensity")
-                or "recommended" in lipid_line.lower()
-            )
-        )
+        lipid_treatment_forward = _lipid_line_is_treatment_forward(lipid_line)
         _add_action(
             recommendations,
             domains,
@@ -692,13 +711,7 @@ def _build_testing_actions(patient, result):
         cac_recommendation = build_cac_recommendation(patient, result)
         if clarification.get("recommend_cac") and cac_recommendation:
             lipid_line = _lipid_action_text(patient, result)
-            lipid_treatment_forward = bool(
-                _prevent_intermediate(result)
-                and (
-                    lipid_line.startswith("Moderate-intensity")
-                    or "recommended" in lipid_line.lower()
-                )
-            )
+            lipid_treatment_forward = _lipid_line_is_treatment_forward(lipid_line)
             _add_action(
                 recommendations,
                 domains,

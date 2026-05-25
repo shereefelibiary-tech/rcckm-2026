@@ -1,5 +1,5 @@
 from core.results import DiagnosisCandidate, RCCKMResult
-from diagnosis_workflow import (
+from core.diagnosis_workflow import (
     apply_confirmations,
     augment_diagnoses_with_bmi_glp1,
     build_assessment_section,

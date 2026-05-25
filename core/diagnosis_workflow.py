@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+"""Diagnosis normalization and review helpers for RCCKM report output."""
+
 from typing import Any
 import re
 
@@ -64,6 +66,11 @@ def augment_diagnoses_with_bmi_glp1(
     all_dx: list[dict[str, Any]],
     patient_input: dict[str, Any],
 ) -> list[dict[str, Any]]:
+    """Add BMI-related diagnosis candidates when worksheet inputs support them.
+
+    Returns a normalized copy of the diagnosis list without changing upstream
+    clinical engine thresholds.
+    """
     bmi = _as_float((patient_input or {}).get("bmi"))
     if bmi is None:
         return list(all_dx)
@@ -213,6 +220,7 @@ def _raw_diagnosis_sources(out: Any) -> list[Any]:
 
 
 def normalize_diagnosis_entries(out: Any) -> list[dict[str, Any]]:
+    """Convert engine diagnosis candidates into a uniform display/export shape."""
     raw = [x for x in _raw_diagnosis_sources(out) if isinstance(x, dict)]
 
     diagnoses: list[dict[str, Any]] = []
@@ -431,6 +439,7 @@ def prepare_diagnosis_display_entries(out: Any) -> list[dict[str, Any]]:
 
 
 def apply_confirmations(all_dx: list[dict[str, Any]], confirmed_ids: set[str] | list[str]) -> list[dict[str, Any]]:
+    """Mark selected normalized diagnoses as clinician-confirmed for export."""
     confirmed_ids_set = {str(x) for x in (confirmed_ids or [])}
     upgraded: list[dict[str, Any]] = []
     for row in all_dx:
@@ -450,6 +459,7 @@ def apply_confirmations(all_dx: list[dict[str, Any]], confirmed_ids: set[str] | 
 
 
 def diagnosis_entry_id(dx: dict[str, Any]) -> str:
+    """Return the stable UI identifier for a normalized diagnosis row."""
     return str(dx.get("dx_id") or dx.get("label_display") or dx.get("label") or "").strip()
 
 
@@ -500,6 +510,7 @@ def apply_diagnosis_review_overrides(
 
 
 def split_diagnoses(all_dx: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Split normalized diagnoses into confirmed and review-suggested groups."""
     confirmed_dx = [
         d
         for d in all_dx
@@ -514,6 +525,7 @@ def split_diagnoses(all_dx: list[dict[str, Any]]) -> tuple[list[dict[str, Any]],
 
 
 def build_confirmed_code_exports(confirmed_dx: list[dict[str, Any]]) -> dict[str, dict[str, list[str]]]:
+    """Build ICD/HCC export payloads from confirmed diagnosis rows."""
     icd: list[str] = []
     hcc: list[str] = []
     for d in confirmed_dx:
@@ -532,6 +544,7 @@ def build_assessment_section(
     suspected_dx: list[dict[str, Any]],
     include_icd_confirmed: bool = False,
 ) -> str:
+    """Render a plain-text assessment section from confirmed/review diagnoses."""
     section: list[str] = ["Assessment:"]
     if confirmed_dx:
         section.append("- Confirmed by data:")
@@ -582,6 +595,7 @@ def _format_evidence_item(key: str, value: Any, unit: str = "") -> str:
 
 
 def diagnosis_context_line(dx: dict[str, Any]) -> str:
+    """Return a short evidence/context line for a normalized diagnosis row."""
     evidence = dx.get("evidence")
     if isinstance(evidence, dict):
         criteria_met = evidence.get("criteria_met")

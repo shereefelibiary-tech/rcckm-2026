@@ -15,6 +15,8 @@ DOMAIN_COLORS = {
     "Liver / MASLD": "#65A30D",
     "Family History": "#9333EA",
     "Reproductive History": "#C2410C",
+    "HIV": "#7C2D12",
+    "Ancestry / SDOH": "#64748B",
     "Kidney": "#0F8B8D",
     "Lipids": "#2F5F8F",
     "Metabolic": "#7C3AED",
@@ -38,6 +40,11 @@ CONTRIBUTION_ORDER = {
     "Psoriasis": 86,
     "IBD": 87,
     "HIV": 88,
+    "Inflammatory arthritis": 88.5,
+    "South Asian ancestry": 90,
+    "Filipino ancestry": 90.1,
+    "Suspected FH / HeFH": 22,
+    "Incidental CAC": 11,
     "Inflammatory disease": 89,
     "OSA": 92,
     "MASLD": 94,
@@ -66,6 +73,11 @@ RSS_DISPLAY_ORDER_TOP_TO_BOTTOM = {
     "Psoriasis": 26.3,
     "IBD": 26.4,
     "HIV": 26.5,
+    "Inflammatory arthritis": 26.6,
+    "South Asian ancestry": 29.1,
+    "Filipino ancestry": 29.2,
+    "Suspected FH / HeFH": 69,
+    "Incidental CAC": 81,
     "Premature menopause": 28.1,
     "Early menopause": 28.2,
     "Preeclampsia": 28.3,
@@ -88,6 +100,7 @@ RSS_DISPLAY_ORDER_TOP_TO_BOTTOM = {
 
 
 def ordered_contributions(rss_contributions):
+    """Return RSS contributions in the canonical display order."""
     return sorted(
         [contribution for contribution in rss_contributions if contribution.points > 0],
         key=lambda contribution: (
@@ -99,6 +112,7 @@ def ordered_contributions(rss_contributions):
 
 
 def get_rss_display_contributions(result=None, rss_contributions=None):
+    """Return the complete point-contributor list used by both RSS tower and rows."""
     """Return the canonical scored RSS display list used by both tower and rows."""
     if rss_contributions is None and isinstance(result, (list, tuple)):
         rss_contributions = result
@@ -221,6 +235,7 @@ def _severity_for_points(points):
 
 
 def get_rss_display_items(result=None, rss_contributions=None, rss_total=None):
+    """Build the canonical RSS display payload for score, contributors, and context."""
     contributors = [
         _contribution_to_display_item(contribution)
         for contribution in get_rss_display_contributions(result, rss_contributions)
@@ -239,6 +254,7 @@ def get_rss_display_items(result=None, rss_contributions=None, rss_total=None):
 
 
 def format_signal(contribution):
+    """Format a contribution label for compact row display."""
     value = contribution.actual_value
     if contribution.label == "Diabetes" and value is not None and not isinstance(value, bool):
         return f"{contribution.label} (A1c {_format_number(value)}%)"
@@ -260,6 +276,7 @@ def format_signal(contribution):
 
 
 def format_tower_value(contribution):
+    """Format the shortest readable in-tower label for an RSS contribution."""
     value = contribution.actual_value
     if contribution.label == "Diabetes" and value is not None and not isinstance(value, bool):
         return f"A1c {_format_number(value)}%"
@@ -297,6 +314,7 @@ def _format_number(value):
 
 
 def teaching_label(contribution):
+    """Return patient/clinician-facing teaching copy for an RSS contribution."""
     value = format_tower_value(contribution) or contribution.label
     label = contribution.label
     notes = {
@@ -334,6 +352,7 @@ def teaching_label(contribution):
 
 
 def contributor_explanation(contribution):
+    """Return the muted value/explanation line for an RSS contributor row."""
     label = contribution.label
     primary = {
         "CAC plaque burden": "Coronary calcium",
@@ -374,6 +393,7 @@ def contributor_explanation(contribution):
 
 
 def numeric_value(contribution):
+    """Extract the numeric value carried by an RSS contribution when available."""
     value = contribution.actual_value
     if isinstance(value, (int, float)):
         return value
@@ -386,6 +406,7 @@ def numeric_value(contribution):
 
 
 def evidence_note(contribution):
+    """Return a compact evidence note for the contribution source value."""
     value = numeric_value(contribution)
     label = contribution.label
 
@@ -555,6 +576,7 @@ def evidence_note(contribution):
 
 
 def format_tower_tooltip(contribution):
+    """Build the hover/title text for an RSS tower segment."""
     value_label = format_tower_value(contribution)
     if not value_label:
         value_label = contribution.label
@@ -568,10 +590,12 @@ def format_tower_tooltip(contribution):
 
 
 def domain_color(domain):
+    """Resolve a contribution domain to its configured display color."""
     return DOMAIN_COLORS.get(domain, "#6b7280")
 
 
 def rss_interpretation(rss_total):
+    """Map an RSS numeric score to a compact interpretation label."""
     if rss_total >= 75:
         return "Severe"
     if rss_total >= 50:
@@ -582,6 +606,7 @@ def rss_interpretation(rss_total):
 
 
 def build_rss_tower_html(rss_contributions):
+    """Render the vertical RSS tower from canonical point contributors."""
     segments = []
     tower_items = [item for item in (rss_contributions or []) if item["points"] > 0 and item["stack_in_tower"]]
     filled_points = sum(item["points"] for item in tower_items)
@@ -661,6 +686,7 @@ def build_rss_tower_html(rss_contributions):
 
 
 def render_rss_tower(rss_total, rss_contributions):
+    """Render RSS tower HTML for Streamlit display."""
     if rss_total <= 0 or not rss_contributions:
         return
 
@@ -801,6 +827,7 @@ def _context_row(item, class_name="rss-context-row"):
 
 
 def build_rss_panel_html(rss_total, rss_contributions, result=None):
+    """Render the complete RSS panel with tower and contributor list."""
     display = get_rss_display_items(result, rss_contributions, rss_total)
     interpretation = display["score_label"]
     display_contributors = display["contributors"]
@@ -1233,6 +1260,7 @@ def build_rss_panel_html(rss_total, rss_contributions, result=None):
 
 
 def render_rss_panel(rss_total, rss_contributions):
+    """Emit the RSS panel into the active Streamlit page."""
     render_html(st, build_rss_panel_html(rss_total, rss_contributions))
 
     domain_points = {}

@@ -357,8 +357,8 @@ def build_rss_contributions(patient, result) -> List[SignalContribution]:
         ("rheumatoid_arthritis", "RA"),
         ("sle", "SLE"),
         ("psoriasis", "Psoriasis"),
+        ("inflammatory_arthritis", "Inflammatory arthritis"),
         ("ibd", "IBD"),
-        ("hiv", "HIV"),
     ]
     added_inflammatory_specific = False
     for attr, label in inflammatory_items:
@@ -374,6 +374,17 @@ def build_rss_contributions(patient, result) -> List[SignalContribution]:
                     rationale=f"{label} is a chronic inflammatory risk enhancer.",
                 )
             )
+    if getattr(patient, "hiv", False):
+        contributions.append(
+            SignalContribution(
+                domain="HIV",
+                label="HIV",
+                actual_value="stable ART" if getattr(patient, "stable_art", False) else True,
+                points=2,
+                severity="tiny",
+                rationale="HIV is shown as its own guideline risk-enhancing pathway.",
+            )
+        )
     if getattr(patient, "inflammatory_disease", False) and not added_inflammatory_specific:
         contributions.append(
             SignalContribution(
@@ -383,6 +394,48 @@ def build_rss_contributions(patient, result) -> List[SignalContribution]:
                 points=2,
                 severity="tiny",
                 rationale="Chronic inflammatory disease is a risk enhancer.",
+            )
+        )
+
+    ancestry_items = [
+        ("south_asian_ancestry", "South Asian ancestry"),
+        ("filipino_ancestry", "Filipino ancestry"),
+    ]
+    for attr, label in ancestry_items:
+        if getattr(patient, attr, False):
+            contributions.append(
+                SignalContribution(
+                    domain="Ancestry / SDOH",
+                    label=label,
+                    actual_value=True,
+                    points=2,
+                    severity="tiny",
+                    rationale=f"{label} is a guideline risk-enhancing context.",
+                )
+            )
+
+    if getattr(patient, "suspected_fh_hefh", False):
+        contributions.append(
+            SignalContribution(
+                domain="Atherogenic Burden",
+                label="Suspected FH / HeFH",
+                actual_value=True,
+                points=8,
+                severity="moderate",
+                rationale="Suspected FH/HeFH is a treatment-forward severe lipid pathway context.",
+            )
+        )
+
+    if getattr(patient, "incidental_cac", False) and getattr(patient, "cac", None) is None:
+        severe = str(getattr(patient, "incidental_cac_severity", "") or "").lower() == "severe"
+        contributions.append(
+            SignalContribution(
+                domain="Plaque",
+                label="Incidental CAC",
+                actual_value="severe on noncardiac CT" if severe else "noted on noncardiac CT",
+                points=20 if severe else 10,
+                severity="major" if severe else "moderate",
+                rationale="Incidental coronary calcium is qualitative plaque evidence.",
             )
         )
 

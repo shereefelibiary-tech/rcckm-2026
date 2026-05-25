@@ -441,6 +441,7 @@ def _build_grouped_rows(patient, result):
             ("rheumatoid_arthritis", "RA"),
             ("sle", "SLE"),
             ("psoriasis", "psoriasis"),
+            ("inflammatory_arthritis", "inflammatory arthritis"),
             ("ibd", "IBD"),
         ],
     )
@@ -454,7 +455,7 @@ def _build_grouped_rows(patient, result):
     groups["INFLAMMATORY DISEASE"].append(
         _row(
             "Immune/inflammatory context",
-            "RA, SLE, psoriasis, IBD",
+            "RA, SLE, psoriasis, inflammatory arthritis, IBD",
             [value],
             effect,
             active=False,
@@ -469,6 +470,26 @@ def _build_grouped_rows(patient, result):
                 ["HIV reported"],
                 "enhancer context",
                 active=False,
+            )
+        )
+
+    ancestry_values = _enabled_labels(
+        patient,
+        [
+            ("south_asian_ancestry", "South Asian ancestry"),
+            ("filipino_ancestry", "Filipino ancestry"),
+        ],
+    )
+    if getattr(patient, "higher_risk_ancestry_context", None):
+        ancestry_values.append(str(patient.higher_risk_ancestry_context))
+    if ancestry_values:
+        groups.setdefault("RISK ENHANCERS", []).append(
+            _row(
+                "Higher-risk ancestry/context",
+                "used for personalization, not diagnosis",
+                ancestry_values,
+                "enhancer context",
+                active=True,
             )
         )
 
@@ -534,6 +555,7 @@ def _build_grouped_rows(patient, result):
 
 
 def build_where_patient_falls_html(patient, result):
+    """Build the clinician audit table showing values, thresholds, and effects."""
     rows_html, active_signal_items = _build_grouped_rows(patient, result)
     if not rows_html:
         rows_html = _domain(
@@ -824,6 +846,7 @@ def build_where_patient_falls_html(patient, result):
 
 
 def render_where_patient_falls(patient, result, st_module=None):
+    """Render the Where This Patient Falls audit table in Streamlit."""
     if st_module is None:
         import streamlit as st_module
 

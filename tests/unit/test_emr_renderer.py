@@ -38,51 +38,32 @@ def test_render_emr_note_outputs_plain_text_sections_in_order():
 
     note = render_emr_note(patient, result)
 
-    expected_note = "\n".join(
-        [
-            "RISK CONTINUUM CKM — CLINICAL REPORT",
-            "",
-            "Risk Summary:",
-            "- Risk level: HIGH",
-            "- CKM stage: Stage 3 - Subclinical cardiovascular disease present.",
-            "- PREVENT 10-year atherosclerotic event risk: 8.2%",
-            "- PREVENT 30-year atherosclerotic event risk: 24.5%",
-            "- Plaque: CAC 350",
-            "- Kidney: G3aA2",
-            "- RSS: 57/100",
-            "",
-            "Assessment:",
-            "- Clinical ASCVD (ICD: I25.10)",
-            "- Type 2 diabetes mellitus (ICD: E11.9)",
-            "",
-            "Recommendations:",
-            "- Lipid-lowering therapy is reasonable.",
-            "- Optimize kidney-protective therapy.",
-        ]
-    )
-    assert expected_note
-    assert "Risk Summary:" in note
-    assert "- Risk level: HIGH" in note
-    assert "- PREVENT 10-year atherosclerotic event risk: 8.2%" in note
-    assert "- PREVENT 30-year atherosclerotic event risk: 24.5%" in note
-    assert "- Plaque: CAC 350" in note
-    assert "- Kidney: G3aA2" in note
-    assert "- RSS: 57/100" in note
+    assert "RISK CONTINUUM CKM - CLINICAL REPORT" in note
+    assert "Impression:" in note
+    assert "Assessment:" in note
+    assert "Assessment/coding:" not in note
+    assert "Recommendations:" in note
+    assert "Risk Summary:" not in note
+    assert "Context:" not in note
+    assert note.index("Impression:") < note.index("Assessment:") < note.index("Recommendations:")
+    assert "HIGH." in note
+    assert "PREVENT 10-year risk 8.2%; 30-year risk 24.5%." in note
+    assert "CKM stage 3; kidney G3aA2; albuminuria not measured; plaque CAC 350." in note
     assert "- Clinical ASCVD (ICD: I25.10)" in note
     assert "- Type 2 diabetes mellitus (ICD: E11.9)" in note
-    lipid_line = "- High-intensity lipid-lowering therapy indicated; treat toward high-risk targets."
+
+    lipid_line = "- High-intensity lipid-lowering therapy indicated."
     cac_line = "- CAC 350 already measured; no repeat CAC needed for current decision-making."
     aspirin_line = "- Aspirin may be considered only if bleeding risk is low after shared decision-making."
-    monitoring_line = "- Recheck lipid profile 4-12 weeks after starting or intensifying therapy, then every 6-12 months."
     assert lipid_line in note
-    assert monitoring_line in note
+    assert "Recheck lipids in 4-12 weeks" not in note
     assert cac_line in note
     assert aspirin_line in note
     assert "- Lipid therapy:" not in note
     assert "- Coronary calcium:" not in note
     assert "- Supporting actions:" not in note
     assert "Aspirin: Aspirin" not in note
-    assert note.index(lipid_line) < note.index(monitoring_line) < note.index(cac_line) < note.index(aspirin_line)
+    assert note.index(lipid_line) < note.index(cac_line) < note.index(aspirin_line)
 
 
 def test_render_emr_note_uses_plaque_category_when_cac_missing():
@@ -91,7 +72,7 @@ def test_render_emr_note_uses_plaque_category_when_cac_missing():
 
     note = render_emr_note(patient, result)
 
-    assert "- Plaque: SEVERE" in note
+    assert "plaque SEVERE" in note
 
 
 def test_render_emr_note_avoids_duplicate_recommendations_and_generic_action():
@@ -109,7 +90,7 @@ def test_render_emr_note_avoids_duplicate_recommendations_and_generic_action():
 
     assert "Treatment is reasonable." not in note
     assert "Supporting actions:" not in note
-    assert note.count("- Treat blood pressure toward individualized goal.") == 1
+    assert note.count("- Treat BP toward goal <130/80.") == 1
 
 
 def test_demo_emr_note_prioritizes_composite_diagnoses_and_decisive_actions():
@@ -125,7 +106,7 @@ def test_demo_emr_note_prioritizes_composite_diagnoses_and_decisive_actions():
     assert "Type 2 diabetes mellitus with CKD G3aA2 and albuminuria" in assessment
     assert "CKD stage 3a ICD: N18.31" in assessment
     assert "- Chronic kidney disease, stage 3a" not in assessment
-    assert "Elevated ApoB / atherogenic particle burden" in assessment
+    assert "Elevated ApoB / atherogenic particle burden" not in assessment
     assert "Premature family history of ASCVD" not in assessment
     assert "Subclinical coronary atherosclerosis (ICD:" not in assessment
     assert "- Type 2 diabetes mellitus (ICD:" not in assessment
@@ -134,20 +115,70 @@ def test_demo_emr_note_prioritizes_composite_diagnoses_and_decisive_actions():
     assert "- Albuminuria (ICD:" not in assessment
     assert "data-derived" not in assessment
 
-    assert "High-intensity lipid-lowering therapy indicated; treat toward high-risk targets." in note
-    assert "Risk enhancer: premature family history of ASCVD" in note
+    assert "High-intensity lipid-lowering therapy indicated." in note
+    assert "premature family history" in note
     assert "Lipid-lowering therapy is reasonable." not in note
     assert "Optimize glycemic therapy." in note
     assert "Supporting actions:" not in note
 
 
-def test_emr_risk_summary_uses_compact_atherogenic_burden_line_for_demo():
+def test_emr_impression_uses_compact_atherogenic_burden_sentence_for_demo():
     from ui.report_layout import demo_patient, run_patient
 
     patient = demo_patient()
     result, _rss_total, _contributions = run_patient(patient)
     note = render_emr_note(patient, result)
 
-    assert "- TG: 180 mg/dL." in note
-    assert "- Atherogenic burden: ApoB 110 mg/dL; LDL-C 132 mg/dL; non-HDL-C 157 mg/dL." in note
+    assert "Atherogenic/metabolic burden: ApoB 110 mg/dL; LDL-C 132 mg/dL; non-HDL-C 157 mg/dL; TG 180 mg/dL; Lp(a) 80 nmol/L." in note
+    assert "- TG: 180 mg/dL." not in note
     assert "use non-HDL-C/ApoB for atherogenic burden when TG is elevated" not in note
+
+
+def test_emr_note_is_materially_shorter_than_legacy_risk_summary_shape():
+    from ui.report_layout import demo_patient, run_patient
+
+    patient = demo_patient()
+    result, _rss_total, _contributions = run_patient(patient)
+    note = render_emr_note(patient, result)
+
+    legacy_proxy = "\n".join(
+        [
+            "RISK CONTINUUM CKM - CLINICAL REPORT",
+            "",
+            "Risk Summary:",
+            "- Level 5 - very high plaque burden",
+            "- CKM stage: Stage 3 - Subclinical cardiovascular disease present.",
+            "- PREVENT category: high 10-year risk",
+            "- PREVENT 10-year atherosclerotic event risk: 10.16%",
+            "- PREVENT 30-year atherosclerotic event risk: 30.65%",
+            "- Plaque: CAC 350",
+            "- Kidney: G3aA2",
+            "- RSS: 74/100",
+            "- TG: 180 mg/dL.",
+            "- Atherogenic burden: ApoB 110 mg/dL; LDL-C 132 mg/dL; non-HDL-C 157 mg/dL.",
+            "- Lp(a): 80 nmol/L.",
+            "- Risk enhancer: premature family history of ASCVD.",
+            "- PREVENT 10-year atherosclerotic event risk is high and supports treatment escalation.",
+            "- Diabetes and CKD are present and increase cardiometabolic risk.",
+            "- CAC 350 confirms severe plaque burden and high-risk targets.",
+            "- Aspirin decision should include individualized bleeding-risk review.",
+            "- UACR not available; obtain to complete kidney-risk assessment.",
+            "",
+            "Assessment:",
+            "- Severe subclinical coronary atherosclerosis / high CAC burden (ICD: I25.10)",
+            "- Type 2 diabetes mellitus with CKD G3aA2 and albuminuria (ICD: E11.22; CKD stage 3a ICD: N18.31)",
+            "- Hypertriglyceridemia (ICD: E78.1)",
+            "",
+            "Recommendations:",
+            "- High-intensity lipid-lowering therapy indicated; treat toward high-risk targets.",
+            "- Recheck lipid profile 4-12 weeks after starting or intensifying therapy, then every 6-12 months.",
+            "- CAC 350 already measured; no repeat CAC needed for current decision-making.",
+            "- Aspirin may be considered only if bleeding risk is low after shared decision-making.",
+            "- Optimize kidney-protective therapy.",
+            "- Optimize glycemic therapy.",
+        ]
+    )
+
+    assert len(note) <= len(legacy_proxy) * 0.7
+    assert "Impression:" in note
+    assert "Risk Summary:" not in note

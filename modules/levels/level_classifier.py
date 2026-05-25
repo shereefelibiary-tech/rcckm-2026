@@ -4,6 +4,8 @@ from typing import Any
 
 @dataclass
 class LevelClassification:
+    """Structured RCCKM level output for report and audit renderers."""
+
     level: str
     label: str
     short_reason: str
@@ -13,6 +15,7 @@ class LevelClassification:
     treatment_posture: str = "lifestyle"
 
     def to_dict(self) -> dict[str, Any]:
+        """Return a JSON-serializable representation of the level classification."""
         return asdict(self)
 
 
@@ -148,8 +151,8 @@ def _inflammatory_signal(patient) -> bool:
             "rheumatoid_arthritis",
             "sle",
             "psoriasis",
+            "inflammatory_arthritis",
             "ibd",
-            "hiv",
         )
     )
 
@@ -163,6 +166,8 @@ def _enhancer_burden_count(patient) -> int:
             _reproductive_signal_count(patient) > 0,
             _inflammatory_signal(patient),
             bool(getattr(patient, "hiv", False)),
+            bool(getattr(patient, "south_asian_ancestry", False)),
+            bool(getattr(patient, "filipino_ancestry", False)),
         )
         if present
     )
@@ -211,6 +216,12 @@ def _mild_signal_drivers(patient, result) -> list[str]:
         drivers.append("reproductive risk marker")
     if _inflammatory_signal(patient):
         drivers.append("inflammatory/immune risk marker")
+    if getattr(patient, "hiv", False):
+        drivers.append("HIV")
+    if getattr(patient, "south_asian_ancestry", False):
+        drivers.append("South Asian ancestry")
+    if getattr(patient, "filipino_ancestry", False):
+        drivers.append("Filipino ancestry")
     hscrp = _num(getattr(patient, "hscrp", None))
     if hscrp is not None and hscrp >= 2:
         drivers.append("hsCRP >=2")
@@ -235,6 +246,8 @@ def _actionable_burden_drivers(patient, result) -> list[str]:
         drivers.append("LDL-C 160-189")
     if _severe_hyperchol(patient):
         drivers.append("severe hypercholesterolemia")
+    if getattr(patient, "suspected_fh_hefh", False):
+        drivers.append("suspected FH / HeFH")
     if _bp_signal(patient):
         drivers.append("BP-treated/elevated BP")
     apob = _num(getattr(patient, "apob", None))
@@ -261,6 +274,9 @@ def _actionable_burden_drivers(patient, result) -> list[str]:
 def _plaque_status(patient) -> str:
     if bool(getattr(patient, "clinical_ascvd", False)):
         return "Clinical ASCVD"
+    if bool(getattr(patient, "incidental_cac", False)) and getattr(patient, "cac", None) is None:
+        severity = str(getattr(patient, "incidental_cac_severity", "") or "").strip()
+        return f"Incidental CAC noted{f' ({severity})' if severity else ''}"
     cac = _num(getattr(patient, "cac", None))
     if cac is None:
         if bool(getattr(patient, "cac_not_done", False)):
@@ -288,6 +304,11 @@ def _classification(level, label, reason, drivers, result, patient, posture):
 
 
 def classify_rcckm_level(patient, prevent_result=None, rss_result=None, diagnosis_context=None):
+    """Classify a reviewed patient worksheet into the RCCKM level taxonomy.
+
+    The function combines PREVENT outputs, plaque/ASCVD status, kidney signals,
+    and cardiometabolic burden into a structured LevelClassification.
+    """
     result = prevent_result
     cac = _num(getattr(patient, "cac", None))
 
@@ -330,12 +351,12 @@ def classify_rcckm_level(patient, prevent_result=None, rss_result=None, diagnosi
     elevated_30y = _age_30_to_59(patient) and prevent_30y is not None and prevent_30y >= 10
     prevent_category = _risk_value(getattr(result, "prevent_risk_category", None))
 
-    if _severe_hyperchol(patient):
+    if _severe_hyperchol(patient) or bool(getattr(patient, "suspected_fh_hefh", False)):
         return _classification(
             "3B",
             "Level 3B - actionable early CKM / atherogenic risk",
-            "Severe hypercholesterolemia should not be de-risked by PREVENT or CAC 0.",
-            ["severe hypercholesterolemia", *[d for d in actionable if d != "severe hypercholesterolemia"]],
+            "Severe hypercholesterolemia/FH pathway should not be de-risked by PREVENT or CAC 0.",
+            ["severe hypercholesterolemia / suspected FH", *[d for d in actionable if d != "severe hypercholesterolemia"]],
             result,
             patient,
             "treatment-forward",

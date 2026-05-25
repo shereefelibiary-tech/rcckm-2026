@@ -331,6 +331,7 @@ def _model_from_best_available(inputs: dict[str, Any]) -> str:
 
 
 def calculate_prevent(patient, model="best_available") -> dict[str, Any]:
+    """Calculate official PREVENT estimates using the requested or best-available model."""
     inputs = _base_inputs(patient)
     model_used = _model_from_best_available(inputs) if model == "best_available" else model
     if model_used not in MODEL_NUMBERS:

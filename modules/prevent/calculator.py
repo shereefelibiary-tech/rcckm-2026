@@ -81,6 +81,7 @@ def _merge_official_missing_values(patient, explicit: dict) -> dict:
 
 
 def calculate_prevent_summary(patient, trace=None) -> dict:
+    """Return PREVENT risk values, source metadata, and missing-input details."""
     explicit = _explicit_prevent_summary(patient)
     if explicit is not None:
         explicit = _merge_official_missing_values(patient, explicit)
@@ -120,16 +121,20 @@ def calculate_prevent_summary(patient, trace=None) -> dict:
 
 
 def calculate_prevent_ascvd_10y(patient):
+    """Return the 10-year ASCVD PREVENT estimate for a patient, if available."""
     return calculate_prevent_summary(patient)["prevent_10y_ascvd"]
 
 
 def calculate_prevent_total_cvd_10y(patient):
+    """Return the 10-year total CVD PREVENT estimate for a patient, if available."""
     return calculate_prevent_summary(patient)["prevent_10y_total_cvd"]
 
 
 def calculate_prevent_ascvd_30y(patient):
+    """Return the 30-year ASCVD PREVENT estimate for a patient, if available."""
     return calculate_prevent_summary(patient)["prevent_30y_ascvd"]
 
 
 def calculate_prevent_total_cvd_30y(patient):
+    """Return the 30-year total CVD PREVENT estimate for a patient, if available."""
     return calculate_prevent_summary(patient)["prevent_30y_total_cvd"]

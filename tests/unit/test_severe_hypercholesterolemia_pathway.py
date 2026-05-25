@@ -47,7 +47,7 @@ def test_ldl_190_pathway_dominates_low_prevent_and_cac_zero():
 
     assert "Severe hypercholesterolemia / LDL-C 204 mg/dL (>=190)" in result.top_drivers
     assert "PREVENT is not used to de-risk LDL-C >=190 pathway." in prevent_card_text
-    assert "PREVENT: not used to de-risk LDL-C >=190 pathway." in emr
+    assert "PREVENT should not be used to de-risk LDL-C >=190 pathway." in emr
     assert (
         "CAC 0 measured; do not use CAC 0 to defer lipid-lowering therapy in LDL-C >=190 / possible FH pathway"
         in emr
@@ -58,10 +58,7 @@ def test_ldl_190_pathway_dominates_low_prevent_and_cac_zero():
     apob_index = emr.index("Elevated ApoB")
     assert severe_index < apob_index
 
-    assert "High-intensity or maximally tolerated statin therapy indicated." in emr
+    assert "High-intensity or maximally tolerated statin indicated." in emr
     assert "Evaluate secondary causes of severe hypercholesterolemia." in emr
     assert "Consider FH evaluation/cascade screening when clinical suspicion is present." in emr
-    assert (
-        "Recheck lipid profile 4-12 weeks after starting or intensifying therapy, then every 6-12 months."
-        in emr
-    )
+    assert "Recheck lipids in 4-12 weeks" not in emr

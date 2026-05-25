@@ -159,10 +159,10 @@ def build_diagnosis_candidates(patient):
                 icd10_code="E78.41",
             )
 
-    if patient.apob is not None and patient.apob >= 100:
+    if patient.apob is not None and patient.apob >= 120:
         add_candidate(
             name="Elevated ApoB",
-            source="ApoB >=100 mg/dL",
+            source="ApoB >=120 mg/dL",
             icd10_code="E78.89",
         )
 

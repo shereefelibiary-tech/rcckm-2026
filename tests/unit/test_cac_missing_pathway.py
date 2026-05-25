@@ -36,13 +36,13 @@ def test_cac_missing_high_prevent_shows_plaque_unmeasured_without_plaque_diagnos
     assert "subclinical coronary atherosclerosis" not in " ".join(_diagnosis_names(result)).lower()
     assert "Plaque burden is unmeasured" in prevent_html
     assert "Plaque status has not been measured." in roadmap_html
-    assert "Plaque: unmeasured" in emr_note
+    assert "plaque unmeasured" in emr_note
     assert "Plaque unmeasured" in wpf_html
     assert "wpf-chip-missing" in wpf_html
     assert all(contribution.label != "CAC plaque burden" for contribution in rss_contributions)
     assert rss_total == 0
     assert result.dominant_action == "Lipid-lowering therapy is indicated; treat toward high-risk targets."
-    assert "CAC reasonable for risk clarification if treatment decision remains uncertain." in result.recommendations
+    assert "CAC may clarify plaque burden if treatment intensity remains uncertain." in result.recommendations
 
 
 def test_cac_missing_borderline_prevent_family_history_recommends_cac_without_plaque_diagnosis():

@@ -126,9 +126,9 @@ def test_clinical_ascvd_above_target_intensifies_secondary_prevention():
 
 
 def test_hiv_pathway_uses_specific_statin_wording():
-    plan = build_action_plan(Patient(age=55, sex="male", hiv=True), RCCKMResult())
+    plan = build_action_plan(Patient(age=55, sex="male", hiv=True, stable_art=True), RCCKMResult())
 
-    assert plan["dominant_action"] == "Statin therapy reasonable in HIV; review antiretroviral drug interactions."
+    assert plan["dominant_action"] == "Statin therapy recommended/reasonable in HIV; review ART-statin interactions."
 
 
 def test_triglyceride_action_boundaries():

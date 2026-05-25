@@ -27,7 +27,7 @@ def test_clinical_ascvd_overrides_prevent_and_cac():
     assert result.clinical_ascvd is True
     assert any("Clinical ASCVD" in name for name in names)
     assert not any("Subclinical coronary atherosclerosis" in name for name in names)
-    assert "PREVENT: not used for treatment decisions in established ASCVD." in text
+    assert "PREVENT is not used for treatment decisions." in text
     assert "does not de-risk secondary prevention" in text
     assert any("Secondary-prevention lipid-lowering therapy" in action for action in action_lines(result))
 
@@ -82,7 +82,7 @@ def test_prevent_category_does_not_overwrite_rcckm_level_when_albuminuria_is_act
 
     assert str(getattr(result.prevent_risk_category, "value", result.prevent_risk_category)) == "BORDERLINE"
     assert classify_continuum_position(patient, result) == {"level": 3, "sublevel": "3B"}
-    assert "Risk level: Level 3B - actionable early CKM / kidney risk" in render_emr_note(patient, result)
+    assert "Level 3B - actionable early CKM / kidney risk." in render_emr_note(patient, result)
 
 
 def test_elevated_30_year_prevent_trajectory_sets_at_least_level_3_without_plaque():
@@ -103,8 +103,8 @@ def test_elevated_30_year_prevent_trajectory_sets_at_least_level_3_without_plaqu
     assert position["level"] >= 3
     assert position["level"] < 4
     assert not any("Subclinical coronary atherosclerosis" in name for name in names)
-    assert "Plaque: unmeasured / CAC not performed" in render_emr_note(patient, result)
-    assert "30-year risk trajectory supports prevention discussion" in text
+    assert "plaque unmeasured / CAC not performed" in render_emr_note(patient, result)
+    assert "30-year risk 10.5%" in text
 
 
 def test_missing_uacr_is_not_normal_albuminuria_but_zero_is_measured():

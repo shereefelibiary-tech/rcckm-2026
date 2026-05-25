@@ -74,6 +74,7 @@ def _trajectory_line(risk_value):
 
 
 def build_prevent_missing_reason(result):
+    """Return a clinician-readable explanation of unavailable PREVENT inputs."""
     missing = list(getattr(result, "prevent_missing_inputs", None) or [])
     unsupported = str(getattr(result, "prevent_unsupported_reason", "") or "").strip()
     warnings = [
@@ -300,6 +301,7 @@ def _rcckm_level_html(result) -> str:
 
 
 def render_prevent_card(result):
+    """Render the PREVENT population-risk card as HTML."""
     risk = getattr(result, "prevent_10y_ascvd", None)
     total_cvd = _total_cvd_value(result)
     ascvd_30y = _ascvd_30y_value(result)

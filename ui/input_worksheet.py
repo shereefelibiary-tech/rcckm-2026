@@ -113,10 +113,24 @@ WORKSHEET_KEY_BY_FIELD = {
     "rheumatoid_arthritis": "input_rheumatoid_arthritis",
     "sle": "input_sle",
     "psoriasis": "input_psoriasis",
+    "inflammatory_arthritis": "input_inflammatory_arthritis",
     "ibd": "input_ibd",
     "hiv": "input_hiv",
+    "stable_art": "input_stable_art",
     "osa": "input_osa",
     "masld": "input_masld",
+    "south_asian_ancestry": "input_south_asian_ancestry",
+    "filipino_ancestry": "input_filipino_ancestry",
+    "higher_risk_ancestry_context": "input_higher_risk_ancestry_context",
+    "active_cancer": "input_active_cancer",
+    "cancer_survivor": "input_cancer_survivor",
+    "cancer_life_expectancy_gt_2y": "input_cancer_life_expectancy_gt_2y",
+    "suspected_fh_hefh": "input_suspected_fh_hefh",
+    "incidental_cac": "input_incidental_cac",
+    "incidental_cac_severity": "input_incidental_cac_severity",
+    "cac_percentile": "input_cac_percentile",
+    "zip_code": "input_zip_code",
+    "neighborhood_sdoh_context": "input_neighborhood_sdoh_context",
     "lipid_lowering": "input_lipid_lowering",
     "lipid_supplements": "input_lipid_supplements",
     "bp_treated": "input_bp_treated",
@@ -208,10 +222,24 @@ def build_patient_from_inputs(inputs):
         rheumatoid_arthritis=_optional_bool(values, "rheumatoid_arthritis"),
         sle=_optional_bool(values, "sle"),
         psoriasis=_optional_bool(values, "psoriasis"),
+        inflammatory_arthritis=_optional_bool(values, "inflammatory_arthritis"),
         ibd=_optional_bool(values, "ibd"),
         hiv=_optional_bool(values, "hiv"),
+        stable_art=_optional_bool(values, "stable_art"),
         osa=_optional_bool(values, "osa"),
         masld=_optional_bool(values, "masld"),
+        south_asian_ancestry=_optional_bool(values, "south_asian_ancestry"),
+        filipino_ancestry=_optional_bool(values, "filipino_ancestry"),
+        higher_risk_ancestry_context=_empty_to_none(values.get("higher_risk_ancestry_context")),
+        active_cancer=_optional_bool(values, "active_cancer"),
+        cancer_survivor=_optional_bool(values, "cancer_survivor"),
+        cancer_life_expectancy_gt_2y=_optional_bool(values, "cancer_life_expectancy_gt_2y"),
+        suspected_fh_hefh=_optional_bool(values, "suspected_fh_hefh"),
+        incidental_cac=_optional_bool(values, "incidental_cac"),
+        incidental_cac_severity=_empty_to_none(values.get("incidental_cac_severity")),
+        cac_percentile=parse_optional_float(values.get("cac_percentile")),
+        zip_code=_empty_to_none(values.get("zip_code")),
+        neighborhood_sdoh_context=_empty_to_none(values.get("neighborhood_sdoh_context")),
         family_history_premature_ascvd=_optional_bool(
             values, "family_history_premature_ascvd"
         ),
@@ -262,6 +290,7 @@ def build_patient_from_inputs(inputs):
             patient.rheumatoid_arthritis,
             patient.sle,
             patient.psoriasis,
+            patient.inflammatory_arthritis,
             patient.ibd,
         ]
     ):
@@ -584,18 +613,20 @@ def render_manual_worksheet(st, parsed):
                 st, "Inflammatory disease", parsed, "inflammatory_disease"
             )
 
-        inf1, inf2, inf3, inf4, inf5 = st.columns(5)
+        inf1, inf2, inf3, inf4, inf5, inf6 = st.columns(6)
         with inf1:
             inputs["hiv"] = _checkbox_input(st, "HIV", parsed, "hiv")
         with inf2:
+            inputs["stable_art"] = _checkbox_input(st, "Stable ART", parsed, "stable_art")
+        with inf3:
             inputs["rheumatoid_arthritis"] = _checkbox_input(
                 st, "RA", parsed, "rheumatoid_arthritis"
             )
-        with inf3:
-            inputs["sle"] = _checkbox_input(st, "SLE", parsed, "sle")
         with inf4:
-            inputs["psoriasis"] = _checkbox_input(st, "Psoriasis", parsed, "psoriasis")
+            inputs["sle"] = _checkbox_input(st, "SLE", parsed, "sle")
         with inf5:
+            inputs["psoriasis"] = _checkbox_input(st, "Psoriasis", parsed, "psoriasis")
+        with inf6:
             inputs["ibd"] = _checkbox_input(st, "IBD", parsed, "ibd")
         inputs["inflammatory_disease"] = bool(inputs.get("inflammatory_disease")) or any(
             [
@@ -603,7 +634,86 @@ def render_manual_worksheet(st, parsed):
                 inputs.get("sle"),
                 inputs.get("psoriasis"),
                 inputs.get("ibd"),
-                inputs.get("hiv"),
+            ]
+        )
+        with st.expander("Edit additional risk enhancers", expanded=False):
+            enh1, enh2, enh3, enh4 = st.columns(4)
+            with enh1:
+                inputs["inflammatory_arthritis"] = _checkbox_input(
+                    st, "Inflammatory arthritis", parsed, "inflammatory_arthritis"
+                )
+                inputs["south_asian_ancestry"] = _checkbox_input(
+                    st, "South Asian ancestry", parsed, "south_asian_ancestry"
+                )
+            with enh2:
+                inputs["filipino_ancestry"] = _checkbox_input(
+                    st, "Filipino ancestry", parsed, "filipino_ancestry"
+                )
+                inputs["suspected_fh_hefh"] = _checkbox_input(
+                    st, "Suspected FH / HeFH", parsed, "suspected_fh_hefh"
+                )
+            with enh3:
+                inputs["active_cancer"] = _checkbox_input(st, "Active cancer", parsed, "active_cancer")
+                inputs["cancer_survivor"] = _checkbox_input(st, "Cancer survivor", parsed, "cancer_survivor")
+            with enh4:
+                inputs["cancer_life_expectancy_gt_2y"] = _checkbox_input(
+                    st, "Life expectancy >2y", parsed, "cancer_life_expectancy_gt_2y"
+                )
+                inputs["incidental_cac"] = _checkbox_input(
+                    st, "Incidental CAC on CT", parsed, "incidental_cac"
+                )
+            extra1, extra2, extra3, extra4 = st.columns([1, 1, 1, 1.25])
+            with extra1:
+                severity_options = ["", "present", "severe"]
+                parsed_severity = parsed.get("incidental_cac_severity") or ""
+                inputs["incidental_cac_severity"] = st.selectbox(
+                    "Incidental CAC severity",
+                    severity_options,
+                    key="input_incidental_cac_severity",
+                    **(
+                        {}
+                        if "input_incidental_cac_severity" in st.session_state
+                        else {"index": severity_options.index(parsed_severity) if parsed_severity in severity_options else 0}
+                    ),
+                )
+            with extra2:
+                inputs["cac_percentile"] = _numeric_input(st, "CAC percentile", parsed, "cac_percentile")
+            with extra3:
+                inputs["zip_code"] = st.text_input(
+                    "ZIP / SDOH support",
+                    key="input_zip_code",
+                    **(
+                        {}
+                        if "input_zip_code" in st.session_state
+                        else {"value": parsed.get("zip_code") or ""}
+                    ),
+                )
+            with extra4:
+                inputs["higher_risk_ancestry_context"] = st.text_input(
+                    "Other ancestry/context",
+                    key="input_higher_risk_ancestry_context",
+                    **(
+                        {}
+                        if "input_higher_risk_ancestry_context" in st.session_state
+                        else {"value": parsed.get("higher_risk_ancestry_context") or ""}
+                    ),
+                )
+                inputs["neighborhood_sdoh_context"] = st.text_input(
+                    "Neighborhood context",
+                    key="input_neighborhood_sdoh_context",
+                    **(
+                        {}
+                        if "input_neighborhood_sdoh_context" in st.session_state
+                        else {"value": parsed.get("neighborhood_sdoh_context") or ""}
+                    ),
+                )
+        inputs["inflammatory_disease"] = bool(inputs.get("inflammatory_disease")) or any(
+            [
+                inputs.get("rheumatoid_arthritis"),
+                inputs.get("sle"),
+                inputs.get("psoriasis"),
+                inputs.get("ibd"),
+                inputs.get("inflammatory_arthritis"),
             ]
         )
         with st.expander("Edit family history details", expanded=False):

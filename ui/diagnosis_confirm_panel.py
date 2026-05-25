@@ -1,6 +1,6 @@
 from html import escape
 
-from diagnosis_workflow import (
+from core.diagnosis_workflow import (
     apply_diagnosis_review_overrides,
     diagnosis_entry_id,
     diagnosis_context_line,

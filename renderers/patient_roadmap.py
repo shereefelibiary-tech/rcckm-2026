@@ -250,6 +250,7 @@ def _inflammatory_context(patient):
         ("rheumatoid_arthritis", "RA"),
         ("sle", "SLE"),
         ("psoriasis", "psoriasis"),
+        ("inflammatory_arthritis", "inflammatory arthritis"),
         ("ibd", "IBD"),
     ):
         if getattr(patient, field, False):
@@ -354,6 +355,19 @@ def _contributor_groups(patient, result):
 
     if getattr(patient, "masld", False):
         other_context.append("MASLD")
+
+    if getattr(patient, "hiv", False):
+        other_context.append("HIV on stable ART" if getattr(patient, "stable_art", False) else "HIV")
+    if getattr(patient, "south_asian_ancestry", False):
+        other_context.append("South Asian ancestry")
+    if getattr(patient, "filipino_ancestry", False):
+        other_context.append("Filipino ancestry")
+    if getattr(patient, "active_cancer", False):
+        other_context.append("active cancer context")
+    elif getattr(patient, "cancer_survivor", False):
+        other_context.append("cancer survivor context")
+    if getattr(patient, "incidental_cac", False) and getattr(patient, "cac", None) is None:
+        other_context.append("incidental CAC noted")
 
     reproductive_summary = reproductive_history_summary(patient, patient_facing=True)
     if reproductive_summary:
@@ -830,7 +844,17 @@ def _patient_driver_sections(patient, result):
     if getattr(patient, "masld", False):
         context.append("MASLD")
     if getattr(patient, "hiv", False):
-        context.append("HIV")
+        context.append("HIV on stable ART" if getattr(patient, "stable_art", False) else "HIV")
+    if getattr(patient, "south_asian_ancestry", False):
+        context.append("South Asian ancestry")
+    if getattr(patient, "filipino_ancestry", False):
+        context.append("Filipino ancestry")
+    if getattr(patient, "active_cancer", False):
+        context.append("active cancer context")
+    elif getattr(patient, "cancer_survivor", False):
+        context.append("cancer survivor context")
+    if getattr(patient, "incidental_cac", False) and getattr(patient, "cac", None) is None:
+        context.append("incidental CAC noted")
     inflammatory = _inflammatory_context(patient)
     if inflammatory:
         context.extend(inflammatory)
@@ -934,6 +958,10 @@ def _text_lines(patient, result):
 
     for label, finding, note, _tone in _patient_contributor_groups(patient, result):
         lines.append(f"- {label}: {finding}. {note}")
+
+    _priority, context_items = _patient_driver_sections(patient, result)
+    if context_items:
+        lines.append("- Other context: " + "; ".join(context_items[:8]) + ".")
 
     target_rows = _target_rows(patient, result)
     if target_rows:

@@ -1,4 +1,4 @@
-from diagnosis_workflow import (
+from core.diagnosis_workflow import (
     apply_diagnosis_review_overrides,
     prepare_diagnosis_display_entries,
     split_diagnoses,
@@ -43,6 +43,9 @@ def _plaque_summary(patient, result):
         return "CAC 0 measured; do not use CAC 0 to defer lipid-lowering therapy in LDL-C >=190 / possible FH pathway"
     if cac is not None:
         return f"CAC {cac:g}"
+    if getattr(patient, "incidental_cac", False):
+        severity = str(getattr(patient, "incidental_cac_severity", "") or "").strip()
+        return f"incidental CAC noted{f' ({severity})' if severity else ''}"
     if getattr(patient, "cac_not_done", False):
         return "unmeasured / CAC not performed"
 
@@ -122,6 +125,39 @@ def _lipid_risk_summary_lines(patient):
         lines.append(f"- Lp(a): {lpa_value:g}{unit}.")
 
     return lines
+
+
+def _lipid_risk_sentence(patient):
+    parts = []
+    triglycerides = getattr(patient, "triglycerides", None)
+    non_hdl_c = getattr(patient, "non_hdl_c", None)
+    apob = getattr(patient, "apob", None)
+    ldl_c = getattr(patient, "ldl_c", None)
+    lpa_value = getattr(patient, "lp_a_value", None)
+    lpa_unit = str(getattr(patient, "lp_a_unit", "") or "").strip()
+
+    if apob is not None:
+        parts.append(f"ApoB {apob:g} mg/dL")
+    if ldl_c is not None:
+        parts.append(f"LDL-C {ldl_c:g} mg/dL")
+    elif triglycerides is not None and triglycerides >= 400:
+        parts.append("LDL-C not calculated due to TG")
+    if non_hdl_c is not None:
+        parts.append(f"non-HDL-C {non_hdl_c:g} mg/dL")
+    if triglycerides is not None:
+        tg_label = f"TG {triglycerides:g} mg/dL"
+        if triglycerides >= 1000:
+            tg_label += " (pancreatitis-risk range)"
+        elif triglycerides >= 500:
+            tg_label += " (severe)"
+        parts.append(tg_label)
+    if lpa_value is not None:
+        unit = f" {lpa_unit}" if lpa_unit else ""
+        parts.append(f"Lp(a) {lpa_value:g}{unit}")
+
+    if not parts:
+        return None
+    return f"Atherogenic/metabolic burden: {'; '.join(parts)}."
 
 
 def _has_elevated_lpa(patient):
@@ -348,68 +384,142 @@ def _append_unique(lines, line):
         lines.append(line)
 
 
-def render_emr_note(patient, result):
-    lines = ["RISK CONTINUUM CKM — CLINICAL REPORT", "", "Risk Summary:"]
-
-    risk_level = _risk_level_summary(patient, result)
-    if risk_level:
-        lines.append(f"- Risk level: {risk_level}")
-
-    ckm_summary = _ckm_summary(result)
-    if ckm_summary:
-        lines.append(f"- CKM stage: {ckm_summary}")
-
+def _prevent_impression_sentence(patient, result):
     if getattr(patient, "clinical_ascvd", False):
-        lines.append("- PREVENT: not used for treatment decisions in established ASCVD.")
-    elif result.prevent_10y_ascvd is not None:
-        lines.append(
-            f"- PREVENT 10-year atherosclerotic event risk: {result.prevent_10y_ascvd:g}%"
-        )
-        category = str(_display_value(getattr(result, "prevent_risk_category", None)) or "").lower()
-        if category:
-            lines.append(f"- PREVENT category: {category} 10-year risk")
+        return "Established clinical ASCVD / secondary-prevention pathway; PREVENT is not used for treatment decisions."
 
-    if not getattr(patient, "clinical_ascvd", False) and getattr(result, "prevent_30y_ascvd", None) is not None:
-        lines.append(
-            f"- PREVENT 30-year atherosclerotic event risk: {result.prevent_30y_ascvd:g}%"
-        )
-        if _has_elevated_30y_trajectory(patient, result):
-            lines.append(
-                "- 30-year risk trajectory supports prevention discussion."
-            )
-    near_level3_line = _near_level3_threshold_line(patient, result)
-    if near_level3_line:
-        lines.append(f"- {near_level3_line}")
-    if bool(getattr(result, "severe_hypercholesterolemia", False)):
-        lines.append("- PREVENT: not used to de-risk LDL-C >=190 pathway.")
+    fragments = []
+    if getattr(result, "prevent_10y_ascvd", None) is not None:
+        fragments.append(f"PREVENT 10-year risk {result.prevent_10y_ascvd:g}%")
+    if getattr(result, "prevent_30y_ascvd", None) is not None:
+        fragments.append(f"30-year risk {result.prevent_30y_ascvd:g}%")
+    if not fragments:
+        return "PREVENT unavailable or incomplete; interpretation is based on reviewed worksheet data."
+    return "; ".join(fragments) + "."
 
-    plaque_summary = _plaque_summary(patient, result)
-    if plaque_summary:
-        lines.append(f"- Plaque: {plaque_summary}")
+
+def _disease_context_sentence(patient, result):
+    parts = []
+    ckm_stage = getattr(result, "ckm_stage", None) or {}
+    if ckm_stage.get("stage") is not None:
+        parts.append(f"CKM stage {ckm_stage.get('stage')}")
 
     kidney_summary = _kidney_summary(patient, result)
     if kidney_summary:
-        lines.append(f"- Kidney: {kidney_summary}")
-    if _uacr_completion_relevant(patient, result):
-        lines.append("- UACR not available; obtain to complete kidney-risk assessment.")
+        parts.append(f"kidney {kidney_summary}")
 
-    if result.rss_total is not None:
-        lines.append(f"- RSS: {result.rss_total:g}/100")
+    plaque_summary = _plaque_summary(patient, result)
+    if plaque_summary:
+        plaque_category = str(_display_value(getattr(result, "plaque_category", None)) or "").upper()
+        measured_plaque_category = bool(plaque_category and plaque_category != "UNKNOWN")
+        important_plaque = (
+            getattr(patient, "clinical_ascvd", False)
+            or getattr(patient, "cac", None) is not None
+            or getattr(patient, "incidental_cac", False)
+            or "LDL-C >=190" in plaque_summary
+            or measured_plaque_category
+        )
+        cac_action = "cac_testing" in (getattr(result, "action_domains", None) or {})
+        if important_plaque or cac_action:
+            parts.append(f"plaque {plaque_summary}")
 
-    for line in _lipid_risk_summary_lines(patient):
-        lines.append(line)
+    if not parts:
+        return None
+    return "; ".join(parts) + "."
 
+
+def _history_context_sentence(patient):
+    parts = []
     reproductive_summary = reproductive_history_summary(patient)
     if reproductive_summary:
-        label = "marker" if ";" not in reproductive_summary else "markers"
-        lines.append(f"- Reproductive risk {label}: {reproductive_summary}.")
-
+        parts.append(f"reproductive history: {reproductive_summary}")
+    if getattr(patient, "hiv", False):
+        parts.append("HIV on stable ART" if getattr(patient, "stable_art", False) else "HIV")
+    ancestry = []
+    if getattr(patient, "south_asian_ancestry", False):
+        ancestry.append("South Asian ancestry")
+    if getattr(patient, "filipino_ancestry", False):
+        ancestry.append("Filipino ancestry")
+    if getattr(patient, "higher_risk_ancestry_context", None):
+        ancestry.append(str(patient.higher_risk_ancestry_context))
+    if ancestry:
+        parts.append("risk-enhancing ancestry/context: " + "; ".join(ancestry))
+    if getattr(patient, "active_cancer", False):
+        parts.append("active cancer context")
+    elif getattr(patient, "cancer_survivor", False):
+        suffix = " with life expectancy >2 years" if getattr(patient, "cancer_life_expectancy_gt_2y", False) else ""
+        parts.append(f"cancer survivor context{suffix}")
+    if getattr(patient, "suspected_fh_hefh", False):
+        parts.append("suspected FH / HeFH pathway")
     if bool(getattr(patient, "premature_fhx_ascvd", False)) or bool(
         getattr(patient, "family_history_premature_ascvd", False)
     ):
         family_summary = str(getattr(patient, "family_history_summary", "") or "").strip()
-        suffix = f" ({family_summary})" if family_summary else ""
-        lines.append(f"- Risk enhancer: premature family history of ASCVD{suffix}.")
+        if family_summary:
+            parts.append(f"premature family history ({family_summary})")
+        else:
+            parts.append("premature family history")
+    if not parts:
+        return None
+    return "Risk context: " + "; ".join(parts) + "."
+
+
+def _impression_paragraphs(patient, result):
+    risk_level = _risk_level_summary(patient, result)
+    first = f"{risk_level}." if risk_level else None
+    prevent = _prevent_impression_sentence(patient, result)
+
+    second_parts = [_disease_context_sentence(patient, result), _lipid_risk_sentence(patient)]
+    second = " ".join(part for part in second_parts if part)
+
+    third_parts = []
+    if _uacr_completion_relevant(patient, result):
+        third_parts.append("UACR not available; obtain to complete kidney-risk assessment.")
+    history = _history_context_sentence(patient)
+    if history:
+        third_parts.append(history)
+    if bool(getattr(result, "severe_hypercholesterolemia", False)):
+        third_parts.append("PREVENT should not be used to de-risk LDL-C >=190 pathway.")
+    near_level3_line = _near_level3_threshold_line(patient, result)
+    if near_level3_line:
+        third_parts.append(near_level3_line)
+    third = " ".join(third_parts)
+
+    return [paragraph for paragraph in [first, prevent, second, third] if paragraph]
+
+
+def _include_monitoring_line(recommendation, recommendations):
+    if "Recheck lipid profile 4-12 weeks" not in recommendation:
+        return True
+    posture = " ".join(item for item in recommendations if item != recommendation).lower()
+    return any(token in posture for token in ("intensify", "started", "starting", "initiat"))
+
+
+def _short_recommendation_line(recommendation):
+    replacements = {
+        "Moderate-intensity lipid-lowering therapy is reasonable to reduce cumulative atherogenic exposure.": "Moderate-intensity lipid-lowering therapy reasonable.",
+        "Moderate-intensity statin therapy is reasonable to reduce cumulative atherogenic exposure.": "Moderate-intensity statin therapy reasonable.",
+        "Lipid-lowering therapy is indicated; treat toward high-risk targets.": "Lipid-lowering therapy indicated; treat toward high-risk targets.",
+        "High-intensity lipid-lowering therapy indicated; treat toward high-risk targets.": "High-intensity lipid-lowering therapy indicated.",
+        "High-intensity or maximally tolerated statin therapy indicated.": "High-intensity or maximally tolerated statin indicated.",
+        "Optimize kidney-protective therapy and confirm albuminuria persistence.": "Confirm albuminuria persistence and optimize kidney-protective therapy.",
+        "Treat blood pressure toward individualized goal.": "Treat BP toward goal <130/80.",
+        "CAC reasonable for risk clarification if treatment decision remains uncertain.": "CAC reasonable if treatment decision remains uncertain.",
+        "Recheck lipid profile 4-12 weeks after starting or intensifying therapy, then every 6-12 months.": "Recheck lipids in 4-12 weeks, then every 6-12 months.",
+        "Consider hsCRP to clarify inflammatory residual risk.": "Consider hsCRP if inflammatory residual risk would change management.",
+    }
+    return replacements.get(recommendation, recommendation)
+
+
+def render_emr_note(patient, result):
+    """Render the clinician-facing EMR note as compact plain text."""
+    lines = ["RISK CONTINUUM CKM - CLINICAL REPORT", "", "Impression:"]
+
+    impression = _impression_paragraphs(patient, result)
+    if impression:
+        lines.extend(impression)
+    else:
+        lines.append("Interpretation limited by available worksheet data.")
 
     lines.extend(["", "Assessment:"])
     diagnosis_entries = prepare_diagnosis_display_entries(result)
@@ -432,7 +542,11 @@ def render_emr_note(patient, result):
     recommendations = build_action_recommendation_lines(patient, result)
     if recommendations:
         for recommendation in recommendations:
-            lines.append(f"- {recommendation}")
+            if not _include_monitoring_line(recommendation, recommendations):
+                continue
+            if recommendation == "Plaque burden unmeasured.":
+                continue
+            lines.append(f"- {_short_recommendation_line(recommendation)}")
     else:
         lines.append("- No escalation indicated.")
 

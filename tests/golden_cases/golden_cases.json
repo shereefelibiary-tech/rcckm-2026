@@ -132,14 +132,13 @@
       "required_action": "No escalation"
     },
     "required_phrases": [
-      "Risk level: Level 2B - converging early risk signals",
+      "Level 2B - converging early risk signals",
       "Near-term estimated risk is low",
       "Early metabolic signals are present",
       "Hypertriglyceridemia",
       "Prediabetes",
-      "Reproductive risk marker: Gestational diabetes",
-      "Atherogenic burden: ApoB 84 mg/dL; LDL-C 118 mg/dL; non-HDL-C 148 mg/dL",
-      "TG: 176 mg/dL",
+      "reproductive history: Gestational diabetes",
+      "Atherogenic/metabolic burden: ApoB 84 mg/dL; LDL-C 118 mg/dL; non-HDL-C 148 mg/dL; TG 176 mg/dL",
       "Continue lifestyle-based prevention",
       "Aspirin not indicated for routine primary prevention"
     ],
@@ -186,20 +185,18 @@
       "forbidden_diagnosis": "subclinical"
     },
     "required_phrases": [
-      "Risk level: Level 3B - actionable early CKM / atherogenic risk",
-      "PREVENT 10-year atherosclerotic event risk: 1.37%",
-      "PREVENT 30-year atherosclerotic event risk: 9.09%",
-      "Moderate-intensity statin therapy is reasonable to reduce cumulative atherogenic exposure",
+      "Level 3B - actionable early CKM / atherogenic risk",
+      "PREVENT 10-year risk 1.37%; 30-year risk 9.09%",
+      "Moderate-intensity statin therapy reasonable",
       "CAC not performed; below usual age threshold, use only if it would change management",
       "Aspirin not indicated for routine primary prevention",
-      "Risk enhancer: premature family history of ASCVD",
-      "Atherogenic burden: ApoB 118 mg/dL; LDL-C 164 mg/dL; non-HDL-C 188 mg/dL",
-      "TG: 186 mg/dL",
+      "premature family history",
+      "Atherogenic/metabolic burden: ApoB 118 mg/dL; LDL-C 164 mg/dL; non-HDL-C 188 mg/dL; TG 186 mg/dL",
       "Hypertriglyceridemia",
       "Prediabetes"
     ],
     "forbidden_phrases": [
-      "Risk level: LOW\n",
+      "LOW\n",
       "High-intensity",
       "Lipid-lowering therapy is indicated",
       "CAC reasonable",
@@ -234,18 +231,15 @@
       "forbidden_diagnosis": "subclinical"
     },
     "required_phrases": [
-      "Risk level: Level 3A - elevated long-term risk trajectory",
-      "PREVENT 10-year atherosclerotic event risk: 1.2%",
-      "PREVENT category: low 10-year risk",
-      "PREVENT 30-year atherosclerotic event risk: 10.5%",
-      "30-year risk trajectory supports prevention discussion",
-      "Moderate-intensity statin therapy is reasonable to reduce cumulative atherogenic exposure",
+      "Level 3A - elevated long-term risk trajectory",
+      "PREVENT 10-year risk 1.2%; 30-year risk 10.5%",
+      "Moderate-intensity statin therapy reasonable",
       "CAC may clarify plaque burden if treatment intensity remains uncertain",
       "Near-term estimated risk may be low, but 30-year risk is elevated enough to justify prevention discussion"
     ],
     "forbidden_phrases": [
       "Subclinical coronary atherosclerosis",
-      "Risk level: LOW\n",
+      "LOW\n",
       "<div class=",
       "phenotype",
       "inherited risk",
@@ -284,17 +278,17 @@
       "forbidden_diagnosis": "subclinical"
     },
     "required_phrases": [
-      "Risk level: Level 2B - converging early risk signals",
-      "Lp(a): 188 nmol/L",
-      "Risk enhancer: premature family history of ASCVD",
+      "Level 2B - converging early risk signals",
+      "Lp(a) 188 nmol/L",
+      "premature family history",
       "No medication escalation required today; clinician-patient risk discussion recommended given elevated Lp(a) and premature family history",
       "CAC reasonable for risk clarification if treatment decision remains uncertain",
       "Aspirin not indicated for routine primary prevention",
       "Lp(a) and family history increase long-term risk context",
-      "Atherogenic burden: ApoB 86 mg/dL; LDL-C 124 mg/dL; non-HDL-C 142 mg/dL"
+      "Atherogenic/metabolic burden: ApoB 86 mg/dL; LDL-C 124 mg/dL; non-HDL-C 142 mg/dL; TG 90 mg/dL; Lp(a) 188 nmol/L"
     ],
     "forbidden_phrases": [
-      "Risk level: LOW\n",
+      "LOW\n",
       "High-intensity",
       "Moderate-intensity statin therapy",
       "Lipid-lowering therapy is indicated",
@@ -345,22 +339,21 @@
       "forbidden_diagnosis": "subclinical"
     },
     "required_phrases": [
-      "Risk level: Level 3B - actionable early CKM / atherogenic risk",
-      "PREVENT category: borderline 10-year risk",
-      "PREVENT 30-year atherosclerotic event risk: 17.53%",
-      "Plaque: unmeasured / CAC not performed",
-      "Kidney: G2; albuminuria not measured",
+      "Level 3B - actionable early CKM / atherogenic risk",
+      "PREVENT 10-year risk 3.42%; 30-year risk 17.53%",
+      "plaque unmeasured / CAC not performed",
+      "kidney G2; albuminuria not measured",
       "UACR not available; obtain to complete kidney-risk assessment",
-      "Moderate-intensity lipid-lowering therapy is reasonable to reduce cumulative atherogenic exposure",
-      "CAC reasonable for risk clarification if treatment decision remains uncertain",
+      "Moderate-intensity lipid-lowering therapy reasonable",
+      "CAC may clarify plaque burden if treatment intensity remains uncertain",
       "Obtain UACR to complete kidney-risk assessment",
       "Aspirin not indicated for routine primary prevention",
-      "Lp(a): 132 nmol/L",
-      "Reproductive risk markers: Early menopause 43; Gestational hypertension; Gestational diabetes",
+      "Lp(a) 132 nmol/L",
+      "reproductive history: Early menopause 43; Gestational hypertension; Gestational diabetes",
       "Near-term risk is borderline, but 30-year risk and multiple early risk markers support prevention discussion"
     ],
     "forbidden_phrases": [
-      "Risk level: BORDERLINE",
+      "BORDERLINE.",
       "No medication escalation today",
       "Subclinical coronary atherosclerosis",
       "<div class=",
@@ -396,15 +389,13 @@
       "forbidden_diagnosis": "subclinical"
     },
     "required_phrases": [
-      "Risk level: Level 3B - actionable early CKM / atherogenic risk",
-      "PREVENT category: low 10-year risk",
-      "PREVENT 30-year atherosclerotic event risk: 11.85%",
-      "30-year risk trajectory supports prevention discussion",
-      "Plaque: unmeasured / CAC not performed",
-      "Moderate-intensity statin therapy is reasonable to reduce cumulative atherogenic exposure",
+      "Level 3B - actionable early CKM / atherogenic risk",
+      "PREVENT 10-year risk 1.73%; 30-year risk 11.85%",
+      "plaque unmeasured / CAC not performed",
+      "Moderate-intensity statin therapy reasonable",
       "CAC may clarify plaque burden if treatment intensity remains uncertain",
       "Aspirin not indicated for routine primary prevention",
-      "Atherogenic burden: ApoB 121 mg/dL; LDL-C 166 mg/dL; non-HDL-C 202 mg/dL"
+      "Atherogenic/metabolic burden: ApoB 121 mg/dL; LDL-C 166 mg/dL; non-HDL-C 202 mg/dL; TG 182 mg/dL"
     ],
     "forbidden_phrases": [
       "CAC reasonable for risk clarification if treatment decision remains uncertain",
@@ -431,7 +422,6 @@
       ],
       "risk_continuum_sublevel": "2A",
       "required_driver": "ApoB",
-      "required_diagnosis": "Elevated ApoB",
       "required_action": "Lipid-lowering"
     },
     "forbidden_phrases": [
@@ -454,7 +444,6 @@
       "risk_continuum_level": 2,
       "risk_continuum_sublevel": "2B",
       "required_driver": "ApoB",
-      "required_diagnosis": "Elevated ApoB",
       "required_clarifier": "Lp(a)"
     },
     "forbidden_phrases": [
@@ -936,22 +925,20 @@
       "forbidden_diagnosis": "subclinical"
     },
     "required_phrases": [
-      "Risk level: Level 3B - actionable early CKM / kidney risk",
-      "PREVENT 10-year atherosclerotic event risk: 3.74%",
-      "PREVENT category: borderline 10-year risk",
-      "PREVENT 30-year atherosclerotic event risk: 18.8%",
-      "Plaque: unmeasured / CAC not performed",
-      "Kidney: G2A2",
+      "Level 3B - actionable early CKM / kidney risk",
+      "PREVENT 10-year risk 3.74%; 30-year risk 18.8%",
+      "plaque unmeasured / CAC not performed",
+      "kidney G2A2",
       "Albuminuria",
       "Prediabetes",
       "Hypertriglyceridemia",
-      "Optimize kidney-protective therapy and confirm albuminuria persistence",
-      "Moderate-intensity lipid-lowering therapy is reasonable to reduce cumulative atherogenic exposure",
-      "CAC reasonable for risk clarification if treatment decision remains uncertain",
+      "Confirm albuminuria persistence and optimize kidney-protective therapy",
+      "Moderate-intensity lipid-lowering therapy reasonable",
+      "CAC may clarify plaque burden if treatment intensity remains uncertain",
       "Aspirin not indicated for routine primary prevention"
     ],
     "forbidden_phrases": [
-      "Risk level: BORDERLINE",
+      "BORDERLINE.",
       "No medication escalation today",
       "Subclinical coronary atherosclerosis",
       "<div class=",
@@ -1284,7 +1271,7 @@
     },
     "required_phrases": [
       "Level 3B",
-      "PREVENT category: intermediate 10-year risk",
+      "PREVENT 10-year risk 5.41%; 30-year risk 22.55%",
       "UACR not available; obtain to complete kidney-risk assessment",
       "CAC may clarify plaque burden if treatment intensity remains uncertain",
       "Aspirin not indicated for routine primary prevention"

@@ -9,6 +9,7 @@ from smartphrase_ingest.med_vocab import extract_medications_structured
 
 @dataclass
 class ParseReport:
+    """Structured parser output containing extracted fields and review metadata."""
     extracted: dict[str, Any] = field(default_factory=dict)
     field_meta: dict[str, dict[str, str]] = field(default_factory=dict)
     warnings: list[str] = field(default_factory=list)
@@ -95,6 +96,7 @@ SOURCE_PATTERNS = {
 
 
 def detect_source_style(raw_text: str) -> str:
+    """Classify pasted text into a known EMR/lab style when recognizable."""
     text = raw_text or ""
     for source, patterns in SOURCE_PATTERNS.items():
         if any(re.search(pattern, text, re.IGNORECASE) for pattern in patterns):
@@ -232,6 +234,7 @@ def _parse_explicit_bool_line_status(raw: str, labels: list[str]) -> tuple[bool,
 
 
 def parse_explicit_bool_line(raw: str, labels: list[str]) -> bool | None:
+    """Parse a labeled boolean field while preserving explicit no/unknown states."""
     """Parse explicit yes/no condition lines without treating label mentions as positive."""
     _found, value = _parse_explicit_bool_line_status(raw, labels)
     return value
@@ -320,6 +323,7 @@ def _segment_affirms_event(segment: str, labels: list[str]) -> bool:
 
 
 def extract_ascvd_events(raw: str) -> dict:
+    """Extract clinical ASCVD event flags and a concise event summary from text."""
     events = {key: None for key in ASCVD_EVENT_LABELS}
     events["acs"] = None
     for segment in _bool_segments(raw):
@@ -586,6 +590,7 @@ def _parse_reproductive_history(report: ParseReport, text: str) -> None:
 
 
 def parse_smartphrase_report(text: str) -> ParseReport:
+    """Parse pasted EMR/lab text into a reviewable SmartPhrase ParseReport."""
     report = ParseReport()
     if not text:
         return report
@@ -776,10 +781,19 @@ def parse_smartphrase_report(text: str) -> ParseReport:
         "rheumatoid_arthritis": [r"rheumatoid\s+arthritis", r"ra"],
         "sle": [r"sle", r"lupus"],
         "psoriasis": [r"psoriasis"],
+        "inflammatory_arthritis": [r"inflammatory\s+arthritis"],
         "ibd": [r"ibd", r"inflammatory\s+bowel\s+disease", r"crohn'?s", r"ulcerative\s+colitis"],
         "hiv": [r"hiv"],
+        "stable_art": [r"stable\s+art", r"stable\s+antiretroviral\s+therapy", r"antiretroviral\s+therapy", r"\bart\b"],
         "osa": [r"osa", r"obstructive\s+sleep\s+apnea", r"sleep\s+apnea"],
         "masld": [r"masld", r"nafld", r"fatty\s+liver", r"metabolic\s+dysfunction-associated\s+steatotic\s+liver\s+disease"],
+        "south_asian_ancestry": [r"south\s+asian\s+ancestry", r"south\s+asian", r"asian\s+indian", r"indian\s+ancestry"],
+        "filipino_ancestry": [r"filipino\s+ancestry", r"filipino"],
+        "active_cancer": [r"active\s+cancer", r"current\s+cancer"],
+        "cancer_survivor": [r"cancer\s+survivor", r"history\s+of\s+cancer", r"prior\s+cancer"],
+        "cancer_life_expectancy_gt_2y": [r"life\s+expectancy\s*(?:>|greater\s+than|over)\s*2\s*y", r"life\s+expectancy\s+at\s+least\s+2\s*y"],
+        "suspected_fh_hefh": [r"suspected\s+(?:fh|hefh)", r"heterozygous\s+familial\s+hypercholesterolemia", r"familial\s+hypercholesterolemia", r"\bhefh\b"],
+        "incidental_cac": [r"incidental\s+cac", r"incidental\s+coronary\s+(?:artery\s+)?calcification", r"coronary\s+(?:artery\s+)?calcification\s+(?:on|noted\s+on)\s+(?:ct|noncardiac\s+ct)"],
         "sglt2": [r"sglt2", r"sglt-2"],
         "glp1": [r"glp1", r"glp-1", r"incretin"],
         "ace_arb": [r"ace\s+inhibitor", r"arb", r"ace/arb"],
@@ -844,13 +858,27 @@ def parse_smartphrase_report(text: str) -> ParseReport:
                 if context:
                     _record(report, "clinical_ascvd_context", context, "parsed", "clinical ASCVD event/procedure")
 
+    cac_percentile = re.search(
+        r"\b(?:cac\s+percentile|coronary\s+calcium\s+percentile)\s*(?:=|:|is)?\s*(\d{1,3})(?:th|st|nd|rd)?\b",
+        text,
+        re.IGNORECASE,
+    )
+    if cac_percentile:
+        _record(report, "cac_percentile", float(cac_percentile.group(1)), "parsed", "CAC percentile")
+    elif re.search(r"\bcac\b[^\n.;]{0,40}\b(?:>=|at\s+or\s+above)\s*75(?:th)?\s+percentile\b", text, re.IGNORECASE):
+        _record(report, "cac_percentile", 75.0, "parsed", "CAC percentile")
+
+    if report.extracted.get("incidental_cac") is True:
+        severity = "severe" if re.search(r"\bsevere\b[^\n.;]{0,40}\b(?:incidental\s+)?(?:cac|coronary\s+(?:artery\s+)?calcification)\b|\b(?:incidental\s+)?(?:cac|coronary\s+(?:artery\s+)?calcification)\b[^\n.;]{0,40}\bsevere\b", text, re.IGNORECASE) else "present"
+        _record(report, "incidental_cac_severity", severity, "parsed", "incidental CAC context")
+
     ascvd_events = extract_ascvd_events(text)
     if "ascvd_clinical" not in report.extracted and ascvd_events["clinical_ascvd"] is not None:
         _record(report, "ascvd_clinical", ascvd_events["clinical_ascvd"], "parsed", "structured ASCVD event extraction")
     if ascvd_events["event_summary"] and "clinical_ascvd_context" not in report.extracted:
         _record(report, "clinical_ascvd_context", ascvd_events["event_summary"], "parsed", "structured ASCVD event extraction")
 
-    for field in ("rheumatoid_arthritis", "sle", "psoriasis", "ibd", "hiv", "osa", "masld"):
+    for field in ("rheumatoid_arthritis", "sle", "psoriasis", "inflammatory_arthritis", "ibd", "hiv", "osa", "masld"):
         if field in report.extracted:
             continue
         value = _keyword_present_without_explicit_negation(text, explicit_bool_labels[field])
@@ -859,7 +887,7 @@ def parse_smartphrase_report(text: str) -> ParseReport:
 
     specific_inflammatory_present = any(
         report.extracted.get(key) is True
-        for key in ("rheumatoid_arthritis", "sle", "psoriasis", "ibd")
+        for key in ("rheumatoid_arthritis", "sle", "psoriasis", "inflammatory_arthritis", "ibd")
     )
     if specific_inflammatory_present:
         if report.extracted.get("inflammatory_disease") is False:
@@ -899,4 +927,5 @@ def parse_smartphrase_report(text: str) -> ParseReport:
 
 
 def parse_smartphrase(text: str) -> ParseReport:
+    """Backward-compatible wrapper for parse_smartphrase_report."""
     return parse_smartphrase_report(text)

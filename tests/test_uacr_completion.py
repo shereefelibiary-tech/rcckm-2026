@@ -11,7 +11,8 @@ from ui.report_layout import _build_ckm_kdigo_summary_html
 
 
 def _assessment_block(note):
-    return note.split("Assessment:", 1)[1].split("Recommendations:", 1)[0]
+    section_label = "Assessment/coding:" if "Assessment/coding:" in note else "Assessment:"
+    return note.split(section_label, 1)[1].split("Recommendations:", 1)[0]
 
 
 def test_missing_uacr_remains_none_and_zero_remains_measured_zero():
@@ -156,7 +157,7 @@ def test_diabetes_ckd_missing_uacr_does_not_render_albuminuria_diagnosis():
     assert patient.uacr is None
     assert result.albuminuria_stage is None
     assert result.kdigo_stage == "G3a"
-    assert "Kidney: G3a; albuminuria not measured" in note
+    assert "kidney G3a; albuminuria not measured" in note
     assert "Type 2 diabetes mellitus with CKD G3a" in assessment
     assert "albuminuria" not in assessment.lower()
     assert "CKD stage 3a ICD: N18.31" in assessment
@@ -172,7 +173,7 @@ def test_diabetes_ckd_uacr_zero_is_measured_a1_without_albuminuria_diagnosis():
     assert patient.uacr == 0
     assert result.albuminuria_stage == "A1"
     assert result.kdigo_stage == "G3aA1"
-    assert "Kidney: G3aA1" in note
+    assert "kidney G3aA1" in note
     assert "Type 2 diabetes mellitus with CKD G3aA1" in assessment
     assert "albuminuria" not in assessment.lower()
     assert "UACR not available" not in note

@@ -28,7 +28,7 @@ def build_snapshot_lines(result):
     lines = []
 
     if result.risk_level:
-        lines.append(f"Risk level: {result.risk_level.value}")
+        lines.append(f"RCCKM level: {result.risk_level.value}")
 
     if result.ckm_stage:
         drivers = result.ckm_stage.get("drivers", [])

@@ -187,8 +187,16 @@ def test_build_diagnosis_candidates_adds_elevated_lpa_from_mg_dl():
     assert any(c.name == "Elevated lipoprotein(a)" for c in candidates)
 
 
-def test_build_diagnosis_candidates_adds_elevated_apob():
-    patient = Patient(age=60, sex="male", apob=100)
+def test_build_diagnosis_candidates_does_not_add_elevated_apob_for_100_to_119():
+    patient = Patient(age=60, sex="male", apob=119)
+
+    candidates = build_diagnosis_candidates(patient)
+
+    assert not any(c.name == "Elevated ApoB" for c in candidates)
+
+
+def test_build_diagnosis_candidates_adds_elevated_apob_at_guideline_threshold():
+    patient = Patient(age=60, sex="male", apob=120)
 
     candidates = build_diagnosis_candidates(patient)
 

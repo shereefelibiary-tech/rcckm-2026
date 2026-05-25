@@ -94,7 +94,7 @@ def test_lpa_thresholds(value, unit, diagnosed):
 
 @pytest.mark.parametrize(
     ("apob", "diagnosed"),
-    [(79, False), (80, False), (99, False), (100, True), (119, True), (120, True)],
+    [(79, False), (80, False), (99, False), (100, False), (119, False), (120, True)],
 )
 def test_apob_thresholds(apob, diagnosed):
     _patient, result = evaluate_dict({"age": 55, "sex": "male", "apob": apob})

@@ -31,7 +31,7 @@ def test_build_snapshot_lines_returns_concise_clinical_synthesis_in_order():
     lines = build_snapshot_lines(result)
 
     assert lines == [
-        "Risk level: HIGH",
+        "RCCKM level: HIGH",
         "CKM stage: Stage 3 — CAC 350",
         "PREVENT 10-year ASCVD risk: 8.2%",
         "PREVENT 30-year ASCVD risk: 24.5%",
@@ -56,4 +56,4 @@ def test_build_snapshot_lines_omits_low_tier_clarification_and_aligned_discordan
 
     lines = build_snapshot_lines(result)
 
-    assert lines == ["Risk level: LOW"]
+    assert lines == ["RCCKM level: LOW"]

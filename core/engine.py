@@ -53,10 +53,13 @@ def evaluate_patient(patient):
     kdigo_stage = build_kdigo_stage(patient)
     severe_hypercholesterolemia = patient.ldl_c is not None and patient.ldl_c >= 190
     possible_fh_pathway = bool(
-        severe_hypercholesterolemia
-        and (
-            family_history["premature_fhx_ascvd"]
-            or (patient.apob is not None and patient.apob >= 140)
+        getattr(patient, "suspected_fh_hefh", False)
+        or (
+            severe_hypercholesterolemia
+            and (
+                family_history["premature_fhx_ascvd"]
+                or (patient.apob is not None and patient.apob >= 140)
+            )
         )
     )
 

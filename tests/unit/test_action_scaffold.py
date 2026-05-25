@@ -53,7 +53,7 @@ def test_cac_missing_clear_treatment_indication_keeps_lipid_action_first():
     assert sections[0].label == "Lipid therapy"
     assert sections[0].line == "Lipid-lowering therapy is indicated; treat toward high-risk targets."
     assert sections[1].label == "Coronary calcium"
-    assert sections[1].line == "CAC reasonable for risk clarification if treatment decision remains uncertain."
+    assert sections[1].line == "CAC may clarify plaque burden if treatment intensity remains uncertain."
 
 
 def test_cac_zero_does_not_recommend_cac():
@@ -212,7 +212,7 @@ def test_clinical_ascvd_with_cac_zero_uses_secondary_prevention_not_derisking():
     assert _section(sections, "Aspirin").line == (
         "Antiplatelet therapy indicated for secondary prevention if clinically appropriate."
     )
-    assert "PREVENT: not used for treatment decisions in established ASCVD." in note
+    assert "Established clinical ASCVD / secondary-prevention pathway; PREVENT is not used for treatment decisions." in note
     assert "PREVENT 10-year ASCVD risk" not in note
     assert "CAC 0 does not de-risk secondary prevention" in note
     assert "Clinical ASCVD / coronary artery disease with prior NSTEMI and PCI/stent" in diagnosis_text
@@ -271,19 +271,18 @@ def test_emr_recommendations_use_action_scaffold():
 
     note = render_emr_note(patient, result)
 
-    lipid_line = "- High-intensity lipid-lowering therapy indicated; treat toward high-risk targets."
+    lipid_line = "- High-intensity lipid-lowering therapy indicated."
     cac_line = "- CAC 350 already measured; no repeat CAC needed for current decision-making."
-    monitoring_line = "- Recheck lipid profile 4-12 weeks after starting or intensifying therapy, then every 6-12 months."
     aspirin_line = "- Aspirin may be considered only if bleeding risk is low after shared decision-making."
     assert lipid_line in note
-    assert monitoring_line in note
+    assert "Recheck lipids in 4-12 weeks" not in note
     assert cac_line in note
     assert aspirin_line in note
     assert "- Lipid therapy:" not in note
     assert "- Coronary calcium:" not in note
     assert "- Supporting actions:" not in note
     assert "Aspirin: Aspirin" not in note
-    assert note.index(lipid_line) < note.index(monitoring_line) < note.index(cac_line) < note.index(aspirin_line)
+    assert note.index(lipid_line) < note.index(cac_line) < note.index(aspirin_line)
 
 
 def test_flat_recommendation_lines_keep_order_without_visible_scaffold_labels():
@@ -321,9 +320,7 @@ def test_emr_very_severe_hypertriglyceridemia_uses_pancreatitis_pathway():
     note = render_emr_note(patient, result)
 
     assert patient.non_hdl_c == 254
-    assert "- TG: 1040 mg/dL; pancreatitis-risk range." in note
-    assert "- LDL-C: not calculated due to TG." in note
-    assert "- Atherogenic burden: ApoB 138 mg/dL; non-HDL-C 254 mg/dL." in note
+    assert "Atherogenic/metabolic burden: ApoB 138 mg/dL; LDL-C not calculated due to TG; non-HDL-C 254 mg/dL; TG 1040 mg/dL (pancreatitis-risk range)." in note
     assert "- Very severe hypertriglyceridemia: lower TG to reduce pancreatitis risk." in note
     assert "- Very-low-fat diet; eliminate alcohol and added sugars/refined carbohydrates." in note
     assert "- Refer to registered dietitian nutritionist." in note
@@ -390,6 +387,6 @@ def test_low_risk_complete_data_below_cac_age_threshold_stays_calm_without_cac_r
     assert "- Aspirin not indicated for routine primary prevention." in recommendations
     assert "CAC reasonable" not in recommendations
     assert "CAC not performed" not in recommendations
-    assert "Plaque: unmeasured / CAC not performed" in note
+    assert "Plaque: unmeasured / CAC not performed" not in note
     assert "UACR not available" not in note
     assert "Check Lp(a)" not in recommendations
