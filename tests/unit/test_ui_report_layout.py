@@ -8,6 +8,7 @@ from ui.report_layout import (
     render_report,
     run_patient,
 )
+from ui.export_print import contains_html_tags, normalize_export_text
 from renderers.clarifier_renderer import build_clarifier_card_html
 from renderers.continuum_bar import build_continuum_bar_html
 from renderers.prevent_card import render_prevent_card
@@ -85,6 +86,10 @@ class _FakeStreamlit:
     def button(self, label, key=None, **kwargs):
         self.messages.append(("button", label, key, kwargs))
         return key == self.clicked_key
+
+    def download_button(self, label, data=None, file_name=None, mime=None, **kwargs):
+        self.messages.append(("download_button", label, data, file_name, mime, kwargs))
+        return False
 
     def checkbox(self, label, value=False, key=None):
         self.messages.append(("checkbox", label, value, key))
@@ -270,10 +275,35 @@ def test_report_hierarchy_is_clinician_first_and_patient_roadmap_last():
     emr_index = next(i for i, message in enumerate(messages) if "Risk Continuum - EMR Note" in message)
     roadmap_index = next(i for i, message in enumerate(messages) if "roadmap-card" in message)
     copy_index = next(i for i, message in enumerate(messages) if "Copy patient roadmap" in message)
+    export_index = next(i for i, message in enumerate(messages) if "Export / Print" in message)
 
     assert continuum_index < prevent_index < drivers_index < ckm_index
     assert ckm_index < where_index < clarifier_index < targets_index < action_index
     assert action_index < assessment_index < emr_index < roadmap_index < copy_index
+    assert copy_index < export_index
+
+
+def test_export_print_section_uses_plain_text_outputs_and_downloads():
+    fake_st = _FakeStreamlit()
+
+    render_report(fake_st, demo_patient())
+
+    combined = "\n".join(str(message) for message in fake_st.messages)
+    assert "Export / Print" in combined
+    assert "Copy the EMR note for clinical documentation" in combined
+    assert "Copy EMR note" in combined
+    assert "Copy patient roadmap" in combined
+    assert "Print patient roadmap" in combined
+    assert "Review all copied or printed output before use." in combined
+
+    downloads = [message for message in fake_st.messages if message[0] == "download_button"]
+    labels = [message[1] for message in downloads]
+    assert "Download EMR note (.txt)" in labels
+    assert "Download patient roadmap (.txt)" in labels
+    for _kind, _label, data, _file_name, mime, _kwargs in downloads:
+        assert mime == "text/plain"
+        assert data == normalize_export_text(data)
+        assert not contains_html_tags(data)
 
 
 def test_default_demo_patient_populates_major_outputs_and_renderers():
@@ -599,12 +629,18 @@ def _click_button_by_label(app_test, label):
     raise AssertionError(f"Missing button {label}")
 
 
+def _assert_sidebar_navigation(app_test):
+    assert len(app_test.radio) == 1
+    assert app_test.radio[0].label == "Section"
+    assert list(app_test.radio[0].options) == ["Worksheet", "Validation & Safety"]
+
+
 def test_ingest_populates_editable_worksheet_fields():
     from streamlit.testing.v1 import AppTest
 
     at = AppTest.from_file("app.py")
     at.run(timeout=10)
-    assert len(at.radio) == 0
+    _assert_sidebar_navigation(at)
     at.text_area[0].set_value(
         "60M BP 132/78 TC 210 LDL 142 HDL 42 TG 180 ApoB 118 "
         "Lp(a) 180 nmol/L A1c 7.1 eGFR 55 UACR 45 CAC 350 "
@@ -659,7 +695,7 @@ def test_app_loads_with_demo_patient_and_unified_input_flow():
     at.run(timeout=10)
 
     assert len(at.exception) == 0
-    assert len(at.radio) == 0
+    _assert_sidebar_navigation(at)
     assert _value_by_label(at.text_input, "Age") == "55"
     assert _value_by_label(at.text_input, "SBP") == "132"
     assert _value_by_label(at.text_input, "DBP") == "82"
@@ -677,6 +713,27 @@ def test_app_loads_with_demo_patient_and_unified_input_flow():
     markdown_text = "\n".join(str(message.value) for message in at.markdown)
     assert "Review the worksheet, then click Interpret reviewed worksheet." in markdown_text
     assert "10-Year Cardiovascular Risk" not in markdown_text
+
+
+def test_demo_case_gallery_loads_case_and_clears_report_state():
+    from streamlit.testing.v1 import AppTest
+
+    at = AppTest.from_file("app.py")
+    at.run(timeout=10)
+
+    demo_select = next(widget for widget in at.selectbox if widget.label == "Demo case")
+    demo_select.set_value("Severe hypertriglyceridemia")
+    at.run(timeout=10)
+    _click_button_by_label(at, "Load demo case")
+
+    assert len(at.exception) == 0
+    assert "Loaded demo case: Severe hypertriglyceridemia." in "\n".join(
+        str(message.value) for message in at.success
+    )
+    assert float(_value_by_label(at.text_input, "TG")) >= 1000
+    assert at.session_state["parsed_ingest"] == {}
+    assert at.session_state["report_generated"] is False
+    assert at.session_state["current_result"] is None
 
 
 def test_worksheet_numeric_labels_include_compact_units():

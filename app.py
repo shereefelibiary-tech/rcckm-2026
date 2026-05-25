@@ -4,10 +4,12 @@ except ModuleNotFoundError:
     st = None
 
 from ui.ingest_panel import parse_ingest_text, render_ingest_panel
+from ui.demo_case_gallery import build_demo_patient, demo_case_options
 from ui.input_worksheet import (
     apply_patient_to_session_state,
     build_patient_from_inputs,
     patient_to_payload,
+    WORKSHEET_KEY_BY_FIELD,
     render_manual_worksheet,
 )
 from ui.html import render_html
@@ -21,6 +23,7 @@ from ui.report_state import (
     store_interpretation,
 )
 from ui.theme import apply_global_theme, render_brand_header, section_heading
+from ui.validation_safety import render_validation_safety
 from modules.prevent.calculator import calculate_prevent_summary
 
 
@@ -51,11 +54,33 @@ def _load_demo_defaults_once():
 
 def _reset_to_demo_patient():
     patient = demo_patient()
+    _clear_worksheet_state()
     apply_patient_to_session_state(st.session_state, patient, overwrite=True)
     st.session_state.parsed_ingest = {}
     st.session_state.parse_report = {"parsed": {}, "meta": {}, "warnings": []}
     st.session_state.parsed_needs_review = False
     st.session_state.confirmed_diagnosis_names = []
+    clear_report_state(st.session_state, dirty=True)
+
+
+def _clear_worksheet_state():
+    for widget_key in WORKSHEET_KEY_BY_FIELD.values():
+        st.session_state.pop(widget_key, None)
+    st.session_state.pop("input_bp_meds", None)
+    for key in list(st.session_state.keys()):
+        if str(key).startswith("_unknown_input_"):
+            st.session_state.pop(key, None)
+
+
+def _load_demo_case(case_label, case_name):
+    patient = build_demo_patient(case_name)
+    _clear_worksheet_state()
+    apply_patient_to_session_state(st.session_state, patient, overwrite=True)
+    st.session_state.parsed_ingest = {}
+    st.session_state.parse_report = {"parsed": {}, "meta": {}, "warnings": []}
+    st.session_state.parsed_needs_review = False
+    st.session_state.confirmed_diagnosis_names = []
+    st.session_state.loaded_demo_case_label = case_label
     clear_report_state(st.session_state, dirty=True)
 
 
@@ -92,10 +117,33 @@ def main():
     _load_demo_defaults_once()
 
     with st.sidebar:
+        st.markdown("### Navigation")
+        active_section = st.radio(
+            "Section",
+            ["Worksheet", "Validation & Safety"],
+            key="app_section",
+            label_visibility="collapsed",
+        )
+
         st.markdown("### Worksheet")
         if st.button("Reset to demo patient"):
             _reset_to_demo_patient()
             st.rerun()
+
+        st.markdown("### Demo Case Gallery")
+        st.caption(
+            "Load a representative clinical scenario to see how RCCKM structures risk, action, EMR documentation, and the patient roadmap."
+        )
+        demo_options = demo_case_options()
+        labels = [label for label, _case_name in demo_options]
+        selected_label = st.selectbox(
+            "Demo case",
+            labels,
+            key="demo_case_gallery_selection",
+        )
+        selected_case_name = dict(demo_options).get(selected_label)
+        if st.button("Load demo case", disabled=selected_case_name is None):
+            _load_demo_case(selected_label, selected_case_name)
 
         st.markdown("### Debug")
         st.checkbox(
@@ -103,6 +151,14 @@ def main():
             key="show_raw_renderer_html",
             help="Developer-only: show raw renderer HTML in collapsed expanders.",
         )
+
+    if active_section == "Validation & Safety":
+        render_validation_safety(st)
+        return
+
+    loaded_demo_case_label = st.session_state.pop("loaded_demo_case_label", None)
+    if loaded_demo_case_label:
+        st.success(f"Loaded demo case: {loaded_demo_case_label}.")
 
     parsed = render_ingest_panel(st)
 
@@ -132,11 +188,11 @@ def main():
         worksheet_changed = False
 
     if report_can_render(st.session_state, current_worksheet_hash):
+        render_report(st, st.session_state.active_patient)
         _render_patient_debug(
             st.session_state.active_patient,
             st.session_state.active_patient_source,
         )
-        render_report(st, st.session_state.active_patient)
     else:
         message = "Review the worksheet, then click Interpret reviewed worksheet."
         if worksheet_changed or (

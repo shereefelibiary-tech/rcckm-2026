@@ -13,6 +13,7 @@ from modules.snapshot.engine import build_snapshot_lines
 
 from ui.diagnosis_confirm_panel import render_diagnosis_confirm_panel
 from ui.emr_copy_box import render_emr_copy_box
+from ui.export_print import render_export_print_section
 from ui.html import render_component_html, render_html
 from ui.theme import component_theme_css
 
@@ -811,11 +812,14 @@ def render_report(st, patient):
     render_html(st, _detail_section_header_html("Assessment candidates", "Coding support"))
     render_diagnosis_confirm_panel(st, result, include_title=False)
 
+    emr_note_text = _render_emr_note_text(patient, result)
+    patient_roadmap_text = _render_patient_roadmap_text(patient, result)
+
     render_html(st, _detail_section_header_html("EMR note", "Copy-ready clinical text"))
     _safe_panel(
         st,
         "EMR note",
-        lambda: render_emr_copy_box(st, _render_emr_note_text(patient, result)),
+        lambda: render_emr_copy_box(st, emr_note_text),
     )
 
     render_html(st, _detail_section_header_html("Patient roadmap", "Patient-facing handout"))
@@ -829,11 +833,16 @@ def render_report(st, patient):
         "Copy patient roadmap",
         lambda: render_emr_copy_box(
             st,
-            _render_patient_roadmap_text(patient, result),
+            patient_roadmap_text,
             title="Patient roadmap text",
             height_px=420,
             button_label="Copy patient roadmap",
         ),
+    )
+    render_export_print_section(
+        st,
+        emr_text=emr_note_text,
+        roadmap_text=patient_roadmap_text,
     )
 
     return result
