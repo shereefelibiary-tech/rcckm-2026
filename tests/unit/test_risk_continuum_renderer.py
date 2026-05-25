@@ -52,11 +52,12 @@ def test_build_risk_continuum_html_keeps_level_5_inside_responsive_grid():
     assert "High plaque burden (CAC 350)" not in html
     assert "CAC 350" in html
     assert "overflow: visible" in html
-    assert "font-size: clamp(0.95rem, 1.02vw, 1.05rem)" in html
-    assert "font-size: clamp(0.72rem, 0.84vw, 0.82rem)" in html
-    assert "font-size: clamp(0.70rem, 0.74vw, 0.78rem)" in html
-    assert "white-space: nowrap" in html
-    assert "clamp(4px, 0.58vw, 8px)" in html
+    assert "min-height: 126px" in html
+    assert "font-size: clamp(0.94rem, 1.0vw, 1.02rem)" in html
+    assert "font-size: clamp(0.76rem, 0.86vw, 0.84rem)" in html
+    assert "font-size: clamp(0.72rem, 0.78vw, 0.80rem)" in html
+    assert "white-space: normal" in html
+    assert "clamp(6px, 0.76vw, 12px)" in html
 
 
 def test_build_risk_continuum_html_level_5_clinical_ascvd_copy_is_compact():
@@ -100,5 +101,36 @@ def test_build_risk_continuum_html_level_5_cac_1000_copy_is_compact():
 
     assert "rc-level-5 rc-card-active" in html
     assert "Very high risk" in html
-    assert "CAC ≥1000" in html
+    assert "CAC &gt;=1000" in html
     assert "High plaque burden (CAC 1200)" not in html
+
+
+def test_build_risk_continuum_html_level_3b_has_room_for_context_line():
+    html = build_continuum_bar_html(
+        Patient(
+            age=56,
+            sex="male",
+            cac=None,
+            cac_not_done=True,
+            bp_treated=True,
+            a1c=5.9,
+            triglycerides=185,
+            apob=102,
+            non_hdl_c=165,
+            egfr=76,
+            uacr=None,
+        ),
+        RCCKMResult(
+            prevent_risk_category=RiskLevel.INTERMEDIATE,
+            prevent_30y_ascvd=22.55,
+        ),
+    )
+
+    assert "Current: Level 3B" in html
+    assert "Level 3B" in html
+    assert "Actionable early CKM / atherogenic risk" in html
+    assert "Plaque unmeasured" in html
+    assert "min-height: 126px" in html
+    assert "overflow: visible" in html
+    assert "white-space: normal" in html
+    assert "line-height: 1.24" in html

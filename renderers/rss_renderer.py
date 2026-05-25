@@ -300,16 +300,16 @@ def teaching_label(contribution):
     value = format_tower_value(contribution) or contribution.label
     label = contribution.label
     notes = {
-        "CAC plaque burden": "high plaque burden" if numeric_value(contribution) and numeric_value(contribution) >= 300 else "plaque present",
-        "ApoB elevation": "elevated particle burden",
+        "CAC plaque burden": "coronary calcium",
+        "ApoB elevation": "ApoB / particle burden",
         "Albuminuria": "albuminuria",
-        "Reduced eGFR": "reduced kidney function",
-        "Diabetes": "diabetes-range A1c",
-        "A1c elevation": "diabetes-range A1c",
+        "Reduced eGFR": "eGFR",
+        "Diabetes": "A1c",
+        "A1c elevation": "A1c",
         "Elevated Lp(a)": "Lp(a)",
-        "Inflammatory risk": "elevated inflammatory biomarker",
-        "Hypertriglyceridemia": "elevated triglycerides",
-        "Premature family history": "premature family history",
+        "Inflammatory risk": "hsCRP",
+        "Hypertriglyceridemia": "triglycerides",
+        "Premature family history": "family history",
         "RA": "inflammatory risk enhancer",
         "SLE": "inflammatory risk enhancer",
         "Psoriasis": "inflammatory risk enhancer",
@@ -335,22 +335,17 @@ def teaching_label(contribution):
 
 def contributor_explanation(contribution):
     label = contribution.label
-    value = numeric_value(contribution)
     primary = {
-        "CAC plaque burden": "High plaque burden"
-        if value and value >= 100
-        else "Plaque present",
-        "ApoB elevation": "Elevated particle burden",
-        "Reduced eGFR": "Reduced kidney function",
+        "CAC plaque burden": "Coronary calcium",
+        "ApoB elevation": "ApoB / particle burden",
+        "Reduced eGFR": "eGFR",
         "Albuminuria": "Albuminuria",
-        "Diabetes": "Diabetes-range A1c",
-        "A1c elevation": "Prediabetes-range A1c"
-        if value is not None and value < 6.5
-        else "Diabetes-range A1c",
+        "Diabetes": "A1c",
+        "A1c elevation": "A1c",
         "Elevated Lp(a)": "Lp(a)",
-        "Hypertriglyceridemia": "Elevated triglycerides",
-        "Inflammatory risk": "Elevated inflammatory biomarker",
-        "Premature family history": "Premature family history",
+        "Hypertriglyceridemia": "Triglycerides",
+        "Inflammatory risk": "hsCRP",
+        "Premature family history": "Family history",
         "RA": "RA",
         "SLE": "SLE",
         "Psoriasis": "Psoriasis",
@@ -509,11 +504,11 @@ def evidence_note(contribution):
     if label in {"Diabetes", "A1c elevation"}:
         if label == "A1c elevation" and value is not None and value < 6.5:
             return (
-                "Prediabetes-range A1c",
-                "Prediabetes-range A1c is shown as a small metabolic contributor.",
+                "A1c 5.7-6.4% band",
+                "A1c is shown as a small metabolic contributor in this range.",
             )
         return (
-            "Diabetes-range A1c",
+            "A1c >=6.5% band",
             "Dysglycemia adds cardiometabolic risk beyond lipid burden alone.",
         )
 
@@ -833,7 +828,7 @@ def build_rss_panel_html(rss_total, rss_contributions, result=None):
             f'<div class="rss-driver-copy">'
             f'<strong class="rss-row-label">{html.escape(primary)}</strong>'
             f'<span class="rss-row-value rss-muted">{html.escape(detail)}</span></div>'
-            f'<div class="rss-row-points rss-driver-points" style="color:{color};">+{contribution.points:g}</div>'
+            f'<div class="rss-row-points rss-driver-points">+{contribution.points:g}</div>'
             f'</div>'
         )
     driver_rows = "".join(driver_row_parts)
@@ -1062,21 +1057,12 @@ def build_rss_panel_html(rss_total, rss_contributions, result=None):
     border-bottom-color: rgba(11, 31, 58, 0.07);
 }}
 .rss-driver-row--tiny {{
-    grid-template-columns: 8px minmax(0, 1fr) auto;
-    gap: 8px;
+    grid-template-columns: 11px minmax(0, 1fr) auto;
+    gap: 10px;
     padding: 3px 0 4px;
 }}
 .rss-driver-row--mild {{
     padding: 4px 0 5px;
-}}
-.rss-driver-row--tiny .rss-driver-color,
-.rss-driver-row--mild .rss-driver-color {{
-    opacity: 0.72;
-}}
-.rss-driver-row--tiny .rss-driver-color {{
-    border-radius: 2px;
-    height: 8px;
-    width: 8px;
 }}
 .rss-driver-row--tiny .rss-driver-copy strong {{
     color: rgba(17, 17, 17, 0.78);
@@ -1091,7 +1077,6 @@ def build_rss_panel_html(rss_total, rss_contributions, result=None):
 .rss-driver-row--tiny .rss-driver-points {{
     font-size: 0.85rem;
     font-weight: 800;
-    opacity: 0.84;
 }}
 .rss-driver-row--mild .rss-driver-copy strong {{
     color: rgba(17, 17, 17, 0.84);
@@ -1113,8 +1098,9 @@ def build_rss_panel_html(rss_total, rss_contributions, result=None):
 .rss-marker,
 .rss-driver-color {{
     border-radius: 3px;
-    height: 11px;
-    width: 11px;
+    flex: 0 0 auto;
+    height: 9px;
+    width: 9px;
 }}
 .rss-driver-copy {{
     color: rgba(7, 26, 47, 0.74);
@@ -1141,6 +1127,7 @@ def build_rss_panel_html(rss_total, rss_contributions, result=None):
 }}
 .rss-row-points,
 .rss-driver-points {{
+    color: var(--rc-black);
     font-size: 0.88rem;
     font-weight: 820;
     text-align: right;
@@ -1227,7 +1214,7 @@ def build_rss_panel_html(rss_total, rss_contributions, result=None):
 <div class="rss-card rss-module rc-panel">
 <div class="rss-module-head">
 <div>
-<div class="rss-title rss-module-title rc-card-title">Why Risk Is Elevated</div>
+<div class="rss-title rss-module-title rc-card-title">Where the Risk Is Coming From</div>
 </div>
 <div class="rss-score-compact">
 <div class="rss-score rss-score-number">{rss_total:g}<span class="rss-score-den">/100</span></div>

@@ -176,7 +176,7 @@ def test_report_uses_component_html_for_custom_renderers():
     assert "prevent-card" in inline_html
     assert "roadmap-card" in inline_html
     assert "rss-module" in inline_html
-    assert "Why Risk Is Elevated" in inline_html
+    assert "Where the Risk Is Coming From" in inline_html
     assert "grid-template-columns: 220px minmax(0, 1fr)" in inline_html
     assert "rss-tower-zone" in inline_html
     assert "rss-list-zone" in inline_html
@@ -335,7 +335,7 @@ def test_unified_rss_module_returns_unescaped_contributor_rows():
     html = build_rss_panel_html(rss_total, contributions)
 
     assert "rss-module" in html
-    assert "Why Risk Is Elevated" in html
+    assert "Where the Risk Is Coming From" in html
     assert "rss-driver-row" in html
     assert "grid-template-columns: 220px minmax(0, 1fr)" in html
     assert "rss-tower-zone" in html
@@ -359,11 +359,11 @@ def test_rss_module_uses_shared_visual_order_for_tower_and_list():
     html = build_rss_panel_html(rss_total, contributions)
 
     expected = [
-        "Diabetes-range A1c",
+        "A1c",
         "Albuminuria",
-        "Reduced kidney function",
-        "Elevated particle burden",
-        "High plaque burden",
+        "eGFR",
+        "ApoB / particle burden",
+        "Coronary calcium",
     ]
     tower_expected = [
         "A1c 7.1%",
@@ -395,8 +395,8 @@ def test_rss_module_uses_shared_visual_order_for_tower_and_list():
     assert "rss-tower-empty" in tower
     assert tower.index("rss-tower-empty") < tower.index("A1c 7.1%")
     assert tower.rindex("CAC 350") > tower.index("ApoB 110 mg/dL")
-    assert "CAC 350: High plaque burden" not in html
-    assert "ApoB 110 mg/dL: Elevated particle burden" not in html
+    assert "CAC 350: Coronary calcium" not in html
+    assert "ApoB 110 mg/dL: ApoB / particle burden" not in html
     assert "Albuminuria signal" not in driver_list
     assert "Diabetes-range glycemia" not in driver_list
     assert " signal" not in driver_list.lower()
@@ -410,11 +410,11 @@ def test_rss_tower_and_rows_match_exact_visual_order_without_sorting_copy():
     rows = html.split('<div class="rss-driver-list">', 1)[1]
 
     row_expected = [
-        "Diabetes-range A1c",
+        "A1c",
         "Albuminuria",
-        "Reduced kidney function",
-        "Elevated particle burden",
-        "High plaque burden",
+        "eGFR",
+        "ApoB / particle burden",
+        "Coronary calcium",
     ]
 
     assert "Tower shows RSS burden" not in html
@@ -911,3 +911,4 @@ def test_primary_report_copy_limits_repeated_ascvd_jargon():
     assert combined_html.count("Atherosclerotic events include heart attack") == 1
     assert "10-year risk" in combined_html
     assert "30-year risk" in combined_html
+

@@ -94,6 +94,62 @@ def test_rss_layout_contains_tower_and_list_zones_without_clarifiers():
     assert "UACR missing" not in rendered
 
 
+def test_rss_title_and_contributor_labels_are_concise():
+    patient = Patient(
+        age=55,
+        sex="male",
+        a1c=6.0,
+        hscrp=2.2,
+        triglycerides=186,
+        apob=104,
+        uacr=45,
+        egfr=55,
+        cac=350,
+        family_history_relationship="father",
+        family_history_event_type="MI",
+        family_history_age_at_event=52,
+    )
+    result, rss_total, contributions = run_patient(patient)
+
+    rendered = build_rss_panel_html(rss_total, contributions, result)
+    rows = _row_html(rendered)
+
+    assert "Where the Risk Is Coming From" in rendered
+    assert "Why Risk Is Elevated" not in rendered
+    assert '<strong class="rss-row-label">A1c</strong>' in rows
+    assert '<strong class="rss-row-label">hsCRP</strong>' in rows
+    assert '<strong class="rss-row-label">Triglycerides</strong>' in rows
+    assert '<strong class="rss-row-label">ApoB / particle burden</strong>' in rows
+    assert '<strong class="rss-row-label">Albuminuria</strong>' in rows
+    assert '<strong class="rss-row-label">eGFR</strong>' in rows
+    assert '<strong class="rss-row-label">Family history</strong>' in rows
+    assert '<strong class="rss-row-label">Coronary calcium</strong>' in rows
+    assert "Elevated inflammatory biomarker" not in rows
+    assert "Elevated triglycerides" not in rows
+    assert "Elevated particle burden" not in rows
+    assert "Prediabetes-range A1c" not in rows
+    assert "Diabetes-range A1c" not in rows
+
+
+def test_rss_markers_and_points_use_consistent_visual_system():
+    patient = Patient(age=55, sex="male", apob=106, triglycerides=182, masld=True)
+    result, rss_total, contributions = run_patient(patient)
+
+    rendered = build_rss_panel_html(rss_total, contributions, result)
+
+    assert ".rss-marker," in rendered
+    assert ".rss-driver-color {" in rendered
+    assert "height: 9px;" in rendered
+    assert "width: 9px;" in rendered
+    assert "border-radius: 3px;" in rendered
+    assert ".rss-driver-row--tiny .rss-driver-color" not in rendered
+    assert ".rss-driver-row--mild .rss-driver-color" not in rendered
+    assert ".rss-row-points," in rendered
+    assert ".rss-driver-points {" in rendered
+    assert "color: var(--rc-black);" in rendered
+    assert 'class="rss-row-points rss-driver-points" style=' not in rendered
+
+
 def test_prediabetes_range_a1c_appears_as_rss_contributor_when_scored():
     patient = Patient(age=50, sex="male", a1c=5.7)
     result, rss_total, contributions = run_patient(patient)
@@ -106,7 +162,7 @@ def test_prediabetes_range_a1c_appears_as_rss_contributor_when_scored():
     assert any(item.label == "A1c elevation" for item in get_rss_contributors(result))
     assert rss_total == 2
     assert sum(item["points"] for item in display["contributors"] if item["stack_in_tower"]) == rss_total
-    assert "Prediabetes-range A1c" in html
+    assert "A1c" in html
     assert "A1c 5.7%" in tower
     assert "A1c 5.7%" in rows
     assert '<span class="rss-tower-label">A1c 5.7%</span>' not in tower
@@ -119,7 +175,7 @@ def test_diabetes_range_a1c_appears_as_rss_contributor_when_scored():
     assert any(item.label == "Diabetes" for item in get_rss_contributors(result))
     html = build_rss_panel_html(rss_total, contributions, result)
 
-    assert "Diabetes-range A1c" in html
+    assert "A1c" in html
     assert "A1c 7.1%" in html
 
 
@@ -131,7 +187,7 @@ def test_diabetes_range_a1c_appears_as_rss_contributor_when_diabetes_flag_absent
 
     assert any(item.label == "A1c elevation" for item in get_rss_contributors(result))
     assert rss_total == 8
-    assert "Diabetes-range A1c" in html
+    assert "A1c" in html
     assert "A1c 7.1%" in html
 
 
@@ -461,7 +517,7 @@ def test_low_rss_18_case_has_callout_and_keeps_exact_tower_scale():
     assert 'data-rss-id="triglycerides"' in tower
     assert 'data-rss-id="osa"' in tower
     assert 'data-rss-id="masld"' in tower
-    assert "Prediabetes-range A1c" in rows
+    assert "A1c" in rows
     assert "A1c 5.7%" in rows
     assert "ApoB 106 mg/dL" in rows
     assert "TG 182 mg/dL" in rows
@@ -540,3 +596,4 @@ def test_hiv_rss_label_is_not_generic_inflammatory_disease():
     assert "HIV-related risk enhancer" in html
     assert "HIV is shown as its own guideline risk-enhancing pathway." in html
     assert "Inflammatory disease" not in html
+

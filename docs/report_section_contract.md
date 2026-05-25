@@ -43,7 +43,7 @@ Must not show:
 Source:
 - `renderers/prevent_card.py`
 
-## 3. Why Risk Is Elevated
+## 3. Where the Risk Is Coming From
 
 Purpose: RSS burden accumulator.
 

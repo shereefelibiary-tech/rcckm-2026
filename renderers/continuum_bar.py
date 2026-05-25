@@ -33,7 +33,7 @@ def _selected_level_copy(patient, level):
         return "", ""
 
     if cac_value >= 300:
-        context = "CAC ≥1000" if cac_value >= 1000 else f"CAC {_fmt_num(cac)}"
+        context = "CAC >=1000" if cac_value >= 1000 else f"CAC {_fmt_num(cac)}"
         return ("Very high risk", context) if level == 5 else ("", context)
     if cac_value > 0:
         return "", f"Plaque present (CAC {_fmt_num(cac)})"
@@ -61,7 +61,7 @@ def build_continuum_bar_html(patient, result):
         if level == active_level and selected_subtitle:
             display_label = selected_subtitle
         active_class = " rc-card-active" if level == active_level else ""
-        caret = '<div class="rc-caret">▼</div>' if level == active_level else ""
+        caret = '<div class="rc-caret"></div>' if level == active_level else ""
         context = (
             f'<div class="rc-context">{escape(selected_context)}</div>'
             if level == active_level and selected_context
@@ -119,7 +119,7 @@ def build_continuum_bar_html(patient, result):
 .rc-grid {{
     display: grid;
     grid-template-columns: repeat(5, minmax(118px, 1fr));
-    gap: clamp(4px, 0.58vw, 8px);
+    gap: clamp(6px, 0.76vw, 12px);
     align-items: stretch;
     overflow: visible;
 }}
@@ -130,7 +130,7 @@ def build_continuum_bar_html(patient, result):
     padding-top: 10px;
 }}
 .rc-card {{
-    min-height: 98px;
+    min-height: 126px;
     border-radius: 10px;
     border: 1px solid rgba(11, 31, 58, 0.18);
     display: flex;
@@ -138,11 +138,12 @@ def build_continuum_bar_html(patient, result):
     justify-content: center;
     align-items: center;
     text-align: center;
-    padding: 9px 6px;
+    padding: 13px 9px;
     color: var(--rc-text);
     height: 100%;
     min-width: 0;
-    overflow-wrap: normal;
+    overflow: visible;
+    overflow-wrap: anywhere;
     position: relative;
     transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
 }}
@@ -154,14 +155,13 @@ def build_continuum_bar_html(patient, result):
 }}
 .rc-caret {{
     align-self: center;
-    color: rgba(11, 31, 58, 0.70);
-    display: flex;
-    font-size: 10px;
-    font-weight: 900;
-    justify-content: center;
-    line-height: 1;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 7px solid rgba(11, 31, 58, 0.70);
+    height: 0;
     margin: 0 0 3px;
     pointer-events: none;
+    width: 0;
 }}
 .rc-level-1 {{ background: #edf3fb; }}
 .rc-level-2 {{ background: #eef4ef; }}
@@ -185,26 +185,27 @@ def build_continuum_bar_html(patient, result):
     box-shadow: 0 9px 18px rgba(75, 0, 7, 0.22);
 }}
 .rc-level-title {{
-    font-size: clamp(0.95rem, 1.02vw, 1.05rem);
+    font-size: clamp(0.94rem, 1.0vw, 1.02rem);
     font-weight: 800;
-    line-height: 1.05;
-    margin-bottom: 4px;
+    line-height: 1.12;
+    margin-bottom: 6px;
 }}
 .rc-level-subtitle {{
-    font-size: clamp(0.72rem, 0.84vw, 0.82rem);
+    font-size: clamp(0.76rem, 0.86vw, 0.84rem);
     font-weight: 650;
-    line-height: 1.16;
+    line-height: 1.24;
     max-width: 100%;
 }}
 .rc-context {{
     border-top: 1px solid rgba(11, 31, 58, 0.13);
     color: rgba(7, 26, 47, 0.68);
-    font-size: clamp(0.70rem, 0.74vw, 0.78rem);
+    font-size: clamp(0.72rem, 0.78vw, 0.80rem);
     font-weight: 850;
-    line-height: 1.12;
-    margin-top: 6px;
-    padding-top: 5px;
-    white-space: nowrap;
+    line-height: 1.18;
+    margin-top: 8px;
+    max-width: 100%;
+    padding-top: 7px;
+    white-space: normal;
 }}
 .rc-level-5 .rc-context {{
     border-top-color: rgba(255, 255, 255, 0.35);
@@ -232,8 +233,8 @@ def build_continuum_bar_html(patient, result):
     }}
     .rc-card {{
         border-radius: 8px;
-        min-height: 96px;
-        padding: 8px 5px;
+        min-height: 118px;
+        padding: 11px 7px;
     }}
     .rc-card-active {{
         transform: translateY(4px);

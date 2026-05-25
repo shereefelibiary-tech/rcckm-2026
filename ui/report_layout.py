@@ -767,7 +767,7 @@ def render_report(st, patient):
         "Risk Continuum",
         lambda: _build_continuum_bar_html(patient, result),
         component=True,
-        height=230,
+        height=275,
     )
 
     _safe_panel(
@@ -778,7 +778,7 @@ def render_report(st, patient):
 
     _safe_panel(
         st,
-        "Why Risk Is Elevated",
+        "Where the Risk Is Coming From",
         lambda: _build_rss_html(rss_total, rss_contributions, result),
     )
 
