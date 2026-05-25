@@ -256,7 +256,7 @@ def test_report_hierarchy_is_clinician_first_and_patient_roadmap_last():
     assert "prevent-matrix" in combined
     assert "30.65%" in combined
     assert "PREVENT population model" in combined
-    assert "Your Cardiometabolic Prevention Roadmap" in combined
+    assert "Your Prevention Roadmap" in combined
     assert "Copy patient roadmap" in combined
     assert "rss-module" in combined
     assert "Key Contributors" not in combined

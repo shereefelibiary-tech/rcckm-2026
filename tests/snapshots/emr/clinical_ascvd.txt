@@ -1,9 +1,8 @@
-RISK CONTINUUM CKM - CLINICAL REPORT
+RISK CONTINUUM CKM
 
-Impression:
 Level 5 - clinical ASCVD / secondary prevention.
 PREVENT not used for treatment decisions in established ASCVD.
-CKM stage 4; plaque established clinically.
+CKM stage 4 with plaque established clinically.
 
 Assessment:
 - Clinical ASCVD

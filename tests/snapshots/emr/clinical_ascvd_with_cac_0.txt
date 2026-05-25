@@ -1,9 +1,8 @@
-RISK CONTINUUM CKM - CLINICAL REPORT
+RISK CONTINUUM CKM
 
-Impression:
 Level 5 - clinical ASCVD / secondary prevention.
 PREVENT not used for treatment decisions in established ASCVD.
-CKM stage 4; plaque established ASCVD; CAC 0 does not de-risk secondary prevention.
+CKM stage 4 with plaque established ASCVD; CAC 0 does not de-risk secondary prevention.
 
 Assessment:
 - Clinical ASCVD / coronary artery disease with prior NSTEMI and PCI/stent (ICD: I25.10)

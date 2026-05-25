@@ -2,12 +2,16 @@ import pytest
 
 from core.patient import Patient
 from ui.report_layout import run_patient
-from renderers.where_patient_falls import build_where_patient_falls_html
+from renderers.where_patient_falls import (
+    build_where_patient_falls_html,
+    normalize_risk_impact_label,
+)
 
 
 def _row_snippet(html: str, marker: str) -> str:
     idx = html.index(marker)
-    return html[idx : idx + 1500]
+    end = html.index("</tr>", idx)
+    return html[idx : end + len("</tr>")]
 
 
 def test_where_patient_falls_displays_measured_values_and_effects():
@@ -31,17 +35,21 @@ def test_where_patient_falls_displays_measured_values_and_effects():
     )
     result, _rss_total, _contributions = run_patient(patient)
 
-    html = build_where_patient_falls_html(patient, result)
+    html = build_where_patient_falls_html(patient, result, show_not_active=True)
 
     assert "WHERE THIS PATIENT FALLS" in html
     assert "Inputs, missing data, and level-driving findings." in html
+    assert "Risk impact: Major = changes level/action" in html
+    assert "Contributes = supports risk interpretation" in html
+    assert "Context only = relevant background" in html
+    assert "Not active = not currently contributing" in html
     assert "Active findings:" not in html
     assert "Active signals:" not in html
     assert "ApoB ApoB" not in html
     assert "A1c A1c" not in html
     assert "CAC CAC" not in html
     assert "<table class=\"wpf-table\">" in html
-    assert "<th>Marker</th><th>Patient</th><th>Level effect</th>" in html
+    assert "<th>Marker</th><th>Patient</th><th>Risk impact</th>" in html
     assert "colspan=\"3\"" in html
     assert "<td class=\"wpf-marker\">" in html
     assert "<td class=\"wpf-patient\">" in html
@@ -73,8 +81,7 @@ def test_where_patient_falls_displays_measured_values_and_effects():
     assert "MASLD reported" in html
     assert "Inflammation" not in html
     assert "LP(A)" in html
-    assert "very high risk" in html
-    assert "major driver" in html
+    assert "Major driver" in html
     assert "wpf-patient-pill" in html
     assert "wpf-domain-row" in html
     assert "grid-template-columns" not in html
@@ -82,7 +89,6 @@ def test_where_patient_falls_displays_measured_values_and_effects():
     assert "background: rgba(115,0,10,0.045)" in html
     assert "background: var(--rc-garnet)" in html
     assert "border: 2px solid rgba(115,0,10,0.72)" in html
-    assert "background: var(--rc-garnet-deep)" in html
 
 
 def test_where_patient_falls_surfaces_missing_clarifiers():
@@ -94,6 +100,143 @@ def test_where_patient_falls_surfaces_missing_clarifiers():
     assert "ApoB missing" in html
     assert "Plaque unmeasured" in html
     assert "missing" in html
+
+
+def test_where_patient_falls_normalizes_risk_impact_labels():
+    assert normalize_risk_impact_label("major driver") == "Major driver"
+    assert normalize_risk_impact_label("very high risk") == "Major driver"
+    assert normalize_risk_impact_label("elevated") == "Contributes"
+    assert normalize_risk_impact_label("mild signal") == "Contributes"
+    assert normalize_risk_impact_label("mild/context") == "Context only"
+    assert normalize_risk_impact_label("enhancer context") == "Context only"
+    assert normalize_risk_impact_label("no major signal") == "Not active"
+    assert normalize_risk_impact_label("no active signal") == "Not active"
+
+
+def test_where_patient_falls_uses_only_simplified_risk_impact_vocabulary():
+    patient = Patient(
+        age=60,
+        sex="male",
+        apob=110,
+        lp_a_value=80,
+        lp_a_unit="nmol/L",
+        a1c=5.8,
+        hscrp=2.5,
+        preeclampsia=True,
+        smoker=True,
+    )
+    html = build_where_patient_falls_html(
+        patient,
+        run_patient(patient)[0],
+        show_not_active=True,
+    )
+
+    assert "Risk impact" in html
+    assert "Level effect" not in html
+    for label in ("Major driver", "Contributes", "Context only", "Not active"):
+        assert label in html
+    for old_label in (
+        ">elevated<",
+        ">mild signal<",
+        ">mild/context<",
+        ">enhancer context<",
+        ">no major signal<",
+        ">no active signal<",
+        ">very high risk<",
+    ):
+        assert old_label not in html
+
+
+def test_where_patient_falls_risk_impact_chip_hierarchy_is_restrained():
+    patient = Patient(age=60, sex="male", apob=110, lp_a_value=80, lp_a_unit="nmol/L", smoker=True)
+    html = build_where_patient_falls_html(
+        patient,
+        run_patient(patient)[0],
+    )
+
+    assert ".wpf-chip-major-driver" in html
+    assert ".wpf-chip-contributes" in html
+    assert ".wpf-chip-context-only" in html
+    assert ".wpf-chip-not-active" in html
+    context_block = html.split(".wpf-chip-context-only", 1)[1].split("}", 1)[0]
+    not_active_block = html.split(".wpf-chip-not-active", 1)[1].split("}", 1)[0]
+    contributes_block = html.split(".wpf-chip-contributes", 1)[1].split("}", 1)[0]
+    major_block = html.split(".wpf-chip-major-driver", 1)[1].split("}", 1)[0]
+
+    assert "background: transparent" in context_block
+    assert "font-weight: 650" in context_block
+    assert "background: transparent" in not_active_block
+    assert "border: 0" in not_active_block
+    assert "rgba(47, 95, 143, 0.12)" in contributes_block
+    assert "font-weight: 750" in contributes_block
+    assert "background: var(--rc-garnet)" in major_block
+    assert "font-weight: 800" in major_block
+
+
+def test_where_patient_falls_risk_impact_rows_have_hierarchy_classes():
+    patient = Patient(
+        age=60,
+        sex="male",
+        apob=110,
+        lp_a_value=80,
+        lp_a_unit="nmol/L",
+        smoker=True,
+    )
+    html = build_where_patient_falls_html(patient, run_patient(patient)[0])
+
+    assert "marker-row-major-driver" in html
+    assert "marker-row-contributes" in html
+    assert "marker-row-context-only" in html
+    assert "marker-row-not-active" in html
+    assert ".wpf-row.marker-row-context-only" in html
+    assert ".wpf-row.marker-row-not-active" in html
+    assert "rgba(7, 26, 47, 0.52)" in html
+    assert "rgba(7, 26, 47, 0.42)" in html
+
+
+def test_where_patient_falls_hides_not_active_rows_by_default():
+    patient = Patient(age=60, sex="male", apob=72, lp_a_value=74, lp_a_unit="nmol/L")
+    result = run_patient(patient)[0]
+
+    html = build_where_patient_falls_html(patient, result)
+    full_html = build_where_patient_falls_html(patient, result, show_not_active=True)
+
+    assert "ApoB 72 mg/dL" not in html
+    assert "Lp(a) 74 nmol/L" not in html
+    assert "ApoB 72 mg/dL" in full_html
+    assert "Lp(a) 74 nmol/L" in full_html
+
+
+def test_where_patient_falls_sorts_abnormal_rows_before_context_and_not_active():
+    patient = Patient(
+        age=60,
+        sex="male",
+        smoker=True,
+        apob=110,
+        lp_a_value=80,
+        lp_a_unit="nmol/L",
+    )
+    html = build_where_patient_falls_html(patient, run_patient(patient)[0])
+    full_html = build_where_patient_falls_html(
+        patient,
+        run_patient(patient)[0],
+        show_not_active=True,
+    )
+
+    assert html.index("Current smoking") < html.index("ApoB / LDL-C")
+    assert html.index("ApoB / LDL-C") < html.index("Lp(a)")
+    assert full_html.index("Lp(a)") < full_html.index("Premature family history")
+
+
+def test_where_patient_falls_keeps_missing_clarifiers_visible_by_default():
+    patient = Patient(age=60, sex="male", ldl_c=140, prevent_10y_ascvd=8.2)
+    html = build_where_patient_falls_html(patient, run_patient(patient)[0])
+
+    assert "ApoB missing" in html
+    assert "Lp(a) missing" in html
+    assert "UACR missing" in html
+    assert "Plaque unmeasured" in html
+    assert "Context only" in html
 
 
 def test_where_patient_falls_shows_hiv_separately_from_inflammatory_disease():
@@ -111,17 +254,17 @@ def test_where_patient_falls_shows_hiv_separately_from_inflammatory_disease():
 @pytest.mark.parametrize(
     ("value", "unit", "expected_effect", "unexpected_effects"),
     [
-        (74, "nmol/L", "no major signal", ["mild/context", "elevated", "high", "very high"]),
-        (80, "nmol/L", "mild/context", ["major driver", "elevated", "high", "very high"]),
-        (124, "nmol/L", "mild/context", ["major driver", "elevated", "high", "very high"]),
-        (125, "nmol/L", "elevated", ["major driver", "mild/context", "high", "very high"]),
-        (250, "nmol/L", "high", ["major driver", "mild/context", "elevated", "very high"]),
-        (430, "nmol/L", "very high", ["major driver", "mild/context", "elevated"]),
-        (29, "mg/dL", "no major signal", ["mild/context", "elevated", "high", "very high"]),
-        (30, "mg/dL", "mild/context", ["major driver", "elevated", "high", "very high"]),
-        (50, "mg/dL", "elevated", ["major driver", "mild/context", "high", "very high"]),
-        (100, "mg/dL", "high", ["major driver", "mild/context", "elevated", "very high"]),
-        (180, "mg/dL", "very high", ["major driver", "mild/context", "elevated"]),
+        (74, "nmol/L", "Not active", ["Context only", "Contributes", "Major driver"]),
+        (80, "nmol/L", "Context only", ["Not active", "Contributes", "Major driver"]),
+        (124, "nmol/L", "Context only", ["Not active", "Contributes", "Major driver"]),
+        (125, "nmol/L", "Contributes", ["Not active", "Context only", "Major driver"]),
+        (250, "nmol/L", "Major driver", ["Not active", "Context only", "Contributes"]),
+        (430, "nmol/L", "Major driver", ["Not active", "Context only", "Contributes"]),
+        (29, "mg/dL", "Not active", ["Context only", "Contributes", "Major driver"]),
+        (30, "mg/dL", "Context only", ["Not active", "Contributes", "Major driver"]),
+        (50, "mg/dL", "Contributes", ["Not active", "Context only", "Major driver"]),
+        (100, "mg/dL", "Major driver", ["Not active", "Context only", "Contributes"]),
+        (180, "mg/dL", "Major driver", ["Not active", "Context only", "Contributes"]),
     ],
 )
 def test_where_patient_falls_lpa_threshold_tiers(
@@ -130,7 +273,11 @@ def test_where_patient_falls_lpa_threshold_tiers(
     patient = Patient(age=60, sex="male", lp_a_value=value, lp_a_unit=unit)
     result, _rss_total, _contributions = run_patient(patient)
 
-    html = build_where_patient_falls_html(patient, result)
+    html = build_where_patient_falls_html(
+        patient,
+        result,
+        show_not_active=(expected_effect == "Not active"),
+    )
     row = _row_snippet(html, "Lp(a)")
 
     assert f"Lp(a) {value} {unit}" in row
@@ -151,7 +298,7 @@ def test_where_patient_falls_lpa_missing_shows_clarifier_and_thresholds():
     row = _row_snippet(html, "Lp(a)")
 
     assert "Lp(a) missing" in row
-    assert ">clarifier<" in row
+    assert ">Context only<" in row
     assert "nmol/L: &lt;75 reference; 75-124 mild; &gt;=125 elevated; &gt;=250 high; &gt;=430 very high" in row
     assert "mg/dL: &lt;30 reference; 30-49 mild; &gt;=50 elevated; &gt;=100 high; &gt;=180 very high" in row
     assert "genetics" not in row.lower()
@@ -161,19 +308,23 @@ def test_where_patient_falls_lpa_missing_shows_clarifier_and_thresholds():
 @pytest.mark.parametrize(
     ("apob", "expected_effect", "unexpected_effects"),
     [
-        (72, "no major signal", ["mild signal", "elevated", "major driver / risk-enhancing", "severe particle burden"]),
-        (82, "mild signal", ["elevated", "major driver / risk-enhancing", "severe particle burden"]),
-        (99, "mild signal", ["elevated", "major driver / risk-enhancing", "severe particle burden"]),
-        (100, "elevated", ["major driver / risk-enhancing", "severe particle burden"]),
-        (119, "elevated", ["major driver / risk-enhancing", "severe particle burden"]),
-        (120, "major driver / risk-enhancing", ["severe particle burden"]),
-        (140, "severe particle burden", []),
+        (72, "Not active", ["Contributes", "Major driver"]),
+        (82, "Contributes", ["Not active", "Major driver"]),
+        (99, "Contributes", ["Not active", "Major driver"]),
+        (100, "Contributes", ["Not active", "Major driver"]),
+        (119, "Contributes", ["Not active", "Major driver"]),
+        (120, "Major driver", ["Not active", "Contributes"]),
+        (140, "Major driver", ["Not active", "Contributes"]),
     ],
 )
 def test_where_patient_falls_apob_severity_thresholds(apob, expected_effect, unexpected_effects):
     patient = Patient(age=60, sex="male", apob=apob)
 
-    html = build_where_patient_falls_html(patient, run_patient(patient)[0])
+    html = build_where_patient_falls_html(
+        patient,
+        run_patient(patient)[0],
+        show_not_active=(expected_effect == "Not active"),
+    )
     row = _row_snippet(html, "ApoB / LDL-C")
 
     assert f"ApoB {apob} mg/dL" in row
@@ -193,8 +344,8 @@ def test_where_patient_falls_glycemia_severity_thresholds():
     mild_html = build_where_patient_falls_html(mild, run_patient(mild)[0])
     major_html = build_where_patient_falls_html(major, run_patient(major)[0])
 
-    assert "mild signal" in _row_snippet(mild_html, "A1c / diabetes")
-    assert "major driver" in _row_snippet(major_html, "A1c / diabetes")
+    assert "Contributes" in _row_snippet(mild_html, "A1c / diabetes")
+    assert "Major driver" in _row_snippet(major_html, "A1c / diabetes")
 
 
 def test_where_patient_falls_kidney_severity_thresholds():
@@ -204,8 +355,8 @@ def test_where_patient_falls_kidney_severity_thresholds():
     egfr_html = build_where_patient_falls_html(egfr_patient, run_patient(egfr_patient)[0])
     uacr_html = build_where_patient_falls_html(uacr_patient, run_patient(uacr_patient)[0])
 
-    assert "major driver" in _row_snippet(egfr_html, "eGFR / UACR")
-    assert "major driver" in _row_snippet(uacr_html, "eGFR / UACR")
+    assert "Major driver" in _row_snippet(egfr_html, "eGFR / UACR")
+    assert "Major driver" in _row_snippet(uacr_html, "eGFR / UACR")
 
 
 def test_where_patient_falls_hscrp_alone_is_not_red_major():
@@ -215,8 +366,8 @@ def test_where_patient_falls_hscrp_alone_is_not_red_major():
     html = build_where_patient_falls_html(patient, result)
     row = _row_snippet(html, "hsCRP")
 
-    assert "mild signal" in row
-    assert "major driver" not in row
+    assert "Contributes" in row
+    assert ">Major driver<" not in row
 
 
 def test_where_patient_falls_current_smoking_is_major_driver():
@@ -225,4 +376,4 @@ def test_where_patient_falls_current_smoking_is_major_driver():
 
     html = build_where_patient_falls_html(patient, result)
 
-    assert "major driver" in _row_snippet(html, "Current smoking")
+    assert "Major driver" in _row_snippet(html, "Current smoking")

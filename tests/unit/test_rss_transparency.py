@@ -445,6 +445,43 @@ def test_many_contributors_case_stays_complete_without_forcing_tiny_tower_labels
         assert item["value_label"] in rows
 
 
+def test_rss_contributor_typography_is_consistent_sans_serif():
+    patient = Patient(
+        age=55,
+        sex="male",
+        cac=350,
+        apob=110,
+        egfr=55,
+        uacr=45,
+        triglycerides=180,
+        a1c=7.1,
+        diabetes=True,
+    )
+    result, rss_total, contributions = run_patient(patient)
+    html = build_rss_panel_html(rss_total, contributions, result)
+
+    assert ".rss-card *" in html
+    assert "font-family: var(--rc-font-body)" in html
+    heading_block = html.split(".rss-contributor-heading", 1)[1].split("}", 1)[0]
+    title_block = html.split(".rss-title", 1)[1].split("}", 1)[0]
+    label_block = html.split(".rss-row-label", 1)[1].split("}", 1)[0]
+    value_block = html.split(".rss-row-value", 1)[1].split("}", 1)[0]
+    points_block = html.split(".rss-row-points", 1)[1].split("}", 1)[0]
+
+    assert "font-family: var(--rc-font-body)" in heading_block
+    assert "font-weight: 800" in heading_block
+    assert "font-size: 1.0rem" in heading_block
+    assert "font-family: var(--rc-font-title)" not in heading_block
+    assert "font-weight: 800" in title_block
+    assert "font-weight: 750" in label_block
+    assert "font-size: 0.86rem" in label_block
+    assert "font-weight: 500" in value_block
+    assert "font-size: 0.76rem" in value_block
+    assert "font-weight: 800" in points_block
+    assert "font-size: 0.82rem" in points_block
+    assert "font-variant-numeric: tabular-nums" in points_block
+
+
 def test_long_contributor_list_uses_clean_scroll_area_without_hiding_rows():
     patient = Patient(
         age=55,

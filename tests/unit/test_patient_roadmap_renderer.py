@@ -67,7 +67,8 @@ def test_render_patient_roadmap_groups_full_clinical_story_without_raw_html():
     html = render_patient_roadmap(_patient(), _result())
 
     assert "roadmap-card" in html
-    assert "Your Cardiometabolic Prevention Roadmap" in html
+    assert "Your Prevention Roadmap" in html
+    assert "Your results show where you stand today and the most important steps to lower future heart, kidney, and metabolic risk." in html
     assert "roadmap-subtitle" in html
     assert "roadmap-risk-card" in html
     assert "roadmap-driver-row" in html
@@ -81,7 +82,7 @@ def test_render_patient_roadmap_groups_full_clinical_story_without_raw_html():
     assert "8.2%" in html
     assert "Total CVD" not in html
     assert "12.4%" not in html
-    assert "30-year risk" in html
+    assert "Longer-term 30-year risk trajectory" in html
     assert "24.5%" in html
     assert "PREVENT Total CVD 30-year" not in html
     assert "roadmap-factor-grid" not in html
@@ -93,11 +94,11 @@ def test_render_patient_roadmap_groups_full_clinical_story_without_raw_html():
     assert "About 8 out of 100 similar patients may have a cardiovascular event" in html
     assert "About 25 out of 100 similar patients may have a cardiovascular event" in html
     assert "Level 5" in html
-    assert "CAC 350" in html
+    assert "Coronary calcium score 350" in html
     assert "Coronary calcium score: 350, showing a high amount of plaque." in html
     assert "Level 5 - Very high risk" in html
     assert "Very high risk / high plaque burden" not in html
-    assert "CAC 350 - high plaque burden" in html
+    assert "Coronary calcium score 350 - high plaque burden" in html
     assert "ApoB 110 - elevated particle burden" in html
     assert "Atherogenic burden" not in html
     assert "Atherogenic particle burden" not in html
@@ -105,8 +106,7 @@ def test_render_patient_roadmap_groups_full_clinical_story_without_raw_html():
     assert "LDL-C 132" in html
     assert "Blood sugar / diabetes" not in html
     assert "Kidney protection" not in html
-    assert "Diabetes/kidney involvement" in html
-    assert "Diabetes / kidney" not in html
+    assert "Diabetes / kidney involvement" in html
     assert "Diabetes with kidney involvement" not in html
     assert "A1c 7.1%" in html
     assert "KDIGO G3aA2" in html
@@ -130,8 +130,8 @@ def test_render_patient_roadmap_groups_full_clinical_story_without_raw_html():
     assert "Protect the kidneys" in html
     assert "Review kidney protection options with your clinician." in html
     assert "Lp(a) can be checked once to guide long-term prevention." in html
-    assert "This roadmap supports clinician review" in html
-    assert "It does not replace medical advice." in html
+    assert "This roadmap is for discussion with your clinician." in html
+    assert "Medication decisions should be individualized." in html
     assert "Dominant action" not in html
     assert 'roadmap-row-label">Next step' not in html
     next_section = html.split('<div class="roadmap-section-title">Next steps</div>', 1)[1]
@@ -145,17 +145,38 @@ def test_render_patient_roadmap_groups_full_clinical_story_without_raw_html():
     assert "genetic" not in html.lower()
     assert "inherited" not in html.lower()
     assert "phenotype" not in html.lower()
+    assert "dominant_action" not in html
+    assert "action_domains" not in html
+    assert "risk_continuum_sublevel" not in html
+    assert "treatment posture" not in html.lower()
+    assert "risk enhancer" not in html.lower()
+    assert "optimize" not in html.lower()
+    assert "intensify" not in html.lower()
+    assert "pharmacotherapy" not in html.lower()
     assert "&lt;div" not in html
+
+
+def test_render_patient_roadmap_section_titles_use_dividers_not_underlines():
+    html = render_patient_roadmap(_patient(), _result())
+
+    assert "roadmap-section-title" in html
+    assert "border-top: 1px solid rgba(7, 26, 47, 0.10)" in html
+    assert "padding-top: 12px" in html
+    assert "text-decoration" not in html
+    assert "border-bottom" not in html.split(".roadmap-section-title", 1)[1].split(
+        ".roadmap-risk-grid", 1
+    )[0]
 
 
 def test_render_patient_roadmap_text_is_copy_ready_plain_text():
     text = render_patient_roadmap_text(_patient(), _result())
 
-    assert "Your Cardiometabolic Prevention Roadmap" in text
-    assert "This summary shows where you stand today" in text
+    assert "Your Prevention Roadmap" in text
+    assert "Your results show where you stand today" in text
     assert "Where you stand:" in text
     assert "- 10-year risk: 8.2%" in text
     assert "- 30-year risk: 24.5%" in text
+    assert "About 25 out of 100 similar patients may have a cardiovascular event over the next 30 years." in text
     assert "PREVENT Total CVD" not in text
     assert "ASCVD means artery/plaque-related events" not in text
     assert "PREVENT-age" not in text
@@ -174,6 +195,14 @@ def test_render_patient_roadmap_text_is_copy_ready_plain_text():
     assert "3. Aspirin safety: Do not start aspirin unless your clinician recommends it." in text
     assert "4. Additional testing: Lp(a) can be checked once to guide long-term prevention." in text
     assert "Dominant action" not in text
+    assert "dominant_action" not in text
+    assert "action_domains" not in text
+    assert "risk_continuum_sublevel" not in text
+    assert "treatment posture" not in text.lower()
+    assert "risk enhancer" not in text.lower()
+    assert "optimize" not in text.lower()
+    assert "intensify" not in text.lower()
+    assert "pharmacotherapy" not in text.lower()
     assert "- Next step:" not in text
     assert "Supporting actions:" not in text
     assert "Lipid therapy:" not in text
@@ -194,7 +223,7 @@ def test_render_patient_roadmap_works_without_30_year_risk():
 
     html = render_patient_roadmap(_patient(), result)
 
-    assert "Your Cardiometabolic Prevention Roadmap" in html
+    assert "Your Prevention Roadmap" in html
     assert "30-year risk" not in html
     assert "30-year PREVENT estimate unavailable for the current data/age range." in html
 
@@ -208,7 +237,7 @@ def test_render_patient_roadmap_explains_unavailable_prevent():
     html = render_patient_roadmap(_patient(), result)
     text = render_patient_roadmap_text(_patient(), result)
 
-    assert "10-year risk" in html
+    assert "Near-term 10-year risk" in html
     assert "Unavailable" in html
     assert "Missing inputs: systolic BP, smoking status" in html
     assert "Missing inputs: systolic BP, smoking status" in text

@@ -38,32 +38,32 @@ def test_render_emr_note_outputs_plain_text_sections_in_order():
 
     note = render_emr_note(patient, result)
 
-    assert "RISK CONTINUUM CKM - CLINICAL REPORT" in note
-    assert "Impression:" in note
+    assert note.startswith("RISK CONTINUUM CKM\n\nHIGH.")
+    assert "Impression:" not in note
     assert "Assessment:" in note
     assert "Assessment/coding:" not in note
     assert "Recommendations:" in note
     assert "Risk Summary:" not in note
     assert "Context:" not in note
-    assert note.index("Impression:") < note.index("Assessment:") < note.index("Recommendations:")
+    assert note.index("HIGH.") < note.index("Assessment:") < note.index("Recommendations:")
     assert "HIGH." in note
     assert "PREVENT 10-year risk 8.2%; 30-year risk 24.5%." in note
-    assert "CKM stage 3; kidney G3aA2; albuminuria not measured; plaque CAC 350." in note
+    assert "CKM stage 3 with kidney G3aA2; albuminuria not measured and CAC 350." in note
     assert "- Clinical ASCVD (ICD: I25.10)" in note
     assert "- Type 2 diabetes mellitus (ICD: E11.9)" in note
 
     lipid_line = "- High-intensity lipid-lowering therapy indicated."
     cac_line = "- CAC 350 already measured; no repeat CAC needed for current decision-making."
-    aspirin_line = "- Aspirin may be considered only if bleeding risk is low after shared decision-making."
+    aspirin_line = "- Aspirin only if bleeding risk is low after shared decision-making."
     assert lipid_line in note
     assert "Recheck lipids in 4-12 weeks" not in note
-    assert cac_line in note
+    assert cac_line not in note
     assert aspirin_line in note
     assert "- Lipid therapy:" not in note
     assert "- Coronary calcium:" not in note
     assert "- Supporting actions:" not in note
     assert "Aspirin: Aspirin" not in note
-    assert note.index(lipid_line) < note.index(cac_line) < note.index(aspirin_line)
+    assert note.index(lipid_line) < note.index(aspirin_line)
 
 
 def test_render_emr_note_marks_hcc_supported_diagnosis_subtly():
@@ -83,7 +83,7 @@ def test_render_emr_note_marks_hcc_supported_diagnosis_subtly():
 
     note = render_emr_note(patient, result)
 
-    assert "HCC-supported" in note
+    assert "HCC-supported" not in note
     assert "RAF" not in note
     assert "capture" not in note.lower()
     assert "reimbursement" not in note.lower()
@@ -141,18 +141,18 @@ def test_demo_emr_note_prioritizes_composite_diagnoses_and_decisive_actions():
     assert "High-intensity lipid-lowering therapy indicated." in note
     assert "premature family history" in note
     assert "Lipid-lowering therapy is reasonable." not in note
-    assert "Optimize glycemic therapy." in note
+    assert "Optimize kidney-protective and glycemic therapy." in note
     assert "Supporting actions:" not in note
 
 
-def test_emr_impression_uses_compact_atherogenic_burden_sentence_for_demo():
+def test_emr_note_omits_verbose_atherogenic_burden_sentence_for_demo():
     from ui.report_layout import demo_patient, run_patient
 
     patient = demo_patient()
     result, _rss_total, _contributions = run_patient(patient)
     note = render_emr_note(patient, result)
 
-    assert "Atherogenic/metabolic burden: ApoB 110 mg/dL; LDL-C 132 mg/dL; non-HDL-C 157 mg/dL; TG 180 mg/dL; Lp(a) 80 nmol/L." in note
+    assert "Atherogenic/metabolic burden:" not in note
     assert "- TG: 180 mg/dL." not in note
     assert "use non-HDL-C/ApoB for atherogenic burden when TG is elevated" not in note
 
@@ -203,5 +203,28 @@ def test_emr_note_is_materially_shorter_than_legacy_risk_summary_shape():
     )
 
     assert len(note) <= len(legacy_proxy) * 0.7
-    assert "Impression:" in note
+    assert "Impression:" not in note
     assert "Risk Summary:" not in note
+
+
+def test_emr_note_excludes_workflow_and_metadata_noise():
+    from ui.report_layout import demo_patient, run_patient
+
+    patient = demo_patient()
+    result, _rss_total, _contributions = run_patient(patient)
+    note = render_emr_note(patient, result)
+
+    forbidden = [
+        "Impression:",
+        "HCC-supported",
+        "Atherogenic/metabolic burden:",
+        "Recheck lipid profile",
+        "CAC already measured",
+        "no repeat CAC needed",
+    ]
+    for phrase in forbidden:
+        assert phrase not in note
+
+    lines = note.splitlines()
+    assert lines[0] == "RISK CONTINUUM CKM"
+    assert lines[2].startswith("Level 5 -")

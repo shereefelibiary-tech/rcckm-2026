@@ -73,7 +73,7 @@ def test_where_patient_falls_shows_reproductive_history_domain_when_present():
 
     assert "REPRODUCTIVE HISTORY" in html
     assert "Preeclampsia" in html
-    assert "mild signal" in html
+    assert "Contributes" in html
 
 
 def test_male_patient_without_markers_does_not_show_reproductive_history():

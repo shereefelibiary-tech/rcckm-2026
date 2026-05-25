@@ -26,7 +26,7 @@ def test_cac_missing_high_prevent_shows_plaque_unmeasured_without_plaque_diagnos
     position = classify_continuum_position(patient, result)
     prevent_html = render_prevent_card(result)
     roadmap_html = render_patient_roadmap(patient, result)
-    wpf_html = build_where_patient_falls_html(patient, result)
+    wpf_html = build_where_patient_falls_html(patient, result, show_not_active=True)
     emr_note = render_emr_note(patient, result)
 
     assert result.plaque_category == PlaqueCategory.UNKNOWN
@@ -73,7 +73,7 @@ def test_cac_zero_is_plaque_absent_not_missing_or_level_4():
 
     result, _rss_total, rss_contributions = run_patient(patient)
     position = classify_continuum_position(patient, result)
-    wpf_html = build_where_patient_falls_html(patient, result)
+    wpf_html = build_where_patient_falls_html(patient, result, show_not_active=True)
 
     assert result.plaque_category == PlaqueCategory.NONE
     assert position["level"] != 4

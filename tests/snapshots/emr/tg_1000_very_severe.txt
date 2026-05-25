@@ -1,9 +1,8 @@
-RISK CONTINUUM CKM - CLINICAL REPORT
+RISK CONTINUUM CKM
 
-Impression:
 Level 2A - early isolated risk signal.
 PREVENT unavailable or incomplete; interpretation is based on reviewed worksheet data.
-CKM stage 2. Atherogenic/metabolic burden: LDL-C not calculated due to TG; TG 1000 mg/dL (pancreatitis-risk range).
+CKM stage 2.
 UACR not available; obtain to complete kidney-risk assessment.
 
 Assessment:
@@ -18,4 +17,3 @@ Recommendations:
 - Lp(a) - one-time risk assessment
 - Obtain UACR to complete kidney-risk assessment.
 - hsCRP - inflammatory residual risk
-- Recheck fasting lipid profile after treatment changes.

@@ -81,7 +81,7 @@ def test_measured_uacr_values_do_not_render_missing_badge_or_clarifier():
     for uacr in (0, 18, 34):
         patient = Patient(age=55, sex="male", bp_treated=True, egfr=76, uacr=uacr)
         result = evaluate_patient(patient)
-        html = build_where_patient_falls_html(patient, result)
+        html = build_where_patient_falls_html(patient, result, show_not_active=True)
         clarifier_html = build_clarifier_card_html(result)
 
         assert f"UACR {uacr} mg/g" in html

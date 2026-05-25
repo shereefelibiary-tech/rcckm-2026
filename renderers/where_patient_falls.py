@@ -12,6 +12,50 @@ LPA_THRESHOLD_TEXT = (
 )
 
 
+RISK_IMPACT_LABELS = {
+    "major driver": "Major driver",
+    "very high risk": "Major driver",
+    "very high": "Major driver",
+    "high": "Major driver",
+    "severe particle burden": "Major driver",
+    "major driver / risk-enhancing": "Major driver",
+    "elevated": "Contributes",
+    "mild signal": "Contributes",
+    "moderate signal": "Contributes",
+    "plaque present": "Contributes",
+    "mild/context": "Context only",
+    "enhancer context": "Context only",
+    "missing": "Context only",
+    "clarifier": "Context only",
+    "needed": "Context only",
+    "no major signal": "Not active",
+    "no active signal": "Not active",
+}
+
+RISK_IMPACT_PRIORITY = {
+    "Major driver": 0,
+    "Contributes": 1,
+    "Context only": 2,
+    "Not active": 3,
+}
+
+
+def normalize_risk_impact_label(effect):
+    """Collapse internal audit effects into clinician-facing display labels."""
+    raw = str(effect or "").strip().lower()
+    return RISK_IMPACT_LABELS.get(raw, str(effect or "").strip())
+
+
+def _risk_impact_priority(effect):
+    """Return display sort priority for a risk-impact label."""
+    return RISK_IMPACT_PRIORITY.get(normalize_risk_impact_label(effect), 99)
+
+
+def _is_not_active_effect(effect):
+    """Return True when the display impact is the quiet audit-only state."""
+    return normalize_risk_impact_label(effect) == "Not active"
+
+
 def _fmt_num(value, decimals=0):
     if value is None:
         return None
@@ -191,14 +235,43 @@ def _enabled_labels(patient, fields):
 
 
 def _chip(label):
+    display_label = normalize_risk_impact_label(label)
     normalized = (
-        label.lower()
+        display_label.lower()
         .replace(" ", "-")
         .replace("/", "-")
         .replace("(", "")
         .replace(")", "")
     )
-    return f'<span class="wpf-chip wpf-chip-{escape(normalized)}">{escape(label)}</span>'
+    raw_normalized = (
+        str(label or "")
+        .lower()
+        .replace(" ", "-")
+        .replace("/", "-")
+        .replace("(", "")
+        .replace(")", "")
+    )
+    semantic_class = (
+        f" wpf-chip-{escape(raw_normalized)}"
+        if raw_normalized and raw_normalized != normalized
+        else ""
+    )
+    return (
+        f'<span class="wpf-chip wpf-chip-{escape(normalized)}{semantic_class}">'
+        f"{escape(display_label)}</span>"
+    )
+
+
+def _risk_impact_class(effect):
+    display_label = normalize_risk_impact_label(effect)
+    normalized = (
+        display_label.lower()
+        .replace(" ", "-")
+        .replace("/", "-")
+        .replace("(", "")
+        .replace(")", "")
+    )
+    return f"risk-impact-{normalized}"
 
 
 def _patient_pill(value):
@@ -263,6 +336,8 @@ def _marker(label, threshold=""):
 
 def _row(marker, threshold, values, effect, active=False):
     active_class = " wpf-active" if active and effect != "none" else ""
+    impact_class = _risk_impact_class(effect) if effect and effect != "none" else ""
+    row_impact_class = f" marker-row-{impact_class.removeprefix('risk-impact-')}" if impact_class else ""
     effect_html = _chip(effect) if effect and effect != "none" else ""
     missing = effect in {"missing", "clarifier"}
     uacr_attention = "UACR missing" in {str(value).strip() for value in values} and effect in {
@@ -270,7 +345,7 @@ def _row(marker, threshold, values, effect, active=False):
         "major driver",
     }
     return (
-        f'<tr class="wpf-row{active_class}">'
+        f'<tr class="wpf-row{active_class}{row_impact_class}">'
         f'<td class="wpf-marker">{_marker(marker, threshold)}</td>'
         f'<td class="wpf-patient">{_patient_values(values, active=active and effect != "none", missing=missing, uacr_attention=uacr_attention)}</td>'
         f'<td class="wpf-effect">{effect_html}</td>'
@@ -287,7 +362,15 @@ def _domain(label, rows):
     )
 
 
-def _build_grouped_rows(patient, result):
+def _row_entry(marker, threshold, values, effect, active=False):
+    return {
+        "html": _row(marker, threshold, values, effect, active=active),
+        "effect": effect,
+        "priority": _risk_impact_priority(effect),
+    }
+
+
+def _build_grouped_rows(patient, result, *, show_not_active=False):
     groups = {
         "ATHEROGENIC BURDEN": [],
         "GLYCEMIA": [],
@@ -311,6 +394,11 @@ def _build_grouped_rows(patient, result):
         if line:
             active_signals.append(line)
 
+    def add_row(group_label, marker, threshold, values, effect, active=False):
+        groups[group_label].append(
+            _row_entry(marker, threshold, values, effect, active=active)
+        )
+
     apob = getattr(patient, "apob", None)
     ldl = getattr(patient, "ldl_c", None)
     values = []
@@ -324,14 +412,13 @@ def _build_grouped_rows(patient, result):
         values.append("LDL-C missing")
     effect = _effect_for_apob_ldl(apob, ldl)
     add_signal("ApoB" if apob is not None else "LDL-C", values[0] if apob is not None else values[1], effect)
-    groups["ATHEROGENIC BURDEN"].append(
-        _row(
-            "ApoB / LDL-C",
-            "<80 optimal/goal if treated; 80-99 mild; 100-119 elevated; >=120 risk-enhancing; >=140 severe. LDL-C fallback if ApoB unavailable.",
-            values,
-            effect,
-            active=_is_active_effect(effect),
-        )
+    add_row(
+        "ATHEROGENIC BURDEN",
+        "ApoB / LDL-C",
+        "<80 optimal/goal if treated; 80-99 mild; 100-119 elevated; >=120 risk-enhancing; >=140 severe. LDL-C fallback if ApoB unavailable.",
+        values,
+        effect,
+        active=_is_active_effect(effect),
     )
 
     a1c = getattr(patient, "a1c", None)
@@ -341,14 +428,13 @@ def _build_grouped_rows(patient, result):
         value += "; diabetes reported"
     effect = _effect_for_glycemia(a1c, diabetes)
     add_signal("A1c", value, effect)
-    groups["GLYCEMIA"].append(
-        _row(
-            "A1c / diabetes",
-            "Prediabetes 5.7-6.4%; diabetes >=6.5%",
-            [value],
-            effect,
-            active=_is_active_effect(effect),
-        )
+    add_row(
+        "GLYCEMIA",
+        "A1c / diabetes",
+        "Prediabetes 5.7-6.4%; diabetes >=6.5%",
+        [value],
+        effect,
+        active=_is_active_effect(effect),
     )
 
     egfr = getattr(patient, "egfr", None)
@@ -360,14 +446,13 @@ def _build_grouped_rows(patient, result):
     effect = _effect_for_kidney(egfr, uacr)
     kidney_signal_value = "; ".join(v for v in values if "missing" not in v) or "kidney data missing"
     add_signal("Kidney", kidney_signal_value, effect)
-    groups["KIDNEY (EGFR/UACR)"].append(
-        _row(
-            "eGFR / UACR",
-            "mild: UACR 10-29; major: eGFR <60 or UACR >=30",
-            values,
-            effect,
-            active=_is_active_effect(effect),
-        )
+    add_row(
+        "KIDNEY (EGFR/UACR)",
+        "eGFR / UACR",
+        "mild: UACR 10-29; major: eGFR <60 or UACR >=30",
+        values,
+        effect,
+        active=_is_active_effect(effect),
     )
 
     lpa = getattr(patient, "lp_a_value", None)
@@ -379,14 +464,13 @@ def _build_grouped_rows(patient, result):
     )
     effect = _effect_for_lpa(lpa, lpa_unit)
     add_signal("Lp(a)", value, effect)
-    groups["LP(A)"].append(
-        _row(
-            "Lp(a)",
-            LPA_THRESHOLD_TEXT,
-            [value],
-            effect,
-            active=_is_active_effect(effect),
-        )
+    add_row(
+        "LP(A)",
+        "Lp(a)",
+        LPA_THRESHOLD_TEXT,
+        [value],
+        effect,
+        active=_is_active_effect(effect),
     )
 
     fhx = bool(getattr(patient, "premature_fhx_ascvd", False)) or bool(
@@ -396,14 +480,13 @@ def _build_grouped_rows(patient, result):
     effect = "mild signal" if fhx else "no major signal"
     value = family_summary or ("Yes" if fhx else "No")
     add_signal("Family history", value, effect)
-    groups["FAMILY HISTORY"].append(
-        _row(
-            "Premature family history",
-            "male first-degree <55; female first-degree <65",
-            [value],
-            effect,
-            active=_is_active_effect(effect),
-        )
+    add_row(
+        "FAMILY HISTORY",
+        "Premature family history",
+        "male first-degree <55; female first-degree <65",
+        [value],
+        effect,
+        active=_is_active_effect(effect),
     )
 
     smoking = bool(getattr(patient, "smoker", False)) or bool(
@@ -411,28 +494,26 @@ def _build_grouped_rows(patient, result):
     )
     effect = "major driver" if smoking else "no major signal"
     add_signal("Smoking", "current" if smoking else "No", effect)
-    groups["SMOKING"].append(
-        _row(
-            "Current smoking",
-            "current use",
-            ["Yes" if smoking else "No"],
-            effect,
-            active=_is_active_effect(effect),
-        )
+    add_row(
+        "SMOKING",
+        "Current smoking",
+        "current use",
+        ["Yes" if smoking else "No"],
+        effect,
+        active=_is_active_effect(effect),
     )
 
     hscrp = getattr(patient, "hscrp", None)
     effect = _effect_for_hscrp(hscrp, patient)
     value = f"hsCRP {_fmt_num(hscrp, 1)} mg/L" if hscrp is not None else "hsCRP missing"
     add_signal("hsCRP", value, effect)
-    groups["HSCRP"].append(
-        _row(
-            "hsCRP",
-            ">=2 mg/L is interpreted in clinical context",
-            [value],
-            effect,
-            active=_is_active_effect(effect),
-        )
+    add_row(
+        "HSCRP",
+        "hsCRP",
+        ">=2 mg/L is interpreted in clinical context",
+        [value],
+        effect,
+        active=_is_active_effect(effect),
     )
 
     inflammatory_labels = _enabled_labels(
@@ -452,25 +533,23 @@ def _build_grouped_rows(patient, result):
         else ("Inflammatory disease reported" if inflammatory else "None reported")
     )
     effect = "enhancer context" if inflammatory_labels or inflammatory else "no major signal"
-    groups["INFLAMMATORY DISEASE"].append(
-        _row(
-            "Immune/inflammatory context",
-            "RA, SLE, psoriasis, inflammatory arthritis, IBD",
-            [value],
-            effect,
-            active=False,
-        )
+    add_row(
+        "INFLAMMATORY DISEASE",
+        "Immune/inflammatory context",
+        "RA, SLE, psoriasis, inflammatory arthritis, IBD",
+        [value],
+        effect,
+        active=False,
     )
 
     if bool(getattr(patient, "hiv", False)):
-        groups["HIV"].append(
-            _row(
-                "HIV",
-                "guideline risk-enhancing pathway",
-                ["HIV reported"],
-                "enhancer context",
-                active=False,
-            )
+        add_row(
+            "HIV",
+            "HIV",
+            "guideline risk-enhancing pathway",
+            ["HIV reported"],
+            "enhancer context",
+            active=False,
         )
 
     ancestry_values = _enabled_labels(
@@ -483,14 +562,14 @@ def _build_grouped_rows(patient, result):
     if getattr(patient, "higher_risk_ancestry_context", None):
         ancestry_values.append(str(patient.higher_risk_ancestry_context))
     if ancestry_values:
-        groups.setdefault("RISK ENHANCERS", []).append(
-            _row(
-                "Higher-risk ancestry/context",
-                "used for personalization, not diagnosis",
-                ancestry_values,
-                "enhancer context",
-                active=True,
-            )
+        groups.setdefault("RISK ENHANCERS", [])
+        add_row(
+            "RISK ENHANCERS",
+            "Higher-risk ancestry/context",
+            "used for personalization, not diagnosis",
+            ancestry_values,
+            "enhancer context",
+            active=True,
         )
 
     reproductive_items = reproductive_marker_items(patient)
@@ -500,24 +579,33 @@ def _build_grouped_rows(patient, result):
             detail = str(item.get("detail") or "").strip()
             label = str(item.get("label") or "").strip()
             values.append(f"{label} {detail}".strip())
-        groups["REPRODUCTIVE HISTORY"].append(
-            _row(
-                "Reproductive history",
-                "pregnancy and menopause risk markers",
-                values,
-                "mild signal",
-                active=True,
-            )
+        add_row(
+            "REPRODUCTIVE HISTORY",
+            "Reproductive history",
+            "pregnancy and menopause risk markers",
+            values,
+            "mild signal",
+            active=True,
         )
 
     if bool(getattr(patient, "osa", False)):
-        groups["SLEEP / HYPOXIA"].append(
-            _row("OSA", "sleep/hypoxia context", ["OSA reported"], "enhancer context", active=True)
+        add_row(
+            "SLEEP / HYPOXIA",
+            "OSA",
+            "sleep/hypoxia context",
+            ["OSA reported"],
+            "enhancer context",
+            active=True,
         )
 
     if bool(getattr(patient, "masld", False)):
-        groups["LIVER / MASLD"].append(
-            _row("MASLD", "liver/metabolic context", ["MASLD reported"], "enhancer context", active=True)
+        add_row(
+            "LIVER / MASLD",
+            "MASLD",
+            "liver/metabolic context",
+            ["MASLD reported"],
+            "enhancer context",
+            active=True,
         )
 
     cac = getattr(patient, "cac", None)
@@ -541,22 +629,46 @@ def _build_grouped_rows(patient, result):
         value = "CAC 0"
         effect = "no major signal"
     add_signal("CAC", value, effect)
-    groups["PLAQUE / CAC"].append(
-        _row(
-            "CAC",
-            "0 absent; 1-99 plaque; 100-299 high burden; >=300 very high burden",
-            [value],
-            effect,
-            active=_is_active_effect(effect),
-        )
+    add_row(
+        "PLAQUE / CAC",
+        "CAC",
+        "0 absent; 1-99 plaque; 100-299 high burden; >=300 very high burden",
+        [value],
+        effect,
+        active=_is_active_effect(effect),
     )
 
-    return "".join(_domain(label, groups[label]) for label in groups), active_signals
+    rendered_domains = []
+    for domain_index, (label, entries) in enumerate(groups.items()):
+        visible_entries = [
+            entry
+            for entry in entries
+            if show_not_active or not _is_not_active_effect(entry["effect"])
+        ]
+        if not visible_entries:
+            continue
+        visible_entries.sort(key=lambda entry: entry["priority"])
+        domain_priority = min(entry["priority"] for entry in visible_entries)
+        rendered_domains.append(
+            (
+                domain_priority,
+                domain_index,
+                label,
+                [entry["html"] for entry in visible_entries],
+            )
+        )
+
+    rendered_domains.sort(key=lambda item: (item[0], item[1]))
+    return "".join(_domain(label, rows) for _priority, _index, label, rows in rendered_domains), active_signals
 
 
-def build_where_patient_falls_html(patient, result):
+def build_where_patient_falls_html(patient, result, *, show_not_active=False):
     """Build the clinician audit table showing values, thresholds, and effects."""
-    rows_html, active_signal_items = _build_grouped_rows(patient, result)
+    rows_html, active_signal_items = _build_grouped_rows(
+        patient,
+        result,
+        show_not_active=show_not_active,
+    )
     if not rows_html:
         rows_html = _domain(
             "CLINICAL AUDIT",
@@ -603,6 +715,14 @@ def build_where_patient_falls_html(patient, result):
     font-size: 0.72rem;
     font-weight: 600;
     margin-top: 10px;
+}}
+.wpf-legend {{
+    color: rgba(7, 26, 47, 0.56);
+    font-size: 0.75rem;
+    font-weight: 620;
+    line-height: 1.3;
+    margin-top: 5px;
+    max-width: 920px;
 }}
 .wpf-badge {{
     border: 2px solid var(--rc-garnet);
@@ -652,6 +772,32 @@ def build_where_patient_falls_html(patient, result):
 }}
 .wpf-row {{
     background: var(--rc-panel);
+}}
+.wpf-row.marker-row-context-only {{
+    color: rgba(7, 26, 47, 0.72);
+}}
+.wpf-row.marker-row-context-only .wpf-marker-main,
+.wpf-row.marker-row-context-only .wpf-patient {{
+    color: rgba(7, 26, 47, 0.70);
+    font-weight: 760;
+}}
+.wpf-row.marker-row-context-only .wpf-threshold,
+.wpf-row.marker-row-context-only .wpf-patient-secondary,
+.wpf-row.marker-row-context-only .wpf-patient-line {{
+    color: rgba(7, 26, 47, 0.52);
+}}
+.wpf-row.marker-row-not-active {{
+    color: rgba(7, 26, 47, 0.54);
+}}
+.wpf-row.marker-row-not-active .wpf-marker-main,
+.wpf-row.marker-row-not-active .wpf-patient {{
+    color: rgba(7, 26, 47, 0.50);
+    font-weight: 650;
+}}
+.wpf-row.marker-row-not-active .wpf-threshold,
+.wpf-row.marker-row-not-active .wpf-patient-line,
+.wpf-row.marker-row-not-active .wpf-patient-secondary {{
+    color: rgba(7, 26, 47, 0.42);
 }}
 .wpf-row td {{
     border-bottom: 1px solid rgba(17,17,17,0.08);
@@ -737,85 +883,48 @@ def build_where_patient_falls_html(patient, result):
     text-align: left;
 }}
 .wpf-chip {{
+    align-items: center;
     border: 1px solid transparent;
     border-radius: 999px;
-    color: var(--rc-black);
-    background: #e8eef6;
     display: inline-flex;
-    font-size: 0.70rem;
-    font-weight: 950;
-    line-height: 1;
-    padding: 7px 11px;
+    line-height: 1.1;
     white-space: nowrap;
 }}
-.wpf-chip-no-major-signal {{
-    border-color: #d7e0ea;
-    color: #536b86;
-    background: #f6f8fb;
+.wpf-chip-not-active,
+.risk-impact-not-active {{
+    background: transparent;
+    border: 0;
+    color: rgba(7, 26, 47, 0.46);
+    font-size: 0.72rem;
+    font-weight: 650;
+    padding: 0;
 }}
-.wpf-chip-missing {{
-    border-color: #cbd5e1;
-    color: #475569;
-    background: #e5e7eb;
+.wpf-chip-contributes,
+.risk-impact-contributes {{
+    background: rgba(47, 95, 143, 0.12);
+    border-color: rgba(47, 95, 143, 0.14);
+    color: #071a2f;
+    font-size: 0.74rem;
+    font-weight: 750;
+    padding: 5px 10px;
 }}
-.wpf-chip-clarifier {{
-    border-color: #cbd5e1;
-    color: #475569;
-    background: #e5e7eb;
+.wpf-chip-context-only,
+.risk-impact-context-only {{
+    background: transparent;
+    border-color: rgba(7, 26, 47, 0.12);
+    color: rgba(7, 26, 47, 0.58);
+    font-size: 0.72rem;
+    font-weight: 650;
+    padding: 4px 8px;
 }}
-.wpf-chip-needed {{
-    border: 2px solid rgba(115,0,10,0.58);
-    color: var(--rc-garnet-deep);
-    background: var(--rc-garnet-tint);
-    font-weight: 950;
-}}
-.wpf-chip-mild-signal {{
-    color: #001426;
-    background: #f59e0b;
-}}
-.wpf-chip-mild-context {{
-    border-color: #fed7aa;
-    color: #7a4b00;
-    background: #fff7ed;
-}}
-.wpf-chip-moderate-signal {{
-    color: #ffffff;
-    background: #ea580c;
-}}
-.wpf-chip-elevated {{
-    border-color: #bcd0e7;
-    color: #17304f;
-    background: #e8f1fb;
-}}
-.wpf-chip-high {{
-    color: #ffffff;
-    background: #ea580c;
-}}
-.wpf-chip-major-driver---risk-enhancing {{
-    color: #ffffff;
+.wpf-chip-major-driver,
+.risk-impact-major-driver {{
     background: var(--rc-garnet);
-}}
-.wpf-chip-severe-particle-burden {{
+    border-color: var(--rc-garnet);
     color: #ffffff;
-    background: var(--rc-garnet-deep);
-}}
-.wpf-chip-major-driver {{
-    color: #ffffff;
-    background: var(--rc-garnet);
-}}
-.wpf-chip-very-high {{
-    color: #ffffff;
-    background: var(--rc-garnet-deep);
-}}
-.wpf-chip-very-high-risk {{
-    color: #ffffff;
-    background: var(--rc-garnet-deep);
-}}
-.wpf-chip-plaque-present,
-.wpf-chip-enhancer-context {{
-    border-color: #bcd0e7;
-    color: #17304f;
-    background: #e8f1fb;
+    font-size: 0.76rem;
+    font-weight: 800;
+    padding: 6px 11px;
 }}
 @media (max-width: 760px) {{
     .wpf-head {{
@@ -832,11 +941,12 @@ def build_where_patient_falls_html(patient, result):
 <div>
 <div class="wpf-title rc-card-title" aria-label="WHERE THIS PATIENT FALLS">Where this patient falls</div>
 <div class="wpf-subtitle">Inputs, missing data, and level-driving findings.</div>
+<div class="wpf-legend">Risk impact: Major = changes level/action &middot; Contributes = supports risk interpretation &middot; Context only = relevant background &middot; Not active = not currently contributing. Major and contributing findings are shown first; not-active markers can be shown for audit/review.</div>
 </div>
 <div class="wpf-badge">{escape(badge)}</div>
 </div>
 <table class="wpf-table">
-<thead><tr><th>Marker</th><th>Patient</th><th>Level effect</th></tr></thead>
+<thead><tr><th>Marker</th><th>Patient</th><th>Risk impact</th></tr></thead>
 <tbody>
 {rows_html}
 </tbody>

@@ -1,12 +1,12 @@
-Your Cardiometabolic Prevention Roadmap
-This summary shows where you stand today and the most important steps to lower future heart, kidney, and metabolic risk.
+Your Prevention Roadmap
+Your results show where you stand today and the most important steps to lower future heart, kidney, and metabolic risk.
 
 Where you stand:
 - 10-year risk: 2.5%
 - About 3 out of 100 similar patients may have a cardiovascular event over the next 10 years.
 - Near-term estimated risk is low.
 - Known cardiovascular disease is present.
-- Clinician context: Level 5 - Very high risk
+- Care focus: Level 5 - Very high risk
 
 Why risk is elevated:
 - Artery plaque: Known cardiovascular disease. This means prevention decisions should be more treatment-focused.
@@ -23,4 +23,4 @@ Next steps:
 4. Optional testing: Do not delay treatment while completing optional testing.
 5. Next step: CAC 0 is discordant/historical and should not be used to de-risk established ASCVD.
 
-This roadmap supports clinician review and shared decision-making. It does not replace medical advice.
+This roadmap is for discussion with your clinician. Medication decisions should be individualized.

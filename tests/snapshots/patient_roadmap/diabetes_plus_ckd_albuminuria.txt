@@ -1,12 +1,12 @@
-Your Cardiometabolic Prevention Roadmap
-This summary shows where you stand today and the most important steps to lower future heart, kidney, and metabolic risk.
+Your Prevention Roadmap
+Your results show where you stand today and the most important steps to lower future heart, kidney, and metabolic risk.
 
 Where you stand:
 - Missing inputs: total cholesterol, HDL-C, systolic BP, BP treatment status, statin/lipid-lowering therapy status, smoking status, BMI
 - 10-year risk: unavailable
 - PREVENT estimate unavailable from the current data.
 - Plaque status has not been measured.
-- Clinician context: Level 3 (3B) - Actionable early CKM / atherogenic risk
+- Care focus: Level 3 (3B) - Actionable early CKM / atherogenic risk
 
 Why risk is elevated:
 - Blood sugar / diabetes: A1c 7.4%. Improving blood sugar can lower long-term heart, kidney, and metabolic risk.
@@ -27,4 +27,4 @@ Next steps:
 5. Aspirin safety: Do not start aspirin unless your clinician recommends it.
 6. Additional testing: A calcium scan may help if treatment choices are still uncertain.
 
-This roadmap supports clinician review and shared decision-making. It does not replace medical advice.
+This roadmap is for discussion with your clinician. Medication decisions should be individualized.

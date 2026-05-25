@@ -89,77 +89,6 @@ def _kidney_summary(patient, result):
     return str(kdigo_stage)
 
 
-def _lipid_risk_summary_lines(patient):
-    lines = []
-    triglycerides = getattr(patient, "triglycerides", None)
-    non_hdl_c = getattr(patient, "non_hdl_c", None)
-    apob = getattr(patient, "apob", None)
-    ldl_c = getattr(patient, "ldl_c", None)
-
-    if triglycerides is not None:
-        if triglycerides >= 1000:
-            lines.append(f"- TG: {triglycerides:g} mg/dL; pancreatitis-risk range.")
-        elif triglycerides >= 500:
-            lines.append(f"- TG: {triglycerides:g} mg/dL; severe hypertriglyceridemia.")
-        elif triglycerides >= 150:
-            lines.append(f"- TG: {triglycerides:g} mg/dL.")
-
-    ldl_unavailable_due_to_tg = ldl_c is None and triglycerides is not None and triglycerides >= 400
-    if ldl_unavailable_due_to_tg:
-        lines.append("- LDL-C: not calculated due to TG.")
-
-    atherogenic_parts = []
-    if apob is not None:
-        atherogenic_parts.append(f"ApoB {apob:g} mg/dL")
-    if ldl_c is not None:
-        atherogenic_parts.append(f"LDL-C {ldl_c:g} mg/dL")
-    if non_hdl_c is not None:
-        atherogenic_parts.append(f"non-HDL-C {non_hdl_c:g} mg/dL")
-    if atherogenic_parts:
-        lines.append(f"- Atherogenic burden: {'; '.join(atherogenic_parts)}.")
-
-    lpa_value = getattr(patient, "lp_a_value", None)
-    lpa_unit = str(getattr(patient, "lp_a_unit", "") or "").strip()
-    if lpa_value is not None:
-        unit = f" {lpa_unit}" if lpa_unit else ""
-        lines.append(f"- Lp(a): {lpa_value:g}{unit}.")
-
-    return lines
-
-
-def _lipid_risk_sentence(patient):
-    parts = []
-    triglycerides = getattr(patient, "triglycerides", None)
-    non_hdl_c = getattr(patient, "non_hdl_c", None)
-    apob = getattr(patient, "apob", None)
-    ldl_c = getattr(patient, "ldl_c", None)
-    lpa_value = getattr(patient, "lp_a_value", None)
-    lpa_unit = str(getattr(patient, "lp_a_unit", "") or "").strip()
-
-    if apob is not None:
-        parts.append(f"ApoB {apob:g} mg/dL")
-    if ldl_c is not None:
-        parts.append(f"LDL-C {ldl_c:g} mg/dL")
-    elif triglycerides is not None and triglycerides >= 400:
-        parts.append("LDL-C not calculated due to TG")
-    if non_hdl_c is not None:
-        parts.append(f"non-HDL-C {non_hdl_c:g} mg/dL")
-    if triglycerides is not None:
-        tg_label = f"TG {triglycerides:g} mg/dL"
-        if triglycerides >= 1000:
-            tg_label += " (pancreatitis-risk range)"
-        elif triglycerides >= 500:
-            tg_label += " (severe)"
-        parts.append(tg_label)
-    if lpa_value is not None:
-        unit = f" {lpa_unit}" if lpa_unit else ""
-        parts.append(f"Lp(a) {lpa_value:g}{unit}")
-
-    if not parts:
-        return None
-    return f"Atherogenic/metabolic burden: {'; '.join(parts)}."
-
-
 def _has_elevated_lpa(patient):
     value = getattr(patient, "lp_a_value", None)
     unit = str(getattr(patient, "lp_a_unit", "") or "").strip()
@@ -300,13 +229,8 @@ def _codes_for(entry, confirmed):
 
 
 def _hcc_note_for(entry, confirmed=True):
-    key = "hcc_confirmed" if confirmed else "hcc_suggested"
-    labels = [str(label).strip() for label in (entry.get(key) or []) if str(label).strip()]
-    if not labels and entry.get("hcc_supported"):
-        labels = [str(entry.get("hcc_label") or "HCC-supported").strip()]
-    if not labels:
-        return None
-    return labels[0] if labels[0].lower() == "hcc-supported" else f"HCC-supported: {labels[0]}"
+    """Keep HCC metadata out of the plain-text EMR note."""
+    return None
 
 
 def _candidate_line(entry, confirmed=True):
@@ -418,14 +342,21 @@ def _prevent_impression_sentence(patient, result):
 
 
 def _disease_context_sentence(patient, result):
-    parts = []
+    ckm_part = None
+    context_parts = []
     ckm_stage = getattr(result, "ckm_stage", None) or {}
     if ckm_stage.get("stage") is not None:
-        parts.append(f"CKM stage {ckm_stage.get('stage')}")
+        ckm_part = f"CKM stage {ckm_stage.get('stage')}"
 
     kidney_summary = _kidney_summary(patient, result)
     if kidney_summary:
-        parts.append(f"kidney {kidney_summary}")
+        if getattr(patient, "diabetes", False) and (
+            "A2" in str(kidney_summary)
+            or "A3" in str(kidney_summary)
+        ):
+            context_parts.append("diabetic kidney involvement")
+        else:
+            context_parts.append(f"kidney {kidney_summary}")
 
     plaque_summary = _plaque_summary(patient, result)
     if plaque_summary:
@@ -440,11 +371,18 @@ def _disease_context_sentence(patient, result):
         )
         cac_action = "cac_testing" in (getattr(result, "action_domains", None) or {})
         if important_plaque or cac_action:
-            parts.append(f"plaque {plaque_summary}")
+            if plaque_summary.startswith("CAC "):
+                context_parts.append(plaque_summary)
+            else:
+                context_parts.append(f"plaque {plaque_summary}")
 
-    if not parts:
+    if not ckm_part and not context_parts:
         return None
-    return "; ".join(parts) + "."
+    if ckm_part and context_parts:
+        if len(context_parts) == 1:
+            return f"{ckm_part} with {context_parts[0]}."
+        return f"{ckm_part} with {', '.join(context_parts[:-1])} and {context_parts[-1]}."
+    return (ckm_part or "; ".join(context_parts)) + "."
 
 
 def _history_context_sentence(patient):
@@ -488,7 +426,7 @@ def _impression_paragraphs(patient, result):
     first = f"{risk_level}." if risk_level else None
     prevent = _prevent_impression_sentence(patient, result)
 
-    second_parts = [_disease_context_sentence(patient, result), _lipid_risk_sentence(patient)]
+    second_parts = [_disease_context_sentence(patient, result)]
     second = " ".join(part for part in second_parts if part)
 
     third_parts = []
@@ -509,11 +447,17 @@ def _impression_paragraphs(patient, result):
     return [paragraph for paragraph in [first, prevent, second, third] if paragraph]
 
 
-def _include_monitoring_line(recommendation, recommendations):
-    if "Recheck lipid profile 4-12 weeks" not in recommendation:
+def _skip_emr_recommendation(recommendation):
+    lowered = str(recommendation or "").strip().lower()
+    if not lowered:
         return True
-    posture = " ".join(item for item in recommendations if item != recommendation).lower()
-    return any(token in posture for token in ("intensify", "started", "starting", "initiat"))
+    if "recheck lipid profile" in lowered or "recheck fasting lipid profile" in lowered or "recheck lipids" in lowered:
+        return True
+    if "cac" in lowered and ("already measured" in lowered or "no repeat" in lowered):
+        return True
+    if lowered == "plaque burden unmeasured.":
+        return True
+    return False
 
 
 def _short_recommendation_line(recommendation):
@@ -526,7 +470,7 @@ def _short_recommendation_line(recommendation):
         "Optimize kidney-protective therapy and confirm albuminuria persistence.": "Confirm albuminuria persistence and optimize kidney-protective therapy.",
         "Treat blood pressure toward individualized goal.": "Treat BP toward goal <130/80.",
         "CAC reasonable for risk clarification if treatment decision remains uncertain.": "CAC reasonable if treatment decision remains uncertain.",
-        "Recheck lipid profile 4-12 weeks after starting or intensifying therapy, then every 6-12 months.": "Recheck lipids in 4-12 weeks, then every 6-12 months.",
+        "Aspirin may be considered only if bleeding risk is low after shared decision-making.": "Aspirin only if bleeding risk is low after shared decision-making.",
         "Consider hsCRP to clarify inflammatory residual risk.": "Consider hsCRP if inflammatory residual risk would change management.",
     }
     return replacements.get(recommendation, recommendation)
@@ -534,7 +478,7 @@ def _short_recommendation_line(recommendation):
 
 def render_emr_note(patient, result):
     """Render the clinician-facing EMR note as compact plain text."""
-    lines = ["RISK CONTINUUM CKM - CLINICAL REPORT", "", "Impression:"]
+    lines = ["RISK CONTINUUM CKM", ""]
 
     impression = _impression_paragraphs(patient, result)
     if impression:
@@ -562,12 +506,34 @@ def render_emr_note(patient, result):
     lines.extend(["", "Recommendations:"])
     recommendations = build_action_recommendation_lines(patient, result)
     if recommendations:
+        rendered_recommendations = []
         for recommendation in recommendations:
-            if not _include_monitoring_line(recommendation, recommendations):
+            if _skip_emr_recommendation(recommendation):
                 continue
-            if recommendation == "Plaque burden unmeasured.":
-                continue
-            lines.append(f"- {_short_recommendation_line(recommendation)}")
+            rendered = _short_recommendation_line(recommendation)
+            if rendered not in rendered_recommendations:
+                rendered_recommendations.append(rendered)
+
+        has_kidney = any("kidney-protective" in line for line in rendered_recommendations)
+        has_glycemic = any("glycemic" in line for line in rendered_recommendations)
+        if has_kidney and has_glycemic:
+            combined_index = min(
+                index
+                for index, line in enumerate(rendered_recommendations)
+                if "kidney-protective" in line or "glycemic" in line
+            )
+            rendered_recommendations = [
+                line
+                for line in rendered_recommendations
+                if "kidney-protective" not in line and "glycemic" not in line
+            ]
+            rendered_recommendations.insert(
+                min(combined_index, len(rendered_recommendations)),
+                "Optimize kidney-protective and glycemic therapy.",
+            )
+
+        for rendered in rendered_recommendations:
+            lines.append(f"- {rendered}")
     else:
         lines.append("- No escalation indicated.")
 

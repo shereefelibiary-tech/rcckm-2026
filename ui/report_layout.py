@@ -730,11 +730,11 @@ def _render_emr_note_text(patient, result):
     return renderer(patient, result)
 
 
-def _build_where_patient_falls_html(patient, result):
+def _build_where_patient_falls_html(patient, result, *, show_not_active=False):
     renderer = _load_renderer_function(
         "renderers.where_patient_falls", "build_where_patient_falls_html"
     )
-    return renderer(patient, result)
+    return renderer(patient, result, show_not_active=show_not_active)
 
 
 def _build_rss_html(rss_total, rss_contributions, result=None):
@@ -791,10 +791,19 @@ def render_report(st, patient):
         lambda: _build_ckm_kdigo_summary_html(result, patient),
     )
 
+    show_not_active_markers = st.checkbox(
+        "Show not-active markers",
+        value=False,
+        key="where_patient_falls_show_not_active",
+    )
     _safe_panel(
         st,
         "Where this patient falls",
-        lambda: _build_where_patient_falls_html(patient, result),
+        lambda: _build_where_patient_falls_html(
+            patient,
+            result,
+            show_not_active=show_not_active_markers,
+        ),
     )
 
     _safe_panel(

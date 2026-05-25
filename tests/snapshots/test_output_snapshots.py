@@ -46,6 +46,12 @@ FORBIDDEN_SNAPSHOT_PHRASES = (
     "action_domains",
     "risk_continuum_sublevel",
     "Supporting actions:",
+    "Impression:",
+    "HCC-supported",
+    "Atherogenic/metabolic burden:",
+    "Recheck lipid profile",
+    "CAC already measured",
+    "no repeat CAC needed",
 )
 
 

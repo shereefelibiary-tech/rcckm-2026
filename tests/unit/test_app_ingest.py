@@ -227,7 +227,7 @@ def test_empty_patient_inputs_preserve_missing_numeric_values():
     assert result.prevent_missing_inputs
     assert calculate_rss_total(contributions) == 0
 
-    wpf_html = build_where_patient_falls_html(patient, result)
+    wpf_html = build_where_patient_falls_html(patient, result, show_not_active=True)
     assert "UACR missing" in wpf_html
     assert "ApoB missing" in wpf_html
     assert "Lp(a) missing" in wpf_html
@@ -250,7 +250,7 @@ def test_true_zero_values_are_preserved_as_measured_values():
         }
     )
     result = evaluate_patient(patient)
-    wpf_html = build_where_patient_falls_html(patient, result)
+    wpf_html = build_where_patient_falls_html(patient, result, show_not_active=True)
 
     assert patient.cac == 0
     assert patient.cac_not_done is False

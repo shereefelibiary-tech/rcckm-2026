@@ -1,9 +1,8 @@
-RISK CONTINUUM CKM - CLINICAL REPORT
+RISK CONTINUUM CKM
 
-Impression:
 Level 3B - actionable early CKM / kidney risk.
 PREVENT 10-year risk 3.74%; 30-year risk 18.8%.
-CKM stage 3; kidney G2A2; plaque unmeasured / CAC not performed. Atherogenic/metabolic burden: ApoB 92 mg/dL; LDL-C 126 mg/dL; non-HDL-C 156 mg/dL; TG 162 mg/dL.
+CKM stage 3 with kidney G2A2 and plaque unmeasured / CAC not performed.
 
 Assessment:
 - Albuminuria (ICD: R80.9)

@@ -867,8 +867,13 @@ def build_rss_panel_html(rss_total, rss_contributions, result=None):
 {component_theme_css()}
 .rss-card,
 .rss-module {{
+    font-family: var(--rc-font-body);
     margin: 12px 0 16px;
     padding: 14px 16px 16px;
+}}
+.rss-card,
+.rss-card * {{
+    font-family: var(--rc-font-body);
 }}
 .rss-module-head {{
     display: flex;
@@ -884,8 +889,8 @@ def build_rss_panel_html(rss_total, rss_contributions, result=None):
     color: var(--rc-text);
     font-family: var(--rc-font-body);
     font-size: 1.04rem;
-    font-weight: 750;
-    letter-spacing: 0;
+    font-weight: 800;
+    letter-spacing: -0.01em;
     line-height: 1.15;
     margin-bottom: 8px;
 }}
@@ -1048,9 +1053,9 @@ def build_rss_panel_html(rss_total, rss_contributions, result=None):
 .rss-contributor-heading,
 .rss-driver-heading {{
     color: var(--rc-black);
-    font-family: var(--rc-font-title);
-    font-size: 0.95rem;
-    font-weight: 720;
+    font-family: var(--rc-font-body);
+    font-size: 1.0rem;
+    font-weight: 800;
     letter-spacing: -0.01em;
     margin: 1px 0 7px;
     text-transform: none;
@@ -1092,35 +1097,36 @@ def build_rss_panel_html(rss_total, rss_contributions, result=None):
     padding: 4px 0 5px;
 }}
 .rss-driver-row--tiny .rss-driver-copy strong {{
-    color: rgba(17, 17, 17, 0.78);
-    font-size: 0.88rem;
-    font-weight: 700;
+    color: var(--rc-black);
+    font-size: 0.86rem;
+    font-weight: 750;
 }}
 .rss-driver-row--tiny .rss-driver-copy span {{
     color: rgba(7, 26, 47, 0.52);
-    font-size: 0.78rem;
-    margin-top: 1px;
+    font-size: 0.76rem;
+    font-weight: 500;
+    margin-top: 2px;
 }}
 .rss-driver-row--tiny .rss-driver-points {{
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     font-weight: 800;
 }}
 .rss-driver-row--mild .rss-driver-copy strong {{
-    color: rgba(17, 17, 17, 0.84);
-    font-size: 0.89rem;
-    font-weight: 720;
+    color: var(--rc-black);
+    font-size: 0.86rem;
+    font-weight: 750;
 }}
 .rss-driver-row--mild .rss-driver-points {{
-    font-size: 0.86rem;
-    font-weight: 810;
+    font-size: 0.82rem;
+    font-weight: 800;
 }}
 .rss-driver-row--major .rss-driver-copy strong,
 .rss-driver-row--very_high .rss-driver-copy strong {{
-    font-weight: 820;
+    font-weight: 750;
 }}
 .rss-driver-row--major .rss-driver-points,
 .rss-driver-row--very_high .rss-driver-points {{
-    font-weight: 880;
+    font-weight: 800;
 }}
 .rss-marker,
 .rss-driver-color {{
@@ -1131,8 +1137,9 @@ def build_rss_panel_html(rss_total, rss_contributions, result=None):
 }}
 .rss-driver-copy {{
     color: rgba(7, 26, 47, 0.74);
-    font-size: 0.84rem;
-    font-weight: 560;
+    font-family: var(--rc-font-body);
+    font-size: 0.86rem;
+    font-weight: 500;
     line-height: 1.18;
     min-width: 0;
     border-left: 0 solid transparent;
@@ -1141,22 +1148,30 @@ def build_rss_panel_html(rss_total, rss_contributions, result=None):
 .rss-driver-copy strong {{
     color: var(--rc-black);
     display: block;
-    font-weight: 720;
+    font-family: var(--rc-font-body);
+    font-size: 0.86rem;
+    font-weight: 750;
+    line-height: 1.12;
 }}
 .rss-muted,
 .rss-row-value,
 .rss-driver-copy span {{
     color: rgba(7, 26, 47, 0.56);
     display: block;
-    font-size: 0.74rem;
-    font-weight: 560;
+    font-family: var(--rc-font-body);
+    font-size: 0.76rem;
+    font-weight: 500;
+    line-height: 1.15;
     margin-top: 2px;
 }}
 .rss-row-points,
 .rss-driver-points {{
     color: var(--rc-black);
-    font-size: 0.88rem;
-    font-weight: 820;
+    font-family: var(--rc-font-body);
+    font-size: 0.82rem;
+    font-variant-numeric: tabular-nums;
+    font-weight: 800;
+    line-height: 1;
     text-align: right;
 }}
 .rss-empty-drivers {{
@@ -1171,7 +1186,7 @@ def build_rss_panel_html(rss_total, rss_contributions, result=None):
 }}
 .rss-context-heading {{
     color: var(--rc-black);
-    font-family: var(--rc-font-title);
+    font-family: var(--rc-font-body);
     font-size: 0.86rem;
     font-weight: 720;
     margin-bottom: 4px;

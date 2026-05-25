@@ -1,16 +1,14 @@
-RISK CONTINUUM CKM - CLINICAL REPORT
+RISK CONTINUUM CKM
 
-Impression:
 Level 5 - very high plaque burden.
 PREVENT unavailable or incomplete; interpretation is based on reviewed worksheet data.
-CKM stage 3; plaque CAC 350.
+CKM stage 3 with CAC 350.
 
 Assessment:
 - Severe subclinical coronary atherosclerosis / high CAC burden (ICD: I25.10)
 
 Recommendations:
 - High-intensity lipid-lowering therapy indicated.
-- CAC 350 already measured; no repeat CAC needed for current decision-making.
-- Aspirin may be considered only if bleeding risk is low after shared decision-making.
+- Aspirin only if bleeding risk is low after shared decision-making.
 - Lp(a) - one-time risk assessment
 - Clarification testing should not delay treatment.

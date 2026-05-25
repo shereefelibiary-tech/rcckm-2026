@@ -1,9 +1,8 @@
-RISK CONTINUUM CKM - CLINICAL REPORT
+RISK CONTINUUM CKM
 
-Impression:
 Level 3B - actionable early CKM / atherogenic risk.
 PREVENT unavailable or incomplete; interpretation is based on reviewed worksheet data.
-CKM stage 0. Atherogenic/metabolic burden: LDL-C 212 mg/dL.
+CKM stage 0.
 LDL-C >=190 / possible FH pathway: PREVENT should not be used to de-risk treatment.
 
 Assessment:

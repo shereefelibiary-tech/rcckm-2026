@@ -1,9 +1,8 @@
-RISK CONTINUUM CKM - CLINICAL REPORT
+RISK CONTINUUM CKM
 
-Impression:
 Level 2B - converging early risk signals.
 PREVENT 10-year risk 0.74%; 30-year risk 5.38%.
-CKM stage 2; kidney G1A1. Atherogenic/metabolic burden: ApoB 84 mg/dL; LDL-C 118 mg/dL; non-HDL-C 148 mg/dL; TG 176 mg/dL; Lp(a) 20 nmol/L.
+CKM stage 2 with kidney G1A1.
 Risk context: reproductive history: Gestational diabetes.
 
 Assessment:

@@ -43,7 +43,7 @@ def test_missing_numeric_fields_stay_none_and_do_not_render_as_zero():
 def test_true_zero_values_are_preserved_as_measured_zero():
     patient = build_patient_from_inputs({"age": 55, "sex": "male", "cac": "0", "uacr": "0", "hscrp": "0"})
     result = evaluate_patient(patient)
-    html = build_where_patient_falls_html(patient, result)
+    html = build_where_patient_falls_html(patient, result, show_not_active=True)
 
     assert patient.cac == 0
     assert patient.cac_not_done is False

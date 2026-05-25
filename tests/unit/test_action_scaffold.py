@@ -139,7 +139,7 @@ def test_cac_100_299_on_treatment_above_target_uses_intensification_wording():
     assert "Lipid-lowering therapy is reasonable" not in recommendations
     assert "Intensify lipid-lowering therapy" in recommendations
     assert "maximally tolerated statin strategy and nonstatin intensification" in recommendations
-    assert "CAC 145 already measured; no repeat CAC needed" in recommendations
+    assert "CAC 145 already measured; no repeat CAC needed" not in recommendations
     assert "CAC reasonable" not in recommendations
     assert "Subclinical coronary atherosclerosis" in note
     assert "Severe subclinical coronary atherosclerosis" not in note
@@ -277,16 +277,16 @@ def test_emr_recommendations_use_action_scaffold():
 
     lipid_line = "- High-intensity lipid-lowering therapy indicated."
     cac_line = "- CAC 350 already measured; no repeat CAC needed for current decision-making."
-    aspirin_line = "- Aspirin may be considered only if bleeding risk is low after shared decision-making."
+    aspirin_line = "- Aspirin only if bleeding risk is low after shared decision-making."
     assert lipid_line in note
     assert "Recheck lipids in 4-12 weeks" not in note
-    assert cac_line in note
+    assert cac_line not in note
     assert aspirin_line in note
     assert "- Lipid therapy:" not in note
     assert "- Coronary calcium:" not in note
     assert "- Supporting actions:" not in note
     assert "Aspirin: Aspirin" not in note
-    assert note.index(lipid_line) < note.index(cac_line) < note.index(aspirin_line)
+    assert note.index(lipid_line) < note.index(aspirin_line)
 
 
 def test_flat_recommendation_lines_keep_order_without_visible_scaffold_labels():
@@ -324,14 +324,14 @@ def test_emr_very_severe_hypertriglyceridemia_uses_pancreatitis_pathway():
     note = render_emr_note(patient, result)
 
     assert patient.non_hdl_c == 254
-    assert "Atherogenic/metabolic burden: ApoB 138 mg/dL; LDL-C not calculated due to TG; non-HDL-C 254 mg/dL; TG 1040 mg/dL (pancreatitis-risk range)." in note
+    assert "Atherogenic/metabolic burden:" not in note
     assert "- Very severe hypertriglyceridemia: lower TG to reduce pancreatitis risk." in note
     assert "- Very-low-fat diet; eliminate alcohol and added sugars/refined carbohydrates." in note
     assert "- Refer to registered dietitian nutritionist." in note
     assert "- Consider fibrate or prescription omega-3 therapy to lower TG." in note
     assert "- Address ASCVD risk with lipid-lowering therapy guided by non-HDL-C/ApoB." in note
     assert "- Optimize glycemic therapy." in note
-    assert "- Recheck fasting lipid profile after treatment changes." in note
+    assert "- Recheck fasting lipid profile after treatment changes." not in note
     assert note.index("lower TG to reduce pancreatitis risk") < note.index("guided by non-HDL-C/ApoB")
 
 

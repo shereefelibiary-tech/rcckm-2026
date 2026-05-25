@@ -1,18 +1,16 @@
-RISK CONTINUUM CKM - CLINICAL REPORT
+RISK CONTINUUM CKM
 
-Impression:
 Level 3B - actionable early CKM / kidney risk.
 PREVENT unavailable or incomplete; interpretation is based on reviewed worksheet data.
-CKM stage 3; kidney G3aA2.
+CKM stage 3 with diabetic kidney involvement.
 
 Assessment:
-- Type 2 diabetes mellitus with CKD G3aA2 and albuminuria (ICD: E11.22; HCC-supported; CKD stage 3a ICD: N18.31)
+- Type 2 diabetes mellitus with CKD G3aA2 and albuminuria (ICD: E11.22; CKD stage 3a ICD: N18.31)
 
 Recommendations:
 - No medication escalation today.
 - Continue lifestyle-based prevention.
 - Aspirin not indicated for routine primary prevention.
-- Optimize kidney-protective therapy.
-- Optimize glycemic therapy.
+- Optimize kidney-protective and glycemic therapy.
 - Lp(a) - one-time risk assessment
 - hsCRP - inflammatory residual risk

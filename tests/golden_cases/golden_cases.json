@@ -138,7 +138,6 @@
       "Hypertriglyceridemia",
       "Prediabetes",
       "reproductive history: Gestational diabetes",
-      "Atherogenic/metabolic burden: ApoB 84 mg/dL; LDL-C 118 mg/dL; non-HDL-C 148 mg/dL; TG 176 mg/dL",
       "Continue lifestyle-based prevention",
       "Aspirin not indicated for routine primary prevention"
     ],
@@ -191,7 +190,6 @@
       "CAC not performed; below usual age threshold, use only if it would change management",
       "Aspirin not indicated for routine primary prevention",
       "premature family history",
-      "Atherogenic/metabolic burden: ApoB 118 mg/dL; LDL-C 164 mg/dL; non-HDL-C 188 mg/dL; TG 186 mg/dL",
       "Hypertriglyceridemia",
       "Prediabetes"
     ],
@@ -284,8 +282,7 @@
       "No medication escalation required today; clinician-patient risk discussion recommended given elevated Lp(a) and premature family history",
       "CAC reasonable for risk clarification if treatment decision remains uncertain",
       "Aspirin not indicated for routine primary prevention",
-      "Lp(a) and family history increase long-term risk context",
-      "Atherogenic/metabolic burden: ApoB 86 mg/dL; LDL-C 124 mg/dL; non-HDL-C 142 mg/dL; TG 90 mg/dL; Lp(a) 188 nmol/L"
+      "Lp(a) and family history increase long-term risk context"
     ],
     "forbidden_phrases": [
       "LOW\n",
@@ -394,8 +391,7 @@
       "plaque unmeasured / CAC not performed",
       "Moderate-intensity statin therapy reasonable",
       "CAC may clarify plaque burden if treatment intensity remains uncertain",
-      "Aspirin not indicated for routine primary prevention",
-      "Atherogenic/metabolic burden: ApoB 121 mg/dL; LDL-C 166 mg/dL; non-HDL-C 202 mg/dL; TG 182 mg/dL"
+      "Aspirin not indicated for routine primary prevention"
     ],
     "forbidden_phrases": [
       "CAC reasonable for risk clarification if treatment decision remains uncertain",

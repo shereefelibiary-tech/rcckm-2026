@@ -425,7 +425,7 @@ def test_high_lpa_reproductive_low_prevent_stays_level_2b_with_cac_clarification
     assert classification.level == "2B"
     assert "converging early risk" in classification.label.lower()
     assert "Level 2B - converging early risk signals." in note
-    assert "Lp(a) 268 nmol/L" in note
+    assert "Elevated lipoprotein(a)" in note
     assert "reproductive history: Early menopause 44; Preeclampsia." in note
     assert "CAC reasonable for risk clarification if treatment decision remains uncertain" in actions
     assert "No medication escalation required today; clinician-patient risk discussion recommended given high Lp(a) and reproductive risk markers" in actions
@@ -465,7 +465,7 @@ def test_level_2b_converging_early_signals_low_prevent_uses_formal_taxonomy():
     assert "Level 2B - converging early risk signals." in note
     assert "PREVENT 10-year risk 0.8%; 30-year risk 5.76%." in note
     assert "kidney G1A1" in note
-    assert "Atherogenic/metabolic burden: ApoB 88 mg/dL; LDL-C 126 mg/dL; non-HDL-C 150 mg/dL; TG 151 mg/dL; Lp(a) 118 nmol/L." in note
+    assert "Atherogenic/metabolic burden:" not in note
     assert "reproductive history: Preeclampsia." in note
     assert "No medication escalation today" in note
     assert "Continue lifestyle-based prevention" in note

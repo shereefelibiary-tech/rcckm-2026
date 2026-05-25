@@ -151,6 +151,42 @@ def _prevent_explanation(risk):
     )
 
 
+def _prevent_30y_explanation(risk):
+    if risk is None:
+        return None
+    try:
+        people = max(0, int(float(risk) + 0.5))
+    except (TypeError, ValueError):
+        return None
+    return (
+        f"About {people} out of 100 similar patients may have a "
+        "cardiovascular event over the next 30 years."
+    )
+
+
+def _patient_safe_phrase(text):
+    """Convert action-engine wording into calmer patient-facing language."""
+    cleaned = str(text or "")
+    for source, target in (
+        ("Optimize", "Improve"),
+        ("optimize", "improve"),
+        ("Intensifying", "Changing"),
+        ("intensifying", "changing"),
+        ("Intensify", "Increase"),
+        ("intensify", "increase"),
+        ("Pharmacotherapy", "Medication"),
+        ("pharmacotherapy", "medication"),
+        ("Risk enhancer", "Risk factor"),
+        ("risk enhancer", "risk factor"),
+        ("Treatment posture", "Care plan"),
+        ("treatment posture", "care plan"),
+        ("Dominant action", "Main step"),
+        ("dominant action", "main step"),
+    ):
+        cleaned = cleaned.replace(source, target)
+    return cleaned
+
+
 def _prevent_unavailable_reason_text(result):
     missing = list(getattr(result, "prevent_missing_inputs", None) or [])
     if missing:
@@ -275,7 +311,7 @@ def _contributor_groups(patient, result):
                     plaque_detail = f"CAC {cac_value:g}; plaque present"
             except (TypeError, ValueError):
                 pass
-        groups.append(("Plaque burden", plaque_detail))
+        groups.append(("Artery plaque", plaque_detail))
 
     apob = getattr(patient, "apob", None)
     ldl = getattr(patient, "ldl_c", None)
@@ -288,7 +324,7 @@ def _contributor_groups(patient, result):
     if non_hdl is not None:
         lipids.append(f"non-HDL-C {_fmt(non_hdl)} mg/dL")
     if lipids:
-        groups.append(("Atherogenic burden", "; ".join(lipids)))
+        groups.append(("Cholesterol particles", "; ".join(lipids)))
 
     a1c = getattr(patient, "a1c", None)
     diabetes = bool(getattr(patient, "diabetes", False)) or (
@@ -309,9 +345,9 @@ def _contributor_groups(patient, result):
     if kdigo:
         kidney_bits.append(f"KDIGO {kdigo}")
     if diabetes and (egfr is not None or uacr is not None or kdigo):
-        groups.append(("Diabetes / kidney", "; ".join(kidney_bits)))
+        groups.append(("Diabetes / kidney involvement", "; ".join(kidney_bits)))
     elif diabetes or a1c is not None:
-        groups.append(("Glycemia / metabolic", "; ".join(kidney_bits)))
+        groups.append(("Blood sugar / metabolic", "; ".join(kidney_bits)))
     elif egfr is not None or uacr is not None or kdigo:
         kidney_only = []
         if egfr is not None:
@@ -320,7 +356,7 @@ def _contributor_groups(patient, result):
             kidney_only.append(f"UACR {_fmt(uacr)} mg/g")
         if kdigo:
             kidney_only.append(f"KDIGO {kdigo}")
-        groups.append(("Kidney / albuminuria", "; ".join(kidney_only)))
+        groups.append(("Kidney markers", "; ".join(kidney_only)))
 
     other_context = []
 
@@ -668,7 +704,7 @@ def _patient_next_steps(patient, result):
             detail = "Lp(a) can be checked once to guide long-term prevention."
         else:
             label = "Next step"
-            detail = str(item)
+            detail = _patient_safe_phrase(item)
         key = (label, detail)
         if key not in seen:
             seen.add(key)
@@ -711,25 +747,17 @@ def _patient_risk_cards_html(risk, ascvd_30y):
     if risk is not None:
         cards.append(
             (
-                "10-year risk",
+                "Near-term 10-year risk",
                 _fmt(risk, "%"),
                 _prevent_explanation(risk),
                 "blue",
             )
         )
     else:
-        cards.append(("10-year risk", "Unavailable", "More information is needed to calculate this estimate.", "gray"))
+        cards.append(("Near-term 10-year risk", "Unavailable", "More information is needed to calculate this estimate.", "gray"))
     if ascvd_30y is not None:
-        try:
-            people = max(0, int(float(ascvd_30y) + 0.5))
-        except (TypeError, ValueError):
-            people = None
-        line = (
-            f"About {people} out of 100 similar patients may have a cardiovascular event over the next 30 years."
-            if people is not None
-            else "This longer-term estimate helps guide prevention planning."
-        )
-        cards.append(("30-year risk", _fmt(ascvd_30y, "%"), line, "green"))
+        line = _prevent_30y_explanation(ascvd_30y) or "This longer-term estimate helps guide prevention planning."
+        cards.append(("Longer-term 30-year risk trajectory", _fmt(ascvd_30y, "%"), line, "green"))
 
     return "".join(
         f'<div class="roadmap-risk-card roadmap-tone-{tone}">'
@@ -773,9 +801,9 @@ def _patient_driver_sections(patient, result):
         except (TypeError, ValueError):
             value = None
         if value is not None and value >= 300:
-            priority.append((f"CAC {value:g} - high plaque burden", "Coronary calcium shows a high amount of plaque.", "red"))
+            priority.append((f"Coronary calcium score {value:g} - high plaque burden", "Coronary calcium shows a high amount of plaque.", "red"))
         elif value is not None and value > 0:
-            priority.append((f"CAC {value:g} - plaque present", "Coronary calcium shows plaque is present.", "amber"))
+            priority.append((f"Coronary calcium score {value:g} - plaque present", "Coronary calcium shows plaque is present.", "amber"))
         elif value == 0:
             context.append("CAC 0")
 
@@ -791,7 +819,9 @@ def _patient_driver_sections(patient, result):
         priority.append(
             (
                 f"ApoB {_fmt(apob)} - elevated particle burden",
-                "; ".join(lipid_bits),
+                "ApoB reflects the number of cholesterol-carrying particles that can contribute to plaque. Current values: "
+                + "; ".join(lipid_bits)
+                + ".",
                 "amber",
             )
         )
@@ -801,7 +831,7 @@ def _patient_driver_sections(patient, result):
             lipid_bits.append(f"LDL-C {_fmt(ldl)}")
         if non_hdl is not None:
             lipid_bits.append(f"non-HDL-C {_fmt(non_hdl)}")
-        priority.append(("Cholesterol particles", "; ".join(lipid_bits), "amber"))
+        priority.append(("Cholesterol particles", "These numbers show plaque-driving cholesterol in the blood. Current values: " + "; ".join(lipid_bits) + ".", "amber"))
 
     a1c = getattr(patient, "a1c", None)
     diabetes = bool(getattr(patient, "diabetes", False)) or (
@@ -822,8 +852,13 @@ def _patient_driver_sections(patient, result):
     if kdigo:
         kidney_bits.append(f"KDIGO {kdigo}")
     if kidney_bits and (diabetes or egfr is not None or uacr is not None):
-        label = "Diabetes/kidney involvement" if diabetes and (egfr is not None or uacr is not None or kdigo) else "Blood sugar / kidney"
-        priority.append((label, "; ".join(kidney_bits), "blue" if diabetes else "green"))
+        if diabetes and (egfr is not None or uacr is not None or kdigo):
+            label = "Diabetes / kidney involvement"
+            detail = "Blood sugar and kidney markers both add to long-term cardiovascular and kidney risk. Current values: "
+        else:
+            label = "Blood sugar / kidney"
+            detail = "Blood sugar and kidney markers help guide long-term prevention. Current values: "
+        priority.append((label, detail + "; ".join(kidney_bits) + ".", "blue" if diabetes else "green"))
 
     lpa = getattr(patient, "lp_a_value", None)
     if lpa is not None:
@@ -924,19 +959,22 @@ def _text_lines(patient, result):
     level, level_detail = _continuum_label(patient, result)
 
     lines = [
-        "Your Cardiometabolic Prevention Roadmap",
-        "This summary shows where you stand today and the most important steps to lower future heart, kidney, and metabolic risk.",
+        "Your Prevention Roadmap",
+        "Your results show where you stand today and the most important steps to lower future heart, kidney, and metabolic risk.",
         "",
         "Where you stand:",
         f"- 10-year risk: {_fmt(risk, '%') or 'unavailable'}",
     ]
     if ascvd_30y is not None:
         lines.append(f"- 30-year risk: {_fmt(ascvd_30y, '%')}")
+        prevent_30y_text = _prevent_30y_explanation(ascvd_30y)
+        if prevent_30y_text:
+            lines.append(f"- {prevent_30y_text}")
     lines.extend(
         [
             f"- {_prevent_explanation(risk)}",
             f"- {_patient_plaque_status(patient, result)}",
-            f"- Clinician context: {level}" + (f" - {level_detail}" if level_detail else ""),
+            f"- Care focus: {level}" + (f" - {level_detail}" if level_detail else ""),
             "",
             "Why risk is elevated:",
         ]
@@ -973,7 +1011,7 @@ def _text_lines(patient, result):
     for index, (label, detail) in enumerate(_patient_next_steps(patient, result)[:6], start=1):
         lines.append(f"{index}. {label}: {detail}")
 
-    lines.extend(["", "This roadmap supports clinician review and shared decision-making. It does not replace medical advice."])
+    lines.extend(["", "This roadmap is for discussion with your clinician. Medication decisions should be individualized."])
     return lines
 
 
@@ -1110,16 +1148,23 @@ def _render_patient_roadmap_legacy(patient, result):
     white-space: nowrap;
 }}
 .roadmap-section-title {{
-    color: var(--rc-charcoal);
+    border-top: 1px solid rgba(7, 26, 47, 0.10);
+    color: #071a2f;
     font-family: var(--rc-font-title);
-    font-size: 0.90rem;
-    font-weight: 760;
-    letter-spacing: 0;
-    margin: 8px 0 4px;
+    font-size: 1.02rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+    margin: 18px 0 10px;
+    padding-top: 12px;
+}}
+.roadmap-section-title:first-of-type {{
+    border-top: 0;
+    margin-top: 10px;
+    padding-top: 0;
 }}
 .roadmap-stand {{
-    border-top: 1px solid rgba(11, 31, 58, 0.08);
-    padding-top: 6px;
+    padding-top: 0;
 }}
 .roadmap-risk-line {{
     color: var(--rc-black);
@@ -1317,12 +1362,20 @@ def render_patient_roadmap(patient, result):
             white-space: nowrap;
         }
         .roadmap-section-title {
+            border-top: 1px solid rgba(7, 26, 47, 0.10);
             color: var(--rc-black);
             font-family: var(--rc-font-title);
-            font-size: 1.04rem;
-            font-weight: 720;
-            letter-spacing: 0;
-            margin: 11px 0 7px;
+            font-size: 1.05rem;
+            font-weight: 800;
+            letter-spacing: -0.01em;
+            line-height: 1.2;
+            margin: 18px 0 10px;
+            padding-top: 12px;
+        }
+        .roadmap-section-title:first-of-type {
+            border-top: 0;
+            margin-top: 10px;
+            padding-top: 0;
         }
         .roadmap-risk-grid {
             display: grid;
@@ -1603,15 +1656,15 @@ def render_patient_roadmap(patient, result):
     body_parts = [
         '<div class="roadmap-card rc-panel">',
         '<div class="roadmap-head">',
-        '<div><div class="roadmap-title rc-card-title">Your Cardiometabolic Prevention Roadmap</div>',
-        '<div class="roadmap-subtitle">This summary shows where you stand today and the most important steps to lower future heart, kidney, and metabolic risk.</div></div>',
+        '<div><div class="roadmap-title rc-card-title">Your Prevention Roadmap</div>',
+        '<div class="roadmap-subtitle">Your results show where you stand today and the most important steps to lower future heart, kidney, and metabolic risk.</div></div>',
         f'<div class="roadmap-chip">{escape(badge)}</div>',
         "</div>",
         '<div class="roadmap-section-title">Where you stand</div>',
         f'<div class="roadmap-risk-grid">{risk_cards_html}</div>',
         f'<div class="roadmap-detail">{escape(stand_detail)}</div>' if stand_detail else "",
         f'<div class="roadmap-plaque-line">{plaque_html}</div>',
-        f'<div class="roadmap-clinician-context">Clinician context: {escape(clinician_context)}</div>' if clinician_context else "",
+        f'<div class="roadmap-clinician-context">Care focus: {escape(clinician_context)}</div>' if clinician_context else "",
         '<div class="roadmap-section-title">Why risk is elevated</div>',
         f'<div class="roadmap-driver-list">{priority_html}</div>',
         context_html,
@@ -1619,7 +1672,7 @@ def render_patient_roadmap(patient, result):
         f'<div class="roadmap-goal-strip">{goal_html}</div>',
         '<div class="roadmap-section-title">Next steps</div>',
         f'<ol class="roadmap-step-list">{next_html}</ol>',
-        '<div class="roadmap-footer">This roadmap supports clinician review and shared decision-making. It does not replace medical advice.</div>',
+        '<div class="roadmap-footer">This roadmap is for discussion with your clinician. Medication decisions should be individualized.</div>',
         "</div>",
     ]
 
