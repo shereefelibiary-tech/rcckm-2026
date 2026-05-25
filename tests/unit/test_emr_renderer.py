@@ -66,6 +66,29 @@ def test_render_emr_note_outputs_plain_text_sections_in_order():
     assert note.index(lipid_line) < note.index(cac_line) < note.index(aspirin_line)
 
 
+def test_render_emr_note_marks_hcc_supported_diagnosis_subtly():
+    patient = Patient(age=60, sex="male")
+    result = RCCKMResult(
+        diagnosis_candidates=[
+            DiagnosisCandidate(
+                name="Type 2 diabetes mellitus with diabetic chronic kidney disease",
+                icd10_code="E11.22",
+                status="data-derived",
+                source="diabetes with eGFR <60",
+                hcc_supported=True,
+                hcc_label="HCC-supported",
+            )
+        ]
+    )
+
+    note = render_emr_note(patient, result)
+
+    assert "HCC-supported" in note
+    assert "RAF" not in note
+    assert "capture" not in note.lower()
+    assert "reimbursement" not in note.lower()
+
+
 def test_render_emr_note_uses_plaque_category_when_cac_missing():
     patient = Patient(age=60, sex="male")
     result = RCCKMResult(plaque_category=PlaqueCategory.SEVERE)

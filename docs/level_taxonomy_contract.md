@@ -133,3 +133,6 @@ Invariants:
 - Clinical ASCVD overrides all.
 - LDL-C >=190 should never be Level 1/LOW.
 - CAC 0 does not de-risk LDL-C >=190/FH or clinical ASCVD.
+- PREVENT is validated for primary-prevention adults age 30-79 and is not used to de-risk established ASCVD, LDL-C >=190, or suspected FH/HeFH.
+- Secondary-prevention targets differ from primary-prevention targets: high-risk ASCVD uses LDL-C <70 / non-HDL-C <100, while very-high-risk ASCVD uses LDL-C <55 / non-HDL-C <85.
+- Ancestry, reproductive, inflammatory, and HIV markers personalize risk and may contribute to RSS/context, but they are not diagnosis candidates by default.

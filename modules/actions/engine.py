@@ -329,6 +329,7 @@ def _needs_lipid_action(patient, result=None):
         or (cac is not None and cac > 0)
         or (apob is not None and apob >= 100)
         or (ldl_c is not None and ldl_c >= 190)
+        or bool(getattr(patient, "suspected_fh_hefh", False))
         or (_severe_tg(patient) and _atherogenic_metric_available(patient))
         or _has_hiv_pathway(patient)
         or (result is not None and _low_short_term_elevated_cumulative_lipid_path(patient, result))
@@ -417,7 +418,7 @@ def _lipid_action_text(patient, result):
             return "Intensify secondary-prevention lipid-lowering therapy; treat toward ASCVD targets."
         return "Secondary-prevention lipid-lowering therapy indicated; treat toward ASCVD targets."
     ldl_c = getattr(patient, "ldl_c", None)
-    if ldl_c is not None and ldl_c >= 190:
+    if (ldl_c is not None and ldl_c >= 190) or bool(getattr(patient, "suspected_fh_hefh", False)):
         return "High-intensity or maximally tolerated statin therapy indicated."
     if _severe_tg(patient) and _atherogenic_metric_available(patient):
         return "Address ASCVD risk with lipid-lowering therapy guided by non-HDL-C/ApoB."
@@ -507,18 +508,12 @@ def _build_treatment_actions(patient, result):
             )
 
     ldl_c = getattr(patient, "ldl_c", None)
-    if ldl_c is not None and ldl_c >= 190:
+    if (ldl_c is not None and ldl_c >= 190) or bool(getattr(patient, "suspected_fh_hefh", False)):
         _add_action(
             recommendations,
             domains,
             "secondary_causes",
-            "Evaluate secondary causes of severe hypercholesterolemia.",
-        )
-        _add_action(
-            recommendations,
-            domains,
-            "fh_evaluation",
-            "Consider FH evaluation/cascade screening when clinical suspicion is present.",
+            "Evaluate secondary causes and consider FH/cascade screening when appropriate.",
         )
 
     if _has_ckd_or_albuminuria(patient, result):

@@ -47,8 +47,8 @@ Priority:
 | 27 | Diabetes pathway | Diabetes age 40-75: statin indicated; targets depend on risk factors. | implemented | `modules/targets/engine.py`, `modules/actions/engine.py` | P0 | Multiple-risk-factor pathway represented. |
 | 28 | Diabetes-specific risk enhancers | Duration, albuminuria, eGFR, retinopathy, neuropathy, ABI `<0.9`. | implemented | `core/patient.py`, `modules/targets/engine.py`, `modules/risk_enhancers/engine.py`, `smartphrase_ingest/parser.py` | P0 | Duration/retinopathy/neuropathy/ABI fields added. |
 | 29 | CKD stage 3+ pathway | Age 40-75 CKD stage 3+: moderate statin or statin+ezetimibe recommended. | implemented | `modules/targets/engine.py`, `modules/actions/engine.py` | P0 | Chronicity still clinician-reviewed. |
-| 30 | HIV pathway | HIV is a risk enhancer. | implemented | `smartphrase_ingest/parser.py`, `modules/rss/engine.py`, `modules/risk_enhancers/engine.py` | P0 | Explicit no/yes parsing is covered. |
-| 31 | Chronic inflammatory disease pathway | RA/SLE/psoriasis/IBD/inflammatory context are risk enhancers. | implemented | `smartphrase_ingest/parser.py`, `modules/rss/engine.py`, `modules/risk_enhancers/engine.py` | P0 | Single generic inflammatory disease remains contextual. |
+| 30 | HIV pathway | HIV is a risk enhancer; HIV age 40-75 on stable ART has a specific statin pathway with ART-statin interaction review. | implemented | `smartphrase_ingest/parser.py`, `modules/rss/engine.py`, `modules/risk_enhancers/engine.py`, `modules/actions/engine.py` | P0 | HIV is separate from inflammatory disease; unknown does not trigger pathway. |
+| 31 | Chronic inflammatory disease pathway | RA/SLE/psoriasis/inflammatory arthritis/IBD/inflammatory context are risk enhancers. | implemented | `smartphrase_ingest/parser.py`, `modules/rss/engine.py`, `modules/risk_enhancers/engine.py` | P0 | HIV remains separate; explicit no/unknown are preserved. |
 | 32 | Hypertriglyceridemia 150-499 | Lifestyle + ASCVD/PREVENT-guided statin discussion; non-HDL/ApoB helpful. | partially implemented | `modules/actions/engine.py`, `modules/rss/engine.py`, `modules/diagnoses/engine.py` | P0 | Diagnosis/RSS present; dietary counseling text is not full guideline depth. |
 | 33 | Hypertriglyceridemia 500-999 | Pancreatitis-risk pathway; TG-lowering therapy reasonable. | implemented | `modules/actions/engine.py` | P0 | Wording includes repeat fasting lipids, secondary causes, TG-lowering therapy. |
 | 34 | Hypertriglyceridemia >=1000 | Pancreatitis priority, RDN referral, very-low-fat/no alcohol, TG-lowering therapy. | implemented | `modules/actions/engine.py` | P0 | Specialty workflow details remain concise. |
@@ -59,7 +59,14 @@ Priority:
 | 39 | Monitoring after LLT initiation/intensification | Lipid profile 4-12 weeks, then every 6-12 months. | implemented | `modules/actions/scaffold.py` | P0 | Added to visible recommendation scaffold when LLT is indicated/considered. |
 | 40 | Pregnancy/lactation medication safety | Statin/nonstatin safety and contraception/pregnancy planning. | missing | new reproductive medication safety module | P1 | Do not implement casually; needs medication-specific safety logic. |
 | 41 | Heart failure nuance | PREVENT total CVD includes HF; lipid recommendations vary by HF context. | partially implemented | `modules/prevent/*`, `renderers/prevent_card.py` | P2 | HF risk displays from PREVENT where available; HF clinical state not modeled. |
-| 42 | Cancer survivor / active cancer considerations | Cancer therapy/survivorship may affect ASCVD risk and treatment choices. | missing | new history/risk-enhancer fields | P2 | Not planned for MVP unless oncology workflow added. |
+| 42 | Cancer survivor / active cancer considerations | Cancer therapy/survivorship may affect ASCVD risk and treatment choices. | partially implemented | `core/patient.py`, `ui/input_worksheet.py`, `modules/risk_enhancers/engine.py` | P1 | Conservative context only unless another treatment-eligible pathway is present. |
+
+## Focused Guardrails
+
+- PREVENT is primary-prevention support for adults age 30-79. Age <30 and >79 show explicit unsupported messages.
+- PREVENT does not drive treatment decisions in established ASCVD and does not de-risk LDL-C >=190 or suspected FH/HeFH.
+- Secondary-prevention targets are split into high-risk ASCVD (LDL-C <70, non-HDL-C <100) and very-high-risk ASCVD (LDL-C <55, non-HDL-C <85).
+- Ancestry, reproductive, inflammatory, and HIV markers are personalization enhancers/context; they are not default diagnosis candidates.
 
 ## P0 Implementation Notes From This Pass
 

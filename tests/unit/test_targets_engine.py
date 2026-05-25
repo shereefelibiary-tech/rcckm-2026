@@ -7,6 +7,23 @@ def test_build_target_result_returns_clinical_ascvd_targets():
 
     result = build_target_result(patient)
 
+    assert result.ldl_c_target == 70
+    assert result.non_hdl_c_target == 100
+    assert result.apob_target == 80
+
+
+def test_build_target_result_returns_very_high_risk_ascvd_targets():
+    patient = Patient(
+        age=65,
+        sex="female",
+        clinical_ascvd=True,
+        clinical_ascvd_context="prior MI and ischemic stroke",
+        diabetes=True,
+        ldl_c=110,
+    )
+
+    result = build_target_result(patient)
+
     assert result.ldl_c_target == 55
     assert result.non_hdl_c_target == 85
     assert result.apob_target == 60

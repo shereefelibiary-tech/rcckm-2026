@@ -334,9 +334,9 @@ def test_level_taxonomy_golden_cases(name, patient, expected_level):
     if patient.cac is None:
         assert "unmeasured" in classification.plaque_status.lower()
         assert "subclinical coronary atherosclerosis" not in diagnoses.lower()
-    if patient.clinical_ascvd:
-        assert "secondary prevention" in classification.treatment_posture
-        assert "PREVENT is not used for treatment decisions" in render_note_for(patient)
+        if patient.clinical_ascvd:
+            assert "secondary prevention" in classification.treatment_posture
+            assert "PREVENT not used for treatment decisions in established ASCVD" in render_note_for(patient)
     if patient.ldl_c is not None and patient.ldl_c >= 190:
         assert classification.level != "1"
         assert "High-intensity or maximally tolerated statin therapy indicated" in actions

@@ -382,6 +382,19 @@ def calculate_prevent(patient, model="best_available") -> dict[str, Any]:
         "unavailable_reason": None,
         "warnings": warnings + informational_warnings,
     }
+    age = float(inputs["age"]) if inputs.get("age") is not None else None
+    if age is not None and not (30 <= age < 80):
+        base["missing_inputs"] = []
+        base["warnings"] = informational_warnings
+        if age < 30:
+            base["unavailable_reason"] = (
+                "PREVENT not validated for age <30; interpretation should rely on clinical risk factors and guideline-specific pathways."
+            )
+        else:
+            base["unavailable_reason"] = (
+                "PREVENT not validated for age >79; individualized clinical judgment required."
+            )
+        return base
     if missing:
         base["unavailable_reason"] = "Missing required PREVENT inputs."
         return base
@@ -390,9 +403,6 @@ def calculate_prevent(patient, model="best_available") -> dict[str, Any]:
         return base
 
     age = float(inputs["age"])
-    if not (30 <= age < 80):
-        base["unavailable_reason"] = "PREVENT is validated for ages 30-79."
-        return base
 
     sex = int(inputs["sex"])
     any_available = False

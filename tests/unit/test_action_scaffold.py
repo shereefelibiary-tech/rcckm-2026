@@ -212,7 +212,7 @@ def test_clinical_ascvd_with_cac_zero_uses_secondary_prevention_not_derisking():
     assert _section(sections, "Aspirin").line == (
         "Antiplatelet therapy indicated for secondary prevention if clinically appropriate."
     )
-    assert "Established clinical ASCVD / secondary-prevention pathway; PREVENT is not used for treatment decisions." in note
+    assert "PREVENT not used for treatment decisions in established ASCVD." in note
     assert "PREVENT 10-year ASCVD risk" not in note
     assert "CAC 0 does not de-risk secondary prevention" in note
     assert "Clinical ASCVD / coronary artery disease with prior NSTEMI and PCI/stent" in diagnosis_text

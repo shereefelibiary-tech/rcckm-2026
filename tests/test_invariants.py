@@ -27,7 +27,7 @@ def test_clinical_ascvd_overrides_prevent_and_cac():
     assert result.clinical_ascvd is True
     assert any("Clinical ASCVD" in name for name in names)
     assert not any("Subclinical coronary atherosclerosis" in name for name in names)
-    assert "PREVENT is not used for treatment decisions." in text
+    assert "PREVENT not used for treatment decisions in established ASCVD." in text
     assert "does not de-risk secondary prevention" in text
     assert any("Secondary-prevention lipid-lowering therapy" in action for action in action_lines(result))
 

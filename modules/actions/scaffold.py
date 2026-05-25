@@ -176,7 +176,7 @@ def _lipid_line(patient: Any, result: Any) -> str:
         return dominant
 
     ldl = _num(getattr(patient, "ldl_c", None))
-    if ldl is not None and ldl >= 190:
+    if (ldl is not None and ldl >= 190) or bool(getattr(patient, "suspected_fh_hefh", False)):
         return "High-intensity or maximally tolerated statin therapy indicated."
     if _low_with_lpa_reproductive_context(patient, result):
         return "No medication escalation required today; clinician-patient risk discussion recommended given high Lp(a) and reproductive risk markers."
@@ -362,7 +362,8 @@ def build_action_scaffold(patient: Any, result: Any) -> list[ActionSection]:
         sections.append(
             ActionSection(
                 "Secondary causes",
-                "Evaluate secondary causes of severe hypercholesterolemia.",
+                domains.get("secondary_causes")
+                or "Evaluate secondary causes and consider FH/cascade screening when appropriate.",
             )
         )
     if "fh_evaluation" in domains:

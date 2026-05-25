@@ -72,8 +72,41 @@ def _has_severe_hypercholesterolemia_high_risk_feature(patient):
     )
 
 
+def _is_very_high_risk_ascvd(patient):
+    context = str(getattr(patient, "clinical_ascvd_context", "") or "").lower()
+    major_event_count = sum(
+        1
+        for token in ("stemi", "nstemi", "mi", "acs", "stroke", "tia", "pad")
+        if token in context
+    )
+    high_risk_conditions = sum(
+        1
+        for present in (
+            _has_diabetes(patient),
+            _has_ckd_stage_3_or_higher(patient),
+            bool(getattr(patient, "smoker", False)) or bool(getattr(patient, "smoking", False)),
+            getattr(patient, "ldl_c", None) is not None and patient.ldl_c >= 70,
+            getattr(patient, "non_hdl_c", None) is not None and patient.non_hdl_c >= 100,
+            getattr(patient, "apob", None) is not None and patient.apob >= 80,
+        )
+        if present
+    )
+    return bool(
+        major_event_count >= 2
+        or ("recent acs" in context)
+        or (major_event_count >= 1 and high_risk_conditions >= 2)
+    )
+
+
 def build_target_result(patient):
     if patient.clinical_ascvd:
+        if not _is_very_high_risk_ascvd(patient):
+            return TargetResult(
+                ldl_c_target=70,
+                non_hdl_c_target=100,
+                apob_target=80,
+                rationale="Clinical ASCVD: high-risk secondary prevention target.",
+            )
         return TargetResult(
             ldl_c_target=55,
             non_hdl_c_target=85,
@@ -111,14 +144,14 @@ def build_target_result(patient):
             ),
         )
 
-    if patient.ldl_c is not None and patient.ldl_c >= 190:
-        if _has_severe_hypercholesterolemia_high_risk_feature(patient):
+    if (patient.ldl_c is not None and patient.ldl_c >= 190) or bool(getattr(patient, "suspected_fh_hefh", False)):
+        if bool(getattr(patient, "suspected_fh_hefh", False)) or _has_severe_hypercholesterolemia_high_risk_feature(patient):
             return TargetResult(
                 ldl_c_target=70,
                 non_hdl_c_target=100,
                 apob_target=80,
                 rationale=(
-                    "LDL-C >=190 with additional high-risk features or possible FH pathway: use high-risk lipid targets; CAC 0 should not de-risk therapy."
+                    "LDL-C >=190 / possible FH pathway with additional high-risk features: use high-risk lipid targets; CAC 0 should not de-risk therapy."
                 ),
             )
         return TargetResult(

@@ -167,6 +167,7 @@ def _object_diagnosis_to_dict(item: Any) -> dict[str, Any]:
     return {
         "dx_id": getattr(item, "dx_id", None) or getattr(item, "id", None) or label,
         "label": label,
+        "diagnosis": getattr(item, "diagnosis", None) or label,
         "status": getattr(item, "status", None) or getattr(item, "bucket", None),
         "source": getattr(item, "source", None),
         "icd10": getattr(item, "icd10", None),
@@ -179,6 +180,10 @@ def _object_diagnosis_to_dict(item: Any) -> dict[str, Any]:
         "hcc_suggested": getattr(item, "hcc_suggested", None),
         "hcc_confirmed": getattr(item, "hcc_confirmed", None),
         "hcc_relevant": getattr(item, "hcc_relevant", None),
+        "hcc_supported": getattr(item, "hcc_supported", None),
+        "hcc_label": getattr(item, "hcc_label", None),
+        "confidence": getattr(item, "confidence", None),
+        "review_status": getattr(item, "review_status", None),
         "evidence": getattr(item, "evidence", None),
         "ev": getattr(item, "ev", None),
         "why": getattr(item, "why", None),
@@ -263,8 +268,9 @@ def normalize_diagnosis_entries(out: Any) -> list[dict[str, Any]]:
             hcc_suggested = ["HCC"]
         if not hcc_suggested and isinstance(hcc, str) and hcc.strip():
             hcc_suggested = [hcc.strip()]
-        if not hcc_suggested and bool(item.get("hcc_relevant")):
-            hcc_suggested = ["HCC"]
+        hcc_label = str(item.get("hcc_label") or "").strip()
+        if not hcc_suggested and bool(item.get("hcc_supported")):
+            hcc_suggested = [hcc_label or "HCC-supported"]
         if status in {"confirmed", "clinician_confirmed", "confirmed_by_data"} and not hcc_confirmed:
             hcc_confirmed = list(hcc_suggested)
         if status in {"suspected", "review_suggested"}:
@@ -274,6 +280,7 @@ def normalize_diagnosis_entries(out: Any) -> list[dict[str, Any]]:
             {
                 "dx_id": dx_id,
                 "label": label,
+                "diagnosis": str(item.get("diagnosis") or label).strip(),
                 "label_display": label_display,
                 "status": status,
                 "icd10_suggested": _dedupe(icd10_suggested),
@@ -285,6 +292,10 @@ def normalize_diagnosis_entries(out: Any) -> list[dict[str, Any]]:
                     for k in ("evidence", "ev", "why", "reason", "rationale", "source")
                     if k in item and item[k]
                 },
+                "hcc_supported": bool(item.get("hcc_supported")) or bool(hcc_suggested),
+                "hcc_label": hcc_label or (hcc_suggested[0] if hcc_suggested else None),
+                "confidence": item.get("confidence") or status,
+                "review_status": item.get("review_status") or status,
             }
         )
 

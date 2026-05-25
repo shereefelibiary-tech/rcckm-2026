@@ -118,9 +118,9 @@ def build_prevent_missing_reason(result):
 
 def _context_line(result):
     if _has_clinical_ascvd(result):
-        return "Established ASCVD drives secondary-prevention management; PREVENT should not be used to de-risk treatment."
-    if bool(getattr(result, "severe_hypercholesterolemia", False)):
-        return "PREVENT is not used to de-risk LDL-C >=190 pathway."
+        return "PREVENT not used for treatment decisions in established ASCVD."
+    if bool(getattr(result, "severe_hypercholesterolemia", False)) or bool(getattr(result, "possible_fh_pathway", False)):
+        return "LDL-C >=190 / possible FH pathway: PREVENT should not be used to de-risk treatment."
 
     cac_value = _cac_value_from_result(result)
     cac_missing_line = (
@@ -378,7 +378,15 @@ def render_prevent_card(result):
     unavailable_html = ""
     if not available:
         explanation = "PREVENT estimate unavailable"
-        context = "Complete the missing worksheet inputs to calculate estimated population risk."
+        context = (
+            _context_line(result)
+            if (
+                _has_clinical_ascvd(result)
+                or bool(getattr(result, "severe_hypercholesterolemia", False))
+                or bool(getattr(result, "possible_fh_pathway", False))
+            )
+            else "Complete the missing worksheet inputs to calculate estimated population risk."
+        )
         unavailable_html = build_prevent_missing_reason(result)
 
     if clinical_ascvd:

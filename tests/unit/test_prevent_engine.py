@@ -63,7 +63,7 @@ def test_prevent_summary_reports_unsupported_age():
 
     assert summary["available"] is False
     assert summary["missing_inputs"] == []
-    assert summary["unsupported_reason"] == "PREVENT is validated for ages 30-79."
+    assert summary["unsupported_reason"] == "PREVENT not validated for age >79; individualized clinical judgment required."
 
 
 def test_prevent_summary_calculates_valid_10_year_and_explains_missing_30_year():

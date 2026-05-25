@@ -299,6 +299,16 @@ def _codes_for(entry, confirmed):
     return [str(code).strip() for code in codes if str(code).strip()]
 
 
+def _hcc_note_for(entry, confirmed=True):
+    key = "hcc_confirmed" if confirmed else "hcc_suggested"
+    labels = [str(label).strip() for label in (entry.get(key) or []) if str(label).strip()]
+    if not labels and entry.get("hcc_supported"):
+        labels = [str(entry.get("hcc_label") or "HCC-supported").strip()]
+    if not labels:
+        return None
+    return labels[0] if labels[0].lower() == "hcc-supported" else f"HCC-supported: {labels[0]}"
+
+
 def _candidate_line(entry, confirmed=True):
     label = str(entry.get("label_display") or entry.get("label") or "").strip()
     if not label:
@@ -308,6 +318,9 @@ def _candidate_line(entry, confirmed=True):
     line = f"- {label}"
     if codes:
         line += f" (ICD: {', '.join(codes)})"
+    hcc_note = _hcc_note_for(entry, confirmed=confirmed)
+    if hcc_note:
+        line += f" [{hcc_note}]"
     return line
 
 
@@ -367,11 +380,17 @@ def _emr_assessment_lines(entries):
         codes = _codes_for(diabetic_ckd, confirmed=True)
         if codes:
             parts.append(f"ICD: {', '.join(codes)}")
+        hcc_note = _hcc_note_for(diabetic_ckd, confirmed=True)
+        if hcc_note:
+            parts.append(hcc_note)
         if staged_ckd:
             stage = _ckd_stage_phrase(_diagnosis_label(staged_ckd))
             stage_codes = _codes_for(staged_ckd, confirmed=True)
             if stage and stage_codes:
                 parts.append(f"CKD stage {stage} ICD: {', '.join(stage_codes)}")
+            stage_hcc_note = _hcc_note_for(staged_ckd, confirmed=True)
+            if stage_hcc_note and stage_hcc_note not in parts:
+                parts.append(f"CKD stage {stage} {stage_hcc_note}")
         line = f"- {label}"
         if parts:
             line += f" ({'; '.join(parts)})"
@@ -386,7 +405,7 @@ def _append_unique(lines, line):
 
 def _prevent_impression_sentence(patient, result):
     if getattr(patient, "clinical_ascvd", False):
-        return "Established clinical ASCVD / secondary-prevention pathway; PREVENT is not used for treatment decisions."
+        return "PREVENT not used for treatment decisions in established ASCVD."
 
     fragments = []
     if getattr(result, "prevent_10y_ascvd", None) is not None:
@@ -479,7 +498,9 @@ def _impression_paragraphs(patient, result):
     if history:
         third_parts.append(history)
     if bool(getattr(result, "severe_hypercholesterolemia", False)):
-        third_parts.append("PREVENT should not be used to de-risk LDL-C >=190 pathway.")
+        third_parts.append("LDL-C >=190 / possible FH pathway: PREVENT should not be used to de-risk treatment.")
+    elif bool(getattr(result, "possible_fh_pathway", False)):
+        third_parts.append("LDL-C >=190 / possible FH pathway: PREVENT should not be used to de-risk treatment.")
     near_level3_line = _near_level3_threshold_line(patient, result)
     if near_level3_line:
         third_parts.append(near_level3_line)

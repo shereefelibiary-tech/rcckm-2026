@@ -98,7 +98,7 @@ def test_suspected_fh_and_ldl_190_cac0_remain_treatment_forward():
     assert result.level_classification["level"] == "3B"
     assert "High-intensity or maximally tolerated statin indicated." in emr
     assert "do not use CAC 0 to defer lipid-lowering therapy" in emr
-    assert "PREVENT should not be used to de-risk LDL-C >=190 pathway." in emr
+    assert "LDL-C >=190 / possible FH pathway: PREVENT should not be used to de-risk treatment." in emr
 
 
 def test_incidental_cac_creates_qualitative_plaque_context_without_score():

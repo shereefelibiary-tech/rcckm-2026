@@ -1,13 +1,34 @@
 from core.results import DiagnosisCandidate
 
 
+HCC_SUPPORTED_BY_ICD = {
+    "E11.22": "HCC-supported",
+    "N18.31": "HCC-supported",
+    "N18.32": "HCC-supported",
+    "N18.4": "HCC-supported",
+    "N18.5": "HCC-supported",
+}
+
+
+def _hcc_label_for_icd(icd10_code):
+    if not icd10_code:
+        return None
+    return HCC_SUPPORTED_BY_ICD.get(str(icd10_code).strip().upper())
+
+
 def data_derived_candidate(name, source, icd10_code=None):
+    hcc_label = _hcc_label_for_icd(icd10_code)
     return DiagnosisCandidate(
         name=name,
+        diagnosis=name,
         icd10_code=icd10_code,
         status="data-derived",
         source=source,
-        hcc_relevant=False,
+        hcc_relevant=bool(hcc_label),
+        hcc_supported=bool(hcc_label),
+        hcc_label=hcc_label,
+        confidence="data-supported",
+        review_status="review_suggested",
     )
 
 
@@ -36,10 +57,15 @@ def build_diagnosis_candidates(patient):
         candidates.append(
             DiagnosisCandidate(
                 name=name,
+                diagnosis=name,
                 icd10_code="I25.10" if context else None,
                 status="reported",
                 source=context or "clinical_ascvd flag",
                 hcc_relevant=False,
+                hcc_supported=False,
+                hcc_label=None,
+                confidence="reported",
+                review_status="review_suggested",
             )
         )
         candidate_names.add(name)

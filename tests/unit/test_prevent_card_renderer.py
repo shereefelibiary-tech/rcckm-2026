@@ -160,7 +160,7 @@ def test_render_prevent_card_clinical_ascvd_suppresses_prevent_decision_values()
     html = render_prevent_card(result)
 
     assert "PREVENT is not used for treatment decisions in established ASCVD." in html
-    assert "Established ASCVD drives secondary-prevention management" in html
+    assert "PREVENT not used for treatment decisions in established ASCVD." in html
     assert "2.1%" not in html
     assert "12%" not in html
     assert "<table class='prevent-matrix'>" not in html
@@ -280,9 +280,9 @@ def test_build_prevent_missing_reason_lists_missing_fields():
 def test_build_prevent_missing_reason_shows_unsupported_age():
     result = RCCKMResult(
         prevent_available=False,
-        prevent_unsupported_reason="PREVENT is validated for ages 30-79.",
+        prevent_unsupported_reason="PREVENT not validated for age >79; individualized clinical judgment required.",
     )
 
     html = build_prevent_missing_reason(result)
 
-    assert "PREVENT is validated for ages 30-79." in html
+    assert "PREVENT not validated for age &gt;79; individualized clinical judgment required." in html

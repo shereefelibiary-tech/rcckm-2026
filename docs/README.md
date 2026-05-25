@@ -4,6 +4,7 @@ Core clinical and product contracts:
 
 - [Level Taxonomy Contract](level_taxonomy_contract.md)
 - [Report Section Contract](report_section_contract.md)
+- [Diagnosis Synthesis Contract](diagnosis_synthesis_contract.md)
 - [RSS Scoring Contract](rss_scoring_contract.md)
 - [2026 Guideline Coverage Matrix](guideline_coverage_matrix_2026.md)
 - [2026 Risk-Enhancer Coverage Matrix](risk_enhancer_coverage_matrix_2026.md)

@@ -2,6 +2,11 @@ from modules.prevent.official import calculate_prevent
 
 
 def _explicit_prevent_summary(patient) -> dict | None:
+    age = getattr(patient, "age", None)
+    try:
+        age_num = float(age)
+    except (TypeError, ValueError):
+        age_num = None
     values = {
         "prevent_10y_ascvd": getattr(patient, "prevent_10y_ascvd", None),
         "prevent_10y_total_cvd": getattr(patient, "prevent_10y_total_cvd", None),
@@ -10,6 +15,32 @@ def _explicit_prevent_summary(patient) -> dict | None:
     }
     if not any(value is not None for value in values.values()):
         return None
+    if age_num is not None and not (30 <= age_num < 80):
+        reason = (
+            "PREVENT not validated for age <30; interpretation should rely on clinical risk factors and guideline-specific pathways."
+            if age_num < 30
+            else "PREVENT not validated for age >79; individualized clinical judgment required."
+        )
+        return {
+            "available": False,
+            "model_used": "provided",
+            "missing_inputs": [],
+            "unavailable_reason": reason,
+            "unsupported_reason": reason,
+            "warnings": [reason],
+            "prevent_10y_hf": None,
+            "prevent_10y_chd": None,
+            "prevent_10y_stroke": None,
+            "prevent_30y_hf": None,
+            "prevent_30y_chd": None,
+            "prevent_30y_stroke": None,
+            "prevent_5y_total_cvd": None,
+            "prevent_5y_ascvd": None,
+            "prevent_5y_hf": None,
+            "prevent_age": getattr(patient, "prevent_age", None),
+            "prevent_percentile": getattr(patient, "prevent_percentile", None),
+            **{key: None for key in values},
+        }
     return {
         "available": values["prevent_10y_ascvd"] is not None,
         "model_used": "provided",

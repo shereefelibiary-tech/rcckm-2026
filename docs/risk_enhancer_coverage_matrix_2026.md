@@ -37,3 +37,11 @@ This matrix tracks RCCKM support for guideline risk enhancers and adjacent perso
 ## LDL-C Equation Note
 
 RCCKM uses entered LDL-C values. If LDL-C is calculated upstream, Martin/Hopkins or Sampson/NIH methods are preferred when applicable, especially when triglycerides are elevated or LDL-C is low.
+
+## Safety Guardrails
+
+- PREVENT is a primary-prevention estimator validated for adults age 30-79.
+- PREVENT is not used to de-risk established clinical ASCVD.
+- PREVENT is not used to de-risk LDL-C `>=190 mg/dL`, suspected FH/HeFH, or severe hypercholesterolemia pathways.
+- CAC 0 must not defer lipid-lowering therapy in established ASCVD or LDL-C `>=190` / possible FH pathways.
+- Ancestry, reproductive history, inflammatory disease, and HIV are personalization enhancers/context unless a separate treatment pathway is explicitly triggered.

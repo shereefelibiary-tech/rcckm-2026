@@ -6,6 +6,7 @@ from core.diagnosis_workflow import (
     build_confirmed_code_exports,
     diagnosis_context_line,
     normalize_diagnosis_entries,
+    prepare_diagnosis_display_entries,
     prioritize_linked_diagnoses,
     split_diagnoses,
 )
@@ -19,26 +20,25 @@ def test_normalize_diagnosis_entries_supports_current_result_candidates():
                 "E11.9",
                 "data-derived",
                 "diabetes flag",
-                True,
+                False,
             )
         ]
     )
 
     rows = normalize_diagnosis_entries(result)
 
-    assert rows == [
-            {
-                "dx_id": "Type 2 diabetes mellitus",
-                "label": "Type 2 diabetes mellitus",
-                "label_display": "Type 2 diabetes mellitus",
-                "status": "confirmed_by_data",
-                "icd10_suggested": ["E11.9"],
-                "icd10_confirmed": ["E11.9"],
-                "hcc_suggested": ["HCC"],
-                "hcc_confirmed": ["HCC"],
-                "source": "diabetes flag",
-            }
-        ]
+    assert len(rows) == 1
+    assert rows[0]["dx_id"] == "Type 2 diabetes mellitus"
+    assert rows[0]["label"] == "Type 2 diabetes mellitus"
+    assert rows[0]["diagnosis"] == "Type 2 diabetes mellitus"
+    assert rows[0]["status"] == "confirmed_by_data"
+    assert rows[0]["icd10_suggested"] == ["E11.9"]
+    assert rows[0]["icd10_confirmed"] == ["E11.9"]
+    assert rows[0]["hcc_suggested"] == []
+    assert rows[0]["hcc_confirmed"] == []
+    assert rows[0]["hcc_supported"] is False
+    assert rows[0]["hcc_label"] is None
+    assert rows[0]["source"] == "diabetes flag"
 
 
 def test_apply_confirmations_promotes_codes_and_split_lists():
@@ -65,6 +65,30 @@ def test_apply_confirmations_promotes_codes_and_split_lists():
     assert suspected == []
     assert confirmed[0]["icd10_confirmed"] == ["E11.9"]
     assert confirmed[0]["hcc_confirmed"] == ["HCC 19"]
+
+
+def test_hcc_supported_metadata_normalizes_to_subtle_badge_label():
+    result = RCCKMResult(
+        diagnosis_candidates=[
+            DiagnosisCandidate(
+                name="Type 2 diabetes mellitus with diabetic chronic kidney disease",
+                icd10_code="E11.22",
+                status="data-derived",
+                source="diabetes with eGFR <60",
+                hcc_supported=True,
+                hcc_label="HCC-supported",
+                confidence="data-supported",
+                review_status="review_suggested",
+            )
+        ]
+    )
+
+    rows = prepare_diagnosis_display_entries(result)
+
+    assert rows[0]["hcc_suggested"] == ["HCC-supported"]
+    assert rows[0]["hcc_supported"] is True
+    assert rows[0]["confidence"] == "data-supported"
+    assert rows[0]["review_status"] == "review_suggested"
 
 
 def test_family_history_context_is_not_diagnosis_workflow_item():

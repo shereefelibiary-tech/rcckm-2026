@@ -19,6 +19,11 @@ class DiagnosisCandidate:
     status: Optional[str] = None
     source: Optional[str] = None
     hcc_relevant: Optional[bool] = None
+    diagnosis: Optional[str] = None
+    hcc_supported: bool = False
+    hcc_label: Optional[str] = None
+    confidence: Optional[str] = None
+    review_status: Optional[str] = None
 
 
 @dataclass

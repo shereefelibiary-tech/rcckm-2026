@@ -68,7 +68,9 @@ def test_build_diagnosis_candidates_adds_chronic_kidney_disease_candidate():
     candidates = build_diagnosis_candidates(patient)
 
     assert any(c.name == "Chronic kidney disease" for c in candidates)
-    assert any(c.name == "Chronic kidney disease, stage 3a" for c in candidates)
+    stage = next(c for c in candidates if c.name == "Chronic kidney disease, stage 3a")
+    assert stage.hcc_supported is True
+    assert stage.hcc_label == "HCC-supported"
 
 
 def test_build_diagnosis_candidates_adds_ckd_stage_3b_candidate():
@@ -100,10 +102,12 @@ def test_build_diagnosis_candidates_adds_diabetes_with_ckd_candidate():
 
     candidates = build_diagnosis_candidates(patient)
 
-    assert any(
-        c.name == "Type 2 diabetes mellitus with diabetic chronic kidney disease"
-        for c in candidates
+    candidate = next(
+        c for c in candidates if c.name == "Type 2 diabetes mellitus with diabetic chronic kidney disease"
     )
+    assert candidate.icd10_code == "E11.22"
+    assert candidate.hcc_supported is True
+    assert candidate.hcc_label == "HCC-supported"
 
 
 def test_build_diagnosis_candidates_adds_diabetes_with_albuminuria_candidate():
@@ -200,7 +204,8 @@ def test_build_diagnosis_candidates_adds_elevated_apob_at_guideline_threshold():
 
     candidates = build_diagnosis_candidates(patient)
 
-    assert any(c.name == "Elevated ApoB" for c in candidates)
+    candidate = next(c for c in candidates if c.name == "Elevated ApoB")
+    assert candidate.hcc_supported is False
 
 
 def test_build_diagnosis_candidates_adds_hypertriglyceridemia():
@@ -208,7 +213,8 @@ def test_build_diagnosis_candidates_adds_hypertriglyceridemia():
 
     candidates = build_diagnosis_candidates(patient)
 
-    assert any(c.name == "Hypertriglyceridemia" for c in candidates)
+    candidate = next(c for c in candidates if c.name == "Hypertriglyceridemia")
+    assert candidate.hcc_supported is False
 
 
 def test_build_diagnosis_candidates_adds_severe_hypertriglyceridemia():
