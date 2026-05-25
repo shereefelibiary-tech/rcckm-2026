@@ -1,0 +1,21 @@
+RISK CONTINUUM CKM - CLINICAL REPORT
+
+Impression:
+Level 2A - early isolated risk signal.
+PREVENT unavailable or incomplete; interpretation is based on reviewed worksheet data.
+CKM stage 2. Atherogenic/metabolic burden: LDL-C not calculated due to TG; TG 1000 mg/dL (pancreatitis-risk range).
+UACR not available; obtain to complete kidney-risk assessment.
+
+Assessment:
+- Severe hypertriglyceridemia (ICD: E78.1)
+
+Recommendations:
+- Very severe hypertriglyceridemia: lower TG to reduce pancreatitis risk.
+- Very-low-fat diet; eliminate alcohol and added sugars/refined carbohydrates.
+- Refer to registered dietitian nutritionist.
+- Consider fibrate or prescription omega-3 therapy to lower TG.
+- Aspirin not indicated for routine primary prevention.
+- Lp(a) - one-time risk assessment
+- Obtain UACR to complete kidney-risk assessment.
+- hsCRP - inflammatory residual risk
+- Recheck fasting lipid profile after treatment changes.

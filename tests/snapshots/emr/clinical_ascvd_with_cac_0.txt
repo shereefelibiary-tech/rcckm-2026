@@ -1,0 +1,16 @@
+RISK CONTINUUM CKM - CLINICAL REPORT
+
+Impression:
+Level 5 - clinical ASCVD / secondary prevention.
+PREVENT not used for treatment decisions in established ASCVD.
+CKM stage 4; plaque established ASCVD; CAC 0 does not de-risk secondary prevention.
+
+Assessment:
+- Clinical ASCVD / coronary artery disease with prior NSTEMI and PCI/stent (ICD: I25.10)
+
+Recommendations:
+- Secondary-prevention lipid-lowering therapy indicated; treat toward ASCVD targets.
+- CAC 0 is discordant/historical and should not be used to de-risk established ASCVD.
+- Antiplatelet therapy indicated for secondary prevention if clinically appropriate.
+- Lp(a) - one-time risk assessment
+- Clarification testing should not delay treatment.

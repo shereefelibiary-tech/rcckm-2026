@@ -1,0 +1,19 @@
+RISK CONTINUUM CKM - CLINICAL REPORT
+
+Impression:
+Level 3B - actionable early CKM / atherogenic risk.
+PREVENT 10-year risk 1.37%; 30-year risk 9.09%.
+CKM stage 2. Atherogenic/metabolic burden: ApoB 118 mg/dL; LDL-C 164 mg/dL; non-HDL-C 188 mg/dL; TG 186 mg/dL.
+UACR not available; obtain to complete kidney-risk assessment. Risk context: premature family history.
+
+Assessment:
+- Hypertriglyceridemia (ICD: E78.1)
+- Prediabetes (ICD: R73.03)
+
+Recommendations:
+- Moderate-intensity statin therapy reasonable.
+- CAC not performed; below usual age threshold, use only if it would change management.
+- Aspirin not indicated for routine primary prevention.
+- Lp(a) - one-time risk assessment
+- Obtain UACR to complete kidney-risk assessment.
+- hsCRP - inflammatory residual risk

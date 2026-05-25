@@ -1,0 +1,26 @@
+Your Cardiometabolic Prevention Roadmap
+This summary shows where you stand today and the most important steps to lower future heart, kidney, and metabolic risk.
+
+Where you stand:
+- Missing inputs: total cholesterol, HDL-C, systolic BP, BP treatment status, statin/lipid-lowering therapy status, diabetes status, smoking status, BMI, eGFR
+- 10-year risk: unavailable
+- PREVENT estimate unavailable from the current data.
+- Known cardiovascular disease is present.
+- Clinician context: Level 5 - Very high risk
+
+Why risk is elevated:
+- Artery plaque: Known cardiovascular disease. This means prevention decisions should be more treatment-focused.
+
+Current goals:
+- LDL-C: - to <70 mg/dL
+- non-HDL-C: - to <100 mg/dL
+- ApoB: - to <80 mg/dL
+
+Next steps:
+1. Lower plaque-driving cholesterol: Treat toward the cholesterol goals above.
+2. Aspirin safety: Do not start aspirin unless your clinician recommends it.
+3. Additional testing: Lp(a) can be checked once to guide long-term prevention.
+4. Optional testing: Do not delay treatment while completing optional testing.
+5. Next step: Plaque is established clinically; CAC is not needed for current decision-making.
+
+This roadmap supports clinician review and shared decision-making. It does not replace medical advice.

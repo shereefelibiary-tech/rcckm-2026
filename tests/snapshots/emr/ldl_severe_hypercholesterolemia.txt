@@ -1,0 +1,17 @@
+RISK CONTINUUM CKM - CLINICAL REPORT
+
+Impression:
+Level 3B - actionable early CKM / atherogenic risk.
+PREVENT unavailable or incomplete; interpretation is based on reviewed worksheet data.
+CKM stage 0. Atherogenic/metabolic burden: LDL-C 212 mg/dL.
+LDL-C >=190 / possible FH pathway: PREVENT should not be used to de-risk treatment.
+
+Assessment:
+- Severe hypercholesterolemia (ICD: E78.00)
+
+Recommendations:
+- High-intensity or maximally tolerated statin indicated.
+- Evaluate secondary causes and consider FH/cascade screening when appropriate.
+- Aspirin not indicated for routine primary prevention.
+- ApoB - particle burden clarification
+- Clarification testing should not delay treatment.

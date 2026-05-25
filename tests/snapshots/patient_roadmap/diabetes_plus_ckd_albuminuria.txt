@@ -1,0 +1,30 @@
+Your Cardiometabolic Prevention Roadmap
+This summary shows where you stand today and the most important steps to lower future heart, kidney, and metabolic risk.
+
+Where you stand:
+- Missing inputs: total cholesterol, HDL-C, systolic BP, BP treatment status, statin/lipid-lowering therapy status, smoking status, BMI
+- 10-year risk: unavailable
+- PREVENT estimate unavailable from the current data.
+- Plaque status has not been measured.
+- Clinician context: Level 3 (3B) - Actionable early CKM / atherogenic risk
+
+Why risk is elevated:
+- Blood sugar / diabetes: A1c 7.4%. Improving blood sugar can lower long-term heart, kidney, and metabolic risk.
+- Kidney protection: eGFR 52; UACR 210. Kidney markers also help estimate heart and metabolic risk.
+
+Current goals:
+- LDL-C: - to <70 mg/dL
+- non-HDL-C: - to <100 mg/dL
+- ApoB: - to <80 mg/dL
+- A1c: 7.4% to individualized
+- Kidney / albuminuria: 210 mg/g; G3aA2 to reduce albuminuria / preserve eGFR
+
+Next steps:
+1. Protect the kidneys: Review kidney protection options with your clinician.
+2. Improve blood sugar trajectory: Keep diabetes care moving toward the safest individualized goal.
+3. Medication plan: No medication escalation today.
+4. Long-term prevention: Focus on weight, blood sugar, triglycerides, and long-term prevention.
+5. Aspirin safety: Do not start aspirin unless your clinician recommends it.
+6. Additional testing: A calcium scan may help if treatment choices are still uncertain.
+
+This roadmap supports clinician review and shared decision-making. It does not replace medical advice.

@@ -1,0 +1,18 @@
+RISK CONTINUUM CKM - CLINICAL REPORT
+
+Impression:
+Level 3B - actionable early CKM / kidney risk.
+PREVENT 10-year risk 3.74%; 30-year risk 18.8%.
+CKM stage 3; kidney G2A2; plaque unmeasured / CAC not performed. Atherogenic/metabolic burden: ApoB 92 mg/dL; LDL-C 126 mg/dL; non-HDL-C 156 mg/dL; TG 162 mg/dL.
+
+Assessment:
+- Albuminuria (ICD: R80.9)
+- Hypertriglyceridemia (ICD: E78.1)
+- Prediabetes (ICD: R73.03)
+
+Recommendations:
+- Moderate-intensity lipid-lowering therapy reasonable.
+- CAC may clarify plaque burden if treatment intensity remains uncertain.
+- Aspirin not indicated for routine primary prevention.
+- Confirm albuminuria persistence and optimize kidney-protective therapy.
+- Lp(a) - one-time risk assessment

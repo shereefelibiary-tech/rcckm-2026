@@ -1,0 +1,34 @@
+Your Cardiometabolic Prevention Roadmap
+This summary shows where you stand today and the most important steps to lower future heart, kidney, and metabolic risk.
+
+Where you stand:
+- 10-year risk: 5.41%
+- 30-year risk: 22.55%
+- About 5 out of 100 similar patients may have a cardiovascular event over the next 10 years.
+- Plaque status has not been measured.
+- Clinician context: Level 3 (3B) - Actionable early CKM / atherogenic risk
+
+Why risk is elevated:
+- Near-term estimated risk may be low, but 30-year risk is elevated enough to justify prevention discussion.
+- Cholesterol particles: ApoB 102; non-HDL-C 165. These numbers help show plaque-driving cholesterol in the blood.
+- Blood sugar / diabetes: A1c 5.9%. Improving blood sugar can lower long-term heart, kidney, and metabolic risk.
+- Kidney protection: eGFR 76. Kidney markers also help estimate heart and metabolic risk.
+- Other factors: Lp(a) 80 nmol/L. These details can shape the prevention plan with your clinician.
+- Other context: Lp(a) 80 nmol/L.
+
+Current goals:
+- LDL-C: - to <100 mg/dL
+- non-HDL-C: 165 mg/dL to <130 mg/dL
+- ApoB: 102 mg/dL to <90 mg/dL
+- A1c: 5.9% to individualized
+- Kidney / albuminuria: G2 to reduce albuminuria / preserve eGFR
+
+Next steps:
+1. Lower plaque-driving cholesterol: Treat toward the cholesterol goals above.
+2. Keep blood pressure in a safer range: Use lifestyle and medicines as appropriate.
+3. Aspirin safety: Do not start aspirin unless your clinician recommends it.
+4. Additional testing: Urine albumin test can help check early kidney stress.
+5. Next step: CAC may clarify plaque burden if treatment intensity remains uncertain.
+6. Next step: hsCRP - inflammatory residual risk
+
+This roadmap supports clinician review and shared decision-making. It does not replace medical advice.

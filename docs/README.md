@@ -9,6 +9,7 @@ Core clinical and product contracts:
 - [2026 Guideline Coverage Matrix](guideline_coverage_matrix_2026.md)
 - [2026 Risk-Enhancer Coverage Matrix](risk_enhancer_coverage_matrix_2026.md)
 - [Guideline Concordance 2026](guideline_concordance_2026.md)
+- [Validation Report 2026](validation_report_2026.md)
 - [Beta Safety Disclaimer](beta_safety_disclaimer.md)
 
 Launch and public-shell planning:
