@@ -334,8 +334,11 @@ def render_prevent_card(result):
     )
     extra_metrics = []
     model_used = str(getattr(result, "prevent_model_used", "") or "").strip()
-    if model_used.lower() == "provided":
-        extra_metrics.append(("Source", "PREVENT values entered directly."))
+    source_note_html = (
+        '<div class="prevent-source-note">Source: PREVENT values entered directly.</div>'
+        if model_used.lower() == "provided" and matrix_html
+        else ""
+    )
     if prevent_age is not None:
         extra_metrics.append(("PREVENT-age", f"{float(prevent_age):g} years"))
     if prevent_percentile is not None:
@@ -343,6 +346,11 @@ def render_prevent_card(result):
     extra_metrics_html = "".join(
         f'<div class="prevent-metric"><span>{escape(label)}</span><strong>{escape(val)}</strong></div>'
         for label, val in extra_metrics
+    )
+    extra_metrics_block = (
+        f'<div class="prevent-extra-metrics">{extra_metrics_html}</div>'
+        if extra_metrics_html
+        else ""
     )
     trajectory_html = (
         f'<div class="prevent-line prevent-trajectory">{escape(trajectory)}</div>'
@@ -539,6 +547,13 @@ def render_prevent_card(result):
     min-width: 170px;
     padding-top: 25px;
 }}
+.prevent-source-note {{
+    color: rgba(7, 26, 47, 0.50);
+    font-size: 0.74rem;
+    font-weight: 600;
+    line-height: 1.25;
+    margin-top: 8px;
+}}
 .prevent-body {{
     display: grid;
     gap: 7px;
@@ -658,8 +673,8 @@ def render_prevent_card(result):
 </div>
 </div>
 <div class="prevent-middle">
-<div>{matrix_html}</div>
-<div class="prevent-extra-metrics">{extra_metrics_html}</div>
+<div>{matrix_html}{source_note_html}</div>
+{extra_metrics_block}
 </div>
 <div class="prevent-body">
 <div class="prevent-line">{escape(explanation)}</div>

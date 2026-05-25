@@ -61,7 +61,6 @@ def build_continuum_bar_html(patient, result):
         if level == active_level and selected_subtitle:
             display_label = selected_subtitle
         active_class = " rc-card-active" if level == active_level else ""
-        caret = '<div class="rc-caret"></div>' if level == active_level else ""
         context = (
             f'<div class="rc-context">{escape(selected_context)}</div>'
             if level == active_level and selected_context
@@ -70,8 +69,7 @@ def build_continuum_bar_html(patient, result):
         cards.append(
             f"""
             <div class="rc-card-wrap">
-                {caret}
-                    <div class="rc-card rc-level-{level}{active_class}">
+                <div class="rc-card rc-level-{level}{active_class}">
                     <div class="rc-level-title">{escape(title)}</div>
                     <div class="rc-level-subtitle">{escape(display_label)}</div>
                     {context}
@@ -147,21 +145,25 @@ def build_continuum_bar_html(patient, result):
     position: relative;
     transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
 }}
+.rc-card-active::before {{
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 8px solid rgba(7, 26, 47, 0.70);
+    border-bottom: 0;
+    content: "";
+    height: 0;
+    left: 50%;
+    pointer-events: none;
+    position: absolute;
+    top: -16px;
+    transform: translateX(-50%);
+    width: 0;
+}}
 .rc-card-active {{
     border: 2px solid var(--rc-garnet);
     box-shadow: 0 9px 18px rgba(115, 0, 10, 0.14);
     transform: translateY(6px);
     z-index: 2;
-}}
-.rc-caret {{
-    align-self: center;
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-top: 7px solid rgba(11, 31, 58, 0.70);
-    height: 0;
-    margin: 0 0 3px;
-    pointer-events: none;
-    width: 0;
 }}
 .rc-level-1 {{ background: #edf3fb; }}
 .rc-level-2 {{ background: #eef4ef; }}

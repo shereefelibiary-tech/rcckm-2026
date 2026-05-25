@@ -39,7 +39,11 @@ def main(argv: list[str] | None = None) -> int:
         ),
         (
             "invariants",
-            [python, "-m", "pytest", "tests/test_invariants.py"],
+            [python, "-m", "pytest", "tests/test_invariants.py", "tests/invariants"],
+        ),
+        (
+            "snapshot contracts",
+            [python, "-m", "pytest", "tests/snapshots"],
         ),
         (
             "parser safety",

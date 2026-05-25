@@ -196,7 +196,32 @@ def test_render_prevent_card_never_shows_model_used_provided_phrase():
     assert "Model used provided" not in html
     assert "Model used" not in html
     assert "provided" not in html.lower()
-    assert "PREVENT values entered directly." in html
+    assert "Source: PREVENT values entered directly." in html
+    assert "prevent-source-note" in html
+    assert '<span>Source</span>' not in html
+    assert "grid-template-columns: minmax(280px, 1fr) auto" in html
+
+
+def test_render_prevent_card_places_source_note_below_matrix_not_right_column():
+    result = RCCKMResult(
+        prevent_available=True,
+        prevent_10y_ascvd=5.4,
+        prevent_10y_total_cvd=7.8,
+        prevent_risk_category=RiskLevel.INTERMEDIATE,
+        prevent_model_used="provided",
+    )
+
+    html = render_prevent_card(result)
+
+    assert "<table class='prevent-matrix'>" in html
+    assert '<div class="prevent-source-note">Source: PREVENT values entered directly.</div>' in html
+    assert (
+        "<div><table class='prevent-matrix'>"
+        in html
+        and "<div class=\"prevent-source-note\">Source: PREVENT values entered directly.</div></div>"
+        in html
+    )
+    assert '<div class="prevent-extra-metrics">' not in html
 
 
 def test_render_prevent_card_calculated_values_hide_source_label():

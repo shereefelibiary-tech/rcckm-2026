@@ -15,7 +15,13 @@ def test_build_risk_continuum_html_highlights_plaque_phenotype_level():
     assert "rc-level-4 rc-card-active" in html
     assert html.count(" rc-card-active") == 1
     assert "YOU ARE HERE" not in html
-    assert "rc-caret" in html
+    assert "rc-card-active::before" in html
+    assert "left: 50%" in html
+    assert "transform: translateX(-50%)" in html
+    assert "top: -16px" in html
+    assert "border-top: 8px solid rgba(7, 26, 47, 0.70)" in html
+    assert "border-bottom: 0" in html
+    assert "rc-caret" not in html
     assert "transform: translateY(6px)" in html
     assert "rc-marker" not in html
     assert "Plaque present (CAC 50)" in html
@@ -35,8 +41,46 @@ def test_build_risk_continuum_html_defaults_to_level_1():
     assert "Current: Level 1" in html
     assert "rc-level-1 rc-card-active" in html
     assert "YOU ARE HERE" not in html
-    assert "rc-caret" in html
+    assert "rc-card-active::before" in html
     assert "Plaque unmeasured" in html
+
+
+def test_active_caret_is_anchored_to_active_card_for_each_level():
+    cases = [
+        (Patient(age=60, sex="male"), RCCKMResult(), "rc-level-1 rc-card-active"),
+        (
+            Patient(age=60, sex="male", a1c=5.8),
+            RCCKMResult(),
+            "rc-level-2 rc-card-active",
+        ),
+        (
+            Patient(age=42, sex="male"),
+            RCCKMResult(prevent_30y_ascvd=12.0),
+            "rc-level-3 rc-card-active",
+        ),
+        (
+            Patient(age=60, sex="male", cac=38),
+            RCCKMResult(),
+            "rc-level-4 rc-card-active",
+        ),
+        (
+            Patient(age=60, sex="male", cac=350),
+            RCCKMResult(),
+            "rc-level-5 rc-card-active",
+        ),
+    ]
+
+    for patient, result, active_class in cases:
+        html = build_continuum_bar_html(patient, result)
+        assert active_class in html
+        assert html.count(" rc-card-active") == 1
+        assert "rc-card-active::before" in html
+        assert "left: 50%" in html
+        assert "transform: translateX(-50%)" in html
+        assert "border-top: 8px solid rgba(7, 26, 47, 0.70)" in html
+        assert "border-bottom: 0" in html
+        assert "position: absolute" in html
+        assert "rc-caret" not in html
 
 
 def test_build_risk_continuum_html_keeps_level_5_inside_responsive_grid():

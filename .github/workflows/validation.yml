@@ -11,12 +11,16 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.11"
       - name: Install test dependencies
         run: |
           python -m pip install --upgrade pip
           python -m pip install pytest streamlit pandas
-      - name: Pytest
-        run: python -m pytest
-      - name: Fuzz validation sample
-        run: python -m tools.fuzz_rcckm --n 1000 --seed 2026
+      - name: Golden cases
+        run: python -m pytest tests/golden_cases
+      - name: Never-cross invariants
+        run: python -m pytest tests/invariants
+      - name: Snapshot contracts
+        run: python -m pytest tests/snapshots
+      - name: Layered validation runner
+        run: python tools/run_validation.py

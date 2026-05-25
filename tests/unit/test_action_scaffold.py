@@ -252,6 +252,10 @@ def test_action_html_renders_structured_sections_without_loose_duplicate_list():
     assert "action-number" in html
     assert "action-lead" in html
     assert "action-detail" in html
+    assert ".action-row:nth-child(even){background:rgba(47,95,143,0.035);}" in html
+    assert "border-top:1px solid rgba(7,26,47,0.07)" in html
+    assert "border-radius:10px" in html
+    assert "margin:0 -2px" in html
     assert lipid_lead in html
     assert lipid_detail in html
     assert cac_lead in html

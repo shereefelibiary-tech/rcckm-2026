@@ -10,6 +10,7 @@ from modules.rss.engine import build_rss_contributions, calculate_rss_total
 from renderers.emr_renderer import render_emr_note
 from renderers.patient_roadmap import render_patient_roadmap_text
 from renderers.rss_renderer import rss_interpretation
+from tests.helpers import assert_absent, assert_present, render_all_outputs
 
 
 GOLDEN_CASES_PATH = Path(__file__).with_name("golden_cases.json")
@@ -93,6 +94,18 @@ def _combined_visible_text(result):
     )
 
 
+def _assert_section_phrases(outputs, case):
+    section_map = {
+        "emr": "emr",
+        "roadmap": "roadmap",
+        "action": "actions",
+        "diagnosis": "diagnoses",
+    }
+    for prefix, output_key in section_map.items():
+        assert_present(outputs[output_key], case.get(f"{prefix}_required_phrases", []))
+        assert_absent(outputs[output_key], case.get(f"{prefix}_forbidden_phrases", []))
+
+
 def _assert_in_expected(actual, expected):
     allowed = _expected_values(expected)
     if allowed is None:
@@ -106,8 +119,9 @@ def _load_cases():
 
 @pytest.mark.parametrize("case", _load_cases(), ids=lambda case: case["name"])
 def test_golden_clinical_cases(case):
-    _patient, result = _evaluate(case["patient"])
+    patient, result = _evaluate(case["patient"])
     expected = case.get("expected", {})
+    outputs = render_all_outputs(patient, result)
 
     _assert_in_expected(
         result._golden_position.get("level"),
@@ -156,3 +170,4 @@ def test_golden_clinical_cases(case):
         assert phrase.lower() in visible.lower()
     for phrase in case.get("forbidden_phrases", []):
         assert phrase.lower() not in visible.lower()
+    _assert_section_phrases(outputs, case)
