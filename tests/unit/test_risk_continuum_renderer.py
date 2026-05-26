@@ -31,9 +31,17 @@ def test_build_risk_continuum_html_highlights_plaque_phenotype_level():
     assert "Subclinical atherosclerosis present" in html
     assert "Lower signal / lower urgency" in html
     assert "Higher signal / higher urgency" in html
-    assert "rc-level-help" in html
+    assert '<span class="rc-level-help"' not in html
     assert "role=\"button\"" in html
     assert "aria-label=" in html
+    assert "data-tooltip=" in html
+    assert "Current level explanation:" in html
+    assert "rc-level-why" not in html
+    assert "Why?" not in html
+    assert "top: calc(100% + 12px)" in html
+    assert "z-index: 9999" in html
+    assert ".rc-card-wrap:last-child .rc-card-active::after" in html
+    assert "overflow: visible !important" in html
 
 
 def test_build_risk_continuum_html_defaults_to_level_1():
@@ -194,6 +202,10 @@ def test_level_tooltip_explains_level_5_high_cac():
     assert "Level 5 is assigned because coronary calcium shows high plaque burden." in tooltip
     assert "ApoB" in tooltip or "diabetes" in tooltip
     assert escape_for_test(tooltip) in html
+    assert 'class="rc-card rc-level-5 rc-card-active" role="button" tabindex="0"' in html
+    assert "Current level explanation:" in html
+    assert '<span class="rc-level-help"' not in html
+    assert "Why?" not in html
 
 
 def test_level_tooltip_explains_cac_zero_without_plaque_positive_language():

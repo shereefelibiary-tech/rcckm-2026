@@ -13,7 +13,9 @@ def test_target_card_shows_apob_80_for_cac_100_primary_prevention():
     assert "&lt;70" in html
     assert "&lt;80" in html
     assert "non-HDL-C" not in html
-    assert "RCCKM advanced particle target" in html
+    assert html.count('<span class="target-item">') == 2
+    assert 'content: "•"' not in html
+    assert "RCCKM advanced particle target" not in html
 
 
 def test_target_card_shows_apob_65_for_very_high_risk_when_advanced_target_shown():
@@ -32,4 +34,4 @@ def test_target_card_shows_apob_65_for_very_high_risk_when_advanced_target_shown
     assert "ApoB" in html
     assert "&lt;65" in html
     assert "Very-high-risk ASCVD targets" in html
-    assert "RCCKM advanced particle target" in html
+    assert "RCCKM advanced particle target" not in html

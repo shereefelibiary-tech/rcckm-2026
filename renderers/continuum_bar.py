@@ -68,10 +68,19 @@ def build_continuum_bar_html(patient, result):
             if level == active_level and selected_context
             else ""
         )
+        active_attrs = ""
+        if level == active_level:
+            tooltip_attr = escape(level_tooltip, quote=True)
+            active_attrs = (
+                ' role="button" tabindex="0"'
+                f' aria-label="Current level explanation: {tooltip_attr}"'
+                f' title="{tooltip_attr}"'
+                f' data-tooltip="{tooltip_attr}"'
+            )
         cards.append(
             f"""
             <div class="rc-card-wrap">
-                <div class="rc-card rc-level-{level}{active_class}">
+                <div class="rc-card rc-level-{level}{active_class}"{active_attrs}>
                     <div class="rc-level-title">{escape(title)}</div>
                     <div class="rc-level-subtitle">{escape(display_label)}</div>
                     {context}
@@ -91,8 +100,10 @@ def build_continuum_bar_html(patient, result):
     width: 100%;
     padding: 16px 14px 14px;
     margin: 18px 0 20px;
-    overflow: visible;
+    overflow: visible !important;
     font-family: var(--rc-font-body);
+    position: relative;
+    z-index: 3;
 }}
 .rc-header {{
     display: flex;
@@ -120,30 +131,20 @@ def build_continuum_bar_html(patient, result):
     white-space: nowrap;
 }}
 .rc-level-help {{
-    align-items: center;
-    border: 1px solid rgba(115, 0, 10, 0.28);
-    border-radius: 999px;
-    color: var(--rc-garnet);
-    cursor: help;
-    display: inline-flex;
-    font-size: 0.72rem;
-    font-weight: 850;
-    height: 18px;
-    justify-content: center;
-    line-height: 1;
-    width: 18px;
+    display: none;
 }}
 .rc-grid {{
     display: grid;
     grid-template-columns: repeat(5, minmax(118px, 1fr));
     gap: clamp(6px, 0.76vw, 12px);
     align-items: stretch;
-    overflow: visible;
+    overflow: visible !important;
+    position: relative;
 }}
 .rc-card-wrap {{
     position: relative;
     min-width: 0;
-    overflow: visible;
+    overflow: visible !important;
     padding-top: 10px;
 }}
 .rc-card {{
@@ -159,7 +160,7 @@ def build_continuum_bar_html(patient, result):
     color: var(--rc-text);
     height: 100%;
     min-width: 0;
-    overflow: visible;
+    overflow: visible !important;
     overflow-wrap: anywhere;
     position: relative;
     transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
@@ -180,9 +181,67 @@ def build_continuum_bar_html(patient, result):
 }}
 .rc-card-active {{
     border: 2px solid var(--rc-garnet);
+    cursor: help;
     box-shadow: 0 9px 18px rgba(115, 0, 10, 0.14);
     transform: translateY(6px);
-    z-index: 2;
+    z-index: 50;
+}}
+.rc-card-active:hover,
+.rc-card-active:focus {{
+    border-color: var(--rc-garnet-deep);
+    box-shadow: 0 11px 22px rgba(115, 0, 10, 0.18);
+    outline: none;
+}}
+.rc-card-active:focus-visible {{
+    outline: 3px solid rgba(115, 0, 10, 0.22);
+    outline-offset: 3px;
+}}
+.rc-card-active::after {{
+    background: rgba(7, 26, 47, 0.96);
+    border-radius: 9px;
+    top: calc(100% + 12px);
+    box-shadow: 0 12px 26px rgba(7, 26, 47, 0.20);
+    color: #ffffff;
+    content: attr(data-tooltip);
+    font-size: 0.78rem;
+    font-weight: 650;
+    left: 50%;
+    line-height: 1.32;
+    max-width: min(320px, 72vw);
+    min-width: min(260px, 72vw);
+    opacity: 0;
+    padding: 10px 11px;
+    pointer-events: none;
+    position: absolute;
+    text-align: left;
+    transform: translate(-50%, 4px);
+    transition: opacity 120ms ease, transform 120ms ease;
+    visibility: hidden;
+    white-space: normal;
+    z-index: 9999;
+}}
+.rc-card-active:hover::after,
+.rc-card-active:focus::after {{
+    opacity: 1;
+    transform: translate(-50%, 0);
+    visibility: visible;
+}}
+.rc-card-wrap:first-child .rc-card-active::after {{
+    left: 0;
+    transform: translate(0, 4px);
+}}
+.rc-card-wrap:first-child .rc-card-active:hover::after,
+.rc-card-wrap:first-child .rc-card-active:focus::after {{
+    transform: translate(0, 0);
+}}
+.rc-card-wrap:last-child .rc-card-active::after {{
+    left: auto;
+    right: 0;
+    transform: translate(0, 4px);
+}}
+.rc-card-wrap:last-child .rc-card-active:hover::after,
+.rc-card-wrap:last-child .rc-card-active:focus::after {{
+    transform: translate(0, 0);
 }}
 .rc-level-1 {{ background: #edf3fb; }}
 .rc-level-2 {{ background: #eef4ef; }}
@@ -250,6 +309,7 @@ def build_continuum_bar_html(patient, result):
         grid-template-columns: repeat(5, minmax(96px, 1fr));
         gap: 4px;
         overflow-x: auto;
+        overflow-y: visible;
         padding-bottom: 4px;
     }}
     .rc-card {{
@@ -273,7 +333,6 @@ def build_continuum_bar_html(patient, result):
         <div class="rc-title rc-card-title">Risk Continuum</div>
         <div class="rc-current">
             Current: {escape(current_label)}
-            <span class="rc-level-help" role="button" tabindex="0" aria-label="{escape(level_tooltip)}" title="{escape(level_tooltip)}">i</span>
         </div>
     </div>
     <div class="rc-grid">

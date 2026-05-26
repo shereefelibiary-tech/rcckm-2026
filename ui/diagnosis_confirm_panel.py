@@ -35,15 +35,15 @@ def _panel_css():
 .dx-panel {
     background: rgba(255, 253, 248, 0.84);
     border: 1px solid rgba(11, 31, 58, 0.10);
-    border-radius: 10px;
+    border-radius: 8px;
     box-shadow: none;
-    padding: 14px 15px 15px;
+    padding: 12px 14px 13px;
     margin: 10px 0 14px;
 }
 .dx-panel-head {
     border-bottom: 1px solid rgba(7, 26, 47, 0.08);
-    margin-bottom: 12px;
-    padding-bottom: 10px;
+    margin-bottom: 9px;
+    padding-bottom: 8px;
 }
 .dx-col-title {
     color: rgba(7, 26, 47, 0.78);
@@ -59,6 +59,9 @@ def _panel_css():
     padding: 0;
     min-height: 100%;
 }
+.dx-compact-list {
+    display: block;
+}
 .dx-row {
     background: transparent;
     border: 0;
@@ -67,10 +70,10 @@ def _panel_css():
     color: #071A2F;
     font-family: var(--rc-font-body);
     margin: 0;
-    padding: 9px 0 10px;
+    padding: 7px 0 8px;
 }
 .dx-row-shell {
-    margin: 0 0 8px;
+    margin: 0;
 }
 .dx-action-row {
     display: flex;
@@ -83,9 +86,9 @@ def _panel_css():
 }
 .dx-name {
     font-size: 0.86rem;
-    font-weight: 820;
+    font-weight: 760;
     line-height: 1.2;
-    margin-bottom: 6px;
+    margin-bottom: 3px;
 }
 .dx-meta {
     align-items: center;
@@ -96,21 +99,21 @@ def _panel_css():
 }
 .dx-code-chip {
     background: transparent;
-    border: 1px solid rgba(47, 95, 143, 0.14);
+    border: 0;
     border-radius: 999px;
     color: rgba(7, 26, 47, 0.74);
     display: inline-flex;
     font-size: 0.72rem;
-    font-weight: 760;
+    font-weight: 720;
     line-height: 1;
-    padding: 4px 7px;
+    padding: 0;
 }
 .dx-context {
     color: rgba(7, 26, 47, 0.54);
     font-size: 0.72rem;
     font-weight: 610;
     line-height: 1.24;
-    margin-top: 6px;
+    margin-top: 3px;
 }
 .dx-badge,
 .dx-status {
@@ -133,14 +136,26 @@ def _panel_css():
     vertical-align: 1px;
 }
 .dx-empty {
-    background: rgba(7, 26, 47, 0.035);
-    border: 1px solid rgba(7, 26, 47, 0.07);
-    border-radius: 999px;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
     color: rgba(7, 26, 47, 0.54);
-    display: inline-flex;
+    display: block;
     font-size: 0.76rem;
     font-weight: 650;
-    padding: 5px 9px;
+    padding: 2px 0 0;
+}
+.dx-review-inline {
+    border-top: 1px solid rgba(11, 31, 58, 0.08);
+    color: rgba(7, 26, 47, 0.54);
+    font-size: 0.76rem;
+    font-weight: 650;
+    margin-top: 7px;
+    padding-top: 8px;
+}
+.dx-review-inline strong {
+    color: rgba(7, 26, 47, 0.72);
+    font-weight: 780;
 }
 .dx-suppressed-title {
     color: rgba(7, 26, 47, 0.58);
@@ -235,6 +250,16 @@ def _candidate_html(entry, *, confirmed=False, include_row=True):
     if not include_row:
         return body
     return f"<div class='dx-row'>{body}</div>"
+
+
+def _candidate_rows_html(rows, *, confirmed=False):
+    if not rows:
+        return ""
+    return (
+        "<div class='dx-compact-list'>"
+        + "".join(_candidate_html(row, confirmed=confirmed) for row in rows)
+        + "</div>"
+    )
 
 
 def _state_set(st, key):
@@ -334,6 +359,23 @@ def render_diagnosis_confirm_panel(st, result, include_title=True):
     extra_review = review[5:]
 
     render_html(st, _panel_css())
+    if include_title and not visible_review and not extra_review:
+        accepted_html = _candidate_rows_html(confirmed, confirmed=True)
+        if not accepted_html:
+            accepted_html = "<div class='dx-empty'>Accepted: none</div>"
+        render_html(
+            st,
+            "<div class='dx-panel'><div class='dx-panel-head'>"
+            "<div class='dx-title rc-card-title'>Assessment candidates</div>"
+            "<div class='dx-note'>Clinical diagnoses and coding support</div>"
+            "</div>"
+            "<div class='dx-col-title'>Accepted</div>"
+            f"{accepted_html}"
+            "<div class='dx-review-inline'><strong>Needs review:</strong> none</div>"
+            "</div>",
+        )
+        return
+
     if include_title:
         render_html(
             st,

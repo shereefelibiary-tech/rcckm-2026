@@ -47,7 +47,7 @@ def test_non_hdl_hidden_by_default_in_routine_case_with_apob_and_normal_tg():
     assert "non-HDL-C" not in render_patient_roadmap_text(patient, result)
 
 
-def test_non_hdl_shown_when_triglycerides_are_elevated():
+def test_non_hdl_available_but_not_default_when_tg_mildly_elevated_and_apob_present():
     patient = Patient(
         age=52,
         sex="female",
@@ -64,9 +64,11 @@ def test_non_hdl_shown_when_triglycerides_are_elevated():
     assert payload["current_value"] == 157
     assert payload["target_value"] == 130
     html = _build_targets_html(result, patient)
-    assert "non-HDL-C" in html
-    assert "Current 157" in html
-    assert "Calculated from total cholesterol minus HDL-C." in html
+    assert "LDL-C" in html
+    assert "ApoB" in html
+    assert "non-HDL-C" not in html
+    assert "Current 157" not in html
+    assert "Calculated from total cholesterol minus HDL-C." not in html
 
 
 def test_non_hdl_shown_when_apob_missing_and_calculable():
@@ -82,6 +84,7 @@ def test_non_hdl_shown_when_apob_missing_and_calculable():
 
     assert should_show_non_hdl_default(patient, _result()) is True
     assert "non-HDL-C" in _build_targets_html(_result(), patient)
+    assert "target-secondary" in _build_targets_html(_result(), patient)
 
 
 def test_non_hdl_not_shown_without_source_lipid_values_or_target():

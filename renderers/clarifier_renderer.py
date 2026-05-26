@@ -41,7 +41,7 @@ CLARIFIER_DEFS = [
         "label": "hsCRP",
         "domain": "hscrp_testing",
         "clarification_flag": None,
-        "reason": "inflammatory biomarker context",
+        "reason": "inflammatory risk context",
         "priority": "Medium",
     },
     {
@@ -65,10 +65,25 @@ def _is_recommended(result, definition):
     return bool(flag and clarification.get(flag))
 
 
-def build_clarifier_items(result):
+def _has_measured_cac(patient):
+    if patient is None:
+        return False
+    cac = getattr(patient, "cac", None)
+    if cac is None:
+        return False
+    try:
+        return float(cac) >= 0
+    except (TypeError, ValueError):
+        return False
+
+
+def build_clarifier_items(result, patient=None):
+    patient = patient or getattr(result, "patient", None)
     items = []
     for definition in CLARIFIER_DEFS:
         recommended = _is_recommended(result, definition)
+        if definition["key"] == "cac" and _has_measured_cac(patient):
+            recommended = False
         items.append(
             {
                 "label": definition["label"],
@@ -80,8 +95,8 @@ def build_clarifier_items(result):
     return items
 
 
-def build_clarifier_card_html(result, include_title=True):
-    items = build_clarifier_items(result)
+def build_clarifier_card_html(result, include_title=True, patient=None):
+    items = build_clarifier_items(result, patient=patient)
     recommended_items = [item for item in items if item["status"] != "complete"]
     completed_items = [item for item in items if item["status"] == "complete"]
 
@@ -92,7 +107,7 @@ def build_clarifier_card_html(result, include_title=True):
             "Lp(a)": "Lp(a) measurement",
             "CAC": "plaque burden clarification",
             "UACR": "complete kidney-risk assessment",
-            "hsCRP": "inflammatory biomarker context",
+            "hsCRP": "inflammatory risk context",
             "Repeat fasting lipids": "triglyceride confirmation",
         }
         return reason_map.get(label, item["reason"])
@@ -225,11 +240,11 @@ def build_clarifier_card_html(result, include_title=True):
 """.strip()
 
 
-def render_clarifier_card(result, st_module=None):
+def render_clarifier_card(result, st_module=None, patient=None):
     if st_module is None:
         import streamlit as st_module
 
     from ui.html import render_html
 
-    render_html(st_module, build_clarifier_card_html(result))
+    render_html(st_module, build_clarifier_card_html(result, patient=patient))
 

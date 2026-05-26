@@ -328,88 +328,179 @@ def _target_context_line(result, target, patient=None):
     return rationale or "No target pathway assigned yet."
 
 
-def _build_targets_html(result, patient=None, *, clinician_detail_mode=False):
-    assigned_targets = []
-    target = result.targets[0] if result.targets else None
-    if target:
-        if target.ldl_c_target is not None:
-            assigned_targets.append(("LDL-C", target.ldl_c_target, getattr(patient, "ldl_c", None), "", "primary"))
-        if target.apob_target is not None:
-            assigned_targets.append(("ApoB", target.apob_target, getattr(patient, "apob", None), "", "primary"))
-        triglycerides = getattr(patient, "triglycerides", None) if patient is not None else None
-        try:
-            triglycerides_value = float(triglycerides) if triglycerides is not None else None
-        except (TypeError, ValueError):
-            triglycerides_value = None
-        if triglycerides_value is not None and triglycerides_value >= 150:
-            tg_goal = 500 if triglycerides_value >= 500 else 150
-            assigned_targets.append(("TG", tg_goal, triglycerides_value, "", "primary"))
-        if patient is not None and should_show_non_hdl_default(
+def _num_or_none(value):
+    try:
+        return float(value) if value is not None else None
+    except (TypeError, ValueError):
+        return None
+
+
+def build_primary_targets_display(patient, result, detail_mode=False):
+    """Build display-only target rows without changing target assignment logic."""
+    target = result.targets[0] if getattr(result, "targets", None) else None
+    if not target:
+        return []
+
+    items = []
+    ldl_current = _num_or_none(getattr(patient, "ldl_c", None)) if patient is not None else None
+    apob_current = _num_or_none(getattr(patient, "apob", None)) if patient is not None else None
+    triglycerides = (
+        _num_or_none(getattr(patient, "triglycerides", None)) if patient is not None else None
+    )
+
+    if target.ldl_c_target is not None:
+        items.append(
+            {
+                "label": "LDL-C",
+                "target": target.ldl_c_target,
+                "current_value": ldl_current,
+                "unit": "mg/dL",
+                "display_priority": "primary",
+                "show_default": True,
+                "rationale": "Primary actionable cholesterol target.",
+            }
+        )
+
+    if target.apob_target is not None:
+        apob_detail = ""
+        if apob_current is None:
+            apob_detail = "Obtain for particle burden clarification."
+        items.append(
+            {
+                "label": "ApoB",
+                "target": target.apob_target,
+                "current_value": apob_current,
+                "unit": "mg/dL",
+                "display_priority": "primary",
+                "show_default": True,
+                "rationale": apob_detail or "RCCKM advanced particle target.",
+            }
+        )
+
+    severe_tg = triglycerides is not None and triglycerides >= 500
+    dominant_tg = "triglyceride" in str(getattr(result, "dominant_action", "") or "").lower()
+    if triglycerides is not None and (severe_tg or dominant_tg or detail_mode):
+        tg_goal = 500 if triglycerides >= 500 else 150
+        items.append(
+            {
+                "label": "Triglycerides",
+                "target": tg_goal,
+                "current_value": triglycerides,
+                "unit": "mg/dL",
+                "display_priority": "primary" if severe_tg or dominant_tg else "secondary",
+                "show_default": severe_tg or dominant_tg,
+                "rationale": (
+                    "Pancreatitis-risk TG pathway active."
+                    if triglycerides >= 1000
+                    else "Severe hypertriglyceridemia pathway active."
+                    if severe_tg
+                    else "Clinician detail lipid marker."
+                ),
+            }
+        )
+
+    show_non_hdl = False
+    if patient is not None:
+        show_non_hdl = should_show_non_hdl_default(
             patient,
             result,
-            {"clinician_detail_mode": clinician_detail_mode},
-        ):
-            non_hdl = format_non_hdl_display(patient, result)
-            if non_hdl:
-                assigned_targets.append(
-                    (
-                        "non-HDL-C",
-                        non_hdl["target_value"],
-                        non_hdl["current_value"],
-                        non_hdl["subtitle"],
-                        "secondary",
-                    )
-                )
+            {"clinician_detail_mode": detail_mode},
+        )
+    if show_non_hdl:
+        non_hdl = format_non_hdl_display(patient, result)
+        if non_hdl:
+            apob_missing = apob_current is None
+            items.append(
+                {
+                    "label": "non-HDL-C",
+                    "target": non_hdl["target_value"],
+                    "current_value": non_hdl["current_value"],
+                    "unit": "mg/dL",
+                    "display_priority": "secondary",
+                    "show_default": detail_mode or apob_missing,
+                    "rationale": non_hdl["subtitle"],
+                }
+            )
 
+    return [item for item in items if detail_mode or item["show_default"]]
+
+
+def _build_targets_html(result, patient=None, *, clinician_detail_mode=False):
+    assigned_targets = build_primary_targets_display(
+        patient,
+        result,
+        detail_mode=clinician_detail_mode,
+    )
     if not assigned_targets:
         return ""
 
+    target = result.targets[0] if result.targets else None
     context_line = _target_context_line(result, target, patient)
-    if target and target.apob_target is not None:
-        context_line = (
-            f"{context_line} ApoB is shown as an RCCKM advanced particle target."
-        )
+
     def _fmt_target_number(value):
         try:
             return f"{float(value):g}"
         except (TypeError, ValueError):
             return str(value)
 
-    def _target_item(label, target_value, current_value):
+    def _target_item(item):
+        label = item["label"]
+        target_value = item.get("target")
+        current_value = item.get("current_value")
+        unit = item.get("unit") or "mg/dL"
+        rationale = item.get("rationale") or ""
+        apob_missing = label == "ApoB" and current_value is None
+        target_html = ""
+        if target_value is not None and not apob_missing:
+            target_html = (
+                f'<span class="target-goal">&lt;{_fmt_target_number(target_value)} {escape(unit)}</span>'
+            )
         current_html = ""
         if current_value is not None:
             current_html = (
                 f'<span class="target-current">Current {_fmt_target_number(current_value)}</span>'
             )
+        elif apob_missing:
+            current_html = '<span class="target-current">Obtain for particle burden clarification</span>'
+        rationale_html = ""
+        if rationale and label in {"Triglycerides", "non-HDL-C"}:
+            rationale_html = f'<span class="target-note">{escape(rationale)}</span>'
         return (
             '<span class="target-item">'
-            f'<span class="target-name">{escape(label)}</span> '
-            f'<span class="target-goal">&lt;{_fmt_target_number(target_value)} mg/dL</span>'
+            '<span class="target-main">'
+            f'<span class="target-name">{escape(label)}</span>'
+            f"{target_html}"
+            "</span>"
             f"{current_html}"
+            f"{rationale_html}"
             "</span>"
         )
 
     primary_targets = " ".join(
-        _target_item(label, target_value, current_value)
-        for label, target_value, current_value, _note, priority in assigned_targets
-        if priority == "primary"
+        _target_item(item)
+        for item in assigned_targets
+        if item["display_priority"] == "primary"
     )
     secondary_targets = " ".join(
-        _target_item(label, target_value, current_value)
-        for label, target_value, current_value, _note, priority in assigned_targets
-        if priority == "secondary"
-    )
-    secondary_notes = " ".join(
-        escape(note)
-        for _label, _target_value, _current_value, note, priority in assigned_targets
-        if priority == "secondary" and note
+        _target_item(item)
+        for item in assigned_targets
+        if item["display_priority"] == "secondary"
     )
     secondary_html = ""
     if secondary_targets:
         secondary_html = (
-            f'<div class="target-secondary">{secondary_targets}'
-            + (f'<span class="target-note">{secondary_notes}</span>' if secondary_notes else "")
-            + "</div>"
+            '<details class="target-details">'
+            '<summary>Show lipid details</summary>'
+            f'<div class="target-secondary">{secondary_targets}</div>'
+            "</details>"
+        )
+    rationale_html = ""
+    if context_line:
+        rationale_html = (
+            '<details class="target-details target-rationale-details">'
+            '<summary>Show target rationale</summary>'
+            f'<div class="targets-context">{escape(context_line)}</div>'
+            "</details>"
         )
     return f"""
 <style>
@@ -429,23 +520,23 @@ def _build_targets_html(result, patient=None, *, clinician_detail_mode=False):
 }}
 .target-line {{
     color: var(--rc-black);
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px 10px;
+    display: grid;
+    gap: 7px;
     font-family: var(--rc-font-body);
     font-size: 0.94rem;
     font-weight: 650;
     line-height: 1.35;
 }}
 .target-item {{
-    display: inline-flex;
-    flex-wrap: wrap;
-    gap: 3px 5px;
+    align-items: baseline;
+    display: grid;
+    gap: 8px;
+    grid-template-columns: minmax(130px, 1fr) auto;
 }}
-.target-item + .target-item::before {{
-    color: rgba(7, 26, 47, 0.32);
-    content: "•";
-    margin-right: 5px;
+.target-main {{
+    display: inline-flex;
+    gap: 6px;
+    min-width: 0;
 }}
 .target-name {{
     font-weight: 800;
@@ -454,9 +545,12 @@ def _build_targets_html(result, patient=None, *, clinician_detail_mode=False):
     color: rgba(7, 26, 47, 0.56);
     font-size: 0.82rem;
     font-weight: 600;
+    text-align: right;
 }}
 .target-secondary {{
     color: rgba(7, 26, 47, 0.58);
+    display: grid;
+    gap: 5px;
     font-size: 0.78rem;
     font-weight: 600;
     line-height: 1.3;
@@ -469,19 +563,44 @@ def _build_targets_html(result, patient=None, *, clinician_detail_mode=False):
 .target-note {{
     margin-left: 8px;
 }}
+.target-details {{
+    color: rgba(7, 26, 47, 0.58);
+    font-size: 0.78rem;
+    font-weight: 600;
+    margin-top: 5px;
+}}
+.target-details summary {{
+    cursor: pointer;
+    display: inline-flex;
+    font-weight: 680;
+    list-style: none;
+}}
+.target-details summary::-webkit-details-marker {{
+    display: none;
+}}
 .targets-context {{
     color: rgba(7, 26, 47, 0.68);
     font-size: 0.86rem;
     font-weight: 650;
     line-height: 1.32;
-    margin-top: 0.58rem;
+    margin-top: 5px;
+}}
+@media(max-width: 520px) {{
+    .target-item {{
+        align-items: start;
+        grid-template-columns: 1fr;
+        gap: 1px;
+    }}
+    .target-current {{
+        text-align: left;
+    }}
 }}
 </style>
 <div class="targets-compact rc-panel">
 <div class="targets-title rc-card-title">Targets</div>
 <div class="target-line">{primary_targets}</div>
 {secondary_html}
-<div class="targets-context">{escape(context_line)}</div>
+{rationale_html}
 </div>
 """
 
@@ -782,12 +901,12 @@ def _load_renderer_function(module_name, function_name):
     return function
 
 
-def _build_clarifier_card_html(result):
+def _build_clarifier_card_html(result, patient=None):
     renderer = _load_renderer_function(
         "renderers.clarifier_renderer", "build_clarifier_card_html"
     )
     try:
-        return renderer(result, include_title=False)
+        return renderer(result, patient=patient)
     except TypeError:
         return renderer(result)
 
@@ -843,7 +962,7 @@ def render_report(st, patient):
         "Risk Continuum",
         lambda: _build_continuum_bar_html(patient, result),
         component=True,
-        height=275,
+        height=350,
     )
 
     _safe_panel(
@@ -885,7 +1004,7 @@ def render_report(st, patient):
     _safe_panel(
         st,
         "Risk clarifiers",
-        lambda: _build_clarifier_card_html(result),
+        lambda: _build_clarifier_card_html(result, patient),
     )
 
     target_col, action_col = st.columns([1, 1.15])

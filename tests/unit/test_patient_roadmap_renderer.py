@@ -136,7 +136,7 @@ def test_render_patient_roadmap_groups_full_clinical_story_without_raw_html():
     assert "below 70 mg/dL" in html
     assert "Current 132 mg/dL" in html
     assert "Lower plaque-driving cholesterol" in html
-    assert "High-intensity statin therapy usually lowers LDL cholesterol by at least one-half." in html
+    assert "Discuss stronger cholesterol-lowering therapy." in html
     assert "No repeat calcium scan is needed for today&#x27;s decision." not in html
     assert "Aspirin safety" in html
     assert "Do not start aspirin unless your clinician recommends it." in html
@@ -180,8 +180,13 @@ def test_render_patient_roadmap_sections_use_distinct_panels_not_underlines():
     assert "margin: 11px 0 0" in html
     assert "roadmap-section-eyebrow" in html
     assert "roadmap-section-description" in html
-    assert "font-size: 0.60rem" in html
-    assert "font-size: 0.72rem" in html
+    assert "--patient-font-base: 16px" in html
+    assert "--patient-font-small: 14.5px" in html
+    assert "--patient-font-title: 19px" in html
+    assert "--patient-font-number: 28px" in html
+    assert "--patient-line-height: 1.45" in html
+    assert "font-size: 15px" in html
+    assert "font-size: 14px" in html
     assert "@media print" in html
     assert "padding: 18px 20px 19px" in html
     assert "roadmap-section-title" in html
@@ -227,7 +232,7 @@ def test_render_patient_roadmap_text_is_copy_ready_plain_text():
     assert "clarification" not in text.lower()
     assert "- LDL-C: 132 mg/dL to <70 mg/dL" in text
     assert "Next steps:" in text
-    assert "1. Lower plaque-driving cholesterol: High-intensity statin therapy usually lowers LDL cholesterol by at least one-half." in text
+    assert "1. Lower plaque-driving cholesterol: Discuss stronger cholesterol-lowering therapy." in text
     assert "2. Protect the kidneys: Review kidney protection options with your clinician." in text
     assert "3. Aspirin safety: Do not start aspirin unless your clinician recommends it." in text
     assert "4. Additional testing: Lp(a) can be checked once to guide long-term prevention." not in text

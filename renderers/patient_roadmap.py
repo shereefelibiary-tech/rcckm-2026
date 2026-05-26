@@ -854,9 +854,9 @@ def _patient_next_steps(patient, result):
         if "lipid" in lowered or "statin" in lowered or "cholesterol" in lowered:
             label = "Lower plaque-driving cholesterol"
             if "high-intensity" in lowered or "high-risk targets" in lowered:
-                detail = get_statin_intensity_definition("high").patient_friendly_summary
+                detail = "Discuss stronger cholesterol-lowering therapy."
             elif "moderate-intensity" in lowered:
-                detail = get_statin_intensity_definition("moderate").patient_friendly_summary
+                detail = "Discuss cholesterol-lowering therapy."
             elif "very-high-risk ascvd targets" in lowered:
                 detail = "Because heart artery disease is already established and additional high-risk features are present, the LDL cholesterol goal is lower than for routine prevention."
             else:
@@ -906,10 +906,10 @@ def _patient_next_steps(patient, result):
             detail = "Because heart artery disease is already established and additional high-risk features are present, the LDL cholesterol goal is lower than for routine prevention."
         elif "high-intensity statin" in lowered or "high-intensity lipid" in lowered:
             label = "Lower plaque-driving cholesterol"
-            detail = get_statin_intensity_definition("high").patient_friendly_summary
+            detail = "Discuss stronger cholesterol-lowering therapy."
         elif "moderate-intensity statin" in lowered or "moderate-intensity lipid" in lowered:
             label = "Lower plaque-driving cholesterol"
-            detail = get_statin_intensity_definition("moderate").patient_friendly_summary
+            detail = "Discuss cholesterol-lowering therapy."
         elif "lipid" in lowered or "statin" in lowered:
             label = "Lower plaque-driving cholesterol"
             detail = "Treat toward the cholesterol goals above."
@@ -1102,7 +1102,7 @@ def _patient_driver_sections(patient, result):
         priority.append(
             (
                 f"ApoB {_fmt(apob)} - elevated particle burden",
-                "ApoB reflects the number of cholesterol-carrying particles that can contribute to plaque. Current values: "
+                "ApoB reflects cholesterol-carrying particles that can contribute to plaque. "
                 + "; ".join(lipid_bits)
                 + ".",
                 "amber",
@@ -1138,10 +1138,10 @@ def _patient_driver_sections(patient, result):
     if kidney_bits and (diabetes or egfr is not None or uacr is not None):
         if diabetes and (egfr is not None or uacr is not None or kdigo):
             label = "Diabetes / kidney involvement"
-            detail = "Blood sugar and kidney markers both add to long-term cardiovascular and kidney risk. Current values: "
+            detail = "Blood sugar and kidney markers add to long-term risk. "
         else:
             label = "Blood sugar / kidney"
-            detail = "Blood sugar and kidney markers help guide long-term prevention. Current values: "
+            detail = "Blood sugar and kidney markers help guide prevention. "
         priority.append((label, detail + "; ".join(kidney_bits) + ".", "blue" if diabetes else "green"))
 
     lpa = getattr(patient, "lp_a_value", None)
@@ -1248,6 +1248,7 @@ def _text_lines(patient, result):
         "Your Prevention Roadmap",
         "Your results show where you stand today and the most important steps to lower future heart, kidney, and metabolic risk.",
         "",
+        "STEP 1",
         "Where you stand:",
         f"- 10-year ASCVD risk: {_fmt(risk, '%') or 'unavailable'}",
     ]
@@ -1265,7 +1266,8 @@ def _text_lines(patient, result):
             f"- {_patient_plaque_status(patient, result)}",
             f"- Care focus: {level}" + (f" - {level_detail}" if level_detail else ""),
             "",
-            "Why risk is elevated:",
+            "STEP 2",
+            "Why your risk is higher:",
         ]
     )
     if risk is None:
@@ -1292,11 +1294,11 @@ def _text_lines(patient, result):
 
     target_rows = _target_rows(patient, result)
     if target_rows:
-        lines.extend(["", "Current goals:"])
+        lines.extend(["", "STEP 3", "Your goals:"])
         for area, current, goal in target_rows:
             lines.append(f"- {area}: {current} to {goal}")
 
-    lines.extend(["", "Next steps:"])
+    lines.extend(["", "STEP 4", "Your next steps:"])
     for index, (label, detail) in enumerate(_patient_next_steps(patient, result)[:6], start=1):
         lines.append(f"{index}. {label}: {detail}")
 
@@ -1604,7 +1606,7 @@ def render_patient_roadmap(patient, result):
         [
             row
             for row in _target_rows(patient, result)
-            if row[2] and row[2] != "-" and row[0] in {"LDL-C", "ApoB", "non-HDL-C", "BP", "A1c"}
+            if row[2] and row[2] != "-" and row[0] in {"LDL-C", "ApoB", "BP", "A1c"}
         ]
     )
     next_html = _patient_next_steps_html(_patient_next_steps(patient, result)[:6])
@@ -1615,13 +1617,20 @@ def render_patient_roadmap(patient, result):
         <style>
         /*COMPONENT_THEME*/
         .roadmap-card {
+            --patient-font-base: 16px;
+            --patient-font-small: 14.5px;
+            --patient-font-title: 19px;
+            --patient-font-number: 28px;
+            --patient-line-height: 1.45;
             border: 1px solid rgba(17, 17, 17, 0.10);
             border-radius: 20px;
             background:
                 linear-gradient(180deg, rgba(255, 253, 248, 0.98), rgba(255, 250, 241, 0.98));
             box-shadow: 0 18px 42px rgba(17, 17, 17, 0.07);
             color: var(--rc-black);
+            font-size: var(--patient-font-base);
             font-family: var(--rc-font-body);
+            line-height: var(--patient-line-height);
             margin: 8px 0 12px;
             padding: 12px 14px 12px;
         }
@@ -1637,17 +1646,17 @@ def render_patient_roadmap(patient, result):
         .roadmap-title {
             color: var(--rc-black);
             font-family: var(--rc-font-title);
-            font-size: clamp(1.12rem, 1.65vw, 1.34rem);
+            font-size: clamp(1.18rem, 1.65vw, 1.38rem);
             font-weight: 720;
             letter-spacing: -0.015em;
-            line-height: 1.05;
+            line-height: 1.15;
             margin: 0 0 3px;
         }
         .roadmap-subtitle {
             color: rgba(17, 17, 17, 0.66);
-            font-size: 0.80rem;
+            font-size: 15px;
             font-weight: 560;
-            line-height: 1.26;
+            line-height: 1.42;
             max-width: 760px;
         }
         .roadmap-chip {
@@ -1656,7 +1665,7 @@ def render_patient_roadmap(patient, result):
             background: rgba(217, 119, 6, 0.12);
             color: #7C3F00;
             display: inline-flex;
-            font-size: 0.70rem;
+            font-size: 14px;
             font-weight: 820;
             line-height: 1;
             padding: 0.32rem 0.54rem;
@@ -1677,7 +1686,7 @@ def render_patient_roadmap(patient, result):
         }
         .roadmap-section-eyebrow {
             color: rgba(115, 0, 10, 0.62);
-            font-size: 0.60rem;
+            font-size: 13.5px;
             font-weight: 820;
             letter-spacing: 0.07em;
             line-height: 1.1;
@@ -1687,17 +1696,17 @@ def render_patient_roadmap(patient, result):
         .roadmap-section-title {
             color: var(--rc-black);
             font-family: var(--rc-font-title);
-            font-size: 0.98rem;
+            font-size: var(--patient-font-title);
             font-weight: 820;
             letter-spacing: -0.01em;
-            line-height: 1.15;
+            line-height: 1.22;
             margin: 0;
         }
         .roadmap-section-description {
             color: rgba(17, 17, 17, 0.56);
-            font-size: 0.72rem;
+            font-size: 15px;
             font-weight: 560;
-            line-height: 1.22;
+            line-height: 1.38;
             margin-top: 2px;
             max-width: 720px;
         }
@@ -1730,33 +1739,33 @@ def render_patient_roadmap(patient, result):
         }
         .roadmap-risk-label {
             color: rgba(17, 17, 17, 0.72);
-            font-size: 0.70rem;
+            font-size: 15px;
             font-weight: 830;
-            line-height: 1.1;
+            line-height: 1.22;
             padding-left: 13px;
         }
         .roadmap-risk-subtitle {
             color: rgba(17, 17, 17, 0.52);
-            font-size: 0.62rem;
+            font-size: 14px;
             font-weight: 620;
-            line-height: 1.15;
+            line-height: 1.32;
             margin-top: 2px;
             padding-left: 13px;
         }
         .roadmap-risk-value {
             color: var(--rc-black);
-            font-size: 1.46rem;
+            font-size: var(--patient-font-number);
             font-weight: 900;
             letter-spacing: -0.035em;
-            line-height: 1;
+            line-height: 1.05;
             margin-top: 4px;
         }
         .roadmap-risk-text,
         .roadmap-clinician-context {
             color: rgba(17, 17, 17, 0.62);
-            font-size: 0.72rem;
+            font-size: var(--patient-font-small);
             font-weight: 540;
-            line-height: 1.22;
+            line-height: 1.38;
             margin-top: 3px;
         }
         .roadmap-plaque-line {
@@ -1764,9 +1773,9 @@ def render_patient_roadmap(patient, result):
             border-radius: 11px;
             background: rgba(47, 95, 143, 0.075);
             color: rgba(17, 17, 17, 0.76);
-            font-size: 0.76rem;
+            font-size: 15px;
             font-weight: 680;
-            line-height: 1.22;
+            line-height: 1.38;
             margin-top: 6px;
             padding: 5px 8px;
         }
@@ -1798,15 +1807,15 @@ def render_patient_roadmap(patient, result):
         .roadmap-marker-gray { background: #7A7A7A; }
         .roadmap-driver-title {
             color: var(--rc-black);
-            font-size: 0.84rem;
+            font-size: 15.5px;
             font-weight: 850;
-            line-height: 1.15;
+            line-height: 1.28;
         }
         .roadmap-driver-detail {
             color: rgba(17, 17, 17, 0.62);
-            font-size: 0.72rem;
+            font-size: var(--patient-font-small);
             font-weight: 540;
-            line-height: 1.2;
+            line-height: 1.36;
             margin-top: 1px;
         }
         .roadmap-context-line {
@@ -1818,7 +1827,7 @@ def render_patient_roadmap(patient, result):
         }
         .roadmap-context-label {
             color: rgba(17, 17, 17, 0.42);
-            font-size: 0.66rem;
+            font-size: 14px;
             font-weight: 800;
         }
         .roadmap-context-chip {
@@ -1826,7 +1835,7 @@ def render_patient_roadmap(patient, result):
             border-radius: 999px;
             background: rgba(255, 255, 255, 0.72);
             color: rgba(17, 17, 17, 0.66);
-            font-size: 0.68rem;
+            font-size: 14px;
             font-weight: 650;
             line-height: 1;
             padding: 0.22rem 0.38rem;
@@ -1851,9 +1860,9 @@ def render_patient_roadmap(patient, result):
         }
         .roadmap-goal-target {
             color: var(--rc-black);
-            font-size: 0.76rem;
+            font-size: 15px;
             font-weight: 850;
-            line-height: 1.16;
+            line-height: 1.3;
         }
         .roadmap-goal-target span {
             color: #7C3F00;
@@ -1861,9 +1870,9 @@ def render_patient_roadmap(patient, result):
         }
         .roadmap-goal-current {
             color: rgba(17, 17, 17, 0.56);
-            font-size: 0.66rem;
+            font-size: 14px;
             font-weight: 600;
-            line-height: 1.14;
+            line-height: 1.3;
             margin-top: 2px;
         }
         .roadmap-step-list {
@@ -1878,11 +1887,11 @@ def render_patient_roadmap(patient, result):
             color: rgba(17, 17, 17, 0.68);
             counter-increment: roadmap-step;
             display: grid;
-            font-size: 0.76rem;
+            font-size: 15px;
             font-weight: 540;
             gap: 7px;
             grid-template-columns: 19px 1fr;
-            line-height: 1.22;
+            line-height: 1.38;
             padding: 4px 0;
         }
         .roadmap-step-list li::before {
@@ -1892,7 +1901,7 @@ def render_patient_roadmap(patient, result):
             color: #2F5F8F;
             content: counter(roadmap-step);
             display: inline-flex;
-            font-size: 0.64rem;
+            font-size: 13.5px;
             font-weight: 850;
             height: 17px;
             justify-content: center;
@@ -1937,15 +1946,15 @@ def render_patient_roadmap(patient, result):
         .roadmap-tone-gray::before { background: #7A7A7A; }
         .roadmap-muted {
             color: rgba(17, 17, 17, 0.58);
-            font-size: 0.82rem;
+            font-size: var(--patient-font-small);
             font-weight: 520;
         }
         .roadmap-footer {
             border-top: 1px solid rgba(17, 17, 17, 0.10);
             color: rgba(17, 17, 17, 0.58);
-            font-size: 0.76rem;
+            font-size: 14px;
             font-weight: 620;
-            line-height: 1.3;
+            line-height: 1.38;
             margin-top: 13px;
             padding-top: 9px;
         }

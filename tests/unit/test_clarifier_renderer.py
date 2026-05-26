@@ -1,3 +1,4 @@
+from core.patient import Patient
 from core.results import RCCKMResult
 from renderers.clarifier_renderer import (
     build_clarifier_card_html,
@@ -71,6 +72,36 @@ def test_build_clarifier_card_html_contains_quick_read_recommended_list():
     assert "clarifier-row" not in html
     assert "clarifier-table-head" not in html
     assert "&lt;div" not in html
+
+
+def test_hscrp_clarifier_uses_inflammatory_risk_context_copy():
+    result = RCCKMResult(
+        action_domains={
+            "hscrp_testing": "Consider hsCRP if inflammatory risk context would change management.",
+        }
+    )
+
+    html = build_clarifier_card_html(result)
+
+    assert "hsCRP" in html
+    assert "inflammatory risk context" in html
+    assert "inflammatory biomarker context" not in html
+
+
+def test_measured_cac_does_not_render_as_missing_clarifier():
+    patient = Patient(age=64, sex="female", cac=350)
+    result = RCCKMResult(
+        action_domains={
+            "cac_testing": "Coronary calcium reasonable for plaque clarification.",
+        }
+    )
+
+    html = build_clarifier_card_html(result, patient=patient)
+
+    assert "Data that could clarify risk" in html
+    assert "plaque burden clarification" not in html
+    assert "Already available:" in html
+    assert "CAC" in html
 
 
 def test_render_clarifier_card_uses_unsafe_markdown():

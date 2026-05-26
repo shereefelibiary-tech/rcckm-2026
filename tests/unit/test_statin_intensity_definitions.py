@@ -66,7 +66,7 @@ def test_emr_does_not_dump_statin_example_lists_by_default():
     assert "simvastatin 20-40" not in note.lower()
 
 
-def test_patient_roadmap_uses_plain_language_statin_definition():
+def test_patient_roadmap_uses_short_plain_language_statin_action():
     patient = Patient(age=55, sex="male")
     result = RCCKMResult(
         recommendations=[
@@ -76,6 +76,7 @@ def test_patient_roadmap_uses_plain_language_statin_definition():
 
     roadmap = render_patient_roadmap_text(patient, result)
 
-    assert "usually lowers LDL cholesterol by about one-third to one-half" in roadmap
+    assert "Discuss cholesterol-lowering therapy." in roadmap
+    assert "usually lowers LDL cholesterol by about one-third to one-half" not in roadmap
     assert "Atorvastatin 10-20 mg daily" not in roadmap
     assert "Rosuvastatin 5-10 mg daily" not in roadmap

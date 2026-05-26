@@ -457,7 +457,7 @@ def test_rss_tower_and_rows_match_exact_visual_order_without_sorting_copy():
     )
 
 
-def test_targets_card_uses_compact_horizontal_target_line():
+def test_targets_card_prioritizes_ldl_and_apob_by_default():
     patient = demo_patient()
     result, _rss_total, _contributions = run_patient(patient)
 
@@ -466,6 +466,7 @@ def test_targets_card_uses_compact_horizontal_target_line():
     assert "targets-compact" in html
     assert "target-line" in html
     assert "target-item" in html
+    assert "target-main" in html
     assert "target-name" in html
     assert "target-goal" in html
     assert "target-strip" not in html
@@ -474,18 +475,32 @@ def test_targets_card_uses_compact_horizontal_target_line():
     assert "&lt;70 mg/dL" in html
     assert "ApoB" in html
     assert "&lt;80 mg/dL" in html
-    assert "TG" in html
-    assert "Current 180" in html
-    assert "non-HDL-C" in html
-    assert "&lt;100 mg/dL" in html
-    assert "Current 157" in html
-    assert "Calculated from total cholesterol minus HDL-C." in html
-    assert "target-secondary" in html
-    assert html.count("mg/dL") >= 4
-    assert "High plaque burden (CAC 350)." in html
+    assert "Triglycerides" not in html
+    assert "Current 180" not in html
+    assert "non-HDL-C" not in html
+    assert "Current 157" not in html
+    assert "Calculated from total cholesterol minus HDL-C." not in html
+    assert html.count('<span class="target-item">') == 2
+    assert html.count('<span class="target-main">') == 2
+    assert 'content: "•"' not in html
+    assert "ApoB is shown as an RCCKM advanced particle target." not in html
+    assert "Show target rationale" in html
     assert "rcckm-metric-grid" not in html
     assert "target-separator" not in html
     assert "rcckm-metric" not in html
+
+
+def test_targets_card_shows_severe_triglycerides_when_pathway_relevant():
+    from core.patient import Patient
+
+    patient = Patient(age=50, sex="male", ldl_c=120, apob=90, triglycerides=1040)
+    result, _rss_total, _contributions = run_patient(patient)
+
+    html = _build_targets_html(result, patient)
+
+    assert "Triglycerides" in html
+    assert "Current 1040" in html
+    assert "Pancreatitis-risk TG pathway active." in html
 
 
 def test_assessment_candidates_are_compact_and_deduped():
@@ -498,11 +513,13 @@ def test_assessment_candidates_are_compact_and_deduped():
     assert "Assessment candidates" in combined
     assert "Clinical diagnoses and coding support" in combined
     assert "dx-panel" in combined
-    assert "dx-column-panel" in combined
+    assert "dx-compact-list" in combined
+    assert "<div class='dx-column-panel'>" not in combined
     assert "Accepted" in combined
     assert "Confirmed / accepted" not in combined
     assert "Confirmed by data" not in combined
     assert "Needs review" in combined
+    assert "Needs review:</strong> none" in combined
     assert "Review suggested" not in combined
     assert "ICD:" in combined
     assert "dx-code-chip" in combined
