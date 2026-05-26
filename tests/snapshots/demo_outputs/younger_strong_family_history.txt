@@ -54,7 +54,7 @@ Current goals:
 - Weight: BMI 29.4 to individualized
 
 Next steps:
-1. Lower plaque-driving cholesterol: Treat toward the cholesterol goals above.
+1. Lower plaque-driving cholesterol: Moderate-intensity statin therapy usually lowers LDL cholesterol by about one-third to one-half.
 2. Aspirin safety: Do not start aspirin unless your clinician recommends it.
 3. Additional testing: A calcium scan may help if treatment choices are still uncertain.
 4. Additional testing: hsCRP can help clarify inflammatory risk context when clinically relevant.
@@ -66,7 +66,7 @@ ACTIONS:
 - Recheck lipid profile 4-12 weeks after starting or intensifying therapy, then every 6-12 months.
 - CAC not routinely recommended at this age; consider only if results would change management.
 - Aspirin not indicated for routine primary prevention.
-- hsCRP - inflammatory biomarker clarification
+- Consider hsCRP only if inflammatory risk clarification would change management.
 
 RSS: 19
 RSS CONTRIBUTORS:

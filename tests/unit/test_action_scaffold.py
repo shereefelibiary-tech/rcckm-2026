@@ -51,9 +51,9 @@ def test_cac_missing_clear_treatment_indication_keeps_lipid_action_first():
     sections = build_action_scaffold(patient, result)
 
     assert sections[0].label == "Lipid therapy"
-    assert sections[0].line == "Lipid-lowering therapy is indicated; treat toward high-risk targets."
-    assert sections[1].label == "Coronary calcium"
-    assert sections[1].line == "CAC may clarify plaque burden if treatment intensity remains uncertain."
+    assert sections[0].line == "Moderate-intensity statin therapy is generally favored for primary prevention."
+    cac_section = next(section for section in sections if section.label == "Coronary calcium")
+    assert cac_section.line == "CAC may clarify plaque burden if treatment intensity remains uncertain."
 
 
 def test_cac_zero_does_not_recommend_cac():
@@ -298,11 +298,13 @@ def test_flat_recommendation_lines_keep_order_without_visible_scaffold_labels():
     assert lines[:4] == [
         "High-intensity lipid-lowering therapy indicated; treat toward high-risk targets.",
         "Recheck lipid profile 4-12 weeks after starting or intensifying therapy, then every 6-12 months.",
-        "CAC 350 already measured; no repeat CAC needed for current decision-making.",
-        "Aspirin may be considered only if bleeding risk is low after shared decision-making.",
+        "Confirm persistent albuminuria with repeat UACR if not already confirmed; optimize kidney-protective therapy.",
+        "Optimize glycemic therapy.",
     ]
-    assert "Optimize kidney-protective therapy." in lines
+    assert any("optimize kidney-protective therapy" in line for line in lines)
     assert "Optimize glycemic therapy." in lines
+    assert "CAC 350 already measured; no repeat CAC needed for current decision-making." in lines
+    assert "Aspirin may be considered only if bleeding risk is low after shared decision-making." in lines
     assert not any(line.startswith(("Lipid therapy:", "Coronary calcium:", "Aspirin:", "Supporting actions:")) for line in lines)
     assert "lipid" not in lines[2].lower()
 

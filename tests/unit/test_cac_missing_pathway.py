@@ -41,7 +41,7 @@ def test_cac_missing_high_prevent_shows_plaque_unmeasured_without_plaque_diagnos
     assert "wpf-chip-missing" in wpf_html
     assert all(contribution.label != "CAC plaque burden" for contribution in rss_contributions)
     assert rss_total == 0
-    assert result.dominant_action == "Lipid-lowering therapy is indicated; treat toward high-risk targets."
+    assert result.dominant_action == "Moderate-intensity statin therapy is generally favored for primary prevention."
     assert "CAC may clarify plaque burden if treatment intensity remains uncertain." in result.recommendations
 
 

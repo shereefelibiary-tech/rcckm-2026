@@ -226,14 +226,14 @@
       "risk_continuum_level": 3,
       "risk_continuum_sublevel": "3A",
       "prevent_category": "LOW",
-      "required_action": "cumulative atherogenic exposure",
+      "required_action": "CAC may clarify plaque burden if treatment intensity remains uncertain",
       "forbidden_diagnosis": "subclinical"
     },
     "required_phrases": [
       "Level 3A - elevated long-term risk trajectory",
       "10-year ASCVD risk: 1.2%",
       "30-year ASCVD risk: 10.5%",
-      "Moderate-intensity statin therapy reasonable",
+      "No medication escalation today",
       "CAC may clarify plaque burden if treatment intensity remains uncertain",
       "Near-term estimated risk may be low, but 30-year risk is elevated enough to justify prevention discussion"
     ],
@@ -333,7 +333,7 @@
       "kdigo": "G2",
       "prevent_category": "BORDERLINE",
       "required_diagnosis": "Elevated lipoprotein(a)",
-      "required_action": "cumulative atherogenic exposure",
+      "required_action": "worth discussing",
       "required_clarifier": "UACR",
       "forbidden_diagnosis": "subclinical"
     },
@@ -344,8 +344,8 @@
       "plaque unmeasured / CAC not performed",
       "kidney G2; albuminuria not measured",
       "UACR not available; obtain to complete kidney-risk assessment",
-      "Moderate-intensity lipid-lowering therapy reasonable",
-      "CAC may clarify plaque burden if treatment intensity remains uncertain",
+      "Short-term ASCVD risk is low, but longer-term risk and risk-enhancing factors may make lipid-lowering worth discussing",
+      "CAC reasonable for risk clarification if treatment decision remains uncertain",
       "Obtain UACR to complete kidney-risk assessment",
       "Aspirin not indicated for routine primary prevention",
       "Lp(a) 132 nmol/L",
@@ -925,7 +925,7 @@
       "forbidden_diagnosis": "subclinical"
     },
     "required_phrases": [
-      "Level 3B - actionable early CKM / kidney risk",
+      "Level 3B - CKM stage 3 with albuminuria-mediated kidney and ASCVD risk",
       "10-year ASCVD risk: 3.74%",
       "30-year ASCVD risk: 18.8%",
       "plaque unmeasured / CAC not performed",
@@ -933,9 +933,9 @@
       "Albuminuria",
       "Prediabetes",
       "Hypertriglyceridemia",
-      "Confirm albuminuria persistence and optimize kidney-protective therapy",
-      "Moderate-intensity lipid-lowering therapy reasonable",
-      "CAC may clarify plaque burden if treatment intensity remains uncertain",
+      "Confirm persistent albuminuria with repeat UACR if not already confirmed; optimize kidney-protective therapy",
+      "Short-term ASCVD risk is low, but albuminuria and longer-term risk make lipid-lowering worth discussing",
+      "CAC reasonable for risk clarification if treatment decision remains uncertain",
       "Aspirin not indicated for routine primary prevention"
     ],
     "forbidden_phrases": [
@@ -1123,7 +1123,7 @@
     "expected": {
       "prevent_category": "HIGH",
       "risk_continuum_level": 3,
-      "required_action": "Lipid-lowering therapy is indicated"
+      "required_action": "Moderate-intensity statin therapy is generally favored for primary prevention"
     },
     "forbidden_phrases": [
       "phenotype",
@@ -1266,7 +1266,7 @@
       "risk_continuum_level": 3,
       "risk_continuum_sublevel": "3B",
       "prevent_category": "INTERMEDIATE",
-      "required_action": "Moderate-intensity lipid-lowering therapy is reasonable",
+      "required_action": "Moderate-intensity statin therapy is reasonable given borderline ASCVD risk with risk-enhancing factors",
       "required_clarifier": "Obtain UACR to complete kidney-risk assessment",
       "forbidden_diagnosis": "Subclinical coronary atherosclerosis"
     },
@@ -1275,6 +1275,7 @@
       "10-year ASCVD risk: 5.41%",
       "30-year ASCVD risk: 22.55%",
       "UACR not available; obtain to complete kidney-risk assessment",
+      "Moderate-intensity statin therapy is reasonable given borderline ASCVD risk with risk-enhancing factors",
       "CAC may clarify plaque burden if treatment intensity remains uncertain",
       "Aspirin not indicated for routine primary prevention"
     ],

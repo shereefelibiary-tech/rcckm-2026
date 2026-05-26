@@ -171,6 +171,28 @@ def test_demo_output_snapshot_text_uses_safe_patient_and_emr_wording():
     assert "inflammatory residual risk" not in text.lower()
 
 
+def test_ckd_albuminuria_demo_is_action_oriented_without_passive_no_escalation():
+    patient = build_demo_patient("ckd_albuminuria")
+    result = evaluate_patient(patient)
+    emr = render_emr_note(patient, result)
+
+    assert result.level_classification["label"] == (
+        "Level 3B - CKM stage 3 with albuminuria-mediated kidney and ASCVD risk"
+    )
+    assert "Level 3B - CKM stage 3 with albuminuria-mediated kidney and ASCVD risk." in emr
+    assert "10-year ASCVD risk:" in emr
+    assert "30-year ASCVD risk:" in emr
+    assert "CKM stage 3 with kidney G2A2 and plaque unmeasured / CAC not performed." in emr
+    assert "No medication escalation today." not in emr
+    assert "Moderate-intensity statin therapy is reasonable given borderline/intermediate ASCVD risk with albuminuria and metabolic risk-enhancing factors." in emr
+    assert "Confirm persistent albuminuria with repeat UACR if not already confirmed; optimize kidney-protective therapy." in emr
+    assert "Treat BP toward goal <130/80 if tolerated." in emr
+    assert "Continue or optimize ACEi/ARB therapy if hypertension and persistent albuminuria are present." in emr
+    assert "Consider SGLT2 inhibitor if UACR is >=200 mg/g" in emr
+    assert "hsCRP - inflammatory biomarker clarification" not in emr
+    assert "Consider hsCRP only if inflammatory risk clarification would change management." in emr
+
+
 def test_demo_payloads_are_defensive_copies():
     payloads = demo_patient_payloads()
     payloads["healthy_low_risk_prevention"]["age"] = 999

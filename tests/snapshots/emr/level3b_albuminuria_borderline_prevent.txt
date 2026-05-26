@@ -1,18 +1,21 @@
 RISK CONTINUUM CKM
 
-Level 3B - actionable early CKM / kidney risk.
+Level 3B - CKM stage 3 with albuminuria-mediated kidney and ASCVD risk.
 10-year ASCVD risk: 3.74%.
 30-year ASCVD risk: 18.8%.
 CKM stage 3 with kidney G2A2 and plaque unmeasured / CAC not performed.
 
 Assessment:
-- Albuminuria (ICD: R80.9)
+- CKD stage G2A2 / albuminuria, confirm persistence if not already confirmed (ICD: R80.9)
 - Hypertriglyceridemia (ICD: E78.1)
 - Prediabetes (ICD: R73.03)
 
 Recommendations:
-- Moderate-intensity lipid-lowering therapy reasonable.
-- CAC may clarify plaque burden if treatment intensity remains uncertain.
+- Short-term ASCVD risk is low, but albuminuria and longer-term risk make lipid-lowering worth discussing.
+- Confirm persistent albuminuria with repeat UACR if not already confirmed; optimize kidney-protective therapy.
+- Continue or optimize ACEi/ARB therapy if hypertension and persistent albuminuria are present.
+- Consider SGLT2 inhibitor if UACR is >=200 mg/g, albuminuria persists at higher range, or CKD progression risk is elevated.
+- CAC reasonable if treatment decision remains uncertain.
 - Aspirin not indicated for routine primary prevention.
-- Confirm albuminuria persistence and optimize kidney-protective therapy.
 - Lp(a) - one-time risk assessment
+- Consider hsCRP only if inflammatory risk clarification would change management.

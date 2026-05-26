@@ -409,6 +409,44 @@ def audit_demo_case(label: str, case_name: str) -> DemoCaseAudit:
         if not rationale_present:
             finding.warnings.append("lipid/statin recommendation lacks an obvious demo rationale")
             finding.coherence_score -= 10
+        if (
+            prevent_10y is not None
+            and 3 <= prevent_10y < 5
+            and not any(
+                condition
+                for condition in (
+                    getattr(patient, "cac", None) is not None and patient.cac > 0,
+                    getattr(patient, "uacr", None) is not None and patient.uacr >= 30,
+                    getattr(patient, "egfr", None) is not None and patient.egfr < 60,
+                    getattr(patient, "ldl_c", None) is not None and patient.ldl_c >= 160,
+                    getattr(patient, "apob", None) is not None and patient.apob >= 120,
+                    bool(getattr(patient, "diabetes", False)),
+                    bool(getattr(patient, "family_history_premature_ascvd", False)),
+                )
+            )
+            and any(phrase in visible_lower for phrase in ("statin therapy is reasonable", "statin therapy is generally favored", "recommended"))
+        ):
+            finding.errors.append("3% to <5% ASCVD demo recommends statin too aggressively without major enhancers")
+            finding.coherence_score -= 25
+    if (
+        prevent_10y is not None
+        and prevent_10y >= 5
+        and any(
+            condition
+            for condition in (
+                getattr(patient, "uacr", None) is not None and patient.uacr >= 30,
+                getattr(patient, "egfr", None) is not None and patient.egfr < 60,
+                getattr(patient, "ldl_c", None) is not None and patient.ldl_c >= 130,
+                getattr(patient, "apob", None) is not None and patient.apob >= 100,
+                bool(getattr(patient, "diabetes", False)),
+                bool(getattr(patient, "family_history_premature_ascvd", False)),
+            )
+        )
+        and "statin" not in visible_lower
+        and "lipid-lowering" not in visible_lower
+    ):
+        finding.errors.append("ASCVD >=5% with risk enhancers lacks lipid-prevention discussion")
+        finding.coherence_score -= 25
 
     if any(fragment in visible_lower for fragment in ("dominant_action", "action_domains")):
         finding.errors.append("internal engine field leaked into visible output")
@@ -440,6 +478,9 @@ def audit_demo_case(label: str, case_name: str) -> DemoCaseAudit:
             if phrase not in visible:
                 finding.errors.append(f"younger family-history output missing `{phrase}`")
                 finding.coherence_score -= 15
+        if not any(phrase in visible_lower for phrase in ("low short-term", "longer-term", "lifetime", "prevention opportunity")):
+            finding.errors.append("younger family-history output does not explain low 10-year/high lifetime framing")
+            finding.coherence_score -= 15
 
     _score_floor(finding)
     return finding

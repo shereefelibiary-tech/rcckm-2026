@@ -1,6 +1,6 @@
 RISK CONTINUUM CKM
 
-Level 3B - actionable early CKM / kidney risk.
+Level 3B - CKM stage 3 with albuminuria-mediated kidney and ASCVD risk.
 PREVENT unavailable or incomplete; interpretation is based on reviewed worksheet data.
 CKM stage 3 with diabetic kidney involvement.
 
@@ -8,9 +8,8 @@ Assessment:
 - Type 2 diabetes mellitus with CKD G3aA2 and albuminuria (ICD: E11.22; CKD stage 3a ICD: N18.31)
 
 Recommendations:
-- No medication escalation today.
-- Continue lifestyle-based prevention.
-- Aspirin not indicated for routine primary prevention.
 - Optimize kidney-protective and glycemic therapy.
+- Add an SGLT2 inhibitor for kidney and cardiovascular protection if no contraindication, despite ACEi/ARB therapy.
+- Aspirin not indicated for routine primary prevention.
 - Lp(a) - one-time risk assessment
-- hsCRP - inflammatory biomarker clarification
+- Consider hsCRP only if inflammatory risk clarification would change management.

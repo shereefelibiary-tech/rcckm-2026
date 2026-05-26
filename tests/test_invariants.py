@@ -82,7 +82,7 @@ def test_prevent_category_does_not_overwrite_rcckm_level_when_albuminuria_is_act
 
     assert str(getattr(result.prevent_risk_category, "value", result.prevent_risk_category)) == "BORDERLINE"
     assert classify_continuum_position(patient, result) == {"level": 3, "sublevel": "3B"}
-    assert "Level 3B - actionable early CKM / kidney risk." in render_emr_note(patient, result)
+    assert "Level 3B - CKM stage 3 with albuminuria-mediated kidney and ASCVD risk." in render_emr_note(patient, result)
 
 
 def test_elevated_30_year_prevent_trajectory_sets_at_least_level_3_without_plaque():

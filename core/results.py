@@ -72,6 +72,7 @@ class RCCKMResult:
     dominant_action: Optional[str] = None
     recommendations: list[str] = field(default_factory=list)
     action_domains: dict = field(default_factory=dict)
+    rule_traces: list[dict] = field(default_factory=list)
     snapshot_lines: list[str] = field(default_factory=list)
     emr_lines: list[str] = field(default_factory=list)
     diagnosis_candidates: list[DiagnosisCandidate] = field(default_factory=list)

@@ -1,4 +1,11 @@
 from modules.cac_recommendation.engine import build_cac_recommendation
+from modules.prevent.lipid_bands import (
+    PREVENT_ASCVD_EARLY_DISCUSSION_THRESHOLD,
+    PREVENT_ASCVD_HIGH_THRESHOLD,
+    PREVENT_ASCVD_INTERMEDIATE_THRESHOLD,
+    PREVENT_ASCVD_STATIN_DISCUSSION_THRESHOLD,
+    lipid_recommendation_from_prevent_band,
+)
 from modules.risk_enhancers.reproductive import has_reproductive_risk_markers
 
 
@@ -237,6 +244,61 @@ def _prevent_high(result):
     )
 
 
+def _prevent_10y_ascvd_value(result):
+    value = getattr(result, "prevent_10y_ascvd", None)
+    try:
+        return float(value) if value is not None else None
+    except (TypeError, ValueError):
+        return None
+
+
+def _prevent_ascvd_5_to_7_5(result):
+    risk = _prevent_10y_ascvd_value(result)
+    return risk is not None and PREVENT_ASCVD_STATIN_DISCUSSION_THRESHOLD <= risk < PREVENT_ASCVD_INTERMEDIATE_THRESHOLD
+
+
+def _prevent_ascvd_7_5_to_20(result):
+    risk = _prevent_10y_ascvd_value(result)
+    return risk is not None and PREVENT_ASCVD_INTERMEDIATE_THRESHOLD <= risk < PREVENT_ASCVD_HIGH_THRESHOLD
+
+
+def _prevent_ascvd_20_or_higher(result):
+    risk = _prevent_10y_ascvd_value(result)
+    return risk is not None and risk >= PREVENT_ASCVD_HIGH_THRESHOLD
+
+
+def _prevent_ascvd_3_to_5(result):
+    risk = _prevent_10y_ascvd_value(result)
+    return risk is not None and PREVENT_ASCVD_EARLY_DISCUSSION_THRESHOLD <= risk < PREVENT_ASCVD_STATIN_DISCUSSION_THRESHOLD
+
+
+def _lipid_enhancer_context(patient, result=None):
+    ldl_c = getattr(patient, "ldl_c", None)
+    apob = getattr(patient, "apob", None)
+    cac = _cac_value(patient)
+    return {
+        "ckd_albuminuria": _has_ckd_or_albuminuria(patient, result),
+        "diabetes": _has_diabetes(patient),
+        "metabolic": _has_metabolic_risk(patient),
+        "premature_family_history": _has_premature_family_history(patient),
+        "elevated_lpa": _has_elevated_lpa(patient),
+        "hypertriglyceridemia": _has_elevated_tg(patient),
+        "cac_plaque": cac is not None and cac > 0,
+        "very_high_lipid_burden": (ldl_c is not None and ldl_c >= 160) or (apob is not None and apob >= 120),
+        "ldl_apob_burden": (ldl_c is not None and ldl_c >= 130) or (apob is not None and apob >= 100),
+        "inflammatory": bool(getattr(patient, "inflammatory_disease", False)),
+    }
+
+
+def _prevent_lipid_recommendation(patient, result):
+    return lipid_recommendation_from_prevent_band(
+        patient,
+        _prevent_10y_ascvd_value(result),
+        getattr(result, "prevent_30y_ascvd", None),
+        _lipid_enhancer_context(patient, result),
+    )
+
+
 def _low_short_term_elevated_cumulative_lipid_path(patient, result):
     if bool(getattr(patient, "clinical_ascvd", False)):
         return False
@@ -246,14 +308,12 @@ def _low_short_term_elevated_cumulative_lipid_path(patient, result):
     ldl_c = getattr(patient, "ldl_c", None)
     if age is None or prevent_10y is None:
         return False
-    return bool(
-        30 <= age <= 59
-        and prevent_10y < 3
-        and (
-            (ldl_c is not None and 160 <= ldl_c <= 189)
-            or (prevent_30y is not None and prevent_30y >= 10)
-        )
+    apob = getattr(patient, "apob", None)
+    has_major_lipid_burden = bool(
+        (ldl_c is not None and 160 <= ldl_c <= 189)
+        or (apob is not None and apob >= 120)
     )
+    return bool(30 <= age <= 59 and prevent_10y < 3 and has_major_lipid_burden)
 
 
 def _near_level3_lipid_trajectory(patient, result):
@@ -286,9 +346,48 @@ def _borderline_albuminuria_or_trajectory_path(patient, result):
         return False
     prevent_30y = getattr(result, "prevent_30y_ascvd", None)
     return bool(
-        _prevent_borderline(result)
+        _prevent_ascvd_3_to_5(result)
         and (
             _has_albuminuria(patient, result)
+            or (
+                prevent_30y is not None
+                and prevent_30y >= 10
+                and _has_major_lipid_risk_enhancer(patient, result)
+            )
+        )
+    )
+
+
+def _low_10yr_elevated_30yr_prevent_path(patient, result):
+    if result is None or bool(getattr(patient, "clinical_ascvd", False)):
+        return False
+    age = getattr(patient, "age", None)
+    prevent_10y = _prevent_10y_ascvd_value(result)
+    prevent_30y = getattr(result, "prevent_30y_ascvd", None)
+    try:
+        prevent_30y = float(prevent_30y) if prevent_30y is not None else None
+    except (TypeError, ValueError):
+        prevent_30y = None
+    return bool(
+        age is not None
+        and 30 <= age <= 59
+        and prevent_10y is not None
+        and prevent_10y < PREVENT_ASCVD_EARLY_DISCUSSION_THRESHOLD
+        and prevent_30y is not None
+        and prevent_30y >= 15
+    )
+
+
+def _albuminuria_lipid_prevention_path(patient, result):
+    if result is None or bool(getattr(patient, "clinical_ascvd", False)):
+        return False
+    prevent_30y = getattr(result, "prevent_30y_ascvd", None)
+    return bool(
+        _has_albuminuria(patient, result)
+        and (
+            _prevent_ascvd_5_to_7_5(result)
+            or _prevent_ascvd_7_5_to_20(result)
+            or _prevent_borderline_or_intermediate(result)
             or (prevent_30y is not None and prevent_30y >= 10)
         )
     )
@@ -313,10 +412,86 @@ def _bp_above_target(patient):
     )
 
 
+def _bp_treated_or_hypertension(patient):
+    return bool(getattr(patient, "bp_treated", False)) or bool(
+        getattr(patient, "hypertension", False)
+    )
+
+
 def _level_3b_intermediate_uacr_missing_path(patient, result):
     return bool(
         _level_3b_intermediate_prevent_path(result)
         and getattr(patient, "uacr", None) is None
+    )
+
+
+def _on_statin_therapy(patient):
+    if bool(getattr(patient, "lipid_lowering", False)) and str(
+        getattr(patient, "statin_intensity", "") or ""
+    ).strip():
+        return True
+    medication_text = str(getattr(patient, "medications_raw", "") or "").lower()
+    statin_names = (
+        "atorvastatin",
+        "rosuvastatin",
+        "pravastatin",
+        "simvastatin",
+        "lovastatin",
+        "fluvastatin",
+        "pitavastatin",
+    )
+    return any(name in medication_text for name in statin_names)
+
+
+def _has_heart_failure(patient):
+    return bool(getattr(patient, "heart_failure", False)) or bool(
+        getattr(patient, "hf", False)
+    )
+
+
+def _sglt2_action_text(patient, result=None):
+    egfr = getattr(patient, "egfr", None)
+    uacr = getattr(patient, "uacr", None)
+    try:
+        egfr_value = float(egfr) if egfr is not None else None
+    except (TypeError, ValueError):
+        egfr_value = None
+    try:
+        uacr_value = float(uacr) if uacr is not None else None
+    except (TypeError, ValueError):
+        uacr_value = None
+
+    if egfr_value is None or uacr_value is None:
+        return None
+    if uacr_value < 30 and not _has_heart_failure(patient):
+        return None
+    if egfr_value < 20:
+        return "SGLT2 inhibitor initiation is not routinely recommended at this eGFR; individualize based on nephrology guidance and existing therapy."
+    if bool(getattr(patient, "sglt2", False)):
+        return "Continue SGLT2 inhibitor therapy if tolerated and clinically appropriate."
+    if _has_heart_failure(patient) or uacr_value >= 200:
+        return "Add an SGLT2 inhibitor for kidney and cardiovascular protection if no contraindication, despite ACEi/ARB therapy."
+    if _has_diabetes(patient) and uacr_value >= 30:
+        return "Consider an SGLT2 inhibitor for kidney and cardiovascular protection given diabetes with albuminuric CKD."
+    if uacr_value >= 30:
+        return "Consider SGLT2 inhibitor if UACR is >=200 mg/g, albuminuria persists at higher range, or CKD progression risk is elevated."
+    return None
+
+
+def _has_major_lipid_risk_enhancer(patient, result=None):
+    ldl_c = getattr(patient, "ldl_c", None)
+    apob = getattr(patient, "apob", None)
+    return bool(
+        _has_ckd_or_albuminuria(patient, result)
+        or _has_diabetes(patient)
+        or _has_metabolic_risk(patient)
+        or _has_premature_family_history(patient)
+        or _has_elevated_lpa(patient)
+        or _has_elevated_tg(patient)
+        or (ldl_c is not None and ldl_c >= 130)
+        or (apob is not None and apob >= 100)
+        or bool(getattr(patient, "inflammatory_disease", False))
+        or (_cac_value(patient) is not None and _cac_value(patient) > 0)
     )
 
 
@@ -333,8 +508,18 @@ def _needs_lipid_action(patient, result=None):
         or (_severe_tg(patient) and _atherogenic_metric_available(patient))
         or _has_hiv_pathway(patient)
         or (result is not None and _low_short_term_elevated_cumulative_lipid_path(patient, result))
+        or (result is not None and _low_10yr_elevated_30yr_prevent_path(patient, result))
         or (result is not None and _near_level3_lipid_trajectory(patient, result))
         or (result is not None and _low_with_lpa_reproductive_context(patient, result))
+        or (result is not None and _albuminuria_lipid_prevention_path(patient, result))
+        or (result is not None and _prevent_ascvd_7_5_to_20(result))
+        or (result is not None and _prevent_ascvd_5_to_7_5(result))
+        or (result is not None and _prevent_ascvd_3_to_5(result))
+        or (
+            result is not None
+            and _prevent_ascvd_5_to_7_5(result)
+            and _has_major_lipid_risk_enhancer(patient, result)
+        )
         or (result is not None and _borderline_albuminuria_or_trajectory_path(patient, result))
         or (
             result is not None
@@ -351,7 +536,7 @@ def _needs_indicated_lipid_action(patient, result=None):
     return bool(getattr(patient, "clinical_ascvd", False)) or (
         cac is not None and cac >= 300
     ) or (ldl_c is not None and ldl_c >= 190) or (
-        result is not None and _prevent_high(result)
+        result is not None and _prevent_ascvd_20_or_higher(result)
     )
 
 
@@ -398,6 +583,8 @@ def _lipid_line_is_treatment_forward(lipid_line):
         or text.startswith("secondary-prevention")
         or "lipid-lowering therapy recommended" in text
         or "lipid-lowering therapy is indicated" in text
+        or "lipid-lowering therapy is favored" in text
+        or "statin therapy is reasonable" in text
         or "statin therapy reasonable" in text
         or "statin therapy recommended" in text
     )
@@ -423,16 +610,40 @@ def _lipid_action_text(patient, result):
     if _severe_tg(patient) and _atherogenic_metric_available(patient):
         return "Address ASCVD risk with lipid-lowering therapy guided by non-HDL-C/ApoB."
     cac = _cac_value(patient)
+    if cac is not None and cac >= 300:
+        return "Lipid-lowering therapy is indicated; treat toward high-risk targets."
     if cac is not None and 100 <= cac <= 299:
         if bool(getattr(patient, "lipid_lowering", False)) and _above_lipid_target(patient, result):
             return "Intensify lipid-lowering therapy; treat toward LDL-C <70 and non-HDL-C <100."
         return "Lipid-lowering therapy recommended; treat toward LDL-C <70 and non-HDL-C <100."
+    if cac is not None and cac > 0:
+        return "Lipid-lowering therapy is favored because coronary plaque is already present despite low short-term ASCVD risk."
+    if _prevent_ascvd_20_or_higher(result):
+        return _prevent_lipid_recommendation(patient, result).emr_summary
+    if _needs_indicated_lipid_action(patient, result):
+        return "Lipid-lowering therapy is indicated; treat toward high-risk targets."
     if _has_hiv_pathway(patient):
         return "Statin therapy recommended/reasonable in HIV; review ART-statin interactions."
     if _low_with_lpa_reproductive_context(patient, result):
         return "No medication escalation required today; clinician-patient risk discussion recommended given high Lp(a) and reproductive risk markers."
     if _near_level3_lipid_trajectory(patient, result):
         return "Clinician-patient risk discussion reasonable given near-threshold LDL/ApoB burden and 30-year trajectory."
+    if _albuminuria_lipid_prevention_path(patient, result):
+        if _on_statin_therapy(patient):
+            return "Continue statin therapy; consider intensification if LDL-C/ApoB remain above target."
+        if _prevent_10y_ascvd_value(result) is not None and _prevent_10y_ascvd_value(result) < PREVENT_ASCVD_STATIN_DISCUSSION_THRESHOLD:
+            return _prevent_lipid_recommendation(patient, result).emr_summary
+        return "Moderate-intensity statin therapy is reasonable given borderline/intermediate ASCVD risk with albuminuria and metabolic risk-enhancing factors."
+    if _prevent_ascvd_7_5_to_20(result):
+        return _prevent_lipid_recommendation(patient, result).emr_summary
+    if _prevent_ascvd_5_to_7_5(result) and _has_major_lipid_risk_enhancer(patient, result):
+        return _prevent_lipid_recommendation(patient, result).emr_summary
+    if _prevent_ascvd_5_to_7_5(result):
+        return _prevent_lipid_recommendation(patient, result).emr_summary
+    if _prevent_ascvd_3_to_5(result):
+        return _prevent_lipid_recommendation(patient, result).emr_summary
+    if _low_10yr_elevated_30yr_prevent_path(patient, result):
+        return _prevent_lipid_recommendation(patient, result).emr_summary
     if _level_3b_intermediate_prevent_path(result):
         return "Moderate-intensity lipid-lowering therapy is reasonable to reduce cumulative atherogenic exposure."
     return (
@@ -445,8 +656,9 @@ def _lipid_action_text(patient, result):
                 "Moderate-intensity lipid-lowering therapy is reasonable to reduce cumulative atherogenic exposure."
                 if _borderline_albuminuria_or_trajectory_path(patient, result)
                 else (
-                    "Risk discussion reasonable; consider lipid-lowering therapy."
-                    if _prevent_borderline(result) and has_reproductive_risk_markers(patient)
+                "Risk discussion reasonable; consider lipid-lowering therapy."
+                    if (_prevent_ascvd_3_to_5(result) or _prevent_borderline(result))
+                    and has_reproductive_risk_markers(patient)
                     else "Lipid-lowering therapy is reasonable."
                 )
             )
@@ -518,17 +730,32 @@ def _build_treatment_actions(patient, result):
 
     if _has_ckd_or_albuminuria(patient, result):
         egfr = getattr(patient, "egfr", None)
-        kidney_recommendation = (
-            "Optimize kidney-protective therapy."
-            if _has_diabetes(patient) or (egfr is not None and egfr < 60)
-            else "Optimize kidney-protective therapy and confirm albuminuria persistence."
-        )
+        kidney_recommendation = "Optimize kidney-protective therapy."
+        if _has_albuminuria(patient, result):
+            if bool(getattr(patient, "ace_arb", False)) and not _bp_above_target(patient):
+                kidney_recommendation = "Continue kidney-protective therapy and monitor UACR/eGFR."
+            else:
+                kidney_recommendation = "Confirm persistent albuminuria with repeat UACR if not already confirmed; optimize kidney-protective therapy."
+        elif not (_has_diabetes(patient) or (egfr is not None and egfr < 60)):
+            kidney_recommendation = "Optimize kidney-protective therapy and confirm albuminuria persistence."
         _add_action(
             recommendations,
             domains,
             "kidney",
             kidney_recommendation,
         )
+
+        if (
+            _has_albuminuria(patient, result)
+            and _bp_treated_or_hypertension(patient)
+            and not (bool(getattr(patient, "ace_arb", False)) and not _bp_above_target(patient))
+        ):
+            _add_action(
+                recommendations,
+                domains,
+                "ace_arb",
+                "Continue or optimize ACEi/ARB therapy if hypertension and persistent albuminuria are present.",
+            )
 
     a1c = getattr(patient, "a1c", None)
     if a1c is not None and a1c >= 7.0:
@@ -551,11 +778,25 @@ def _build_treatment_actions(patient, result):
         bool(getattr(patient, "bp_treated", False))
         and _level_3b_intermediate_prevent_path(result)
     ):
+        bp_recommendation = (
+            "Treat BP toward goal <130/80 if tolerated."
+            if _has_albuminuria(patient, result)
+            else "Optimize BP to <130/80."
+        )
         _add_action(
             recommendations,
             domains,
             "blood_pressure",
-            "Optimize BP to <130/80.",
+            bp_recommendation,
+        )
+
+    sglt2_recommendation = _sglt2_action_text(patient, result)
+    if sglt2_recommendation:
+        _add_action(
+            recommendations,
+            domains,
+            "sglt2",
+            sglt2_recommendation,
         )
 
     if _is_smoking(patient):
@@ -742,7 +983,18 @@ def build_action_plan(patient, result):
         )
 
     if not _very_severe_tg(patient):
-        limit = 6 if _level_3b_intermediate_uacr_missing_path(patient, result) else 4
+        limit = (
+            8
+            if (
+                _level_3b_intermediate_uacr_missing_path(patient, result)
+                or (
+                    _has_albuminuria(patient, result)
+                    and not _treatment_should_not_wait(patient, result)
+                    and not _severe_tg(patient)
+                )
+            )
+            else 4
+        )
         recommendations = recommendations[:limit]
     active_domains = {
         domain: recommendation

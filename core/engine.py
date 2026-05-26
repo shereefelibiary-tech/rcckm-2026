@@ -22,6 +22,7 @@ from modules.risk.engine import assign_risk_level
 from modules.snapshot.engine import build_snapshot_lines
 from modules.stability.engine import assess_decision_stability
 from modules.targets.engine import build_target_result
+from rcckm.rule_trace import build_rule_traces
 
 
 def evaluate_patient(patient):
@@ -118,6 +119,9 @@ def evaluate_patient(patient):
     rcckm_result.dominant_action = action_plan["dominant_action"]
     rcckm_result.recommendations = action_plan["recommendations"]
     rcckm_result.action_domains = action_plan["domains"]
+    rcckm_result.rule_traces = [
+        trace.to_dict() for trace in build_rule_traces(patient, rcckm_result)
+    ]
     rcckm_result.snapshot_lines = build_snapshot_lines(rcckm_result)
 
     return rcckm_result

@@ -4,24 +4,25 @@ CASE: ckd_albuminuria
 EMR:
 RISK CONTINUUM CKM
 
-Level 3B - actionable early CKM / kidney risk.
+Level 3B - CKM stage 3 with albuminuria-mediated kidney and ASCVD risk.
 10-year ASCVD risk: 6.65%.
 30-year ASCVD risk: 26.07%.
 CKM stage 3 with kidney G2A2 and plaque unmeasured / CAC not performed.
 
 Assessment:
-- Albuminuria (ICD: R80.9)
+- CKD stage G2A2 / albuminuria, confirm persistence if not already confirmed (ICD: R80.9)
 - Hypertriglyceridemia (ICD: E78.1)
 - Prediabetes (ICD: R73.03)
 
 Recommendations:
-- No medication escalation today.
-- Continue lifestyle-based prevention.
+- Moderate-intensity statin therapy is reasonable given borderline/intermediate ASCVD risk with albuminuria and metabolic risk-enhancing factors.
+- Confirm persistent albuminuria with repeat UACR if not already confirmed; optimize kidney-protective therapy.
+- Continue or optimize ACEi/ARB therapy if hypertension and persistent albuminuria are present.
+- Treat BP toward goal <130/80 if tolerated.
+- Consider SGLT2 inhibitor if UACR is >=200 mg/g, albuminuria persists at higher range, or CKD progression risk is elevated.
 - CAC may clarify plaque burden if treatment intensity remains uncertain.
 - Aspirin not indicated for routine primary prevention.
-- Confirm albuminuria persistence and optimize kidney-protective therapy.
-- Treat BP toward goal <130/80.
-- hsCRP - inflammatory biomarker clarification
+- Consider hsCRP only if inflammatory risk clarification would change management.
 
 PATIENT ROADMAP:
 Your Prevention Roadmap
@@ -55,23 +56,25 @@ Current goals:
 - Weight: BMI 31.0 to individualized
 
 Next steps:
-1. Protect the kidneys: Review kidney protection options with your clinician.
-2. Keep blood pressure in a safer range: Use lifestyle and medicines as appropriate.
-3. Medication plan: No medication escalation today.
-4. Long-term prevention: Focus on weight, blood sugar, triglycerides, and long-term prevention.
-5. Aspirin safety: Do not start aspirin unless your clinician recommends it.
-6. Additional testing: hsCRP can help clarify inflammatory risk context when clinically relevant.
+1. Lower plaque-driving cholesterol: Moderate-intensity statin therapy usually lowers LDL cholesterol by about one-third to one-half.
+2. Protect the kidneys: Review kidney protection options with your clinician.
+3. Keep blood pressure in a safer range: Use lifestyle and medicines as appropriate.
+4. Aspirin safety: Do not start aspirin unless your clinician recommends it.
+5. Additional testing: hsCRP can help clarify inflammatory risk context when clinically relevant.
+6. Next step: CAC may clarify plaque burden if treatment intensity remains uncertain.
 
 This roadmap is for discussion with your clinician. Medication decisions should be individualized.
 
 ACTIONS:
-- No medication escalation today.
-- Continue lifestyle-based prevention.
+- Moderate-intensity statin therapy is reasonable given borderline/intermediate ASCVD risk with albuminuria and metabolic risk-enhancing factors.
+- Recheck lipid profile 4-12 weeks after starting or intensifying therapy, then every 6-12 months.
+- Confirm persistent albuminuria with repeat UACR if not already confirmed; optimize kidney-protective therapy.
+- Continue or optimize ACEi/ARB therapy if hypertension and persistent albuminuria are present.
+- Treat BP toward goal <130/80 if tolerated.
+- Consider SGLT2 inhibitor if UACR is >=200 mg/g, albuminuria persists at higher range, or CKD progression risk is elevated.
 - CAC may clarify plaque burden if treatment intensity remains uncertain.
 - Aspirin not indicated for routine primary prevention.
-- Optimize kidney-protective therapy and confirm albuminuria persistence.
-- Treat blood pressure toward individualized goal.
-- hsCRP - inflammatory biomarker clarification
+- Consider hsCRP only if inflammatory risk clarification would change management.
 
 RSS: 16
 RSS CONTRIBUTORS:

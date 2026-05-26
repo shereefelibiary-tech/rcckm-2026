@@ -58,6 +58,13 @@ def evaluate_patient_case(patient_or_dict: dict[str, Any] | Patient) -> tuple[Pa
     return evaluate_case(patient_or_dict)
 
 
+def render_case_output(patient_dict_or_patient: dict[str, Any] | Patient) -> dict[str, Any]:
+    """Evaluate a case and return patient, result, and rendered output buckets."""
+    patient, result = evaluate_case(patient_dict_or_patient)
+    outputs = render_all_outputs(patient, result)
+    return {"patient": patient, "result": result, "outputs": outputs}
+
+
 def render_emr(patient: Patient, result: Any) -> str:
     """Render the EMR note as plain text."""
     return render_emr_note(patient, result)
@@ -127,6 +134,42 @@ def visible_text(patient: Patient, result: Any) -> str:
     return render_all_outputs(patient, result)["visible"]
 
 
+def get_recommendation_text(output: Any) -> str:
+    """Return recommendation/action text from an output bundle or evaluated result."""
+    if isinstance(output, dict):
+        if "actions" in output:
+            return str(output.get("actions") or "")
+        if "outputs" in output:
+            return str((output.get("outputs") or {}).get("actions") or "")
+        if "result" in output:
+            return action_text(output["result"], output.get("patient"))
+    return action_text(output)
+
+
+def get_patient_text(output: Any) -> str:
+    """Return patient-roadmap text from an output bundle or evaluated result."""
+    if isinstance(output, dict):
+        if "roadmap" in output:
+            return str(output.get("roadmap") or "")
+        if "outputs" in output:
+            return str((output.get("outputs") or {}).get("roadmap") or "")
+        if "patient" in output and "result" in output:
+            return render_roadmap(output["patient"], output["result"])
+    return ""
+
+
+def get_emr_text(output: Any) -> str:
+    """Return EMR note text from an output bundle or evaluated result."""
+    if isinstance(output, dict):
+        if "emr" in output:
+            return str(output.get("emr") or "")
+        if "outputs" in output:
+            return str((output.get("outputs") or {}).get("emr") or "")
+        if "patient" in output and "result" in output:
+            return render_emr(output["patient"], output["result"])
+    return ""
+
+
 def assert_absent(text: str, phrases: list[str] | tuple[str, ...]) -> None:
     """Assert each phrase is absent using case-insensitive matching."""
     haystack = str(text or "").lower()
@@ -134,11 +177,42 @@ def assert_absent(text: str, phrases: list[str] | tuple[str, ...]) -> None:
         assert str(phrase).lower() not in haystack
 
 
+def assert_not_contains_any(text: str, forbidden_phrases: list[str] | tuple[str, ...]) -> None:
+    """Compatibility alias for asserting forbidden phrases are absent."""
+    assert_absent(text, forbidden_phrases)
+
+
 def assert_present(text: str, phrases: list[str] | tuple[str, ...]) -> None:
     """Assert each phrase is present using case-insensitive matching."""
     haystack = str(text or "").lower()
     for phrase in phrases or []:
         assert str(phrase).lower() in haystack
+
+
+def assert_contains_any(text: str, expected_phrases: list[str] | tuple[str, ...]) -> None:
+    """Assert at least one expected phrase is present using case-insensitive matching."""
+    haystack = str(text or "").lower()
+    assert any(str(phrase).lower() in haystack for phrase in expected_phrases or []), (
+        f"None of the expected phrases were present: {expected_phrases!r}"
+    )
+
+
+def assert_risk_labels_valid(output: Any) -> None:
+    """Validate ASCVD/PREVENT labels do not drift into total-CVD or HF wording."""
+    if isinstance(output, dict):
+        text = str((output.get("outputs") or output).get("visible") or "")
+    else:
+        text = str(output or "")
+    lowered = text.lower()
+    if "10-year" in lowered:
+        assert "10-year ascvd risk" in lowered or "10-year artery disease risk" in lowered
+    if "30-year" in lowered:
+        assert "30-year ascvd risk" in lowered or "30-year artery disease risk" in lowered
+    if "ascvd risk" in lowered:
+        assert "total cardiovascular risk" not in lowered
+        assert "heart failure risk" not in lowered
+    if "cardiovascular event risk" in lowered:
+        assert "heart attack, stroke, or related artery disease event" in lowered
 
 
 CONTRADICTORY_PHRASE_PAIRS = (
@@ -175,3 +249,28 @@ def patient_to_dict(patient: Patient) -> dict[str, Any]:
     if is_dataclass(patient):
         return asdict(patient)
     return dict(getattr(patient, "__dict__", {}) or {})
+
+
+def assert_demo_baseline_complete(case_name_or_payload: str | dict[str, Any]) -> None:
+    """Assert an in-app demo has realistic PCP baseline vitals and lipid data."""
+    if isinstance(case_name_or_payload, str):
+        from ui.demo_case_gallery import DEMO_PATIENTS
+
+        payload = DEMO_PATIENTS[case_name_or_payload]
+    else:
+        payload = case_name_or_payload
+    required = (
+        "age",
+        "sex",
+        "height_in",
+        "weight_lb",
+        "bmi",
+        "sbp",
+        "dbp",
+        "tc",
+        "ldl_c",
+        "hdl_c",
+        "triglycerides",
+    )
+    missing = [field for field in required if payload.get(field) in (None, "")]
+    assert not missing, f"Demo baseline missing required fields: {missing}"

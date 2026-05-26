@@ -38,6 +38,7 @@ class Patient:
     smoking: Optional[bool] = None
     clinical_ascvd: Optional[bool] = None
     clinical_ascvd_context: Optional[str] = None
+    heart_failure: Optional[bool] = None
     hscrp: Optional[float] = None
     ckd: Optional[bool] = None
     inflammatory_disease: Optional[bool] = None

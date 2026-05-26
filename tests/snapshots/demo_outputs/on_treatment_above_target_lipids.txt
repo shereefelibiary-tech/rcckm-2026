@@ -18,7 +18,7 @@ Recommendations:
 - Intensify lipid-lowering therapy; treat toward LDL-C <70 and non-HDL-C <100.
 - Given prior high-intensity statin intolerance, consider maximally tolerated statin strategy and nonstatin intensification.
 - Aspirin not routine for primary prevention; consider only if bleeding risk is low and shared decision-making supports it.
-- hsCRP - inflammatory biomarker clarification
+- Consider hsCRP only if inflammatory risk clarification would change management.
 
 PATIENT ROADMAP:
 Your Prevention Roadmap
@@ -50,7 +50,7 @@ Current goals:
 - Weight: BMI 28.8 to individualized
 
 Next steps:
-1. Lower plaque-driving cholesterol: Treat toward the cholesterol goals above.
+1. Lower plaque-driving cholesterol: High-intensity statin therapy usually lowers LDL cholesterol by at least one-half.
 2. Aspirin safety: Do not start aspirin unless your clinician recommends it.
 3. Additional testing: hsCRP can help clarify inflammatory risk context when clinically relevant.
 
@@ -62,7 +62,7 @@ ACTIONS:
 - Recheck lipid profile 4-12 weeks after starting or intensifying therapy, then every 6-12 months.
 - CAC 145 already measured; no repeat CAC needed for current decision-making.
 - Aspirin not routine for primary prevention; consider only if bleeding risk is low and shared decision-making supports it.
-- hsCRP - inflammatory biomarker clarification
+- Consider hsCRP only if inflammatory risk clarification would change management.
 
 RSS: 42
 RSS CONTRIBUTORS:

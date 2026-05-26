@@ -377,7 +377,7 @@ def classify_rcckm_level(patient, prevent_result=None, rss_result=None, diagnosi
     if _albuminuria(patient) and (len(actionable) >= 2 or mild):
         return _classification(
             "3B",
-            "Level 3B - actionable early CKM / kidney risk",
+            "Level 3B - CKM stage 3 with albuminuria-mediated kidney and ASCVD risk",
             "Albuminuria plus cardiometabolic burden is actionable early kidney risk.",
             actionable or ["albuminuria"],
             result,

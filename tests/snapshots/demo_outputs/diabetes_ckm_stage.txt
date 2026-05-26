@@ -4,7 +4,7 @@ CASE: diabetes_ckm_stage
 EMR:
 RISK CONTINUUM CKM
 
-Level 3B - actionable early CKM / kidney risk.
+Level 3B - CKM stage 3 with albuminuria-mediated kidney and ASCVD risk.
 10-year ASCVD risk: 15.85%.
 CKM stage 3 with diabetic kidney involvement.
 
@@ -13,10 +13,14 @@ Assessment:
 - Hypertriglyceridemia (ICD: E78.1)
 
 Recommendations:
-- Lipid-lowering therapy indicated; treat toward high-risk targets.
+- Moderate-intensity statin therapy is reasonable given borderline/intermediate ASCVD risk with albuminuria and metabolic risk-enhancing factors.
+- Optimize kidney-protective and glycemic therapy.
+- Continue or optimize ACEi/ARB therapy if hypertension and persistent albuminuria are present.
+- Treat BP toward goal <130/80 if tolerated.
+- Add an SGLT2 inhibitor for kidney and cardiovascular protection if no contraindication, despite ACEi/ARB therapy.
 - CAC not performed; plaque burden unmeasured.
 - Aspirin not indicated for routine primary prevention.
-- Optimize kidney-protective and glycemic therapy.
+- Consider hsCRP only if inflammatory risk clarification would change management.
 
 PATIENT ROADMAP:
 Your Prevention Roadmap
@@ -47,20 +51,26 @@ Current goals:
 - Weight: BMI 32.9 to individualized
 
 Next steps:
-1. Lower plaque-driving cholesterol: Treat toward the cholesterol goals above.
+1. Lower plaque-driving cholesterol: Moderate-intensity statin therapy usually lowers LDL cholesterol by about one-third to one-half.
 2. Protect the kidneys: Review kidney protection options with your clinician.
 3. Improve blood sugar trajectory: Keep diabetes care moving toward the safest individualized goal.
-4. Aspirin safety: Do not start aspirin unless your clinician recommends it.
-5. Additional testing: A calcium scan may help if treatment choices are still uncertain.
+4. Keep blood pressure in a safer range: Use lifestyle and medicines as appropriate.
+5. Aspirin safety: Do not start aspirin unless your clinician recommends it.
+6. Additional testing: A calcium scan may help if treatment choices are still uncertain.
 
 This roadmap is for discussion with your clinician. Medication decisions should be individualized.
 
 ACTIONS:
-- Lipid-lowering therapy is indicated; treat toward high-risk targets.
+- Moderate-intensity statin therapy is reasonable given borderline/intermediate ASCVD risk with albuminuria and metabolic risk-enhancing factors.
+- Recheck lipid profile 4-12 weeks after starting or intensifying therapy, then every 6-12 months.
+- Confirm persistent albuminuria with repeat UACR if not already confirmed; optimize kidney-protective therapy.
+- Optimize glycemic therapy.
+- Continue or optimize ACEi/ARB therapy if hypertension and persistent albuminuria are present.
+- Treat BP toward goal <130/80 if tolerated.
+- Add an SGLT2 inhibitor for kidney and cardiovascular protection if no contraindication, despite ACEi/ARB therapy.
 - CAC not performed; plaque burden unmeasured.
 - Aspirin not indicated for routine primary prevention.
-- Optimize kidney-protective therapy.
-- Optimize glycemic therapy.
+- Consider hsCRP only if inflammatory risk clarification would change management.
 
 RSS: 31
 RSS CONTRIBUTORS:

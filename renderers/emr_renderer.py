@@ -520,6 +520,7 @@ def _short_recommendation_line(recommendation):
         "High-intensity or maximally tolerated statin therapy indicated.": "High-intensity or maximally tolerated statin indicated.",
         "Optimize kidney-protective therapy and confirm albuminuria persistence.": "Confirm albuminuria persistence and optimize kidney-protective therapy.",
         "Treat blood pressure toward individualized goal.": "Treat BP toward goal <130/80.",
+        "Optimize BP to <130/80.": "Treat BP toward goal <130/80.",
         "CAC reasonable for risk clarification if treatment decision remains uncertain.": "CAC reasonable if treatment decision remains uncertain.",
         "Aspirin may be considered only if bleeding risk is low after shared decision-making.": "Aspirin only if bleeding risk is low after shared decision-making.",
         "Consider hsCRP to clarify inflammatory biomarker context.": "Consider hsCRP if inflammatory biomarker context would change management.",
@@ -537,6 +538,18 @@ def _young_family_metabolic_recommendations(patient, result):
         "Aspirin not indicated for routine primary prevention.",
         "Consider ApoB, Lp(a), and hsCRP for further risk clarification if not already available.",
     ]
+
+
+def _albuminuria_assessment_display(line, patient, result):
+    if "- Albuminuria" not in str(line or ""):
+        return line
+    kdigo_stage = getattr(result, "kdigo_stage", None)
+    if not kdigo_stage or "A2" not in str(kdigo_stage) and "A3" not in str(kdigo_stage):
+        return line
+    suffix = ""
+    if "(ICD:" in line:
+        suffix = " " + line.split(" ", 2)[-1] if line.startswith("- Albuminuria ") else ""
+    return f"- CKD stage {kdigo_stage} / albuminuria, confirm persistence if not already confirmed{suffix}"
 
 
 def render_emr_note(patient, result):
@@ -562,7 +575,7 @@ def render_emr_note(patient, result):
     confirmed_dx, review_dx = split_diagnoses(diagnosis_entries)
     if confirmed_dx or review_dx:
         for line in _emr_assessment_lines(confirmed_dx):
-            _append_unique(lines, line)
+            _append_unique(lines, _albuminuria_assessment_display(line, patient, result))
     else:
         lines.append("- No diagnosis candidates generated.")
 

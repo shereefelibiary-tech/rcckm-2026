@@ -13,12 +13,12 @@ Assessment:
 - Prediabetes (ICD: R73.03)
 
 Recommendations:
-- Moderate-intensity lipid-lowering therapy reasonable.
+- Moderate-intensity statin therapy is reasonable given borderline ASCVD risk with risk-enhancing factors.
 - CAC 0 measured; no calcified plaque detected.
 - Aspirin not indicated for routine primary prevention.
 - Treat BP toward goal <130/80.
 - Lp(a) - one-time risk assessment
-- hsCRP - inflammatory biomarker clarification
+- Consider hsCRP only if inflammatory risk clarification would change management.
 
 PATIENT ROADMAP:
 Your Prevention Roadmap
@@ -52,7 +52,7 @@ Current goals:
 - Weight: BMI 29.7 to individualized
 
 Next steps:
-1. Lower plaque-driving cholesterol: Treat toward the cholesterol goals above.
+1. Lower plaque-driving cholesterol: Moderate-intensity statin therapy usually lowers LDL cholesterol by about one-third to one-half.
 2. Keep blood pressure in a safer range: Use lifestyle and medicines as appropriate.
 3. Aspirin safety: Do not start aspirin unless your clinician recommends it.
 4. Additional testing: Lp(a) can be checked once to guide long-term prevention.
@@ -62,13 +62,13 @@ Next steps:
 This roadmap is for discussion with your clinician. Medication decisions should be individualized.
 
 ACTIONS:
-- Moderate-intensity lipid-lowering therapy is reasonable to reduce cumulative atherogenic exposure.
+- Moderate-intensity statin therapy is reasonable given borderline ASCVD risk with risk-enhancing factors.
 - Recheck lipid profile 4-12 weeks after starting or intensifying therapy, then every 6-12 months.
 - CAC 0 measured; no calcified plaque detected.
 - Aspirin not indicated for routine primary prevention.
-- Treat blood pressure toward individualized goal.
+- Optimize BP to <130/80.
 - Lp(a) - one-time risk assessment
-- hsCRP - inflammatory biomarker clarification
+- Consider hsCRP only if inflammatory risk clarification would change management.
 
 RSS: 10
 RSS CONTRIBUTORS:

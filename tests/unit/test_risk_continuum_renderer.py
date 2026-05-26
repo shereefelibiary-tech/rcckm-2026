@@ -1,6 +1,7 @@
 from core.enums import RiskLevel
 from core.patient import Patient
 from core.results import RCCKMResult
+from modules.levels.explanation import build_level_explanation
 from renderers.continuum_bar import build_continuum_bar_html
 
 
@@ -30,6 +31,9 @@ def test_build_risk_continuum_html_highlights_plaque_phenotype_level():
     assert "Subclinical atherosclerosis present" in html
     assert "Lower signal / lower urgency" in html
     assert "Higher signal / higher urgency" in html
+    assert "rc-level-help" in html
+    assert "role=\"button\"" in html
+    assert "aria-label=" in html
 
 
 def test_build_risk_continuum_html_defaults_to_level_1():
@@ -178,3 +182,91 @@ def test_build_risk_continuum_html_level_3b_has_room_for_context_line():
     assert "overflow: visible" in html
     assert "white-space: normal" in html
     assert "line-height: 1.24" in html
+
+
+def test_level_tooltip_explains_level_5_high_cac():
+    patient = Patient(age=60, sex="male", cac=350, apob=110, diabetes=True, uacr=45)
+    result = RCCKMResult(prevent_30y_ascvd=30.65)
+
+    tooltip = build_level_explanation(patient, result)
+    html = build_continuum_bar_html(patient, result)
+
+    assert "Level 5 is assigned because coronary calcium shows high plaque burden." in tooltip
+    assert "ApoB" in tooltip or "diabetes" in tooltip
+    assert escape_for_test(tooltip) in html
+
+
+def test_level_tooltip_explains_cac_zero_without_plaque_positive_language():
+    tooltip = build_level_explanation(
+        Patient(age=55, sex="female", cac=0, prevent_10y_ascvd=2.0),
+        RCCKMResult(prevent_10y_ascvd=2.0),
+    )
+
+    assert "CAC 0 indicates no calcified coronary plaque detected." in tooltip
+    assert "not detected plaque" in tooltip
+    assert "plaque burden" not in tooltip.lower()
+
+
+def test_level_tooltip_explains_low_10_year_high_30_year_young_patient():
+    tooltip = build_level_explanation(
+        Patient(
+            age=38,
+            sex="male",
+            prevent_10y_ascvd=3.8,
+            prevent_30y_ascvd=24.0,
+            family_history_premature_ascvd=True,
+            a1c=6.0,
+            triglycerides=170,
+        ),
+        RCCKMResult(
+            prevent_10y_ascvd=3.8,
+            prevent_30y_ascvd=24.0,
+            prevent_risk_category=RiskLevel.BORDERLINE,
+        ),
+    )
+
+    assert "short-term ASCVD risk is low" in tooltip
+    assert "longer-term risk is elevated" in tooltip
+    assert "Premature family history" in tooltip or "family history" in tooltip
+
+
+def test_level_tooltip_explains_ckd_albuminuria():
+    tooltip = build_level_explanation(
+        Patient(age=57, sex="male", uacr=48, egfr=64, a1c=6.0, triglycerides=150),
+        RCCKMResult(prevent_10y_ascvd=6.65, prevent_30y_ascvd=26.07),
+    )
+
+    assert "CKM stage 3 with albuminuria" in tooltip
+    assert "kidney-mediated cardiometabolic risk" in tooltip
+
+
+def test_level_tooltip_explains_apob_driven_case():
+    tooltip = build_level_explanation(
+        Patient(age=52, sex="female", apob=124, ldl_c=132, prevent_10y_ascvd=4.0),
+        RCCKMResult(prevent_10y_ascvd=4.0),
+    )
+
+    assert "ApoB/atherogenic particle burden" in tooltip
+
+
+def test_level_tooltip_includes_missing_data_confidence_sentence():
+    tooltip = build_level_explanation(
+        Patient(age=56, sex="male", cac=None, cac_not_done=True, ldl_c=132),
+        RCCKMResult(prevent_10y_ascvd=4.2),
+    )
+
+    assert "ApoB" in tooltip
+    assert "Lp(a)" in tooltip
+    assert "UACR" in tooltip
+    assert "CAC" in tooltip
+    assert "could further clarify risk" in tooltip
+
+
+def escape_for_test(text):
+    return (
+        str(text)
+        .replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+        .replace('"', "&quot;")
+    )

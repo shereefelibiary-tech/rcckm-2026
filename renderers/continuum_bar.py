@@ -4,6 +4,7 @@ from modules.levels.definitions import (
     LEVEL_DEFS,
     classify_continuum_position,
 )
+from modules.levels.explanation import build_level_explanation
 from ui.theme import component_theme_css
 
 
@@ -48,6 +49,7 @@ def build_continuum_bar_html(patient, result):
     if active_sublevel:
         current_label = f"Level {active_sublevel}"
     selected_subtitle, selected_context = _selected_level_copy(patient, active_level)
+    level_tooltip = build_level_explanation(patient, result)
 
     cards = []
     for level, payload in sorted(LEVEL_DEFS.items()):
@@ -109,10 +111,27 @@ def build_continuum_bar_html(patient, result):
     margin-bottom: 8px;
 }}
 .rc-current {{
+    align-items: center;
     color: var(--rc-garnet);
+    display: inline-flex;
     font-size: 1rem;
     font-weight: 850;
+    gap: 6px;
     white-space: nowrap;
+}}
+.rc-level-help {{
+    align-items: center;
+    border: 1px solid rgba(115, 0, 10, 0.28);
+    border-radius: 999px;
+    color: var(--rc-garnet);
+    cursor: help;
+    display: inline-flex;
+    font-size: 0.72rem;
+    font-weight: 850;
+    height: 18px;
+    justify-content: center;
+    line-height: 1;
+    width: 18px;
 }}
 .rc-grid {{
     display: grid;
@@ -252,7 +271,10 @@ def build_continuum_bar_html(patient, result):
 <div class="rc-shell rc-panel">
     <div class="rc-header">
         <div class="rc-title rc-card-title">Risk Continuum</div>
-        <div class="rc-current">Current: {escape(current_label)}</div>
+        <div class="rc-current">
+            Current: {escape(current_label)}
+            <span class="rc-level-help" role="button" tabindex="0" aria-label="{escape(level_tooltip)}" title="{escape(level_tooltip)}">i</span>
+        </div>
     </div>
     <div class="rc-grid">
         {''.join(cards)}

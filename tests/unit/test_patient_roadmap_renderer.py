@@ -67,6 +67,15 @@ def test_render_patient_roadmap_groups_full_clinical_story_without_raw_html():
     html = render_patient_roadmap(_patient(), _result())
 
     assert "roadmap-card" in html
+    assert html.count('class="roadmap-section-panel"') == 4
+    assert "STEP 1" in html
+    assert "STEP 2" in html
+    assert "STEP 3" in html
+    assert "STEP 4" in html
+    assert "Your estimated artery disease risk and current care level." in html
+    assert "The main findings driving your prevention plan." in html
+    assert "Targets to discuss with your clinician." in html
+    assert "The highest-yield actions to reduce future risk." in html
     assert "Your Prevention Roadmap" in html
     assert "Your results show where you stand today and the most important steps to lower future heart, kidney, and metabolic risk." in html
     assert "roadmap-subtitle" in html
@@ -125,7 +134,7 @@ def test_render_patient_roadmap_groups_full_clinical_story_without_raw_html():
     assert "below 70 mg/dL" in html
     assert "Current 132 mg/dL" in html
     assert "Lower plaque-driving cholesterol" in html
-    assert "Treat toward the cholesterol goals above." in html
+    assert "High-intensity statin therapy usually lowers LDL cholesterol by at least one-half." in html
     assert "No repeat calcium scan is needed for today&#x27;s decision." not in html
     assert "Aspirin safety" in html
     assert "Do not start aspirin unless your clinician recommends it." in html
@@ -158,16 +167,28 @@ def test_render_patient_roadmap_groups_full_clinical_story_without_raw_html():
     assert "&lt;div" not in html
 
 
-def test_render_patient_roadmap_section_titles_use_dividers_not_underlines():
+def test_render_patient_roadmap_sections_use_distinct_panels_not_underlines():
     html = render_patient_roadmap(_patient(), _result())
 
+    assert "roadmap-section-panel" in html
+    assert "background: rgba(255, 255, 255, 0.62)" in html
+    assert "border: 1px solid rgba(17, 17, 17, 0.10)" in html
+    assert "border-radius: 14px" in html
+    assert "padding: 12px 14px 13px" in html
+    assert "margin: 11px 0 0" in html
+    assert "roadmap-section-eyebrow" in html
+    assert "roadmap-section-description" in html
+    assert "font-size: 0.60rem" in html
+    assert "font-size: 0.72rem" in html
+    assert "@media print" in html
+    assert "padding: 18px 20px 19px" in html
     assert "roadmap-section-title" in html
-    assert "border-top: 1px solid rgba(7, 26, 47, 0.10)" in html
-    assert "padding-top: 12px" in html
     assert "text-decoration" not in html
-    assert "border-bottom" not in html.split(".roadmap-section-title", 1)[1].split(
-        ".roadmap-risk-grid", 1
+    title_css = html.split(".roadmap-section-title", 1)[1].split(
+        ".roadmap-section-description", 1
     )[0]
+    assert "border-top" not in title_css
+    assert "border-bottom" not in title_css
 
 
 def test_render_patient_roadmap_text_is_copy_ready_plain_text():
@@ -194,7 +215,7 @@ def test_render_patient_roadmap_text_is_copy_ready_plain_text():
     assert "clarification" not in text.lower()
     assert "- LDL-C: 132 mg/dL to <70 mg/dL" in text
     assert "Next steps:" in text
-    assert "1. Lower plaque-driving cholesterol: Treat toward the cholesterol goals above." in text
+    assert "1. Lower plaque-driving cholesterol: High-intensity statin therapy usually lowers LDL cholesterol by at least one-half." in text
     assert "2. Protect the kidneys: Review kidney protection options with your clinician." in text
     assert "3. Aspirin safety: Do not start aspirin unless your clinician recommends it." in text
     assert "4. Additional testing: Lp(a) can be checked once to guide long-term prevention." in text

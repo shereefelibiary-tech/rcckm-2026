@@ -1,9 +1,15 @@
 from dataclasses import asdict
 
 from core.patient import Patient
+from modules.lipids.statin_intensity import statin_intensity_help_text
 from modules.family_history.engine import (
+    PREMATURE_FAMILY_HISTORY_HELP,
     build_family_history_payload,
     build_family_history_summary,
+    compact_family_history_label,
+    compact_family_history_option_values,
+    compact_family_history_payload,
+    infer_compact_family_history_option,
 )
 from modules.plaque.engine import normalize_cac_percentile
 from modules.risk_enhancers.reproductive import (
@@ -458,6 +464,51 @@ def _family_history_summary_from_state(st, parsed):
     return "No premature family history"
 
 
+def _current_compact_family_history_option(st, parsed):
+    return infer_compact_family_history_option(
+        premature=st.session_state.get(
+            "input_family_history_premature_ascvd",
+            parsed.get("family_history_premature_ascvd", False),
+        ),
+        relationship=st.session_state.get(
+            "input_family_history_relationship",
+            parsed.get("family_history_relationship"),
+        ),
+        age_at_event=st.session_state.get(
+            "input_family_history_age_at_event",
+            parsed.get("family_history_age_at_event"),
+        ),
+    )
+
+
+def _apply_compact_family_history_selection(inputs, option, st, parsed):
+    payload = compact_family_history_payload(option)
+    current_relationship = st.session_state.get(
+        "input_family_history_relationship",
+        parsed.get("family_history_relationship"),
+    )
+    current_event = st.session_state.get(
+        "input_family_history_event_type",
+        parsed.get("family_history_event_type"),
+    )
+    current_age = st.session_state.get(
+        "input_family_history_age_at_event",
+        parsed.get("family_history_age_at_event"),
+    )
+    inferred_current = infer_compact_family_history_option(
+        premature=True,
+        relationship=current_relationship,
+        age_at_event=current_age,
+    )
+
+    inputs.update(payload)
+    if option != "none_unknown" and option == inferred_current:
+        inputs["family_history_relationship"] = current_relationship or payload["family_history_relationship"]
+        inputs["family_history_event_type"] = current_event or payload["family_history_event_type"]
+        inputs["family_history_age_at_event"] = current_age
+    return inputs
+
+
 def _reproductive_summary_from_inputs(inputs):
     patient = Patient(
         age=None,
@@ -628,13 +679,32 @@ def render_manual_worksheet(st, parsed):
             inputs["cac_not_done"] = bool(st.session_state.get("input_cac_not_done", parsed.get("cac_not_done", False)))
             st.caption("Plaque burden unmeasured." if inputs["cac_not_done"] else "CAC unknown.")
 
-        pe_cols = st.columns([1.25, 1.75, 0.8, 0.75, 0.8, 1.25])
+        pe_cols = st.columns([1.35, 1.65, 0.8, 0.75, 0.8, 1.25])
         with pe_cols[0]:
-            inputs["family_history_premature_ascvd"] = _checkbox_input(
-                st, "Premature family history", parsed, "family_history_premature_ascvd"
+            family_options = compact_family_history_option_values()
+            default_family_option = _current_compact_family_history_option(st, parsed)
+            selected_family_option = st.selectbox(
+                "Premature family history",
+                family_options,
+                format_func=compact_family_history_label,
+                key="input_family_history_pattern",
+                help=PREMATURE_FAMILY_HISTORY_HELP,
+                **(
+                    {}
+                    if "input_family_history_pattern" in st.session_state
+                    else {
+                        "index": family_options.index(default_family_option)
+                        if default_family_option in family_options
+                        else 0
+                    }
+                ),
             )
+            _apply_compact_family_history_selection(inputs, selected_family_option, st, parsed)
         with pe_cols[1]:
-            st.caption(_family_history_summary_from_state(st, parsed))
+            if selected_family_option == "none_unknown":
+                st.caption("No premature family history selected.")
+            else:
+                st.caption(_family_history_summary_from_state(st, {**parsed, **inputs}))
         with pe_cols[2]:
             inputs["hscrp"] = _numeric_input(st, "hsCRP", parsed, "hscrp", step=0.1)
         with pe_cols[3]:
@@ -749,45 +819,54 @@ def render_manual_worksheet(st, parsed):
                 inputs.get("inflammatory_arthritis"),
             ]
         )
-        with st.expander("Edit family history details", expanded=False):
-            fam1, fam2, fam3 = st.columns([1, 1, 0.8])
-            with fam1:
-                relationship = parsed.get("family_history_relationship") or "father"
-                relationship_options = ["father", "mother", "brother", "sister"]
-                inputs["family_history_relationship"] = st.selectbox(
-                    "Relationship",
-                    relationship_options,
-                    key="input_family_history_relationship",
-                    **(
-                        {}
-                        if "input_family_history_relationship" in st.session_state
-                        else {
-                            "index": relationship_options.index(relationship)
-                            if relationship in relationship_options
-                            else 0
-                        }
-                    ),
-                )
-            with fam2:
-                event = parsed.get("family_history_event_type") or "MI"
-                event_options = ["MI", "PCI/CABG", "stroke", "sudden cardiac death"]
-                inputs["family_history_event_type"] = st.selectbox(
-                    "Event type",
-                    event_options,
-                    key="input_family_history_event_type",
-                    **(
-                        {}
-                        if "input_family_history_event_type" in st.session_state
-                        else {"index": event_options.index(event) if event in event_options else 0}
-                    ),
-                )
-            with fam3:
-                inputs["family_history_age_at_event"] = _numeric_input(
-                    st,
-                    "Age at event",
-                    parsed,
-                    "family_history_age_at_event",
-                )
+        if selected_family_option != "none_unknown":
+            with st.expander("Edit family history details", expanded=False):
+                fam1, fam2, fam3 = st.columns([1, 1, 0.8])
+                with fam1:
+                    relationship = inputs.get("family_history_relationship") or parsed.get("family_history_relationship") or "father"
+                    relationship_options = [
+                        "father",
+                        "mother",
+                        "brother",
+                        "sister",
+                        "sibling",
+                        "multiple first-degree relatives",
+                        "other premature relative",
+                    ]
+                    inputs["family_history_relationship"] = st.selectbox(
+                        "Relationship",
+                        relationship_options,
+                        key="input_family_history_relationship",
+                        **(
+                            {}
+                            if "input_family_history_relationship" in st.session_state
+                            else {
+                                "index": relationship_options.index(relationship)
+                                if relationship in relationship_options
+                                else 0
+                            }
+                        ),
+                    )
+                with fam2:
+                    event = inputs.get("family_history_event_type") or parsed.get("family_history_event_type") or "ASCVD"
+                    event_options = ["ASCVD", "MI", "PCI/CABG", "stroke", "PAD", "sudden cardiac death"]
+                    inputs["family_history_event_type"] = st.selectbox(
+                        "Event type",
+                        event_options,
+                        key="input_family_history_event_type",
+                        **(
+                            {}
+                            if "input_family_history_event_type" in st.session_state
+                            else {"index": event_options.index(event) if event in event_options else 0}
+                        ),
+                    )
+                with fam3:
+                    inputs["family_history_age_at_event"] = _numeric_input(
+                        st,
+                        "Age at event",
+                        parsed,
+                        "family_history_age_at_event",
+                    )
 
         show_reproductive = is_reproductive_history_applicable(
             Patient(age=None, sex=str(inputs.get("sex") or parsed.get("sex") or "unknown"))
@@ -876,6 +955,7 @@ def render_manual_worksheet(st, parsed):
                 "Statin intensity",
                 statin_options,
                 key="input_statin_intensity",
+                help=statin_intensity_help_text(),
                 **(
                     {}
                     if "input_statin_intensity" in st.session_state

@@ -135,7 +135,7 @@ def test_render_prevent_card_separates_rcckm_level_from_prevent_category():
         prevent_risk_category=RiskLevel.BORDERLINE,
         level_classification={
             "level": "3B",
-            "label": "Level 3B — actionable early CKM / kidney risk",
+            "label": "Level 3B - CKM stage 3 with albuminuria-mediated kidney and ASCVD risk",
         },
     )
 
@@ -143,7 +143,7 @@ def test_render_prevent_card_separates_rcckm_level_from_prevent_category():
 
     assert "borderline" in html
     assert "RCCKM:" in html
-    assert "Level 3B - actionable early CKM / kidney risk" in html
+    assert "Level 3B - CKM stage 3 with albuminuria-mediated kidney and ASCVD risk" in html
 
 
 def test_render_prevent_card_clinical_ascvd_suppresses_prevent_decision_values():

@@ -22,9 +22,9 @@ Current goals:
 Next steps:
 1. Protect the kidneys: Review kidney protection options with your clinician.
 2. Improve blood sugar trajectory: Keep diabetes care moving toward the safest individualized goal.
-3. Medication plan: No medication escalation today.
-4. Long-term prevention: Focus on weight, blood sugar, triglycerides, and long-term prevention.
-5. Aspirin safety: Do not start aspirin unless your clinician recommends it.
-6. Additional testing: A calcium scan may help if treatment choices are still uncertain.
+3. Aspirin safety: Do not start aspirin unless your clinician recommends it.
+4. Additional testing: A calcium scan may help if treatment choices are still uncertain.
+5. Additional testing: Lp(a) can be checked once to guide long-term prevention.
+6. Additional testing: hsCRP can help clarify inflammatory risk context when clinically relevant.
 
 This roadmap is for discussion with your clinician. Medication decisions should be individualized.

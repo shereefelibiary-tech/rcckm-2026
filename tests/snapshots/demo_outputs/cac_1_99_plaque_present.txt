@@ -13,11 +13,11 @@ Assessment:
 - Prediabetes (ICD: R73.03)
 
 Recommendations:
-- Lipid-lowering therapy is reasonable.
+- Lipid-lowering therapy is favored because coronary plaque is already present despite low short-term ASCVD risk.
 - CAC 38 measured; plaque present.
 - Aspirin not indicated for routine primary prevention.
 - Treat BP toward goal <130/80.
-- hsCRP - inflammatory biomarker clarification
+- Consider hsCRP only if inflammatory risk clarification would change management.
 
 PATIENT ROADMAP:
 Your Prevention Roadmap
@@ -58,12 +58,11 @@ Next steps:
 This roadmap is for discussion with your clinician. Medication decisions should be individualized.
 
 ACTIONS:
-- Lipid-lowering therapy is reasonable.
-- Recheck lipid profile 4-12 weeks after starting or intensifying therapy, then every 6-12 months.
+- Lipid-lowering therapy is favored because coronary plaque is already present despite low short-term ASCVD risk.
 - CAC 38 measured; plaque present.
 - Aspirin not indicated for routine primary prevention.
-- Treat blood pressure toward individualized goal.
-- hsCRP - inflammatory biomarker clarification
+- Optimize BP to <130/80.
+- Consider hsCRP only if inflammatory risk clarification would change management.
 
 RSS: 18
 RSS CONTRIBUTORS:

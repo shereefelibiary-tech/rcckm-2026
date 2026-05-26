@@ -11,9 +11,9 @@ Assessment:
 - Prediabetes (ICD: R73.03)
 
 Recommendations:
-- Moderate-intensity lipid-lowering therapy reasonable.
+- Moderate-intensity statin therapy is reasonable given borderline ASCVD risk with risk-enhancing factors.
 - Obtain UACR to complete kidney-risk assessment.
 - Treat BP toward goal <130/80.
 - CAC may clarify plaque burden if treatment intensity remains uncertain.
 - Aspirin not indicated for routine primary prevention.
-- hsCRP - inflammatory biomarker clarification
+- Consider hsCRP only if inflammatory risk clarification would change management.

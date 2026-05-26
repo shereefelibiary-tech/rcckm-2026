@@ -17,7 +17,7 @@ TESTING_LABELS = {
     "lpa_testing": "Lp(a) - one-time risk assessment",
     "uacr_testing": "Obtain UACR to complete kidney-risk assessment.",
     "cac_testing": "CAC - risk clarification",
-    "hscrp_testing": "hsCRP - inflammatory biomarker clarification",
+    "hscrp_testing": "Consider hsCRP only if inflammatory risk clarification would change management.",
     "fasting_lipids": "Repeat fasting lipids - confirm triglyceride burden",
 }
 
@@ -49,14 +49,24 @@ def _domains(result: Any) -> dict[str, str]:
         if not recommendation or recommendation == "Treatment is reasonable.":
             continue
         low = recommendation.lower()
-        if "lipid-lowering" in low and "lipids" not in domains:
+        if ("lipid-lowering" in low or "statin therapy" in low) and "lipids" not in domains:
             domains["lipids"] = recommendation
         elif low.startswith("optimize kidney") and "kidney" not in domains:
+            domains["kidney"] = recommendation
+        elif low.startswith("confirm persistent albuminuria") and "kidney" not in domains:
+            domains["kidney"] = recommendation
+        elif low.startswith("continue kidney-protective") and "kidney" not in domains:
             domains["kidney"] = recommendation
         elif low.startswith("optimize glycemic") and "glycemia" not in domains:
             domains["glycemia"] = recommendation
         elif low.startswith("optimize bp") and "blood_pressure" not in domains:
             domains["blood_pressure"] = recommendation
+        elif low.startswith("treat bp") and "blood_pressure" not in domains:
+            domains["blood_pressure"] = recommendation
+        elif ("acei/arb" in low or "ace inhibitor" in low) and "ace_arb" not in domains:
+            domains["ace_arb"] = recommendation
+        elif "sglt2 inhibitor" in low and "sglt2" not in domains:
+            domains["sglt2"] = recommendation
         elif low.startswith("coronary calcium") and "cac_testing" not in domains:
             domains["cac_testing"] = recommendation
         elif low.startswith("obtain uacr") and "uacr_testing" not in domains:
@@ -160,6 +170,13 @@ def _lipid_line(patient: Any, result: Any) -> str:
     dominant = str(getattr(result, "dominant_action", None) or "").strip()
     non_lipid_starts = (
         "Optimize kidney",
+        "Confirm persistent albuminuria",
+        "Continue kidney-protective",
+        "Consider ACE inhibitor",
+        "Continue or optimize ACEi/ARB",
+        "Consider SGLT2",
+        "Add an SGLT2",
+        "SGLT2 inhibitor",
         "Optimize glycemic",
         "Optimize BP",
         "Address smoking",
@@ -307,7 +324,9 @@ def _supporting_items(result: Any) -> list[str]:
     mapping = {
         "kidney": _domain_line(result, "kidney") or "Optimize kidney-protective therapy.",
         "glycemia": "Optimize glycemic therapy.",
-        "blood_pressure": "Treat blood pressure toward individualized goal.",
+        "ace_arb": _domain_line(result, "ace_arb"),
+        "blood_pressure": _domain_line(result, "blood_pressure") or "Treat BP toward goal <130/80.",
+        "sglt2": _domain_line(result, "sglt2"),
         "smoking": "Prioritize smoking cessation support.",
         "triglycerides": _domain_line(result, "triglycerides"),
         "tg_diet": _domain_line(result, "tg_diet"),
@@ -347,8 +366,24 @@ def build_action_scaffold(patient: Any, result: Any) -> list[ActionSection]:
         )
 
     lipid_line = _lipid_line(patient, result)
-    sections.append(ActionSection("Lipid therapy", lipid_line))
-    if lipid_line.startswith("No medication escalation"):
+    actionable_non_lipid_without_lipid_escalation = bool(
+        lipid_line.startswith("No medication escalation")
+        and any(
+            domain in domains
+            for domain in {
+                "kidney",
+                "ace_arb",
+                "sglt2",
+                "blood_pressure",
+                "glycemia",
+                "triglycerides",
+                "tg_pharmacotherapy",
+            }
+        )
+    )
+    if not actionable_non_lipid_without_lipid_escalation:
+        sections.append(ActionSection("Lipid therapy", lipid_line))
+    if lipid_line.startswith("No medication escalation") and not actionable_non_lipid_without_lipid_escalation:
         sections.append(ActionSection("Lifestyle", "Continue lifestyle-based prevention."))
     if "statin_intolerance" in domains:
         sections.append(
@@ -391,12 +426,21 @@ def build_action_scaffold(patient: Any, result: Any) -> list[ActionSection]:
         if supporting:
             sections.append(ActionSection("Supporting actions", items=supporting))
 
+    supporting = _supporting_items(result)
+    kidney_supporting_before_cac = bool(
+        ("kidney" in domains or actionable_non_lipid_without_lipid_escalation)
+        and supporting
+    )
+    if kidney_supporting_before_cac:
+        sections.append(ActionSection("Kidney / BP", items=supporting))
+        supporting = []
+
     cac_line = _cac_line(patient, result)
     if cac_line:
         sections.append(ActionSection("Coronary calcium", cac_line))
     sections.append(ActionSection("Aspirin", _aspirin_line(patient, result)))
 
-    supporting = [] if prioritize_uacr else _supporting_items(result)
+    supporting = [] if prioritize_uacr else supporting
     if triglycerides is not None and triglycerides >= 1000:
         supporting = [
             item

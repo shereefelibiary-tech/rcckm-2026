@@ -257,12 +257,17 @@ def _prevent_matrix_html(risk_value, total_value, ascvd_30y_value, total_cvd_30y
     def cell(value):
         return f'<span class="value">{escape(value or "--")}</span>'
 
+    total_row = (
+        f"<tr><th>Cardiovascular event risk</th><td>{cell(total_value)}</td><td>{cell(total_cvd_30y_value)}</td></tr>"
+        if total_value or total_cvd_30y_value
+        else ""
+    )
     return (
         "<table class='prevent-matrix'>"
         "<thead><tr><th></th><th>10-year</th><th>30-year</th></tr></thead>"
         "<tbody>"
         f"<tr><th>Atherosclerotic event risk</th><td>{cell(risk_value)}</td><td>{cell(ascvd_30y_value)}</td></tr>"
-        f"<tr><th>Cardiovascular event risk</th><td>{cell(total_value)}</td><td>{cell(total_cvd_30y_value)}</td></tr>"
+        f"{total_row}"
         "</tbody></table>"
     )
 

@@ -2,8 +2,10 @@ from html import escape
 from textwrap import dedent
 
 from modules.actions.scaffold import build_action_recommendation_lines
+from modules.lipids.statin_intensity import get_statin_intensity_definition
 from modules.levels.definitions import classify_continuum_position, get_level_definition_payload
 from modules.plaque.engine import format_cac_percentile_context
+from modules.prevent.lipid_bands import LOW_10YR_HIGH_30YR_PATIENT_SUMMARY
 from modules.risk_enhancers.reproductive import (
     reproductive_history_summary,
     reproductive_marker_items,
@@ -214,6 +216,14 @@ def _where_stand_summary_sentence(result, ascvd_30y):
         elevated_30y = float(ascvd_30y) >= 10
     except (TypeError, ValueError):
         elevated_30y = False
+    try:
+        low_short_term = getattr(result, "prevent_10y_ascvd", None) is not None and float(
+            getattr(result, "prevent_10y_ascvd", None)
+        ) < 5
+    except (TypeError, ValueError):
+        low_short_term = category_word == "low"
+    if low_short_term and elevated_30y:
+        return LOW_10YR_HIGH_30YR_PATIENT_SUMMARY
     if elevated_30y:
         return (
             f"Your 10-year ASCVD risk is {category_word}, and your "
@@ -757,6 +767,12 @@ def _patient_next_steps(patient, result):
         elif "hscrp" in lowered:
             label = "Additional testing"
             detail = "hsCRP can help clarify inflammatory risk context when clinically relevant."
+        elif "high-intensity statin" in lowered or "high-intensity lipid" in lowered:
+            label = "Lower plaque-driving cholesterol"
+            detail = get_statin_intensity_definition("high").patient_friendly_summary
+        elif "moderate-intensity statin" in lowered or "moderate-intensity lipid" in lowered:
+            label = "Lower plaque-driving cholesterol"
+            detail = get_statin_intensity_definition("moderate").patient_friendly_summary
         elif "lipid" in lowered or "statin" in lowered:
             label = "Lower plaque-driving cholesterol"
             detail = "Treat toward the cholesterol goals above."
@@ -794,6 +810,16 @@ def _patient_next_steps(patient, result):
         if key not in seen:
             seen.add(key)
             rows.append(key)
+    has_statin_definition = any(
+        label == "Lower plaque-driving cholesterol" and "usually lowers LDL cholesterol" in detail
+        for label, detail in rows
+    )
+    if has_statin_definition:
+        rows = [
+            row
+            for row in rows
+            if row != ("Lower plaque-driving cholesterol", "Treat toward the cholesterol goals above.")
+        ]
     order = {
         "Lower plaque-driving cholesterol": 0,
         "Protect the kidneys": 1,
@@ -1176,6 +1202,20 @@ def _goals_strip_html(rows):
     return '<div class="roadmap-goal-strip">' + "".join(parts) + "</div>"
 
 
+def _roadmap_section_html(eyebrow: str, title: str, description: str, body_html: str) -> str:
+    """Render a patient roadmap section panel with a consistent header."""
+    return (
+        '<section class="roadmap-section-panel">'
+        '<div class="roadmap-section-header">'
+        f'<div class="roadmap-section-eyebrow">{escape(eyebrow)}</div>'
+        f'<div class="roadmap-section-title">{escape(title)}</div>'
+        f'<div class="roadmap-section-description">{escape(description)}</div>'
+        "</div>"
+        f'<div class="roadmap-section-body">{body_html}</div>'
+        "</section>"
+    )
+
+
 def _render_patient_roadmap_legacy(patient, result):
     risk = getattr(result, "prevent_10y_ascvd", None)
     ascvd_30y = _ascvd_30y_value(result)
@@ -1431,14 +1471,14 @@ def render_patient_roadmap(patient, result):
         /*COMPONENT_THEME*/
         .roadmap-card {
             border: 1px solid rgba(17, 17, 17, 0.10);
-            border-radius: 22px;
+            border-radius: 20px;
             background:
                 linear-gradient(180deg, rgba(255, 253, 248, 0.98), rgba(255, 250, 241, 0.98));
             box-shadow: 0 18px 42px rgba(17, 17, 17, 0.07);
             color: var(--rc-black);
             font-family: var(--rc-font-body);
-            margin: 10px 0 14px;
-            padding: 16px 18px 14px;
+            margin: 8px 0 12px;
+            padding: 12px 14px 12px;
         }
         .roadmap-head {
             display: flex;
@@ -1446,23 +1486,23 @@ def render_patient_roadmap(patient, result):
             gap: 12px;
             align-items: flex-start;
             border-bottom: 1px solid rgba(17, 17, 17, 0.08);
-            padding-bottom: 10px;
-            margin-bottom: 10px;
+            padding-bottom: 8px;
+            margin-bottom: 8px;
         }
         .roadmap-title {
             color: var(--rc-black);
             font-family: var(--rc-font-title);
-            font-size: clamp(1.20rem, 1.9vw, 1.48rem);
+            font-size: clamp(1.12rem, 1.65vw, 1.34rem);
             font-weight: 720;
             letter-spacing: -0.015em;
             line-height: 1.05;
-            margin: 0 0 5px;
+            margin: 0 0 3px;
         }
         .roadmap-subtitle {
             color: rgba(17, 17, 17, 0.66);
-            font-size: 0.88rem;
+            font-size: 0.80rem;
             font-weight: 560;
-            line-height: 1.34;
+            line-height: 1.26;
             max-width: 760px;
         }
         .roadmap-chip {
@@ -1471,93 +1511,119 @@ def render_patient_roadmap(patient, result):
             background: rgba(217, 119, 6, 0.12);
             color: #7C3F00;
             display: inline-flex;
-            font-size: 0.76rem;
+            font-size: 0.70rem;
             font-weight: 820;
             line-height: 1;
-            padding: 0.42rem 0.68rem;
+            padding: 0.32rem 0.54rem;
             white-space: nowrap;
         }
+        .roadmap-section-panel {
+            background: rgba(255, 255, 255, 0.62);
+            border: 1px solid rgba(17, 17, 17, 0.10);
+            border-radius: 14px;
+            margin: 11px 0 0;
+            padding: 12px 14px 13px;
+        }
+        .roadmap-section-panel:first-of-type {
+            margin-top: 10px;
+        }
+        .roadmap-section-header {
+            margin-bottom: 8px;
+        }
+        .roadmap-section-eyebrow {
+            color: rgba(115, 0, 10, 0.62);
+            font-size: 0.60rem;
+            font-weight: 820;
+            letter-spacing: 0.07em;
+            line-height: 1.1;
+            margin-bottom: 2px;
+            text-transform: uppercase;
+        }
         .roadmap-section-title {
-            border-top: 1px solid rgba(7, 26, 47, 0.10);
             color: var(--rc-black);
             font-family: var(--rc-font-title);
-            font-size: 1.05rem;
-            font-weight: 800;
+            font-size: 0.98rem;
+            font-weight: 820;
             letter-spacing: -0.01em;
-            line-height: 1.2;
-            margin: 18px 0 10px;
-            padding-top: 12px;
+            line-height: 1.15;
+            margin: 0;
         }
-        .roadmap-section-title:first-of-type {
-            border-top: 0;
-            margin-top: 10px;
-            padding-top: 0;
+        .roadmap-section-description {
+            color: rgba(17, 17, 17, 0.56);
+            font-size: 0.72rem;
+            font-weight: 560;
+            line-height: 1.22;
+            margin-top: 2px;
+            max-width: 720px;
+        }
+        .roadmap-section-body {
+            min-width: 0;
         }
         .roadmap-risk-grid {
             display: grid;
-            gap: 8px;
+            gap: 6px;
             grid-template-columns: repeat(2, minmax(0, 1fr));
         }
         .roadmap-risk-card {
             break-inside: avoid;
             border: 1px solid rgba(17, 17, 17, 0.09);
-            border-radius: 16px;
+            border-radius: 12px;
             background: #FFFFFF;
             box-shadow: 0 8px 20px rgba(17, 17, 17, 0.045);
-            padding: 9px 10px;
+            padding: 7px 9px;
             position: relative;
             overflow: hidden;
         }
         .roadmap-risk-card::before {
             border-radius: 999px;
             content: "";
-            height: 8px;
-            left: 10px;
+            height: 7px;
+            left: 9px;
             position: absolute;
-            top: 9px;
-            width: 8px;
+            top: 8px;
+            width: 7px;
         }
         .roadmap-risk-label {
             color: rgba(17, 17, 17, 0.72);
-            font-size: 0.76rem;
+            font-size: 0.70rem;
             font-weight: 830;
-            line-height: 1.15;
-            padding-left: 15px;
+            line-height: 1.1;
+            padding-left: 13px;
         }
         .roadmap-risk-subtitle {
             color: rgba(17, 17, 17, 0.52);
-            font-size: 0.70rem;
+            font-size: 0.62rem;
             font-weight: 620;
-            line-height: 1.22;
-            margin-top: 3px;
-            padding-left: 15px;
+            line-height: 1.15;
+            margin-top: 2px;
+            padding-left: 13px;
         }
         .roadmap-risk-value {
             color: var(--rc-black);
-            font-size: 1.78rem;
+            font-size: 1.46rem;
             font-weight: 900;
             letter-spacing: -0.035em;
             line-height: 1;
-            margin-top: 7px;
+            margin-top: 4px;
         }
         .roadmap-risk-text,
         .roadmap-clinician-context {
             color: rgba(17, 17, 17, 0.62);
-            font-size: 0.80rem;
+            font-size: 0.72rem;
             font-weight: 540;
-            line-height: 1.34;
-            margin-top: 5px;
+            line-height: 1.22;
+            margin-top: 3px;
         }
         .roadmap-plaque-line {
             border: 1px solid rgba(47, 95, 143, 0.16);
-            border-radius: 14px;
+            border-radius: 11px;
             background: rgba(47, 95, 143, 0.075);
             color: rgba(17, 17, 17, 0.76);
-            font-size: 0.90rem;
+            font-size: 0.76rem;
             font-weight: 680;
-            line-height: 1.32;
-            margin-top: 8px;
-            padding: 8px 10px;
+            line-height: 1.22;
+            margin-top: 6px;
+            padding: 5px 8px;
         }
         .roadmap-driver-list {
             border-top: 1px solid rgba(17, 17, 17, 0.08);
@@ -1566,9 +1632,9 @@ def render_patient_roadmap(patient, result):
             align-items: flex-start;
             border-bottom: 1px solid rgba(17, 17, 17, 0.075);
             display: grid;
-            gap: 9px;
+            gap: 7px;
             grid-template-columns: 10px 1fr;
-            padding: 8px 0;
+            padding: 6px 0;
         }
         .roadmap-driver-row:last-child {
             border-bottom: 0;
@@ -1577,7 +1643,7 @@ def render_patient_roadmap(patient, result):
             border-radius: 999px;
             display: inline-block;
             height: 8px;
-            margin-top: 5px;
+            margin-top: 4px;
             width: 8px;
         }
         .roadmap-marker-red { background: var(--rc-garnet); }
@@ -1587,27 +1653,27 @@ def render_patient_roadmap(patient, result):
         .roadmap-marker-gray { background: #7A7A7A; }
         .roadmap-driver-title {
             color: var(--rc-black);
-            font-size: 0.95rem;
+            font-size: 0.84rem;
             font-weight: 850;
-            line-height: 1.2;
+            line-height: 1.15;
         }
         .roadmap-driver-detail {
             color: rgba(17, 17, 17, 0.62);
-            font-size: 0.82rem;
+            font-size: 0.72rem;
             font-weight: 540;
-            line-height: 1.3;
-            margin-top: 2px;
+            line-height: 1.2;
+            margin-top: 1px;
         }
         .roadmap-context-line {
             align-items: center;
             display: flex;
             flex-wrap: wrap;
-            gap: 5px;
-            margin-top: 5px;
+            gap: 4px;
+            margin-top: 4px;
         }
         .roadmap-context-label {
             color: rgba(17, 17, 17, 0.42);
-            font-size: 0.74rem;
+            font-size: 0.66rem;
             font-weight: 800;
         }
         .roadmap-context-chip {
@@ -1615,14 +1681,14 @@ def render_patient_roadmap(patient, result):
             border-radius: 999px;
             background: rgba(255, 255, 255, 0.72);
             color: rgba(17, 17, 17, 0.66);
-            font-size: 0.76rem;
+            font-size: 0.68rem;
             font-weight: 650;
             line-height: 1;
-            padding: 0.30rem 0.48rem;
+            padding: 0.22rem 0.38rem;
         }
         .roadmap-goal-strip {
             border: 1px solid rgba(17, 17, 17, 0.09);
-            border-radius: 15px;
+            border-radius: 12px;
             background: rgba(255, 255, 255, 0.68);
             display: flex;
             flex-wrap: wrap;
@@ -1631,18 +1697,18 @@ def render_patient_roadmap(patient, result):
         }
         .roadmap-goal-item {
             border-right: 1px solid rgba(17, 17, 17, 0.075);
-            flex: 1 1 150px;
-            min-width: 142px;
-            padding: 8px 10px;
+            flex: 1 1 126px;
+            min-width: 118px;
+            padding: 6px 8px;
         }
         .roadmap-goal-item:last-child {
             border-right: 0;
         }
         .roadmap-goal-target {
             color: var(--rc-black);
-            font-size: 0.86rem;
+            font-size: 0.76rem;
             font-weight: 850;
-            line-height: 1.22;
+            line-height: 1.16;
         }
         .roadmap-goal-target span {
             color: #7C3F00;
@@ -1650,10 +1716,10 @@ def render_patient_roadmap(patient, result):
         }
         .roadmap-goal-current {
             color: rgba(17, 17, 17, 0.56);
-            font-size: 0.75rem;
+            font-size: 0.66rem;
             font-weight: 600;
-            line-height: 1.24;
-            margin-top: 3px;
+            line-height: 1.14;
+            margin-top: 2px;
         }
         .roadmap-step-list {
             counter-reset: roadmap-step;
@@ -1667,12 +1733,12 @@ def render_patient_roadmap(patient, result):
             color: rgba(17, 17, 17, 0.68);
             counter-increment: roadmap-step;
             display: grid;
-            font-size: 0.86rem;
+            font-size: 0.76rem;
             font-weight: 540;
-            gap: 9px;
-            grid-template-columns: 22px 1fr;
-            line-height: 1.32;
-            padding: 6px 0;
+            gap: 7px;
+            grid-template-columns: 19px 1fr;
+            line-height: 1.22;
+            padding: 4px 0;
         }
         .roadmap-step-list li::before {
             align-items: center;
@@ -1681,11 +1747,11 @@ def render_patient_roadmap(patient, result):
             color: #2F5F8F;
             content: counter(roadmap-step);
             display: inline-flex;
-            font-size: 0.72rem;
+            font-size: 0.64rem;
             font-weight: 850;
-            height: 20px;
+            height: 17px;
             justify-content: center;
-            width: 20px;
+            width: 17px;
         }
         .roadmap-step-list li:last-child {
             border-bottom: 0;
@@ -1743,6 +1809,25 @@ def render_patient_roadmap(patient, result):
                 box-shadow: none;
                 margin: 0;
                 page-break-inside: avoid;
+                padding: 16px 18px 14px;
+            }
+            .roadmap-section-panel {
+                border-radius: 16px;
+                margin-top: 16px;
+                padding: 18px 20px 19px;
+            }
+            .roadmap-section-header {
+                margin-bottom: 14px;
+            }
+            .roadmap-section-eyebrow {
+                font-size: 0.68rem;
+                margin-bottom: 4px;
+            }
+            .roadmap-section-title {
+                font-size: 1.08rem;
+            }
+            .roadmap-section-description {
+                font-size: 0.80rem;
             }
             .roadmap-risk-card,
             .roadmap-driver-row,
@@ -1757,6 +1842,9 @@ def render_patient_roadmap(patient, result):
             .roadmap-head {
                 align-items: flex-start;
                 flex-direction: column;
+            }
+            .roadmap-section-panel {
+                padding: 11px 12px;
             }
             .roadmap-risk-grid,
             .roadmap-goal-strip {
@@ -1777,6 +1865,27 @@ def render_patient_roadmap(patient, result):
         """
     ).replace("/*COMPONENT_THEME*/", component_theme_css()).strip()
 
+    where_body = "".join(
+        part
+        for part in (
+            f'<div class="roadmap-risk-grid">{risk_cards_html}</div>',
+            f'<div class="roadmap-detail">{escape(stand_detail)}</div>' if stand_detail else "",
+            f'<div class="roadmap-plaque-line">{plaque_html}</div>',
+            f'<div class="roadmap-clinician-context">Care focus: {escape(clinician_context)}</div>' if clinician_context else "",
+        )
+        if part
+    )
+    drivers_body = "".join(
+        part
+        for part in (
+            f'<div class="roadmap-driver-list">{priority_html}</div>',
+            context_html,
+        )
+        if part
+    )
+    goals_body = f'<div class="roadmap-goal-strip">{goal_html}</div>'
+    next_body = f'<ol class="roadmap-step-list">{next_html}</ol>'
+
     body_parts = [
         '<div class="roadmap-card rc-panel">',
         '<div class="roadmap-head">',
@@ -1784,18 +1893,30 @@ def render_patient_roadmap(patient, result):
         '<div class="roadmap-subtitle">Your results show where you stand today and the most important steps to lower future heart, kidney, and metabolic risk.</div></div>',
         f'<div class="roadmap-chip">{escape(badge)}</div>',
         "</div>",
-        '<div class="roadmap-section-title">Where you stand</div>',
-        f'<div class="roadmap-risk-grid">{risk_cards_html}</div>',
-        f'<div class="roadmap-detail">{escape(stand_detail)}</div>' if stand_detail else "",
-        f'<div class="roadmap-plaque-line">{plaque_html}</div>',
-        f'<div class="roadmap-clinician-context">Care focus: {escape(clinician_context)}</div>' if clinician_context else "",
-        '<div class="roadmap-section-title">Why risk is elevated</div>',
-        f'<div class="roadmap-driver-list">{priority_html}</div>',
-        context_html,
-        '<div class="roadmap-section-title">Current goals</div>',
-        f'<div class="roadmap-goal-strip">{goal_html}</div>',
-        '<div class="roadmap-section-title">Next steps</div>',
-        f'<ol class="roadmap-step-list">{next_html}</ol>',
+        _roadmap_section_html(
+            "STEP 1",
+            "Where you stand",
+            "Your estimated artery disease risk and current care level.",
+            where_body,
+        ),
+        _roadmap_section_html(
+            "STEP 2",
+            "Why risk is elevated",
+            "The main findings driving your prevention plan.",
+            drivers_body,
+        ),
+        _roadmap_section_html(
+            "STEP 3",
+            "Current goals",
+            "Targets to discuss with your clinician.",
+            goals_body,
+        ),
+        _roadmap_section_html(
+            "STEP 4",
+            "Next steps",
+            "The highest-yield actions to reduce future risk.",
+            next_body,
+        ),
         '<div class="roadmap-footer">This roadmap is for discussion with your clinician. Medication decisions should be individualized.</div>',
         "</div>",
     ]

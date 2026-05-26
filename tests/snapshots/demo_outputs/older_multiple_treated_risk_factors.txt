@@ -13,11 +13,12 @@ Assessment:
 - Hypertriglyceridemia (ICD: E78.1)
 
 Recommendations:
-- Lipid-lowering therapy indicated; treat toward high-risk targets.
+- Moderate-intensity statin therapy is generally favored for primary prevention.
 - CAC not performed; plaque burden unmeasured.
 - Aspirin not indicated for routine primary prevention.
 - Optimize glycemic therapy.
 - Treat BP toward goal <130/80.
+- Consider hsCRP only if inflammatory risk clarification would change management.
 
 PATIENT ROADMAP:
 Your Prevention Roadmap
@@ -48,20 +49,23 @@ Current goals:
 - Weight: BMI 32.6 to individualized
 
 Next steps:
-1. Lower plaque-driving cholesterol: Treat toward the cholesterol goals above.
+1. Lower plaque-driving cholesterol: Moderate-intensity statin therapy usually lowers LDL cholesterol by about one-third to one-half.
 2. Improve blood sugar trajectory: Keep diabetes care moving toward the safest individualized goal.
 3. Keep blood pressure in a safer range: Use lifestyle and medicines as appropriate.
 4. Aspirin safety: Do not start aspirin unless your clinician recommends it.
 5. Additional testing: A calcium scan may help if treatment choices are still uncertain.
+6. Additional testing: hsCRP can help clarify inflammatory risk context when clinically relevant.
 
 This roadmap is for discussion with your clinician. Medication decisions should be individualized.
 
 ACTIONS:
-- Lipid-lowering therapy is indicated; treat toward high-risk targets.
+- Moderate-intensity statin therapy is generally favored for primary prevention.
+- Recheck lipid profile 4-12 weeks after starting or intensifying therapy, then every 6-12 months.
 - CAC not performed; plaque burden unmeasured.
 - Aspirin not indicated for routine primary prevention.
 - Optimize glycemic therapy.
-- Treat blood pressure toward individualized goal.
+- Optimize BP to <130/80.
+- Consider hsCRP only if inflammatory risk clarification would change management.
 
 RSS: 16
 RSS CONTRIBUTORS:

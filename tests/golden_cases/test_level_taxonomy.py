@@ -369,9 +369,9 @@ def test_level_3b_albuminuria_case_action_and_clarifiers_are_treatment_forward()
     assert classification.level == "3B"
     assert classification.prevent_category == "BORDERLINE"
     assert "albuminuria" in " ".join(classification.drivers).lower()
-    assert "Optimize kidney-protective therapy" in actions
-    assert "Moderate-intensity lipid-lowering therapy is reasonable" in actions
-    assert "CAC may clarify plaque burden if treatment intensity remains uncertain" in actions
+    assert "optimize kidney-protective therapy" in actions
+    assert "Short-term ASCVD risk is low, but albuminuria and longer-term risk make lipid-lowering worth discussing" in actions
+    assert "CAC reasonable for risk clarification if treatment decision remains uncertain" in actions
     assert "subclinical coronary atherosclerosis" not in diagnoses.lower()
 
 
@@ -597,16 +597,16 @@ def test_level_3b_intermediate_prevent_uacr_missing_prioritizes_uacr_and_specifi
     assert "kidney G2; albuminuria not measured" in note
     assert "UACR not available; obtain to complete kidney-risk assessment" in note
     assert result.dominant_action == (
-        "Moderate-intensity lipid-lowering therapy is reasonable to reduce cumulative atherogenic exposure."
+        "Moderate-intensity statin therapy is reasonable given borderline ASCVD risk with risk-enhancing factors."
     )
     assert recommendation_lines[:6] == [
-        "Moderate-intensity lipid-lowering therapy reasonable.",
+        "Moderate-intensity statin therapy is reasonable given borderline ASCVD risk with risk-enhancing factors.",
         "Obtain UACR to complete kidney-risk assessment.",
         "Treat BP toward goal <130/80.",
-        "CAC may clarify plaque burden if treatment intensity remains uncertain.",
-        "Aspirin not indicated for routine primary prevention.",
-        "hsCRP - inflammatory biomarker clarification",
-    ]
+            "CAC may clarify plaque burden if treatment intensity remains uncertain.",
+            "Aspirin not indicated for routine primary prevention.",
+            "Consider hsCRP only if inflammatory risk clarification would change management.",
+        ]
     assert "CAC reasonable for risk clarification if treatment decision remains uncertain" not in actions
     assert "subclinical coronary atherosclerosis" not in diagnoses.lower()
 

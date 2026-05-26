@@ -14,7 +14,7 @@ Assessment:
 - Hypertriglyceridemia (ICD: E78.1)
 
 Recommendations:
-- Moderate-intensity statin therapy reasonable.
+- Short-term ASCVD risk is low, but longer-term risk is elevated. Earlier lipid-lowering may be reasonable if risk-enhancing factors or ApoB/LDL-C burden support treatment.
 - CAC may clarify plaque burden if treatment intensity remains uncertain.
 - Aspirin not indicated for routine primary prevention.
 - Treat BP toward goal <130/80.
@@ -29,7 +29,7 @@ Where you stand:
 - 30-year ASCVD risk: 15.73%
 - Near-term estimated risk is low.
 - About 16 out of 100 similar patients may have a heart attack, stroke, or related artery disease event over the next 30 years.
-- Your 10-year ASCVD risk is low, and your 30-year risk is elevated enough to make prevention worth discussing.
+- Your short-term risk is low, but your longer-term risk is higher than expected. This does not mean an event is likely soon. It means prevention now may lower your risk over time.
 - About 3 out of 100 similar patients may have a heart attack, stroke, or related artery disease event over the next 10 years.
 - Plaque status has not been measured.
 - Care focus: Level 3 (3B) - Actionable early CKM / atherogenic risk
@@ -63,11 +63,10 @@ Next steps:
 This roadmap is for discussion with your clinician. Medication decisions should be individualized.
 
 ACTIONS:
-- Moderate-intensity statin therapy is reasonable to reduce cumulative atherogenic exposure.
-- Recheck lipid profile 4-12 weeks after starting or intensifying therapy, then every 6-12 months.
+- Short-term ASCVD risk is low, but longer-term risk is elevated. Earlier lipid-lowering may be reasonable if risk-enhancing factors or ApoB/LDL-C burden support treatment.
 - CAC may clarify plaque burden if treatment intensity remains uncertain.
 - Aspirin not indicated for routine primary prevention.
-- Treat blood pressure toward individualized goal.
+- Optimize BP to <130/80.
 - Obtain UACR to complete kidney-risk assessment.
 
 RSS: 16

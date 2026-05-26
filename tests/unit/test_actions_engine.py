@@ -28,8 +28,178 @@ def test_build_action_plan_uses_kidney_action_for_diabetes_ckd():
 
     plan = build_action_plan(patient, result)
 
-    assert plan["dominant_action"] == "Optimize kidney-protective therapy."
-    assert plan["domains"]["kidney"] == "Optimize kidney-protective therapy."
+    assert plan["dominant_action"] == (
+        "Confirm persistent albuminuria with repeat UACR if not already confirmed; optimize kidney-protective therapy."
+    )
+    assert plan["domains"]["kidney"] == (
+        "Confirm persistent albuminuria with repeat UACR if not already confirmed; optimize kidney-protective therapy."
+    )
+
+
+def test_albuminuria_with_elevated_bp_uses_kidney_protective_action_not_passive_plan():
+    patient = Patient(
+        age=57,
+        sex="male",
+        sbp=142,
+        dbp=86,
+        bp_treated=True,
+        egfr=64,
+        uacr=48,
+        a1c=6.0,
+        triglycerides=150,
+    )
+    result = RCCKMResult(
+        egfr_stage="G2",
+        albuminuria_stage="A2",
+        prevent_risk_category="INTERMEDIATE",
+        level_classification={"level": "3B"},
+    )
+
+    plan = build_action_plan(patient, result)
+
+    assert "No escalation indicated." not in plan["recommendations"]
+    assert plan["domains"]["kidney"] == (
+        "Confirm persistent albuminuria with repeat UACR if not already confirmed; optimize kidney-protective therapy."
+    )
+    assert plan["domains"]["blood_pressure"] == (
+        "Treat BP toward goal <130/80 if tolerated."
+    )
+    assert "ACEi/ARB" in plan["domains"]["ace_arb"]
+
+
+def test_albuminuria_with_intermediate_risk_adds_statin_prevention_language():
+    patient = Patient(
+        age=57,
+        sex="male",
+        sbp=142,
+        dbp=86,
+        bp_treated=True,
+        egfr=64,
+        uacr=48,
+        a1c=6.0,
+        triglycerides=150,
+    )
+    result = RCCKMResult(
+        egfr_stage="G2",
+        albuminuria_stage="A2",
+        prevent_risk_category="INTERMEDIATE",
+        prevent_30y_ascvd=26.0,
+        level_classification={"level": "3B"},
+    )
+
+    plan = build_action_plan(patient, result)
+
+    assert plan["domains"]["lipids"] == (
+        "Moderate-intensity statin therapy is reasonable given borderline/intermediate ASCVD risk with albuminuria and metabolic risk-enhancing factors."
+    )
+    assert "No escalation indicated." not in plan["recommendations"]
+
+
+def test_albuminuria_lipid_path_continues_existing_statin():
+    patient = Patient(
+        age=57,
+        sex="male",
+        egfr=64,
+        uacr=48,
+        lipid_lowering=True,
+        statin_intensity="moderate",
+    )
+    result = RCCKMResult(
+        egfr_stage="G2",
+        albuminuria_stage="A2",
+        prevent_risk_category="INTERMEDIATE",
+        prevent_30y_ascvd=26.0,
+        level_classification={"level": "3B"},
+    )
+
+    plan = build_action_plan(patient, result)
+
+    assert plan["domains"]["lipids"] == (
+        "Continue statin therapy; consider intensification if LDL-C/ApoB remain above target."
+    )
+
+
+def test_prevent_ascvd_bands_drive_lipid_decisions_without_total_cvd():
+    low = build_action_plan(
+        Patient(age=55, sex="male"),
+        RCCKMResult(prevent_10y_ascvd=4.9, prevent_10y_total_cvd=22.0),
+    )
+    assert low["domains"]["lipids"] == (
+        "Continue lifestyle-focused prevention; reassess risk as clinical data evolve."
+    )
+
+    borderline_with_enhancer = build_action_plan(
+        Patient(age=55, sex="male", uacr=45, egfr=70),
+        RCCKMResult(
+            prevent_10y_ascvd=5.4,
+            prevent_10y_total_cvd=22.0,
+            albuminuria_stage="A2",
+            egfr_stage="G2",
+        ),
+    )
+    assert "Moderate-intensity statin therapy is reasonable" in borderline_with_enhancer["domains"]["lipids"]
+
+    intermediate = build_action_plan(
+        Patient(age=55, sex="male"),
+        RCCKMResult(prevent_10y_ascvd=8.0),
+    )
+    assert intermediate["domains"]["lipids"] == (
+        "Moderate-intensity statin therapy is generally favored for primary prevention."
+    )
+
+    high = build_action_plan(
+        Patient(age=55, sex="male"),
+        RCCKMResult(prevent_10y_ascvd=20.0),
+    )
+    assert high["domains"]["lipids"] == (
+        "High-intensity statin therapy is generally recommended for primary prevention given high ASCVD risk."
+    )
+
+
+def test_sglt2_kidney_protection_branches():
+    strong_albuminuria = build_action_plan(
+        Patient(age=60, sex="male", egfr=45, uacr=220, ace_arb=True),
+        RCCKMResult(egfr_stage="G3a", albuminuria_stage="A2"),
+    )
+    assert strong_albuminuria["domains"]["sglt2"].startswith("Add an SGLT2 inhibitor")
+
+    diabetes_albuminuria = build_action_plan(
+        Patient(age=60, sex="male", diabetes=True, egfr=55, uacr=80),
+        RCCKMResult(egfr_stage="G3a", albuminuria_stage="A2"),
+    )
+    assert diabetes_albuminuria["domains"]["sglt2"].startswith("Consider an SGLT2 inhibitor")
+
+    heart_failure = build_action_plan(
+        Patient(age=60, sex="male", egfr=55, uacr=10, heart_failure=True),
+        RCCKMResult(egfr_stage="G3a", albuminuria_stage="A1"),
+    )
+    assert heart_failure["domains"]["sglt2"].startswith("Add an SGLT2 inhibitor")
+
+    low_egfr = build_action_plan(
+        Patient(age=60, sex="male", egfr=18, uacr=220),
+        RCCKMResult(egfr_stage="G4", albuminuria_stage="A2"),
+    )
+    assert "not routinely recommended at this eGFR" in low_egfr["domains"]["sglt2"]
+
+
+def test_albuminuria_on_ace_arb_at_bp_goal_continues_kidney_protective_therapy():
+    patient = Patient(
+        age=57,
+        sex="male",
+        sbp=124,
+        dbp=76,
+        bp_treated=True,
+        ace_arb=True,
+        egfr=64,
+        uacr=48,
+    )
+    result = RCCKMResult(egfr_stage="G2", albuminuria_stage="A2")
+
+    plan = build_action_plan(patient, result)
+
+    assert plan["domains"]["kidney"] == "Continue kidney-protective therapy and monitor UACR/eGFR."
+    assert "ace_arb" not in plan["domains"]
+    assert "blood_pressure" not in plan["domains"]
 
 
 def test_build_action_plan_uses_glycemic_action_for_a1c_7():
@@ -204,7 +374,7 @@ def test_build_action_plan_limits_recommendations_to_four_by_priority():
 
     assert plan["recommendations"] == [
         "Lipid-lowering therapy is indicated; treat toward high-risk targets.",
-        "Optimize kidney-protective therapy.",
+        "Confirm persistent albuminuria with repeat UACR if not already confirmed; optimize kidney-protective therapy.",
         "Optimize glycemic therapy.",
         "Clarification testing should not delay treatment.",
     ]
