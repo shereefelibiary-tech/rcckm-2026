@@ -131,7 +131,7 @@ def test_render_patient_roadmap_groups_full_clinical_story_without_raw_html():
     assert "Sleep / hypoxia" not in html
     assert "Liver / MASLD" not in html
     assert "OSA" in html
-    assert "MASLD" in html
+    assert "MASLD" not in html
     assert "LDL-C" in html
     assert "below 70 mg/dL" in html
     assert "Current 132 mg/dL" in html
@@ -191,6 +191,15 @@ def test_render_patient_roadmap_sections_use_distinct_panels_not_underlines():
     )[0]
     assert "border-top" not in title_css
     assert "border-bottom" not in title_css
+
+
+def test_patient_roadmap_uses_plain_masld_language_when_displayed():
+    patient = Patient(age=55, sex="female", masld=True)
+    text = render_patient_roadmap_text(patient, evaluate_patient(patient))
+
+    assert "Metabolic fatty liver disease" in text
+    assert "fatty liver disease risk context" in text
+    assert "MASLD" not in text
 
 
 def test_render_patient_roadmap_text_is_copy_ready_plain_text():

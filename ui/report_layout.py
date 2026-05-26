@@ -333,9 +333,9 @@ def _build_targets_html(result, patient=None, *, clinician_detail_mode=False):
     target = result.targets[0] if result.targets else None
     if target:
         if target.ldl_c_target is not None:
-            assigned_targets.append(("LDL-C", f"&lt;{target.ldl_c_target:g}", "mg/dL", "", "primary"))
+            assigned_targets.append(("LDL-C", target.ldl_c_target, getattr(patient, "ldl_c", None), "", "primary"))
         if target.apob_target is not None:
-            assigned_targets.append(("ApoB", f"&lt;{target.apob_target:g}", "mg/dL", "", "primary"))
+            assigned_targets.append(("ApoB", target.apob_target, getattr(patient, "apob", None), "", "primary"))
         triglycerides = getattr(patient, "triglycerides", None) if patient is not None else None
         try:
             triglycerides_value = float(triglycerides) if triglycerides is not None else None
@@ -343,9 +343,7 @@ def _build_targets_html(result, patient=None, *, clinician_detail_mode=False):
             triglycerides_value = None
         if triglycerides_value is not None and triglycerides_value >= 150:
             tg_goal = 500 if triglycerides_value >= 500 else 150
-            assigned_targets.append(
-                ("TG", f"&lt;{tg_goal:g}", f"mg/dL · current {triglycerides_value:g}", "", "primary")
-            )
+            assigned_targets.append(("TG", tg_goal, triglycerides_value, "", "primary"))
         if patient is not None and should_show_non_hdl_default(
             patient,
             result,
@@ -356,8 +354,8 @@ def _build_targets_html(result, patient=None, *, clinician_detail_mode=False):
                 assigned_targets.append(
                     (
                         "non-HDL-C",
-                        f"&lt;{non_hdl['target_value']:g}",
-                        f"mg/dL · current {non_hdl['current_value']:g}",
+                        non_hdl["target_value"],
+                        non_hdl["current_value"],
                         non_hdl["subtitle"],
                         "secondary",
                     )
@@ -371,21 +369,48 @@ def _build_targets_html(result, patient=None, *, clinician_detail_mode=False):
         context_line = (
             f"{context_line} ApoB is shown as an RCCKM advanced particle target."
         )
-    def _target_cell(label, threshold, unit, note, priority):
-        note_html = f'<div class="target-note">{escape(note)}</div>' if note else ""
+    def _fmt_target_number(value):
+        try:
+            return f"{float(value):g}"
+        except (TypeError, ValueError):
+            return str(value)
+
+    def _target_item(label, target_value, current_value):
+        current_html = ""
+        if current_value is not None:
+            current_html = (
+                f'<span class="target-current">Current {_fmt_target_number(current_value)}</span>'
+            )
         return (
-            f'<div class="target-cell target-cell-{escape(priority)}" title="{escape(note)}">'
-            f'<div class="target-label">{escape(label)}</div>'
-            f'<div class="target-value">{threshold}</div>'
-            f'<div class="target-unit">{escape(unit)}</div>'
-            f"{note_html}"
-            "</div>"
+            '<span class="target-item">'
+            f'<span class="target-name">{escape(label)}</span> '
+            f'<span class="target-goal">&lt;{_fmt_target_number(target_value)} mg/dL</span>'
+            f"{current_html}"
+            "</span>"
         )
 
-    target_cells = "".join(
-        _target_cell(label, threshold, unit, note, priority)
-        for label, threshold, unit, note, priority in assigned_targets
+    primary_targets = " ".join(
+        _target_item(label, target_value, current_value)
+        for label, target_value, current_value, _note, priority in assigned_targets
+        if priority == "primary"
     )
+    secondary_targets = " ".join(
+        _target_item(label, target_value, current_value)
+        for label, target_value, current_value, _note, priority in assigned_targets
+        if priority == "secondary"
+    )
+    secondary_notes = " ".join(
+        escape(note)
+        for _label, _target_value, _current_value, note, priority in assigned_targets
+        if priority == "secondary" and note
+    )
+    secondary_html = ""
+    if secondary_targets:
+        secondary_html = (
+            f'<div class="target-secondary">{secondary_targets}'
+            + (f'<span class="target-note">{secondary_notes}</span>' if secondary_notes else "")
+            + "</div>"
+        )
     return f"""
 <style>
 {component_theme_css()}
@@ -402,45 +427,47 @@ def _build_targets_html(result, patient=None, *, clinician_detail_mode=False):
     line-height: 1.15;
     margin-bottom: 8px;
 }}
-.target-strip {{
-    display: grid;
-    gap: 12px 14px;
-    grid-template-columns: repeat(3, minmax(96px, 1fr));
-}}
-.target-cell {{
-    border-bottom: 1px solid rgba(11, 31, 58, 0.09);
-    padding: 2px 4px 8px 0;
-}}
-.target-cell-secondary {{
-    opacity: 0.78;
-}}
-.target-label {{
-    color: rgba(17, 17, 17, 0.64);
-    font-size: 0.78rem;
-    font-weight: 850;
-    line-height: 1.1;
-}}
-.target-note {{
-    color: rgba(7, 26, 47, 0.46);
-    font-size: 0.66rem;
-    font-weight: 650;
-    line-height: 1.12;
-    margin-top: 3px;
-}}
-.target-value {{
+.target-line {{
     color: var(--rc-black);
-    font-size: 1.22rem;
-    font-weight: 950;
-    letter-spacing: -0.02em;
-    line-height: 1.05;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 10px;
+    font-family: var(--rc-font-body);
+    font-size: 0.94rem;
+    font-weight: 650;
+    line-height: 1.35;
+}}
+.target-item {{
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 3px 5px;
+}}
+.target-item + .target-item::before {{
+    color: rgba(7, 26, 47, 0.32);
+    content: "•";
+    margin-right: 5px;
+}}
+.target-name {{
+    font-weight: 800;
+}}
+.target-current {{
+    color: rgba(7, 26, 47, 0.56);
+    font-size: 0.82rem;
+    font-weight: 600;
+}}
+.target-secondary {{
+    color: rgba(7, 26, 47, 0.58);
+    font-size: 0.78rem;
+    font-weight: 600;
+    line-height: 1.3;
     margin-top: 5px;
 }}
-.target-unit {{
-    color: rgba(7, 26, 47, 0.56);
-    font-size: 0.72rem;
-    font-weight: 720;
-    line-height: 1.1;
-    margin-top: 3px;
+.target-secondary .target-name,
+.target-secondary .target-goal {{
+    font-weight: 680;
+}}
+.target-note {{
+    margin-left: 8px;
 }}
 .targets-context {{
     color: rgba(7, 26, 47, 0.68);
@@ -449,15 +476,11 @@ def _build_targets_html(result, patient=None, *, clinician_detail_mode=False):
     line-height: 1.32;
     margin-top: 0.58rem;
 }}
-@media (max-width: 760px) {{
-    .target-strip {{
-        grid-template-columns: repeat(2, minmax(96px, 1fr));
-    }}
-}}
 </style>
 <div class="targets-compact rc-panel">
 <div class="targets-title rc-card-title">Targets</div>
-<div class="target-strip">{target_cells}</div>
+<div class="target-line">{primary_targets}</div>
+{secondary_html}
 <div class="targets-context">{escape(context_line)}</div>
 </div>
 """
@@ -472,12 +495,11 @@ def _build_action_html(result, patient=None):
     line_html = "".join(
         (
             f'<div class="action-domain action-domain-{escape(item.state)} action-priority-{escape(item.priority)}">'
-            '<div class="action-domain-top">'
-            f'<div class="action-domain-label">{escape(item.label)}</div>'
-            f'<div class="action-indicator" aria-label="{escape(item.priority)} priority"></div>'
-            "</div>"
+            f'<div class="action-domain-label">{escape(item.label)}:</div>'
+            '<div class="action-copy">'
             f'<div class="action-status">{escape(item.status)}</div>'
             + (f'<div class="action-detail">{escape(item.detail)}</div>' if item.detail else "")
+            + "</div>"
             + "</div>"
         )
         for item in items
@@ -495,28 +517,26 @@ def _build_action_html(result, patient=None):
     style = (
         "<style>"
         ".action-card{padding:14px 16px 15px;}"
-        ".action-grid{display:grid;gap:8px;grid-template-columns:repeat(2,minmax(0,1fr));}"
-        ".action-domain{background:rgba(255,255,255,0.58);border:1px solid rgba(7,26,47,0.08);border-radius:10px;min-width:0;padding:8px 10px 9px;}"
-        ".action-domain-top{align-items:center;display:flex;gap:8px;justify-content:space-between;margin-bottom:4px;}"
-        ".action-domain-label{color:rgba(7,26,47,0.58);font-family:var(--rc-font-body);font-size:0.68rem;font-weight:850;letter-spacing:0.01em;line-height:1;text-transform:uppercase;}"
-        ".action-indicator{background:rgba(7,26,47,0.16);border-radius:999px;height:7px;width:7px;flex:0 0 auto;}"
-        ".action-priority-low .action-indicator{background:rgba(47,95,143,0.34);}"
-        ".action-priority-moderate .action-indicator{background:rgba(47,95,143,0.68);}"
-        ".action-priority-high .action-indicator{background:#8B0010;}"
-        ".action-status{color:var(--rc-black);font-family:var(--rc-font-body);font-size:0.86rem;font-weight:850;line-height:1.16;overflow-wrap:anywhere;}"
-        ".action-detail{color:rgba(7,26,47,0.62);font-family:var(--rc-font-body);font-size:0.72rem;font-weight:620;line-height:1.18;margin-top:3px;}"
-        ".action-details{border-top:1px solid rgba(7,26,47,0.08);color:rgba(7,26,47,0.62);font-family:var(--rc-font-body);font-size:0.74rem;font-weight:620;line-height:1.25;margin-top:7px;padding-top:7px;}"
+        ".action-readout{display:grid;gap:0;}"
+        ".action-domain{border-top:1px solid rgba(7,26,47,0.075);display:grid;grid-template-columns:148px minmax(0,1fr);padding:8px 0 9px;}"
+        ".action-domain:first-child{border-top:0;padding-top:2px;}"
+        ".action-domain-label{color:rgba(7,26,47,0.70);font-family:var(--rc-font-body);font-size:0.86rem;font-weight:800;line-height:1.24;}"
+        ".action-copy{min-width:0;}"
+        ".action-status{color:var(--rc-black);font-family:var(--rc-font-body);font-size:0.90rem;font-weight:760;line-height:1.24;overflow-wrap:anywhere;}"
+        ".action-detail{color:rgba(7,26,47,0.60);font-family:var(--rc-font-body);font-size:0.80rem;font-weight:580;line-height:1.24;margin-top:2px;}"
+        ".action-domain-neutral .action-status,.action-domain-complete .action-status{color:rgba(7,26,47,0.66);font-weight:700;}"
+        ".action-details{border-top:1px solid rgba(7,26,47,0.08);color:rgba(7,26,47,0.62);font-family:var(--rc-font-body);font-size:0.76rem;font-weight:620;line-height:1.28;margin-top:8px;padding-top:8px;}"
         ".action-details summary{cursor:pointer;font-weight:800;color:rgba(47,95,143,0.82);}"
         ".action-details ul{margin:5px 0 0 18px;padding:0;}"
         ".action-details li{margin:2px 0;}"
-        "@media(max-width:760px){.action-grid{grid-template-columns:1fr;}}"
+        "@media(max-width:760px){.action-domain{grid-template-columns:1fr;gap:2px;padding:8px 0;}}"
         "</style>"
     )
     return (
         style
         + '<div class="rcckm-card rc-panel action-card">'
         + '<div class="rcckm-card-title rc-card-title">Action</div>'
-        + f'<div class="action-grid">{line_html}</div>'
+        + f'<div class="action-readout">{line_html}</div>'
         + detail_html
         + "</div>"
     )

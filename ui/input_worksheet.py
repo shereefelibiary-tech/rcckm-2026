@@ -13,6 +13,7 @@ from modules.risk_enhancers.incidental_cac import (
     INCIDENTAL_CAC_SEVERITY_OPTIONS,
     normalize_incidental_cac_severity,
 )
+from modules.risk_enhancers.masld import MASLD_PATIENT_LABEL, MASLD_TOOLTIP
 from modules.family_history.engine import (
     PREMATURE_FAMILY_HISTORY_HELP,
     build_family_history_payload,
@@ -437,9 +438,11 @@ def _numeric_input(st, label, parsed, key, step=1, min_value=None, decimals=None
     return parsed_value
 
 
-def _checkbox_input(st, label, parsed, key):
+def _checkbox_input(st, label, parsed, key, help=None):
     widget_key = f"input_{key}"
     kwargs = {"key": widget_key}
+    if help:
+        kwargs["help"] = help
     if widget_key not in st.session_state:
         kwargs["value"] = bool(parsed.get(key, False))
     value = st.checkbox(label, **kwargs)
@@ -737,7 +740,13 @@ def render_manual_worksheet(st, parsed):
         with pe_cols[3]:
             inputs["osa"] = _checkbox_input(st, "OSA", parsed, "osa")
         with pe_cols[4]:
-            inputs["masld"] = _checkbox_input(st, "MASLD", parsed, "masld")
+            inputs["masld"] = _checkbox_input(
+                st,
+                MASLD_PATIENT_LABEL,
+                parsed,
+                "masld",
+                help=MASLD_TOOLTIP,
+            )
         with pe_cols[5]:
             inputs["inflammatory_disease"] = _checkbox_input(
                 st, "Inflammatory disease", parsed, "inflammatory_disease"

@@ -4,6 +4,7 @@ from modules.risk_enhancers.breast_arterial_calcification import (
     breast_arterial_calcification_context,
 )
 from modules.risk_enhancers.incidental_cac import incidental_cac_context
+from modules.risk_enhancers.masld import MASLD_CLINICIAN_FIRST_MENTION
 
 
 def identify_risk_enhancers(patient) -> list[str]:
@@ -76,7 +77,7 @@ def identify_risk_enhancers(patient) -> list[str]:
         enhancers.append("Sleep/hypoxia context: OSA")
 
     if getattr(patient, "masld", False):
-        enhancers.append("Liver/metabolic context: MASLD")
+        enhancers.append(f"Liver/metabolic context: {MASLD_CLINICIAN_FIRST_MENTION}")
 
     triglycerides = getattr(patient, "triglycerides", None)
     if triglycerides is not None and triglycerides >= 150:

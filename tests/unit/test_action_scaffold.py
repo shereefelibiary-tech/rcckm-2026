@@ -257,12 +257,14 @@ def test_action_html_renders_structured_sections_without_loose_duplicate_list():
     assert "action-number" not in html
     assert "<ol" not in html
     assert "<li>High-intensity lipid-lowering therapy indicated" not in html
-    assert "action-grid" in html
+    assert "action-readout" in html
+    assert "action-grid" not in html
     assert "action-domain-label" in html
     assert "action-status" in html
     assert "action-detail" in html
-    assert "grid-template-columns:repeat(2,minmax(0,1fr))" in html
-    assert "border-radius:10px" in html
+    assert "text-transform:uppercase" not in html
+    assert "action-indicator" not in html
+    assert "grid-template-columns:148px minmax(0,1fr)" in html
     assert "Lipid lowering" in html
     assert "CAC / plaque" in html
     assert "Blood pressure" in html
@@ -309,7 +311,7 @@ def test_action_instrument_panel_has_fixed_domain_order_and_neutral_slots():
     assert all(item.status for item in panel)
     assert all("None" not in item.status + item.detail for item in panel)
     assert next(item for item in panel if item.domain_id == "blood_pressure").status == "At goal"
-    assert next(item for item in panel if item.domain_id == "glycemia_metabolic").status == "No glycemic action"
+    assert next(item for item in panel if item.domain_id == "glycemia_metabolic").status == "No immediate action"
     assert next(item for item in panel if item.domain_id == "aspirin_antiplatelet").status == "Not routine for primary prevention"
 
 

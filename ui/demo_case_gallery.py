@@ -1073,7 +1073,7 @@ DEMO_CASE_DESCRIPTIONS = {
         "Low short-term ASCVD risk but elevated longer-term risk makes prevention worth discussing."
     ),
     "obesity_metabolic_syndrome": (
-        "Obesity, OSA/MASLD context, and triglyceride burden with advanced clarifiers still open."
+        "Obesity, OSA/metabolic fatty liver context, and triglyceride burden with advanced clarifiers still open."
     ),
     "prediabetes_insulin_resistance": (
         "Prediabetes and insulin-resistance pattern with reproductive history context."
@@ -1091,7 +1091,7 @@ DEMO_CASE_DESCRIPTIONS = {
         "Low near-term risk with elevated Lp(a) and reproductive risk context."
     ),
     "hypertriglyceridemia_insulin_resistance": (
-        "Triglycerides, obesity, prediabetes, OSA, and MASLD show insulin-resistance burden."
+        "Triglycerides, obesity, prediabetes, OSA, and metabolic fatty liver disease show insulin-resistance burden."
     ),
     "cac_zero_ambiguity_resolution": (
         "CAC 0 helps frame plaque burden while cardiometabolic signals remain visible."

@@ -65,7 +65,7 @@ def test_non_hdl_shown_when_triglycerides_are_elevated():
     assert payload["target_value"] == 130
     html = _build_targets_html(result, patient)
     assert "non-HDL-C" in html
-    assert "current 157" in html
+    assert "Current 157" in html
     assert "Calculated from total cholesterol minus HDL-C." in html
 
 
@@ -114,4 +114,4 @@ def test_clinician_detail_mode_can_show_non_hdl_when_otherwise_hidden():
     assert "LDL-C" in html
     assert "ApoB" in html
     assert "non-HDL-C" in html
-    assert "target-cell-secondary" in html
+    assert "target-secondary" in html

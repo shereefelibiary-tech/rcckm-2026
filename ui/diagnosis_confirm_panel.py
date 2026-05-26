@@ -35,8 +35,8 @@ def _panel_css():
 .dx-panel {
     background: rgba(255, 253, 248, 0.84);
     border: 1px solid rgba(11, 31, 58, 0.10);
-    border-radius: 14px;
-    box-shadow: 0 10px 28px rgba(7, 26, 47, 0.045);
+    border-radius: 10px;
+    box-shadow: none;
     padding: 14px 15px 15px;
     margin: 10px 0 14px;
 }
@@ -47,26 +47,27 @@ def _panel_css():
 }
 .dx-col-title {
     color: rgba(7, 26, 47, 0.78);
-    font-size: 0.76rem;
-    font-weight: 820;
-    letter-spacing: 0.01em;
-    margin: 0 0 8px;
+    font-size: 0.86rem;
+    font-weight: 800;
+    letter-spacing: 0;
+    margin: 0 0 7px;
 }
 .dx-column-panel {
-    background: rgba(255, 255, 255, 0.58);
-    border: 1px solid rgba(7, 26, 47, 0.08);
-    border-radius: 12px;
-    padding: 10px;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    padding: 0;
     min-height: 100%;
 }
 .dx-row {
-    background: rgba(255, 255, 255, 0.72);
-    border: 1px solid rgba(11, 31, 58, 0.09);
-    border-radius: 10px;
+    background: transparent;
+    border: 0;
+    border-top: 1px solid rgba(11, 31, 58, 0.08);
+    border-radius: 0;
     color: #071A2F;
     font-family: var(--rc-font-body);
-    margin: 0 0 8px;
-    padding: 9px 10px 10px;
+    margin: 0;
+    padding: 9px 0 10px;
 }
 .dx-row-shell {
     margin: 0 0 8px;
@@ -94,8 +95,8 @@ def _panel_css():
     margin-top: 2px;
 }
 .dx-code-chip {
-    background: rgba(47, 95, 143, 0.08);
-    border: 1px solid rgba(47, 95, 143, 0.16);
+    background: transparent;
+    border: 1px solid rgba(47, 95, 143, 0.14);
     border-radius: 999px;
     color: rgba(7, 26, 47, 0.74);
     display: inline-flex;
@@ -120,10 +121,10 @@ def _panel_css():
 }
 .dx-badge {
     border-radius: 999px;
-    border: 1px solid rgba(47, 95, 143, 0.24);
-    background: rgba(47, 95, 143, 0.08);
-    color: #132F55;
-    font-weight: 900;
+    border: 1px solid rgba(47, 95, 143, 0.16);
+    background: transparent;
+    color: rgba(19, 47, 85, 0.72);
+    font-weight: 760;
     padding: 1px 5px;
 }
 .dx-status {

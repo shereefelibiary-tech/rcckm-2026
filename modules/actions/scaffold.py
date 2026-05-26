@@ -912,7 +912,7 @@ def _glycemia_readout(patient: Any, result: Any) -> ActionDomainReadout:
         return _make_readout("glycemia_metabolic", "Glycemia / metabolic", "Prediabetes prevention", "Weight and insulin-resistance focus.", priority="low", state="consider")
     if bmi is not None and bmi >= 30:
         return _make_readout("glycemia_metabolic", "Glycemia / metabolic", "Lifestyle / weight-focused prevention", "Address metabolic risk.", priority="low", state="consider")
-    return _make_readout("glycemia_metabolic", "Glycemia / metabolic", "No glycemic action", "No active glycemic signal.", state="neutral")
+    return _make_readout("glycemia_metabolic", "Glycemia / metabolic", "No immediate action", "No active glycemic signal.", state="neutral")
 
 
 def _aspirin_readout(patient: Any, result: Any, section: ActionSection | None) -> ActionDomainReadout:

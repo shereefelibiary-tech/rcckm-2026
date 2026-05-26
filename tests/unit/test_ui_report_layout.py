@@ -464,22 +464,23 @@ def test_targets_card_uses_compact_horizontal_target_line():
     html = _build_targets_html(result, patient)
 
     assert "targets-compact" in html
-    assert "target-strip" in html
-    assert "target-cell" in html
-    assert "grid-template-columns: repeat(3" in html
-    assert "target-label" in html
-    assert "target-value" in html
+    assert "target-line" in html
+    assert "target-item" in html
+    assert "target-name" in html
+    assert "target-goal" in html
+    assert "target-strip" not in html
+    assert "target-cell" not in html
     assert "LDL-C" in html
-    assert "&lt;70" in html
+    assert "&lt;70 mg/dL" in html
     assert "ApoB" in html
-    assert "&lt;80" in html
+    assert "&lt;80 mg/dL" in html
     assert "TG" in html
-    assert "current 180" in html
+    assert "Current 180" in html
     assert "non-HDL-C" in html
-    assert "&lt;100" in html
-    assert "current 157" in html
+    assert "&lt;100 mg/dL" in html
+    assert "Current 157" in html
     assert "Calculated from total cholesterol minus HDL-C." in html
-    assert "target-cell-secondary" in html
+    assert "target-secondary" in html
     assert html.count("mg/dL") >= 4
     assert "High plaque burden (CAC 350)." in html
     assert "rcckm-metric-grid" not in html

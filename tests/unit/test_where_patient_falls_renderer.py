@@ -66,7 +66,7 @@ def test_where_patient_falls_displays_measured_values_and_effects():
     assert "HSCRP" in html
     assert "INFLAMMATORY DISEASE" in html
     assert "SLEEP / HYPOXIA" in html
-    assert "LIVER / MASLD" in html
+    assert "LIVER / FATTY LIVER" in html
     assert "PLAQUE / CAC" in html
     assert "ApoB 110 mg/dL" in html
     assert "LDL-C 115 mg/dL" in html
@@ -80,6 +80,7 @@ def test_where_patient_falls_displays_measured_values_and_effects():
     assert "hsCRP" in html
     assert "&gt;=2 mg/L is interpreted in clinical context" in html
     assert "OSA reported" in html
+    assert "Metabolic fatty liver disease" in html
     assert "MASLD reported" in html
     assert "Inflammation" not in html
     assert "LP(A)" in html

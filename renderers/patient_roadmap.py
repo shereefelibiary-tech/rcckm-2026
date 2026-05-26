@@ -14,6 +14,7 @@ from modules.risk_enhancers.breast_arterial_calcification import (
     BAC_PATIENT_CONTEXT_TEXT,
     has_breast_arterial_calcification,
 )
+from modules.risk_enhancers.masld import MASLD_CONTEXT_LABEL, MASLD_PATIENT_LABEL
 from modules.risk_enhancers.reproductive import (
     reproductive_history_summary,
     reproductive_marker_items,
@@ -564,7 +565,7 @@ def _contributor_groups(patient, result):
         other_context.append("OSA")
 
     if getattr(patient, "masld", False):
-        other_context.append("MASLD")
+        other_context.append(MASLD_CONTEXT_LABEL)
 
     if getattr(patient, "hiv", False):
         other_context.append("HIV on stable ART" if getattr(patient, "stable_art", False) else "HIV")
@@ -729,7 +730,7 @@ def _patient_contributor_groups(patient, result):
     if getattr(patient, "osa", False):
         other.append("OSA")
     if getattr(patient, "masld", False):
-        other.append("MASLD")
+        other.append(MASLD_PATIENT_LABEL)
     inflammatory = _inflammatory_context(patient)
     if inflammatory:
         other.append(", ".join(inflammatory))
@@ -1160,7 +1161,7 @@ def _patient_driver_sections(patient, result):
     if getattr(patient, "osa", False):
         context.append("OSA")
     if getattr(patient, "masld", False):
-        context.append("MASLD")
+        context.append(MASLD_CONTEXT_LABEL)
     if getattr(patient, "hiv", False):
         context.append("HIV on stable ART" if getattr(patient, "stable_art", False) else "HIV")
     if getattr(patient, "south_asian_ancestry", False):

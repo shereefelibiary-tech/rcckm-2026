@@ -52,7 +52,10 @@ def test_identify_risk_enhancers_separates_contexts():
 
     assert "Inflammatory/immune context: rheumatoid arthritis" in enhancers
     assert "Sleep/hypoxia context: OSA" in enhancers
-    assert "Liver/metabolic context: MASLD" in enhancers
+    assert (
+        "Liver/metabolic context: MASLD (metabolic dysfunction-associated steatotic liver disease)"
+        in enhancers
+    )
 
 
 def test_identify_risk_enhancers_lpa_80_nmol_is_not_guideline_enhancer():

@@ -39,8 +39,8 @@ Why risk is elevated:
 - Blood sugar / diabetes: A1c 6.2%. Improving blood sugar can lower long-term heart, kidney, and metabolic risk.
 - Kidney protection: eGFR 88; UACR 16. Kidney markers also help estimate heart and metabolic risk.
 - Blood pressure: 134/84 mmHg. Keeping blood pressure in a safer range protects the heart, brain, and kidneys.
-- Other factors: Lp(a) 28 nmol/L; OSA; MASLD. These details can shape the prevention plan with your clinician.
-- Other context: Lp(a) 28 nmol/L; BP 134/84; OSA; MASLD.
+- Other factors: Lp(a) 28 nmol/L; OSA; Metabolic fatty liver disease. These details can shape the prevention plan with your clinician.
+- Other context: Lp(a) 28 nmol/L; BP 134/84; OSA; fatty liver disease risk context.
 
 Current goals:
 - LDL-C: 118 mg/dL to <100 mg/dL

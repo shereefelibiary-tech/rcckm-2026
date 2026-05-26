@@ -1,6 +1,11 @@
 import html
 
 import streamlit as st
+from modules.risk_enhancers.masld import (
+    MASLD_PATIENT_LABEL,
+    MASLD_SHORT_LABEL,
+    MASLD_TOOLTIP,
+)
 from ui.html import render_html
 from ui.theme import component_theme_css
 
@@ -283,6 +288,8 @@ def format_signal(contribution):
 def format_tower_value(contribution):
     """Format the shortest readable in-tower label for an RSS contribution."""
     value = contribution.actual_value
+    if contribution.label == "MASLD":
+        return MASLD_PATIENT_LABEL
     if contribution.label == "Diabetes" and value is not None and not isinstance(value, bool):
         return f"A1c {_format_number(value)}%"
     if contribution.label == "Diabetes":
@@ -416,7 +423,7 @@ def format_rss_contributor_label(contribution):
         "Inflammatory arthritis": "Inflammatory arthritis",
         "Inflammatory disease": "Chronic inflammatory disease",
         "OSA": "Obstructive sleep apnea",
-        "MASLD": "MASLD",
+        "MASLD": MASLD_PATIENT_LABEL,
         "Incidental CAC": "Incidental coronary calcium on CT",
         "Premature menopause": "Premature menopause",
         "Early menopause": "Early menopause",
@@ -442,7 +449,7 @@ def format_rss_contributor_label(contribution):
         "Inflammatory arthritis": "Chronic inflammatory disease risk enhancer",
         "Inflammatory disease": "Chronic inflammatory disease risk enhancer",
         "HIV": "HIV-related risk enhancer",
-        "MASLD": "Fatty liver disease risk context",
+        "MASLD": MASLD_SHORT_LABEL,
         "Incidental CAC": "Qualitative plaque evidence",
     }.get(label, "")
     return {
@@ -629,7 +636,7 @@ def evidence_note(contribution):
     if label == "MASLD":
         return (
             "Liver-metabolic context",
-            "MASLD is shown as a small liver-metabolic risk contributor.",
+            f"{MASLD_TOOLTIP} It is shown as a small liver-metabolic risk contributor.",
         )
 
     if contribution.domain == "Reproductive History":

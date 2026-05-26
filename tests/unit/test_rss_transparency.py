@@ -352,13 +352,26 @@ def test_small_condition_contributors_stack_individually():
     assert rss_total == 6
     assert "OSA" in tower
     assert "Psoriasis" in tower
-    assert "MASLD" in tower
+    assert "Metabolic fatty liver disease" in tower
     assert "OSA" in rows
     assert "Psoriasis" in rows
+    assert "Metabolic fatty liver disease" in rows
     assert "MASLD" in rows
     assert '<span class="rss-tower-label">OSA</span>' not in tower
     assert '<span class="rss-tower-label">Psoriasis</span>' not in tower
     assert '<span class="rss-tower-label">MASLD</span>' not in tower
+
+
+def test_masld_rss_display_uses_readable_primary_label_without_duplication():
+    patient = Patient(age=55, sex="female", masld=True)
+    result, rss_total, contributions = run_patient(patient)
+    display = get_rss_display_items(result, contributions, rss_total)
+    masld = next(item for item in display["contributors"] if item["id"] == "masld")
+
+    assert masld["label"] == "Metabolic fatty liver disease"
+    assert masld["subtitle"] == "MASLD"
+    assert masld["label"] != masld["subtitle"]
+    assert masld["value_label"] == "Metabolic fatty liver disease"
 
 
 def test_missing_lpa_appears_as_missing_clarifier_when_relevant():
@@ -623,7 +636,9 @@ def test_low_rss_18_case_has_callout_and_keeps_exact_tower_scale():
     assert "ApoB 106 mg/dL" in rows
     assert "Triglycerides 182 mg/dL" in rows
     assert "OSA" in rows
+    assert "Metabolic fatty liver disease" in rows
     assert "MASLD" in rows
+    assert "Fatty liver disease risk context" not in rows
     assert 'data-rss-low-callout="true"' in html
     assert "Top:" in html
     assert "ApoB 106 mg/dL" in html

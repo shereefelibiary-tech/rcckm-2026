@@ -6,6 +6,7 @@ from modules.risk_enhancers.breast_arterial_calcification import (
     breast_arterial_calcification_display,
     has_breast_arterial_calcification,
 )
+from modules.risk_enhancers.masld import MASLD_PATIENT_LABEL, MASLD_SHORT_LABEL
 from modules.risk_enhancers.reproductive import reproductive_marker_items
 from ui.html import render_html
 from ui.theme import component_theme_css
@@ -389,7 +390,7 @@ def _build_grouped_rows(patient, result, *, show_not_active=False):
         "RISK ENHANCERS": [],
         "REPRODUCTIVE HISTORY": [],
         "SLEEP / HYPOXIA": [],
-        "LIVER / MASLD": [],
+        "LIVER / FATTY LIVER": [],
         "PLAQUE / CAC": [],
     }
 
@@ -606,10 +607,10 @@ def _build_grouped_rows(patient, result, *, show_not_active=False):
 
     if bool(getattr(patient, "masld", False)):
         add_row(
-            "LIVER / MASLD",
-            "MASLD",
+            "LIVER / FATTY LIVER",
+            MASLD_PATIENT_LABEL,
             "liver/metabolic context",
-            ["MASLD reported"],
+            [f"{MASLD_SHORT_LABEL} reported"],
             "enhancer context",
             active=True,
         )
