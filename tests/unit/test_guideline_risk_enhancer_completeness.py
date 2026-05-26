@@ -149,4 +149,4 @@ def test_prevent_category_remains_separate_from_rcckm_level_with_enhancers():
     assert result.level_classification["level"] == "3B"
     assert str(result.prevent_risk_category.value).lower() == "borderline"
     assert "Level 3B" in emr
-    assert "PREVENT 10-year risk 3.42%" in emr
+    assert "10-year ASCVD risk: 3.42%" in emr

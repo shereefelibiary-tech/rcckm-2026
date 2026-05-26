@@ -41,7 +41,7 @@ CLARIFIER_DEFS = [
         "label": "hsCRP",
         "domain": "hscrp_testing",
         "clarification_flag": None,
-        "reason": "inflammatory residual risk clarification",
+        "reason": "inflammatory biomarker context",
         "priority": "Medium",
     },
     {
@@ -92,7 +92,7 @@ def build_clarifier_card_html(result, include_title=True):
             "Lp(a)": "Lp(a) measurement",
             "CAC": "plaque burden clarification",
             "UACR": "complete kidney-risk assessment",
-            "hsCRP": "inflammatory residual risk",
+            "hsCRP": "inflammatory biomarker context",
             "Repeat fasting lipids": "triglyceride confirmation",
         }
         return reason_map.get(label, item["reason"])

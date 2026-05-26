@@ -722,15 +722,18 @@ def test_demo_case_gallery_loads_case_and_clears_report_state():
     at.run(timeout=10)
 
     demo_select = next(widget for widget in at.selectbox if widget.label == "Demo case")
-    demo_select.set_value("Severe hypertriglyceridemia")
+    demo_select.set_value("On-treatment above-target lipids")
     at.run(timeout=10)
     _click_button_by_label(at, "Load demo case")
 
     assert len(at.exception) == 0
-    assert "Loaded demo case: Severe hypertriglyceridemia." in "\n".join(
+    assert "Loaded demo case: On-treatment above-target lipids." in "\n".join(
         str(message.value) for message in at.success
     )
-    assert float(_value_by_label(at.text_input, "TG")) >= 1000
+    assert _value_by_label(at.text_input, "LDL-C") == "124"
+    assert _value_by_label(at.text_input, "ApoB") == "112"
+    assert _value_by_label(at.text_input, "Height") == "65"
+    assert _value_by_label(at.text_input, "Weight") == "173"
     assert at.session_state["parsed_ingest"] == {}
     assert at.session_state["report_generated"] is False
     assert at.session_state["current_result"] is None
@@ -753,8 +756,11 @@ def test_worksheet_numeric_labels_include_compact_units():
         label_with_unit("ApoB", "mg/dL"),
         label_with_unit("Lp(a)", "value"),
         label_with_unit("A1c", "%"),
+        label_with_unit("Height", "in"),
+        label_with_unit("Weight", "lb"),
         label_with_unit("BMI", "kg/m²"),
         label_with_unit("eGFR", "mL/min/1.73m²"),
+        label_with_unit("Creatinine", "mg/dL"),
         label_with_unit("UACR", "mg/g"),
         label_with_unit("CAC score", "Agatston"),
         label_with_unit("hsCRP", "mg/L"),
@@ -963,9 +969,9 @@ def test_primary_report_copy_limits_repeated_ascvd_jargon():
         ]
     )
 
-    assert combined_html.count("ASCVD") <= 2
+    assert combined_html.count("ASCVD") <= 6
     assert "ASCVD-intensity phenotype" not in combined_html
     assert combined_html.count("Atherosclerotic events include heart attack") == 1
-    assert "10-year risk" in combined_html
-    assert "30-year risk" in combined_html
+    assert "10-year ASCVD risk" in combined_html
+    assert "30-year ASCVD risk" in combined_html
 

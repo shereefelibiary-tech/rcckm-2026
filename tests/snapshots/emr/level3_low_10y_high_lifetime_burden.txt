@@ -1,18 +1,18 @@
 RISK CONTINUUM CKM
 
-Level 3B - actionable early CKM / atherogenic risk.
-PREVENT 10-year risk 1.37%; 30-year risk 9.09%.
+Level 3B - elevated lifetime cardiometabolic risk despite low short-term event risk.
+10-year ASCVD risk: 1.37%.
+30-year ASCVD risk: 9.09%.
 CKM stage 2.
-UACR not available; obtain to complete kidney-risk assessment. Risk context: premature family history.
+UACR not available; obtain to complete kidney-risk assessment. Risk context: premature family history of ASCVD.
 
 Assessment:
 - Hypertriglyceridemia (ICD: E78.1)
 - Prediabetes (ICD: R73.03)
 
 Recommendations:
-- Moderate-intensity statin therapy reasonable.
-- CAC not performed; below usual age threshold, use only if it would change management.
+- Focus on early risk reduction given metabolic risk signals and strong family history.
+- Moderate-intensity statin therapy may be reasonable after shared decision-making if ApoB/LDL-C burden, family history, or clinician judgment supports treatment.
+- CAC not routinely recommended at this age; consider only if results would change management.
 - Aspirin not indicated for routine primary prevention.
-- Lp(a) - one-time risk assessment
-- Obtain UACR to complete kidney-risk assessment.
-- hsCRP - inflammatory residual risk
+- Consider ApoB, Lp(a), and hsCRP for further risk clarification if not already available.

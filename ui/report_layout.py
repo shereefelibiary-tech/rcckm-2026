@@ -35,10 +35,14 @@ def demo_patient():
         lp_a_unit="nmol/L",
         a1c=7.1,
         diabetes=True,
+        height_in=69,
+        weight_lb=210,
         bmi=31,
+        creatinine=1.15,
         egfr=55,
         uacr=45,
         cac=350,
+        cac_percentile=94,
         clinical_ascvd=False,
         smoker=False,
         smoking=False,
@@ -791,11 +795,13 @@ def render_report(st, patient):
         lambda: _build_ckm_kdigo_summary_html(result, patient),
     )
 
-    show_not_active_markers = st.checkbox(
-        "Show not-active markers",
-        value=False,
-        key="where_patient_falls_show_not_active",
-    )
+    _wpf_spacer, wpf_control = st.columns([1, 0.34])
+    with wpf_control:
+        show_not_active_markers = st.checkbox(
+            "Show not-active markers",
+            value=False,
+            key="where_patient_falls_show_not_active",
+        )
     _safe_panel(
         st,
         "Where this patient falls",

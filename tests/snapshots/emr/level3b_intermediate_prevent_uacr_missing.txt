@@ -1,7 +1,8 @@
 RISK CONTINUUM CKM
 
 Level 3B - actionable early CKM / atherogenic risk.
-PREVENT 10-year risk 5.41%; 30-year risk 22.55%.
+10-year ASCVD risk: 5.41%.
+30-year ASCVD risk: 22.55%.
 CKM stage 2 with kidney G2; albuminuria not measured and plaque unmeasured / CAC not performed.
 UACR not available; obtain to complete kidney-risk assessment.
 
@@ -15,4 +16,4 @@ Recommendations:
 - Treat BP toward goal <130/80.
 - CAC may clarify plaque burden if treatment intensity remains uncertain.
 - Aspirin not indicated for routine primary prevention.
-- hsCRP - inflammatory residual risk
+- hsCRP - inflammatory biomarker clarification

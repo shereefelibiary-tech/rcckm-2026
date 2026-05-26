@@ -16,6 +16,25 @@ def test_rss_apob_scoring():
     assert any(c.label == "ApoB elevation" and c.points == 8 for c in contributions)
 
 
+def test_rss_severe_ldl_scoring_when_apob_missing():
+    patient = Patient(age=45, sex="male", ldl_c=212, apob=None)
+    contributions = build_rss_contributions(patient, None)
+
+    ldl = next(c for c in contributions if c.label == "LDL-C")
+    assert ldl.actual_value == 212
+    assert ldl.points == 10
+    assert ldl.severity == "major"
+    assert calculate_rss_total(contributions) > 0
+
+
+def test_rss_severe_ldl_does_not_double_count_when_apob_present():
+    patient = Patient(age=45, sex="male", ldl_c=212, apob=142)
+    contributions = build_rss_contributions(patient, None)
+
+    assert any(c.label == "ApoB elevation" for c in contributions)
+    assert not any(c.label == "LDL-C" for c in contributions)
+
+
 def test_rss_lpa_scoring():
     patient = Patient(age=60, sex="male", lp_a_value=260, lp_a_unit="nmol/L")
     contributions = build_rss_contributions(patient, None)

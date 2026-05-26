@@ -104,7 +104,7 @@ def test_elevated_30_year_prevent_trajectory_sets_at_least_level_3_without_plaqu
     assert position["level"] < 4
     assert not any("Subclinical coronary atherosclerosis" in name for name in names)
     assert "plaque unmeasured / CAC not performed" in render_emr_note(patient, result)
-    assert "30-year risk 10.5%" in text
+    assert "30-year ASCVD risk: 10.5%" in text
 
 
 def test_missing_uacr_is_not_normal_albuminuria_but_zero_is_measured():

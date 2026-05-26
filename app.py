@@ -4,7 +4,7 @@ except ModuleNotFoundError:
     st = None
 
 from ui.ingest_panel import parse_ingest_text, render_ingest_panel
-from ui.demo_case_gallery import build_demo_patient, demo_case_options
+from ui.demo_case_gallery import build_demo_patient, demo_case_description, demo_case_options
 from ui.input_worksheet import (
     apply_patient_to_session_state,
     build_patient_from_inputs,
@@ -132,7 +132,7 @@ def main():
 
         st.markdown("### Demo Case Gallery")
         st.caption(
-            "Load a representative clinical scenario to see how RCCKM structures risk, action, EMR documentation, and the patient roadmap."
+            "Load a realistic primary-care scenario with standard vitals and lipids to see how RCCKM structures risk, action, EMR documentation, and the patient roadmap."
         )
         demo_options = demo_case_options()
         labels = [label for label, _case_name in demo_options]
@@ -142,6 +142,10 @@ def main():
             key="demo_case_gallery_selection",
         )
         selected_case_name = dict(demo_options).get(selected_label)
+        if selected_case_name:
+            description = demo_case_description(selected_case_name)
+            if description:
+                st.caption(description)
         if st.button("Load demo case", disabled=selected_case_name is None):
             _load_demo_case(selected_label, selected_case_name)
 

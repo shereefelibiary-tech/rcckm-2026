@@ -269,10 +269,10 @@ def test_build_action_plan_adds_hscrp_for_metabolic_or_family_history_context():
 
     plan = build_action_plan(patient, RCCKMResult())
 
-    assert "Consider hsCRP to clarify inflammatory residual risk." in plan["recommendations"]
+    assert "Consider hsCRP to clarify inflammatory biomarker context." in plan["recommendations"]
     assert (
         plan["domains"]["hscrp_testing"]
-        == "Consider hsCRP to clarify inflammatory residual risk."
+        == "Consider hsCRP to clarify inflammatory biomarker context."
     )
 
 

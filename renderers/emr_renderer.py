@@ -153,6 +153,35 @@ def _early_lifetime_burden_path(patient, result):
     )
 
 
+def _young_family_metabolic_trajectory(patient, result):
+    if bool(getattr(patient, "clinical_ascvd", False)):
+        return False
+    age = getattr(patient, "age", None)
+    if age is None or not (30 <= age < 40):
+        return False
+    if str(_display_value(getattr(result, "prevent_risk_category", None)) or "").upper() != "LOW":
+        return False
+    if not _has_premature_family_history(patient):
+        return False
+
+    position = classify_continuum_position(patient, result)
+    if position.get("level") != 3 or position.get("sublevel") != "3B":
+        return False
+
+    a1c = getattr(patient, "a1c", None)
+    triglycerides = getattr(patient, "triglycerides", None)
+    bmi = getattr(patient, "bmi", None)
+    ldl_c = getattr(patient, "ldl_c", None)
+    apob = getattr(patient, "apob", None)
+    return bool(
+        (a1c is not None and 5.7 <= a1c < 6.5)
+        or (triglycerides is not None and triglycerides >= 150)
+        or (bmi is not None and bmi >= 25)
+        or (ldl_c is not None and 160 <= ldl_c < 190)
+        or (apob is not None and apob >= 100)
+    )
+
+
 def _near_level3_threshold_line(patient, result):
     if bool(getattr(patient, "clinical_ascvd", False)):
         return None
@@ -179,6 +208,9 @@ def _near_level3_threshold_line(patient, result):
 
 
 def _risk_level_summary(patient, result):
+    if _young_family_metabolic_trajectory(patient, result):
+        return "Level 3B - elevated lifetime cardiometabolic risk despite low short-term event risk"
+
     classification = getattr(result, "level_classification", None) or {}
     classification_level = str(classification.get("level") or "")
     classification_label = str(classification.get("label") or "").strip()
@@ -333,12 +365,12 @@ def _prevent_impression_sentence(patient, result):
 
     fragments = []
     if getattr(result, "prevent_10y_ascvd", None) is not None:
-        fragments.append(f"PREVENT 10-year risk {result.prevent_10y_ascvd:g}%")
+        fragments.append(f"10-year ASCVD risk: {result.prevent_10y_ascvd:g}%")
     if getattr(result, "prevent_30y_ascvd", None) is not None:
-        fragments.append(f"30-year risk {result.prevent_30y_ascvd:g}%")
+        fragments.append(f"30-year ASCVD risk: {result.prevent_30y_ascvd:g}%")
     if not fragments:
         return "PREVENT unavailable or incomplete; interpretation is based on reviewed worksheet data."
-    return "; ".join(fragments) + "."
+    return ".\n".join(fragments) + "."
 
 
 def _disease_context_sentence(patient, result):
@@ -421,6 +453,21 @@ def _history_context_sentence(patient):
     return "Risk context: " + "; ".join(parts) + "."
 
 
+def _young_family_history_context_sentence(patient):
+    family_summary = str(getattr(patient, "family_history_summary", "") or "").strip()
+    if not family_summary:
+        relationship = str(getattr(patient, "family_history_relationship", "") or "").strip()
+        event_type = str(getattr(patient, "family_history_event_type", "") or "").strip()
+        event_age = getattr(patient, "family_history_age_at_event", None)
+        bits = [bit for bit in (relationship, event_type) if bit]
+        if event_age is not None:
+            bits.append(f"age {event_age:g}")
+        family_summary = " ".join(bits)
+    if family_summary:
+        return f"Risk context: premature family history of ASCVD ({family_summary})."
+    return "Risk context: premature family history of ASCVD."
+
+
 def _impression_paragraphs(patient, result):
     risk_level = _risk_level_summary(patient, result)
     first = f"{risk_level}." if risk_level else None
@@ -432,7 +479,11 @@ def _impression_paragraphs(patient, result):
     third_parts = []
     if _uacr_completion_relevant(patient, result):
         third_parts.append("UACR not available; obtain to complete kidney-risk assessment.")
-    history = _history_context_sentence(patient)
+    history = (
+        _young_family_history_context_sentence(patient)
+        if _young_family_metabolic_trajectory(patient, result)
+        else _history_context_sentence(patient)
+    )
     if history:
         third_parts.append(history)
     if bool(getattr(result, "severe_hypercholesterolemia", False)):
@@ -471,9 +522,21 @@ def _short_recommendation_line(recommendation):
         "Treat blood pressure toward individualized goal.": "Treat BP toward goal <130/80.",
         "CAC reasonable for risk clarification if treatment decision remains uncertain.": "CAC reasonable if treatment decision remains uncertain.",
         "Aspirin may be considered only if bleeding risk is low after shared decision-making.": "Aspirin only if bleeding risk is low after shared decision-making.",
-        "Consider hsCRP to clarify inflammatory residual risk.": "Consider hsCRP if inflammatory residual risk would change management.",
+        "Consider hsCRP to clarify inflammatory biomarker context.": "Consider hsCRP if inflammatory biomarker context would change management.",
     }
     return replacements.get(recommendation, recommendation)
+
+
+def _young_family_metabolic_recommendations(patient, result):
+    if not _young_family_metabolic_trajectory(patient, result):
+        return None
+    return [
+        "Focus on early risk reduction given metabolic risk signals and strong family history.",
+        "Moderate-intensity statin therapy may be reasonable after shared decision-making if ApoB/LDL-C burden, family history, or clinician judgment supports treatment.",
+        "CAC not routinely recommended at this age; consider only if results would change management.",
+        "Aspirin not indicated for routine primary prevention.",
+        "Consider ApoB, Lp(a), and hsCRP for further risk clarification if not already available.",
+    ]
 
 
 def render_emr_note(patient, result):
@@ -504,7 +567,9 @@ def render_emr_note(patient, result):
         lines.append("- No diagnosis candidates generated.")
 
     lines.extend(["", "Recommendations:"])
-    recommendations = build_action_recommendation_lines(patient, result)
+    recommendations = _young_family_metabolic_recommendations(patient, result)
+    if recommendations is None:
+        recommendations = build_action_recommendation_lines(patient, result)
     if recommendations:
         rendered_recommendations = []
         for recommendation in recommendations:

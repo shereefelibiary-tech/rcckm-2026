@@ -47,7 +47,8 @@ def test_render_emr_note_outputs_plain_text_sections_in_order():
     assert "Context:" not in note
     assert note.index("HIGH.") < note.index("Assessment:") < note.index("Recommendations:")
     assert "HIGH." in note
-    assert "PREVENT 10-year risk 8.2%; 30-year risk 24.5%." in note
+    assert "10-year ASCVD risk: 8.2%." in note
+    assert "30-year ASCVD risk: 24.5%." in note
     assert "CKM stage 3 with kidney G3aA2; albuminuria not measured and CAC 350." in note
     assert "- Clinical ASCVD (ICD: I25.10)" in note
     assert "- Type 2 diabetes mellitus (ICD: E11.9)" in note

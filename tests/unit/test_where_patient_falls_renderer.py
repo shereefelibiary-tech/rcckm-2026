@@ -40,9 +40,11 @@ def test_where_patient_falls_displays_measured_values_and_effects():
     assert "WHERE THIS PATIENT FALLS" in html
     assert "Inputs, missing data, and level-driving findings." in html
     assert "Risk impact: Major = changes level/action" in html
-    assert "Contributes = supports risk interpretation" in html
-    assert "Context only = relevant background" in html
-    assert "Not active = not currently contributing" in html
+    assert "Contributes = supports risk" in html
+    assert "Context = background" in html
+    assert "Not active = audit only" in html
+    assert "supports risk interpretation" not in html
+    assert "not currently contributing" not in html
     assert "Active findings:" not in html
     assert "Active signals:" not in html
     assert "ApoB ApoB" not in html
@@ -100,6 +102,29 @@ def test_where_patient_falls_surfaces_missing_clarifiers():
     assert "ApoB missing" in html
     assert "Plaque unmeasured" in html
     assert "missing" in html
+
+
+def test_where_patient_falls_shows_cac_percentile_as_clinician_detail_when_useful():
+    patient = Patient(age=45, sex="male", cac=38, cac_percentile=82)
+    result, _rss_total, _contributions = run_patient(patient)
+
+    html = build_where_patient_falls_html(patient, result)
+
+    assert "CAC 38; Higher than expected for age and sex. Clinician detail: 82th percentile." in html
+
+
+def test_where_patient_falls_omits_invalid_or_zero_cac_percentile_context():
+    cac_zero = Patient(age=45, sex="male", cac=0, cac_percentile=99)
+    zero_result, _rss_total, _contributions = run_patient(cac_zero)
+    zero_html = build_where_patient_falls_html(cac_zero, zero_result, show_not_active=True)
+    assert "CAC 0" in zero_html
+    assert "99th percentile" not in zero_html
+
+    invalid = Patient(age=45, sex="male", cac=38, cac_percentile=120)
+    invalid_result, _rss_total, _contributions = run_patient(invalid)
+    invalid_html = build_where_patient_falls_html(invalid, invalid_result)
+    assert "CAC 38" in invalid_html
+    assert "percentile" not in invalid_html.lower()
 
 
 def test_where_patient_falls_normalizes_risk_impact_labels():

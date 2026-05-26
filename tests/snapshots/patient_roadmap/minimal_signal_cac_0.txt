@@ -3,7 +3,7 @@ Your results show where you stand today and the most important steps to lower fu
 
 Where you stand:
 - Missing inputs: total cholesterol, HDL-C, systolic BP, BP treatment status, statin/lipid-lowering therapy status, diabetes status, smoking status, BMI, eGFR
-- 10-year risk: unavailable
+- 10-year ASCVD risk: unavailable
 - PREVENT estimate unavailable from the current data.
 - Coronary calcium score: 0, with no calcified plaque detected.
 - Care focus: Level 1 - Minimal risk signal

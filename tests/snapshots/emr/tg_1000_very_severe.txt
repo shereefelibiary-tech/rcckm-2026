@@ -16,4 +16,4 @@ Recommendations:
 - Aspirin not indicated for routine primary prevention.
 - Lp(a) - one-time risk assessment
 - Obtain UACR to complete kidney-risk assessment.
-- hsCRP - inflammatory residual risk
+- hsCRP - inflammatory biomarker clarification

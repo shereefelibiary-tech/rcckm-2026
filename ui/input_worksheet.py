@@ -5,6 +5,7 @@ from modules.family_history.engine import (
     build_family_history_payload,
     build_family_history_summary,
 )
+from modules.plaque.engine import normalize_cac_percentile
 from modules.risk_enhancers.reproductive import (
     is_reproductive_history_applicable,
     reproductive_history_summary,
@@ -23,6 +24,8 @@ UNIT_LABEL_BY_KEY = {
     "apob": "mg/dL",
     "lp_a_value": "value",
     "a1c": "%",
+    "height_in": "in",
+    "weight_lb": "lb",
     "bmi": "kg/m²",
     "egfr": "mL/min/1.73m²",
     "uacr": "mg/g",
@@ -60,6 +63,10 @@ FIELD_ALIASES = {
     "lpa": "lp_a_value",
     "lpa_value": "lp_a_value",
     "lpa_unit": "lp_a_unit",
+    "height": "height_in",
+    "height_inches": "height_in",
+    "weight": "weight_lb",
+    "weight_lbs": "weight_lb",
     "smoking": "smoker",
     "premature_family_history": "family_history_premature_ascvd",
     "premature_fhx_ascvd": "family_history_premature_ascvd",
@@ -84,7 +91,10 @@ WORKSHEET_KEY_BY_FIELD = {
     "diabetic_neuropathy": "input_diabetic_neuropathy",
     "abi": "input_abi",
     "abi_lt_0_9": "input_abi_lt_0_9",
+    "height_in": "input_height_in",
+    "weight_lb": "input_weight_lb",
     "bmi": "input_bmi",
+    "creatinine": "input_creatinine",
     "egfr": "input_egfr",
     "uacr": "input_uacr",
     "cac": "input_cac",
@@ -133,6 +143,10 @@ WORKSHEET_KEY_BY_FIELD = {
     "neighborhood_sdoh_context": "input_neighborhood_sdoh_context",
     "lipid_lowering": "input_lipid_lowering",
     "lipid_supplements": "input_lipid_supplements",
+    "medications_raw": "input_medications_raw",
+    "dm_meds_raw": "input_dm_meds_raw",
+    "statin_intensity": "input_statin_intensity",
+    "statin_intolerance": "input_statin_intolerance",
     "bp_treated": "input_bp_treated",
     "sglt2": "input_sglt2",
     "glp1": "input_glp1",
@@ -186,6 +200,11 @@ def build_patient_from_inputs(inputs):
     sex = values.get("sex") or "male"
     cac_value = parse_optional_float(values.get("cac"))
     cac_not_done = bool(values.get("cac_not_done", False)) if cac_value is None else False
+    height_in = parse_optional_float(values.get("height_in"))
+    weight_lb = parse_optional_float(values.get("weight_lb"))
+    bmi = parse_optional_float(values.get("bmi"))
+    if bmi is None and height_in and weight_lb:
+        bmi = round(weight_lb * 703 / (height_in * height_in), 1)
     patient = Patient(
         age=parse_optional_int(values.get("age")),
         sex=str(sex).lower(),
@@ -202,7 +221,10 @@ def build_patient_from_inputs(inputs):
         egfr=parse_optional_float(values.get("egfr")),
         uacr=parse_optional_float(values.get("uacr")),
         a1c=parse_optional_float(values.get("a1c")),
-        bmi=parse_optional_float(values.get("bmi")),
+        height_in=height_in,
+        weight_lb=weight_lb,
+        bmi=bmi,
+        creatinine=parse_optional_float(values.get("creatinine")),
         diabetes=_optional_bool(values, "diabetes"),
         diabetes_duration_years=parse_optional_float(values.get("diabetes_duration_years")),
         diabetic_retinopathy=_optional_bool(values, "diabetic_retinopathy"),
@@ -237,7 +259,7 @@ def build_patient_from_inputs(inputs):
         suspected_fh_hefh=_optional_bool(values, "suspected_fh_hefh"),
         incidental_cac=_optional_bool(values, "incidental_cac"),
         incidental_cac_severity=_empty_to_none(values.get("incidental_cac_severity")),
-        cac_percentile=parse_optional_float(values.get("cac_percentile")),
+        cac_percentile=normalize_cac_percentile(parse_optional_float(values.get("cac_percentile"))),
         zip_code=_empty_to_none(values.get("zip_code")),
         neighborhood_sdoh_context=_empty_to_none(values.get("neighborhood_sdoh_context")),
         family_history_premature_ascvd=_optional_bool(
@@ -319,6 +341,8 @@ INTEGER_INPUT_FIELDS = {
     "cac",
     "uacr",
     "egfr",
+    "height_in",
+    "weight_lb",
     "diabetes_duration_years",
     "family_history_age_at_event",
     "menopause_age",
@@ -520,16 +544,25 @@ def render_manual_worksheet(st, parsed):
 
     with st.container(border=True):
         section_heading(st, "Metabolic / Kidney")
-        mk_cols = st.columns([0.8, 1.0, 0.8, 0.8, 0.8])
-        with mk_cols[0]:
-            inputs["a1c"] = _numeric_input(st, "A1c", parsed, "a1c", step=0.1, decimals=1)
-        with mk_cols[1]:
-            inputs["diabetes"] = _checkbox_input(st, "Diabetes", parsed, "diabetes")
-        with mk_cols[2]:
+        anthro_cols = st.columns([0.76, 0.76, 0.76, 0.76])
+        with anthro_cols[0]:
+            inputs["height_in"] = _numeric_input(st, "Height", parsed, "height_in")
+        with anthro_cols[1]:
+            inputs["weight_lb"] = _numeric_input(st, "Weight", parsed, "weight_lb")
+        with anthro_cols[2]:
             inputs["bmi"] = _numeric_input(st, "BMI", parsed, "bmi", step=0.1, decimals=1)
-        with mk_cols[3]:
+        with anthro_cols[3]:
+            inputs["a1c"] = _numeric_input(st, "A1c", parsed, "a1c", step=0.1, decimals=1)
+        kidney_cols = st.columns([1.0, 0.8, 0.8, 0.8])
+        with kidney_cols[0]:
+            inputs["diabetes"] = _checkbox_input(st, "Diabetes", parsed, "diabetes")
+        with kidney_cols[1]:
+            inputs["creatinine"] = _numeric_input(
+                st, "Creatinine", parsed, "creatinine", step=0.01, decimals=2
+            )
+        with kidney_cols[2]:
             inputs["egfr"] = _numeric_input(st, "eGFR", parsed, "egfr")
-        with mk_cols[4]:
+        with kidney_cols[3]:
             inputs["uacr"] = _numeric_input(st, "UACR", parsed, "uacr")
             if inputs["uacr"] is None:
                 st.caption("UACR missing - needed for kidney risk completion.")
@@ -815,19 +848,46 @@ def render_manual_worksheet(st, parsed):
             inputs["lipid_supplements"] = _checkbox_input(
                 st, "Lipid supplements", parsed, "lipid_supplements"
             )
-        inputs["medications_raw"] = st.session_state.get(
-            "input_medications_raw", parsed.get("medications_raw")
-        )
-        inputs["dm_meds_raw"] = st.session_state.get(
-            "input_dm_meds_raw", parsed.get("dm_meds_raw")
-        )
-        inputs["statin_intensity"] = st.session_state.get(
-            "input_statin_intensity", parsed.get("statin_intensity")
-        )
-        inputs["statin_intolerance"] = bool(
-            st.session_state.get(
-                "input_statin_intolerance", parsed.get("statin_intolerance", False)
+        med_cols = st.columns([1.8, 1.3, 0.9, 0.9])
+        with med_cols[0]:
+            inputs["medications_raw"] = st.text_input(
+                "Medication list",
+                key="input_medications_raw",
+                **(
+                    {}
+                    if "input_medications_raw" in st.session_state
+                    else {"value": parsed.get("medications_raw") or ""}
+                ),
             )
-        )
+        with med_cols[1]:
+            inputs["dm_meds_raw"] = st.text_input(
+                "Diabetes meds",
+                key="input_dm_meds_raw",
+                **(
+                    {}
+                    if "input_dm_meds_raw" in st.session_state
+                    else {"value": parsed.get("dm_meds_raw") or ""}
+                ),
+            )
+        with med_cols[2]:
+            statin_options = ["", "low", "moderate", "high"]
+            parsed_statin = parsed.get("statin_intensity") or ""
+            inputs["statin_intensity"] = st.selectbox(
+                "Statin intensity",
+                statin_options,
+                key="input_statin_intensity",
+                **(
+                    {}
+                    if "input_statin_intensity" in st.session_state
+                    else {"index": statin_options.index(parsed_statin) if parsed_statin in statin_options else 0}
+                ),
+            )
+        with med_cols[3]:
+            inputs["statin_intolerance"] = _checkbox_input(
+                st, "Statin intolerance", parsed, "statin_intolerance"
+            )
+        inputs["medications_raw"] = _empty_to_none(inputs.get("medications_raw"))
+        inputs["dm_meds_raw"] = _empty_to_none(inputs.get("dm_meds_raw"))
+        inputs["statin_intensity"] = _empty_to_none(inputs.get("statin_intensity"))
 
     return inputs

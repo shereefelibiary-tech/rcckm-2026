@@ -463,7 +463,8 @@ def test_level_2b_converging_early_signals_low_prevent_uses_formal_taxonomy():
     assert classification.level == "2B"
     assert classification.prevent_category == "LOW"
     assert "Level 2B - converging early risk signals." in note
-    assert "PREVENT 10-year risk 0.8%; 30-year risk 5.76%." in note
+    assert "10-year ASCVD risk: 0.8%." in note
+    assert "30-year ASCVD risk: 5.76%." in note
     assert "kidney G1A1" in note
     assert "Atherogenic/metabolic burden:" not in note
     assert "reproductive history: Preeclampsia." in note
@@ -555,7 +556,8 @@ def test_level_3b_atherogenic_30y_ldl_apob_uses_intensity_cac_wording():
     assert "ApoB >=120" in classification.drivers
     assert "triglycerides >=150" in classification.drivers
     assert "Level 3B - actionable early CKM / atherogenic risk." in note
-    assert "PREVENT 10-year risk 1.73%; 30-year risk 11.85%." in note
+    assert "10-year ASCVD risk: 1.73%." in note
+    assert "30-year ASCVD risk: 11.85%." in note
     assert "Moderate-intensity statin therapy is reasonable to reduce cumulative atherogenic exposure" in actions
     assert "CAC may clarify plaque burden if treatment intensity remains uncertain" in actions
     assert "CAC reasonable for risk clarification if treatment decision remains uncertain" not in actions
@@ -603,7 +605,7 @@ def test_level_3b_intermediate_prevent_uacr_missing_prioritizes_uacr_and_specifi
         "Treat BP toward goal <130/80.",
         "CAC may clarify plaque burden if treatment intensity remains uncertain.",
         "Aspirin not indicated for routine primary prevention.",
-        "hsCRP - inflammatory residual risk",
+        "hsCRP - inflammatory biomarker clarification",
     ]
     assert "CAC reasonable for risk clarification if treatment decision remains uncertain" not in actions
     assert "subclinical coronary atherosclerosis" not in diagnoses.lower()

@@ -186,6 +186,14 @@ def test_build_patient_from_inputs_accepts_common_aliases():
     assert payload["lpa"] == 80
 
 
+def test_build_patient_from_inputs_ignores_invalid_cac_percentile():
+    valid = build_patient_from_inputs({"age": 45, "sex": "male", "cac": 38, "cac_percentile": 75})
+    invalid = build_patient_from_inputs({"age": 45, "sex": "male", "cac": 38, "cac_percentile": 101})
+
+    assert valid.cac_percentile == 75
+    assert invalid.cac_percentile is None
+
+
 def test_normalize_input_aliases_manual_canonical_values_override_parsed_aliases():
     values = normalize_input_aliases(
         {

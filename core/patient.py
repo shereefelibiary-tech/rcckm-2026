@@ -19,7 +19,10 @@ class Patient:
     egfr: Optional[float] = None
     uacr: Optional[float] = None
     a1c: Optional[float] = None
+    height_in: Optional[float] = None
+    weight_lb: Optional[float] = None
     bmi: Optional[float] = None
+    creatinine: Optional[float] = None
     diabetes: Optional[bool] = None
     diabetes_duration_years: Optional[float] = None
     diabetic_retinopathy: Optional[bool] = None

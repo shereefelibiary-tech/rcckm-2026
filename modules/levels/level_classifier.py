@@ -194,6 +194,18 @@ def _metabolic_burden_count(patient) -> int:
     )
 
 
+def _young_family_metabolic_trajectory(patient, result) -> bool:
+    age = _num(getattr(patient, "age", None))
+    prevent_category = _risk_value(getattr(result, "prevent_risk_category", None))
+    return bool(
+        age is not None
+        and 30 <= age < 40
+        and prevent_category == "LOW"
+        and _has_premature_family_history(patient)
+        and _metabolic_burden_count(patient) >= 2
+    )
+
+
 def _mild_signal_drivers(patient, result) -> list[str]:
     drivers = []
     if _has_prediabetes(patient):
@@ -396,15 +408,20 @@ def classify_rcckm_level(patient, prevent_result=None, rss_result=None, diagnosi
 
     if _ldl_160_189(patient):
         level = "3B" if len(actionable) >= 2 or len(mild) >= 2 else "3A"
-        label = (
-            "Level 3B - actionable early CKM / atherogenic risk"
-            if level == "3B"
-            else "Level 3A - elevated long-term risk trajectory"
-        )
+        label = "Level 3A - elevated long-term risk trajectory"
+        short_reason = "LDL-C 160-189 supports cumulative atherogenic exposure discussion."
+        if level == "3B":
+            if _young_family_metabolic_trajectory(patient, result):
+                label = "Level 3B - elevated lifetime cardiometabolic risk despite low short-term event risk"
+                short_reason = (
+                    "Low short-term ASCVD risk with premature family history and metabolic signals creates a prevention opportunity."
+                )
+            else:
+                label = "Level 3B - actionable early CKM / atherogenic risk"
         return _classification(
             level,
             label,
-            "LDL-C 160-189 supports cumulative atherogenic exposure discussion.",
+            short_reason,
             actionable or ["LDL-C 160-189"],
             result,
             patient,

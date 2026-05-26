@@ -668,7 +668,7 @@ def _build_testing_actions(patient, result):
             recommendations,
             domains,
             "hscrp_testing",
-            "Consider hsCRP to clarify inflammatory residual risk.",
+            "Consider hsCRP to clarify inflammatory biomarker context.",
         )
 
     if triglycerides is not None and 400 <= triglycerides < 500:

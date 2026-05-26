@@ -1,0 +1,77 @@
+DEMO: Younger patient with premature family history
+CASE: younger_strong_family_history
+
+EMR:
+RISK CONTINUUM CKM
+
+Level 3B - elevated lifetime cardiometabolic risk despite low short-term event risk.
+10-year ASCVD risk: 1.03%.
+30-year ASCVD risk: 7.53%.
+CKM stage 2 with kidney G1A1.
+Risk context: premature family history of ASCVD (Father MI age 49).
+
+Assessment:
+- Hypertriglyceridemia (ICD: E78.1)
+- Prediabetes (ICD: R73.03)
+
+Recommendations:
+- Focus on early risk reduction given metabolic risk signals and strong family history.
+- Moderate-intensity statin therapy may be reasonable after shared decision-making if ApoB/LDL-C burden, family history, or clinician judgment supports treatment.
+- CAC not routinely recommended at this age; consider only if results would change management.
+- Aspirin not indicated for routine primary prevention.
+- Consider ApoB, Lp(a), and hsCRP for further risk clarification if not already available.
+
+PATIENT ROADMAP:
+Your Prevention Roadmap
+Your results show where you stand today and the most important steps to lower future heart, kidney, and metabolic risk.
+
+Where you stand:
+- 10-year ASCVD risk: 1.03%
+- 30-year ASCVD risk: 7.53%
+- Near-term estimated risk is low.
+- About 8 out of 100 similar patients may have a heart attack, stroke, or related artery disease event over the next 30 years.
+- Your 10-year ASCVD risk is low, and your 30-year ASCVD risk helps guide prevention planning.
+- About 1 out of 100 similar patients may have a heart attack, stroke, or related artery disease event over the next 10 years.
+- Plaque status has not been measured.
+- Care focus: Level 3B - elevated lifetime cardiometabolic risk despite low short-term event risk
+
+Why risk is elevated:
+- Early metabolic signals are present.
+- Cholesterol particles: ApoB 118; LDL-C 164; non-HDL-C 188. These numbers help show plaque-driving cholesterol in the blood.
+- Blood sugar / diabetes: A1c 5.9%. Improving blood sugar can lower long-term heart, kidney, and metabolic risk.
+- Kidney protection: eGFR 100; UACR 9. Kidney markers also help estimate heart and metabolic risk.
+- Blood pressure: 124/78 mmHg. Keeping blood pressure in a safer range protects the heart, brain, and kidneys.
+- Other factors: Lp(a) 96 nmol/L; Father MI age 49. These details can shape the prevention plan with your clinician.
+- Other context: Lp(a) 96 nmol/L; BP 124/78; Father MI age 49.
+
+Current goals:
+- LDL-C: 164 mg/dL to <100 mg/dL
+- non-HDL-C: 188 mg/dL to <130 mg/dL
+- ApoB: 118 mg/dL to <90 mg/dL
+- A1c: 5.9% to individualized
+- BP: 124/78 mmHg to <130/80 when appropriate
+- Kidney / albuminuria: 9 mg/g; G1A1 to reduce albuminuria / preserve eGFR
+- Weight: BMI 29.4 to individualized
+
+Next steps:
+1. Lower plaque-driving cholesterol: Treat toward the cholesterol goals above.
+2. Aspirin safety: Do not start aspirin unless your clinician recommends it.
+3. Additional testing: A calcium scan may help if treatment choices are still uncertain.
+4. Additional testing: hsCRP can help clarify inflammatory risk context when clinically relevant.
+
+This roadmap is for discussion with your clinician. Medication decisions should be individualized.
+
+ACTIONS:
+- Moderate-intensity statin therapy is reasonable to reduce cumulative atherogenic exposure.
+- Recheck lipid profile 4-12 weeks after starting or intensifying therapy, then every 6-12 months.
+- CAC not routinely recommended at this age; consider only if results would change management.
+- Aspirin not indicated for routine primary prevention.
+- hsCRP - inflammatory biomarker clarification
+
+RSS: 19
+RSS CONTRIBUTORS:
+- ApoB elevation: 118.0 (+8)
+- Elevated Lp(a): 96.0 nmol/L (+2)
+- Hypertriglyceridemia: 186.0 (+4)
+- A1c elevation: 5.9 (+2)
+- Premature family history: Father MI age 49 (+3)

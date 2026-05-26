@@ -27,6 +27,7 @@ DOMAIN_COLORS = {
 CONTRIBUTION_ORDER = {
     "CAC plaque burden": 10,
     "ApoB elevation": 20,
+    "LDL-C": 21,
     "Reduced eGFR": 30,
     "Albuminuria": 40,
     "Diabetes": 50,
@@ -95,6 +96,7 @@ RSS_DISPLAY_ORDER_TOP_TO_BOTTOM = {
     "Reduced eGFR": 51,
     "Elevated Lp(a)": 60,
     "ApoB elevation": 70,
+    "LDL-C": 71,
     "CAC plaque burden": 80,
 }
 
@@ -137,6 +139,7 @@ def _contribution_id(contribution):
     ids = {
         "CAC plaque burden": "cac",
         "ApoB elevation": "apob",
+        "LDL-C": "ldl_c",
         "Elevated Lp(a)": "lpa",
         "Reduced eGFR": "egfr",
         "Albuminuria": "uacr",
@@ -264,6 +267,7 @@ def format_signal(contribution):
     value_labels = {
         "CAC plaque burden": f"CAC {_format_number(value)}",
         "ApoB elevation": f"ApoB {_format_number(value)} mg/dL",
+        "LDL-C": f"LDL-C {_format_number(value)} mg/dL",
         "Elevated Lp(a)": f"Lp(a) {value}",
         "Inflammatory risk": f"hsCRP {_format_number(value)} mg/L",
         "Reduced eGFR": f"eGFR {_format_number(value)}",
@@ -295,6 +299,7 @@ def format_tower_value(contribution):
     value_labels = {
         "CAC plaque burden": f"CAC {_format_number(value)}",
         "ApoB elevation": f"ApoB {_format_number(value)} mg/dL",
+        "LDL-C": f"LDL-C {_format_number(value)} mg/dL",
         "Elevated Lp(a)": f"Lp(a) {value}",
         "Inflammatory risk": f"hsCRP {_format_number(value)} mg/L",
         "Reduced eGFR": f"eGFR {_format_number(value)}",
@@ -320,6 +325,7 @@ def teaching_label(contribution):
     notes = {
         "CAC plaque burden": "coronary calcium",
         "ApoB elevation": "ApoB / particle burden",
+        "LDL-C": "LDL-C",
         "Albuminuria": "albuminuria",
         "Reduced eGFR": "eGFR",
         "Diabetes": "A1c",
@@ -357,6 +363,7 @@ def contributor_explanation(contribution):
     primary = {
         "CAC plaque burden": "Coronary calcium",
         "ApoB elevation": "ApoB / particle burden",
+        "LDL-C": "LDL-C",
         "Reduced eGFR": "eGFR",
         "Albuminuria": "Albuminuria",
         "Diabetes": "A1c",
@@ -445,6 +452,12 @@ def evidence_note(contribution):
         return (
             "ApoB 80-99 band",
             "Borderline ApoB can identify early atherogenic particle burden.",
+        )
+
+    if label == "LDL-C":
+        return (
+            "LDL-C >=190 mg/dL band",
+            "Severe LDL-C elevation is shown when ApoB is unavailable.",
         )
 
     if label == "Elevated Lp(a)":
@@ -862,6 +875,16 @@ def build_rss_panel_html(rss_total, rss_contributions, result=None):
     driver_list_class = "rss-driver-list"
     if len(display_contributors) > 12:
         driver_list_class += " rss-driver-list--scroll"
+    if rss_total > 0 and display_contributors:
+        rss_body_content = f"""
+{build_rss_tower_html(display_contributors)}
+<div class="rss-list-zone rss-drivers">
+<div class="rss-contributor-heading rss-driver-heading">RSS contributors</div>
+<div class="{driver_list_class}">{driver_rows}</div>
+</div>
+"""
+    else:
+        rss_body_content = '<div class="rss-empty-drivers">No active RSS contributors.</div>'
     return f"""
 <style>
 {component_theme_css()}
@@ -937,6 +960,9 @@ def build_rss_panel_html(rss_total, rss_contributions, result=None):
     grid-template-columns: 220px minmax(0, 1fr);
     gap: 28px;
     align-items: start;
+}}
+.rss-module-body--empty {{
+    display: block;
 }}
 .rss-tower-zone {{
     min-width: 180px;
@@ -1178,6 +1204,7 @@ def build_rss_panel_html(rss_total, rss_contributions, result=None):
     color: rgba(7, 26, 47, 0.62);
     font-size: 0.86rem;
     font-weight: 650;
+    padding: 4px 0 2px;
 }}
 .rss-context-block {{
     border-top: 1px solid rgba(11, 31, 58, 0.10);
@@ -1263,12 +1290,8 @@ def build_rss_panel_html(rss_total, rss_contributions, result=None):
 <div class="rss-score-chip rss-score-band">{html.escape(interpretation)}</div>
 </div>
 </div>
-<div class="rss-body rss-module-body">
-{build_rss_tower_html(display_contributors) if rss_total > 0 and display_contributors else '<div class="rss-empty-drivers">No active RSS contributions.</div>'}
-<div class="rss-list-zone rss-drivers">
-<div class="rss-contributor-heading rss-driver-heading">RSS contributors</div>
-<div class="{driver_list_class}">{driver_rows or '<div class="rss-empty-drivers">No active RSS contributors.</div>'}</div>
-</div>
+<div class="rss-body rss-module-body{' rss-module-body--empty' if not (rss_total > 0 and display_contributors) else ''}">
+{rss_body_content}
 </div>
 </div>
 """

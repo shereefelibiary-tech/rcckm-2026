@@ -1,0 +1,34 @@
+RCCKM Demo Case Audit
+Cases checked: 14
+Errors: 0
+Warnings: 1
+Suggestions: 1
+
+Summary table:
+Score  Complete  Coherent  Readable  Showcase  Demo
+  100       100       100       100       100  Healthy low-risk prevention
+  100       100       100       100       100  Obesity / metabolic syndrome
+  100       100       100       100       100  Prediabetes / insulin resistance
+  100       100       100       100       100  High ApoB discordance
+  100       100       100       100       100  Elevated Lp(a)
+  100       100       100       100       100  CAC 0 ambiguity resolution
+  100       100       100       100       100  CAC 1-99 plaque present
+  100       100       100       100       100  CAC >=100 high plaque burden
+  100       100       100       100       100  CKD / albuminuria
+  100       100       100       100       100  Diabetes + CKM stage
+  100       100       100       100       100  On-treatment above-target lipids
+  100       100       100       100       100  Younger patient with premature family history
+  100       100       100       100       100  Older multiple treated risk factors
+   96        92       100       100        94  Sparse but realistic PCP intake
+
+Strongest demos: Healthy low-risk prevention, Obesity / metabolic syndrome, Prediabetes / insulin resistance
+Weakest demos: Younger patient with premature family history, Older multiple treated risk factors, Sparse but realistic PCP intake
+Sparse demos: Sparse but realistic PCP intake
+Contradictory demos: none
+Demos needing rewrite: none
+
+Warnings:
+- Sparse but realistic PCP intake: sparse advanced prevention data: apob, lp_a_value, uacr, hscrp
+
+Suggestions:
+- Sparse but realistic PCP intake: showcase concept may be too subtle: PCP intake

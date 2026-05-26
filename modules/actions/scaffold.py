@@ -17,7 +17,7 @@ TESTING_LABELS = {
     "lpa_testing": "Lp(a) - one-time risk assessment",
     "uacr_testing": "Obtain UACR to complete kidney-risk assessment.",
     "cac_testing": "CAC - risk clarification",
-    "hscrp_testing": "hsCRP - inflammatory residual risk",
+    "hscrp_testing": "hsCRP - inflammatory biomarker clarification",
     "fasting_lipids": "Repeat fasting lipids - confirm triglyceride burden",
 }
 
@@ -237,7 +237,7 @@ def _cac_line(patient: Any, result: Any) -> str | None:
         age_gate_note = build_cac_age_gate_note(patient, result)
         if age_gate_note:
             if getattr(patient, "cac_not_done", False):
-                line = "CAC not performed; below usual age threshold, use only if it would change management."
+                line = "CAC not routinely recommended at this age; consider only if results would change management."
             else:
                 line += f" {age_gate_note}"
         elif _prevent_low(result) and _num(getattr(patient, "age", None)) is not None:

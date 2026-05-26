@@ -1,0 +1,78 @@
+DEMO: Obesity / metabolic syndrome
+CASE: obesity_metabolic_syndrome
+
+EMR:
+RISK CONTINUUM CKM
+
+Level 3B - actionable early CKM / atherogenic risk.
+10-year ASCVD risk: 2.73%.
+30-year ASCVD risk: 15.73%.
+CKM stage 2 with kidney G1; albuminuria not measured and plaque unmeasured / CAC not performed.
+UACR not available; obtain to complete kidney-risk assessment.
+
+Assessment:
+- Hypertriglyceridemia (ICD: E78.1)
+
+Recommendations:
+- Moderate-intensity statin therapy reasonable.
+- CAC may clarify plaque burden if treatment intensity remains uncertain.
+- Aspirin not indicated for routine primary prevention.
+- Treat BP toward goal <130/80.
+- Obtain UACR to complete kidney-risk assessment.
+
+PATIENT ROADMAP:
+Your Prevention Roadmap
+Your results show where you stand today and the most important steps to lower future heart, kidney, and metabolic risk.
+
+Where you stand:
+- 10-year ASCVD risk: 2.73%
+- 30-year ASCVD risk: 15.73%
+- Near-term estimated risk is low.
+- About 16 out of 100 similar patients may have a heart attack, stroke, or related artery disease event over the next 30 years.
+- Your 10-year ASCVD risk is low, and your 30-year risk is elevated enough to make prevention worth discussing.
+- About 3 out of 100 similar patients may have a heart attack, stroke, or related artery disease event over the next 10 years.
+- Plaque status has not been measured.
+- Care focus: Level 3 (3B) - Actionable early CKM / atherogenic risk
+
+Why risk is elevated:
+- Early metabolic signals are present.
+- Near-term estimated risk may be low, but 30-year risk is elevated enough to justify prevention discussion.
+- Cholesterol particles: ApoB 108; LDL-C 132; non-HDL-C 173. These numbers help show plaque-driving cholesterol in the blood.
+- Blood sugar / diabetes: A1c 5.6%. Improving blood sugar can lower long-term heart, kidney, and metabolic risk.
+- Kidney protection: eGFR 92. Kidney markers also help estimate heart and metabolic risk.
+- Blood pressure: 136/86 mmHg. Keeping blood pressure in a safer range protects the heart, brain, and kidneys.
+- Other factors: Lp(a) 36 nmol/L; OSA; MASLD. These details can shape the prevention plan with your clinician.
+- Other context: Lp(a) 36 nmol/L; BP 136/86; OSA; MASLD.
+
+Current goals:
+- LDL-C: 132 mg/dL to <100 mg/dL
+- non-HDL-C: 173 mg/dL to <130 mg/dL
+- ApoB: 108 mg/dL to <90 mg/dL
+- A1c: 5.6% to individualized
+- BP: 136/86 mmHg to <130/80 when appropriate
+- Kidney / albuminuria: G1 to reduce albuminuria / preserve eGFR
+- Weight: BMI 33.7 to individualized
+
+Next steps:
+1. Lower plaque-driving cholesterol: Treat toward the cholesterol goals above.
+2. Keep blood pressure in a safer range: Use lifestyle and medicines as appropriate.
+3. Aspirin safety: Do not start aspirin unless your clinician recommends it.
+4. Additional testing: Urine albumin test can help check early kidney stress.
+5. Next step: CAC may clarify plaque burden if treatment intensity remains uncertain.
+
+This roadmap is for discussion with your clinician. Medication decisions should be individualized.
+
+ACTIONS:
+- Moderate-intensity statin therapy is reasonable to reduce cumulative atherogenic exposure.
+- Recheck lipid profile 4-12 weeks after starting or intensifying therapy, then every 6-12 months.
+- CAC may clarify plaque burden if treatment intensity remains uncertain.
+- Aspirin not indicated for routine primary prevention.
+- Treat blood pressure toward individualized goal.
+- Obtain UACR to complete kidney-risk assessment.
+
+RSS: 16
+RSS CONTRIBUTORS:
+- ApoB elevation: 108.0 (+8)
+- Hypertriglyceridemia: 205.0 (+4)
+- OSA: True (+2)
+- MASLD: True (+2)

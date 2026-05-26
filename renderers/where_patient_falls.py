@@ -1,6 +1,7 @@
 from html import escape
 
 from modules.levels.definitions import classify_continuum_position
+from modules.plaque.engine import format_cac_percentile_context
 from modules.risk_enhancers.reproductive import reproductive_marker_items
 from ui.html import render_html
 from ui.theme import component_theme_css
@@ -621,9 +622,23 @@ def _build_grouped_rows(patient, result, *, show_not_active=False):
         effect = "very high risk"
     elif cac >= 100:
         value = f"CAC {_fmt_num(cac)}"
+        percentile_context = format_cac_percentile_context(
+            cac,
+            getattr(patient, "cac_percentile", None),
+            include_clinician_detail=True,
+        )
+        if percentile_context:
+            value = f"{value}; {percentile_context}"
         effect = "moderate signal"
     elif cac > 0:
         value = f"CAC {_fmt_num(cac)}"
+        percentile_context = format_cac_percentile_context(
+            cac,
+            getattr(patient, "cac_percentile", None),
+            include_clinician_detail=True,
+        )
+        if percentile_context:
+            value = f"{value}; {percentile_context}"
         effect = "plaque present"
     else:
         value = "CAC 0"
@@ -765,10 +780,10 @@ def build_where_patient_falls_html(patient, result, *, show_not_active=False):
     border-bottom: 1px solid var(--rc-line);
     border-left: 3px solid rgba(115,0,10,0.22);
     color: var(--rc-black);
-    font-size: 0.70rem;
-    font-weight: 950;
-    letter-spacing: 0.11em;
-    padding: 10px 12px;
+    font-size: 0.66rem;
+    font-weight: 760;
+    letter-spacing: 0.055em;
+    padding: 8px 12px;
 }}
 .wpf-row {{
     background: var(--rc-panel);
@@ -941,7 +956,7 @@ def build_where_patient_falls_html(patient, result, *, show_not_active=False):
 <div>
 <div class="wpf-title rc-card-title" aria-label="WHERE THIS PATIENT FALLS">Where this patient falls</div>
 <div class="wpf-subtitle">Inputs, missing data, and level-driving findings.</div>
-<div class="wpf-legend">Risk impact: Major = changes level/action &middot; Contributes = supports risk interpretation &middot; Context only = relevant background &middot; Not active = not currently contributing. Major and contributing findings are shown first; not-active markers can be shown for audit/review.</div>
+<div class="wpf-legend">Risk impact: Major = changes level/action &middot; Contributes = supports risk &middot; Context = background &middot; Not active = audit only.</div>
 </div>
 <div class="wpf-badge">{escape(badge)}</div>
 </div>

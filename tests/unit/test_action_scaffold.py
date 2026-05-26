@@ -39,7 +39,7 @@ def test_below_cac_age_gate_soft_note_without_routine_cac_clarifier():
     all_clarifiers = " ".join(item for section in sections for item in section.items)
 
     assert _section(sections, "Coronary calcium").line == (
-        "Plaque burden unmeasured. CAC below usual age threshold; consider only if result would change management."
+        "Plaque burden unmeasured. CAC not routinely recommended at this age; consider only if results would change management."
     )
     assert "CAC - plaque burden clarification" not in all_clarifiers
 

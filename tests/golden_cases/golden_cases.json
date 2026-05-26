@@ -184,10 +184,11 @@
       "forbidden_diagnosis": "subclinical"
     },
     "required_phrases": [
-      "Level 3B - actionable early CKM / atherogenic risk",
-      "PREVENT 10-year risk 1.37%; 30-year risk 9.09%",
-      "Moderate-intensity statin therapy reasonable",
-      "CAC not performed; below usual age threshold, use only if it would change management",
+      "Level 3B - elevated lifetime cardiometabolic risk despite low short-term event risk",
+      "10-year ASCVD risk: 1.37%",
+      "30-year ASCVD risk: 9.09%",
+      "Moderate-intensity statin therapy may be reasonable after shared decision-making",
+      "CAC not routinely recommended at this age; consider only if results would change management",
       "Aspirin not indicated for routine primary prevention",
       "premature family history",
       "Hypertriglyceridemia",
@@ -230,7 +231,8 @@
     },
     "required_phrases": [
       "Level 3A - elevated long-term risk trajectory",
-      "PREVENT 10-year risk 1.2%; 30-year risk 10.5%",
+      "10-year ASCVD risk: 1.2%",
+      "30-year ASCVD risk: 10.5%",
       "Moderate-intensity statin therapy reasonable",
       "CAC may clarify plaque burden if treatment intensity remains uncertain",
       "Near-term estimated risk may be low, but 30-year risk is elevated enough to justify prevention discussion"
@@ -337,7 +339,8 @@
     },
     "required_phrases": [
       "Level 3B - actionable early CKM / atherogenic risk",
-      "PREVENT 10-year risk 3.42%; 30-year risk 17.53%",
+      "10-year ASCVD risk: 3.42%",
+      "30-year ASCVD risk: 17.53%",
       "plaque unmeasured / CAC not performed",
       "kidney G2; albuminuria not measured",
       "UACR not available; obtain to complete kidney-risk assessment",
@@ -387,7 +390,8 @@
     },
     "required_phrases": [
       "Level 3B - actionable early CKM / atherogenic risk",
-      "PREVENT 10-year risk 1.73%; 30-year risk 11.85%",
+      "10-year ASCVD risk: 1.73%",
+      "30-year ASCVD risk: 11.85%",
       "plaque unmeasured / CAC not performed",
       "Moderate-intensity statin therapy reasonable",
       "CAC may clarify plaque burden if treatment intensity remains uncertain",
@@ -922,7 +926,8 @@
     },
     "required_phrases": [
       "Level 3B - actionable early CKM / kidney risk",
-      "PREVENT 10-year risk 3.74%; 30-year risk 18.8%",
+      "10-year ASCVD risk: 3.74%",
+      "30-year ASCVD risk: 18.8%",
       "plaque unmeasured / CAC not performed",
       "kidney G2A2",
       "Albuminuria",
@@ -1267,7 +1272,8 @@
     },
     "required_phrases": [
       "Level 3B",
-      "PREVENT 10-year risk 5.41%; 30-year risk 22.55%",
+      "10-year ASCVD risk: 5.41%",
+      "30-year ASCVD risk: 22.55%",
       "UACR not available; obtain to complete kidney-risk assessment",
       "CAC may clarify plaque burden if treatment intensity remains uncertain",
       "Aspirin not indicated for routine primary prevention"

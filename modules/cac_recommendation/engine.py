@@ -187,7 +187,7 @@ def build_cac_age_gate_note(patient, result):
     if not _cac_available_for_decision(patient, result):
         return None
     if _below_cac_age_gate(patient) and _has_strong_enhancer(patient):
-        return "CAC below usual age threshold; consider only if result would change management."
+        return "CAC not routinely recommended at this age; consider only if results would change management."
     return None
 
 

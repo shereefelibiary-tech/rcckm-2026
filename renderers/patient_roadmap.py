@@ -3,6 +3,7 @@ from textwrap import dedent
 
 from modules.actions.scaffold import build_action_recommendation_lines
 from modules.levels.definitions import classify_continuum_position, get_level_definition_payload
+from modules.plaque.engine import format_cac_percentile_context
 from modules.risk_enhancers.reproductive import (
     reproductive_history_summary,
     reproductive_marker_items,
@@ -87,6 +88,36 @@ def _has_elevated_30y_trajectory(patient, result):
     return bool(age is not None and 30 <= age <= 59 and prevent_30y is not None and prevent_30y >= 10)
 
 
+def _young_family_metabolic_trajectory(patient, result):
+    if bool(getattr(patient, "clinical_ascvd", False)):
+        return False
+    age = getattr(patient, "age", None)
+    if age is None or not (30 <= age < 40):
+        return False
+    if _risk_category(result) != "low":
+        return False
+    if not _has_premature_family_history(patient):
+        return False
+    try:
+        position = classify_continuum_position(patient, result)
+    except Exception:
+        return False
+    if position.get("level") != 3 or position.get("sublevel") != "3B":
+        return False
+    a1c = getattr(patient, "a1c", None)
+    triglycerides = getattr(patient, "triglycerides", None)
+    bmi = getattr(patient, "bmi", None)
+    ldl_c = getattr(patient, "ldl_c", None)
+    apob = getattr(patient, "apob", None)
+    return bool(
+        (a1c is not None and 5.7 <= a1c < 6.5)
+        or (triglycerides is not None and triglycerides >= 150)
+        or (bmi is not None and bmi >= 25)
+        or (ldl_c is not None and 160 <= ldl_c < 190)
+        or (apob is not None and apob >= 100)
+    )
+
+
 def _value_from_fields(result, field_names):
     for field_name in field_names:
         value = getattr(result, field_name, None)
@@ -147,7 +178,7 @@ def _prevent_explanation(risk):
         return "PREVENT estimate unavailable from the current data."
     return (
         f"About {people} out of 100 similar patients may have a "
-        "cardiovascular event over the next 10 years."
+        "heart attack, stroke, or related artery disease event over the next 10 years."
     )
 
 
@@ -160,7 +191,37 @@ def _prevent_30y_explanation(risk):
         return None
     return (
         f"About {people} out of 100 similar patients may have a "
-        "cardiovascular event over the next 30 years."
+        "heart attack, stroke, or related artery disease event over the next 30 years."
+    )
+
+
+def _patient_risk_category_word(category):
+    category_text = str(category or "").strip().lower()
+    if category_text == "low":
+        return "low"
+    if category_text in {"borderline", "intermediate"}:
+        return "moderate"
+    if category_text == "high":
+        return "high"
+    return "not fully calculated"
+
+
+def _where_stand_summary_sentence(result, ascvd_30y):
+    category_word = _patient_risk_category_word(_risk_category(result))
+    if ascvd_30y is None:
+        return f"Your 10-year ASCVD risk is {category_word}."
+    try:
+        elevated_30y = float(ascvd_30y) >= 10
+    except (TypeError, ValueError):
+        elevated_30y = False
+    if elevated_30y:
+        return (
+            f"Your 10-year ASCVD risk is {category_word}, and your "
+            "30-year risk is elevated enough to make prevention worth discussing."
+        )
+    return (
+        f"Your 10-year ASCVD risk is {category_word}, and your "
+        "30-year ASCVD risk helps guide prevention planning."
     )
 
 
@@ -212,6 +273,11 @@ def _continuum_label(patient, result):
         position = classify_continuum_position(patient, result)
         level = position.get("level")
         sublevel = position.get("sublevel")
+        if _young_family_metabolic_trajectory(patient, result):
+            return (
+                "Level 3B",
+                "elevated lifetime cardiometabolic risk despite low short-term event risk",
+            )
         payload = get_level_definition_payload(level, sublevel=sublevel)
         label = f"Level {level}"
         if sublevel:
@@ -249,6 +315,9 @@ def _plaque_status(patient, result):
 
 def _patient_plaque_status(patient, result):
     cac = getattr(patient, "cac", None)
+    percentile_context = format_cac_percentile_context(
+        cac, getattr(patient, "cac_percentile", None)
+    )
     if getattr(patient, "clinical_ascvd", False):
         return "Known cardiovascular disease is present."
     if cac is not None:
@@ -258,8 +327,12 @@ def _patient_plaque_status(patient, result):
             return f"Coronary calcium score: {cac}."
         if value >= 300:
             return f"Coronary calcium score: {value:g}, showing a high amount of plaque."
+        if value >= 100:
+            text = f"Coronary calcium score: {value:g}, showing moderate calcified plaque burden."
+            return f"{text} {percentile_context}" if percentile_context else text
         if value > 0:
-            return f"Coronary calcium score: {value:g}, showing plaque is present."
+            text = f"Coronary calcium score: {value:g}, showing mild calcified plaque detected."
+            return f"{text} {percentile_context}" if percentile_context else text
         return "Coronary calcium score: 0, with no calcified plaque detected."
     return "Plaque status has not been measured."
 
@@ -305,10 +378,19 @@ def _contributor_groups(patient, result):
         if cac is not None:
             try:
                 cac_value = float(cac)
+                percentile_detail = format_cac_percentile_context(
+                    cac_value,
+                    getattr(patient, "cac_percentile", None),
+                    include_clinician_detail=True,
+                )
                 if cac_value >= 300:
                     plaque_detail = f"CAC {cac_value:g}; high plaque burden"
+                elif cac_value >= 100:
+                    plaque_detail = f"CAC {cac_value:g}; moderate plaque burden"
                 elif cac_value > 0:
-                    plaque_detail = f"CAC {cac_value:g}; plaque present"
+                    plaque_detail = f"CAC {cac_value:g}; mild plaque present"
+                if percentile_detail and 0 < cac_value < 300:
+                    plaque_detail = f"{plaque_detail}; {percentile_detail}"
             except (TypeError, ValueError):
                 pass
         groups.append(("Artery plaque", plaque_detail))
@@ -669,9 +751,12 @@ def _patient_next_steps(patient, result):
         elif "obtain uacr" in lowered or "uacr" in lowered and "missing" in lowered:
             label = "Additional testing"
             detail = "Urine albumin test can help check early kidney stress."
-        elif "cac reasonable" in lowered or "plaque burden unmeasured" in lowered:
+        elif "cac reasonable" in lowered or "cac not routinely recommended" in lowered or "plaque burden unmeasured" in lowered:
             label = "Additional testing"
             detail = "A calcium scan may help if treatment choices are still uncertain."
+        elif "hscrp" in lowered:
+            label = "Additional testing"
+            detail = "hsCRP can help clarify inflammatory risk context when clinically relevant."
         elif "lipid" in lowered or "statin" in lowered:
             label = "Lower plaque-driving cholesterol"
             detail = "Treat toward the cholesterol goals above."
@@ -747,25 +832,43 @@ def _patient_risk_cards_html(risk, ascvd_30y):
     if risk is not None:
         cards.append(
             (
-                "Near-term 10-year risk",
+                "10-year ASCVD risk",
+                "ASCVD risk: heart attack, stroke, or related artery disease event",
                 _fmt(risk, "%"),
                 _prevent_explanation(risk),
                 "blue",
             )
         )
     else:
-        cards.append(("Near-term 10-year risk", "Unavailable", "More information is needed to calculate this estimate.", "gray"))
+        cards.append(
+            (
+                "10-year ASCVD risk",
+                "ASCVD risk: heart attack, stroke, or related artery disease event",
+                "Unavailable",
+                "More information is needed to calculate this estimate.",
+                "gray",
+            )
+        )
     if ascvd_30y is not None:
         line = _prevent_30y_explanation(ascvd_30y) or "This longer-term estimate helps guide prevention planning."
-        cards.append(("Longer-term 30-year risk trajectory", _fmt(ascvd_30y, "%"), line, "green"))
+        cards.append(
+            (
+                "30-year ASCVD risk",
+                "ASCVD risk: heart attack, stroke, or related artery disease event",
+                _fmt(ascvd_30y, "%"),
+                line,
+                "green",
+            )
+        )
 
     return "".join(
         f'<div class="roadmap-risk-card roadmap-tone-{tone}">'
         f'<div class="roadmap-risk-label">{escape(label)}</div>'
+        f'<div class="roadmap-risk-subtitle">{escape(subtitle)}</div>'
         f'<div class="roadmap-risk-value">{escape(value or "--")}</div>'
         f'<div class="roadmap-risk-text">{escape(text)}</div>'
         "</div>"
-        for label, value, text, tone in cards
+        for label, subtitle, value, text, tone in cards
     )
 
 
@@ -802,8 +905,22 @@ def _patient_driver_sections(patient, result):
             value = None
         if value is not None and value >= 300:
             priority.append((f"Coronary calcium score {value:g} - high plaque burden", "Coronary calcium shows a high amount of plaque.", "red"))
+        elif value is not None and value >= 100:
+            percentile_context = format_cac_percentile_context(
+                value, getattr(patient, "cac_percentile", None)
+            )
+            note = "Coronary calcium shows a moderate amount of plaque."
+            if percentile_context:
+                note = f"{note} {percentile_context}"
+            priority.append((f"Coronary calcium score {value:g} - moderate plaque burden", note, "amber"))
         elif value is not None and value > 0:
-            priority.append((f"Coronary calcium score {value:g} - plaque present", "Coronary calcium shows plaque is present.", "amber"))
+            percentile_context = format_cac_percentile_context(
+                value, getattr(patient, "cac_percentile", None)
+            )
+            note = "Coronary calcium shows mild calcified plaque."
+            if percentile_context:
+                note = f"{note} {percentile_context}"
+            priority.append((f"Coronary calcium score {value:g} - mild plaque", note, "amber"))
         elif value == 0:
             context.append("CAC 0")
 
@@ -963,13 +1080,15 @@ def _text_lines(patient, result):
         "Your results show where you stand today and the most important steps to lower future heart, kidney, and metabolic risk.",
         "",
         "Where you stand:",
-        f"- 10-year risk: {_fmt(risk, '%') or 'unavailable'}",
+        f"- 10-year ASCVD risk: {_fmt(risk, '%') or 'unavailable'}",
     ]
     if ascvd_30y is not None:
-        lines.append(f"- 30-year risk: {_fmt(ascvd_30y, '%')}")
+        lines.append(f"- 30-year ASCVD risk: {_fmt(ascvd_30y, '%')}")
         prevent_30y_text = _prevent_30y_explanation(ascvd_30y)
         if prevent_30y_text:
             lines.append(f"- {prevent_30y_text}")
+    if risk is not None:
+        lines.append(f"- {_where_stand_summary_sentence(result, ascvd_30y)}")
     lines.extend(
         [
             f"- {_prevent_explanation(risk)}",
@@ -1066,10 +1185,10 @@ def _render_patient_roadmap_legacy(patient, result):
     risk_value = _fmt(risk, "%") or "--"
     secondary_bits = []
     if ascvd_30y is not None:
-        secondary_bits.append(f"30-year artery-event risk {_fmt(ascvd_30y, '%')}")
+        secondary_bits.append(f"30-year ASCVD risk {_fmt(ascvd_30y, '%')}")
     secondary_text = " • ".join(secondary_bits)
     stand_detail = (
-        f"{escape(category.title())} estimated 10-year risk"
+        f"{escape(category.title())} estimated 10-year ASCVD risk"
         + (f" • {escape(secondary_text)}" if secondary_text else "")
     )
     continuum_detail = f"{level}" + (f" - {level_detail}" if level_detail else "")
@@ -1247,8 +1366,8 @@ def _render_patient_roadmap_legacy(patient, result):
     </div>
     <div class="roadmap-section-title">Where you stand</div>
     <div class="roadmap-stand">
-        <div class="roadmap-risk-line">10-year artery-event risk {escape(risk_value)}</div>
-        {f'<div class="roadmap-detail">30-year artery-event risk: {escape(_fmt(ascvd_30y, "%"))}</div>' if ascvd_30y is not None else ''}
+        <div class="roadmap-risk-line">10-year ASCVD risk {escape(risk_value)}</div>
+        {f'<div class="roadmap-detail">30-year ASCVD risk: {escape(_fmt(ascvd_30y, "%"))}</div>' if ascvd_30y is not None else ''}
         <div class="roadmap-detail">{stand_detail}</div>
         <div class="roadmap-detail">{escape(_prevent_explanation(risk))}</div>
         <div class="roadmap-detail">{escape(continuum_detail)} &bull; {escape(_plaque_status(patient, result))}</div>
@@ -1278,15 +1397,12 @@ def render_patient_roadmap(patient, result):
     stand_detail = ""
     if risk is None:
         stand_detail = _prevent_unavailable_reason_text(result)
-    elif _has_elevated_30y_trajectory(patient, result):
-        if _risk_category(result) == "borderline":
-            stand_detail = "Near-term risk is borderline, but 30-year risk and multiple early risk markers support prevention discussion."
-        else:
-            stand_detail = "Near-term estimated risk may be low, but 30-year risk is elevated enough to justify prevention discussion."
-    elif _has_lpa_family_context(patient):
-        stand_detail = "Near-term estimated risk is low. Lp(a) and family history increase long-term risk context."
-    elif _has_early_metabolic_risk(patient, result):
-        stand_detail = "Near-term estimated risk is low. Early metabolic signals are present."
+    else:
+        stand_detail = _where_stand_summary_sentence(result, ascvd_30y)
+        if ascvd_30y is None:
+            unsupported = str(getattr(result, "prevent_unsupported_reason", "") or "").strip()
+            if unsupported:
+                stand_detail = f"{stand_detail} {unsupported}"
 
     if risk is not None and ascvd_30y is None:
         unsupported = str(getattr(result, "prevent_unsupported_reason", "") or "").strip()
@@ -1406,6 +1522,14 @@ def render_patient_roadmap(patient, result):
             font-size: 0.76rem;
             font-weight: 830;
             line-height: 1.15;
+            padding-left: 15px;
+        }
+        .roadmap-risk-subtitle {
+            color: rgba(17, 17, 17, 0.52);
+            font-size: 0.70rem;
+            font-weight: 620;
+            line-height: 1.22;
+            margin-top: 3px;
             padding-left: 15px;
         }
         .roadmap-risk-value {

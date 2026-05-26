@@ -110,6 +110,19 @@ def build_rss_contributions(patient, result) -> List[SignalContribution]:
                     rationale="ApoB >=130 represents severe elevation.",
                 )
             )
+    else:
+        ldl_c = getattr(patient, "ldl_c", None)
+        if ldl_c is not None and ldl_c >= 190:
+            contributions.append(
+                SignalContribution(
+                    domain="Lipids",
+                    label="LDL-C",
+                    actual_value=ldl_c,
+                    points=10,
+                    severity="major",
+                    rationale="LDL-C >=190 mg/dL indicates severe hypercholesterolemia.",
+                )
+            )
 
     lp_a_value = getattr(patient, "lp_a_value", None)
     lp_a_unit = getattr(patient, "lp_a_unit", None)

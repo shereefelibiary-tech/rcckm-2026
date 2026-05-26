@@ -42,5 +42,5 @@ def test_low_10y_elevated_30y_ldl_pathway_and_nonpremature_family_history():
         "Moderate-intensity statin therapy is reasonable to reduce cumulative atherogenic exposure."
     )
     assert _section(sections, "Coronary calcium").line == (
-        "CAC not performed; below usual age threshold, use only if it would change management."
+        "CAC not routinely recommended at this age; consider only if results would change management."
     )

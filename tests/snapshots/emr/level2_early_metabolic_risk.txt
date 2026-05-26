@@ -1,7 +1,8 @@
 RISK CONTINUUM CKM
 
 Level 2B - converging early risk signals.
-PREVENT 10-year risk 0.74%; 30-year risk 5.38%.
+10-year ASCVD risk: 0.74%.
+30-year ASCVD risk: 5.38%.
 CKM stage 2 with kidney G1A1.
 Risk context: reproductive history: Gestational diabetes.
 

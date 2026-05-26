@@ -81,6 +81,28 @@ def test_render_rss_html_has_balanced_explicit_layout_zones():
     assert rendered.count("<div") == rendered.count("</div>")
 
 
+def test_zero_rss_empty_state_is_not_duplicated():
+    rendered = build_rss_panel_html(0, [], None)
+
+    assert '0<span class="rss-score-den">/100</span>' in rendered
+    assert rendered.count("No active RSS contributors.") == 1
+    assert "No active RSS contributions." not in rendered
+    assert '<div class="rss-contributor-heading rss-driver-heading">RSS contributors</div>' not in rendered
+    assert 'class="rss-tower-zone"' not in rendered
+
+
+def test_severe_ldl_without_apob_appears_in_rss_panel():
+    patient = Patient(age=45, sex="male", ldl_c=212, apob=None)
+    result, rss_total, contributions = run_patient(patient)
+    rendered = build_rss_panel_html(rss_total, contributions, result)
+
+    assert rss_total > 0
+    assert any(item.label == "LDL-C" for item in get_rss_contributors(result))
+    assert '<strong class="rss-row-label">LDL-C</strong>' in rendered
+    assert "LDL-C 212 mg/dL" in rendered
+    assert "No active RSS contributors." not in rendered
+
+
 def test_rss_layout_contains_tower_and_list_zones_without_clarifiers():
     patient = Patient(age=55, sex="male", prevent_10y_ascvd=6.0, cac=None, apob=106)
     result, rss_total, contributions = run_patient(patient)
