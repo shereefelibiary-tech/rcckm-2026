@@ -13,7 +13,7 @@ Where you stand:
 
 Why risk is elevated:
 - Early metabolic signals are present.
-- Cholesterol particles: ApoB 84; LDL-C 118; non-HDL-C 148. These numbers help show plaque-driving cholesterol in the blood.
+- Cholesterol particles: ApoB 84; LDL-C 118. These numbers help show plaque-driving cholesterol in the blood.
 - Blood sugar / diabetes: A1c 5.8%. Improving blood sugar can lower long-term heart, kidney, and metabolic risk.
 - Kidney protection: eGFR 100; UACR 6. Kidney markers also help estimate heart and metabolic risk.
 - Other factors: Lp(a) 20 nmol/L; Gestational diabetes. Pregnancy or menopause history can affect long-term heart risk.
@@ -21,14 +21,11 @@ Why risk is elevated:
 
 Current goals:
 - LDL-C: 118 mg/dL to -
-- non-HDL-C: 148 mg/dL to -
 - ApoB: 84 mg/dL to -
 - A1c: 5.8% to individualized
 - Kidney / albuminuria: 6 mg/g; G1A1 to reduce albuminuria / preserve eGFR
 
 Next steps:
-1. Medication plan: No medication escalation today.
-2. Long-term prevention: Focus on weight, blood sugar, triglycerides, and long-term prevention.
-3. Aspirin safety: Do not start aspirin unless your clinician recommends it.
+1. Long-term prevention: Focus on weight, blood sugar, triglycerides, and long-term prevention.
 
 This roadmap is for discussion with your clinician. Medication decisions should be individualized.

@@ -1,7 +1,9 @@
 from core.enums import PlaqueCategory, RiskLevel
+from core.engine import evaluate_patient
 from core.patient import Patient
 from core.results import RCCKMResult, TargetResult
 from renderers.patient_roadmap import (
+    build_patient_risk_summary_sentence,
     render_patient_roadmap,
     render_patient_roadmap_text,
 )
@@ -140,7 +142,7 @@ def test_render_patient_roadmap_groups_full_clinical_story_without_raw_html():
     assert "Do not start aspirin unless your clinician recommends it." in html
     assert "Protect the kidneys" in html
     assert "Review kidney protection options with your clinician." in html
-    assert "Lp(a) can be checked once to guide long-term prevention." in html
+    assert "Lp(a) can be checked once to guide long-term prevention." not in html
     assert "This roadmap is for discussion with your clinician." in html
     assert "Medication decisions should be individualized." in html
     assert "Dominant action" not in html
@@ -200,7 +202,7 @@ def test_render_patient_roadmap_text_is_copy_ready_plain_text():
     assert "- 10-year ASCVD risk: 8.2%" in text
     assert "- 30-year ASCVD risk: 24.5%" in text
     assert "About 25 out of 100 similar patients may have a heart attack, stroke, or related artery disease event over the next 30 years." in text
-    assert "Your 10-year ASCVD risk is moderate, and your 30-year risk is elevated enough to make prevention worth discussing." in text
+    assert "Coronary plaque is present, so prevention decisions should account for measured plaque burden in addition to risk estimates." in text
     assert "cardiovascular event" not in text
     assert "PREVENT Total CVD" not in text
     assert "ASCVD means artery/plaque-related events" not in text
@@ -208,7 +210,8 @@ def test_render_patient_roadmap_text_is_copy_ready_plain_text():
     assert "PREVENT percentile" not in text
     assert "- Coronary calcium score: 350, showing a high amount of plaque." in text
     assert "Artery plaque: CAC 350." in text
-    assert "Cholesterol particles: ApoB 110; LDL-C 132; non-HDL-C 160." in text
+    assert "Cholesterol particles: ApoB 110; LDL-C 132." in text
+    assert "non-HDL-C" not in text
     assert "Blood sugar / diabetes: A1c 7.1%." in text
     assert "phenotype" not in text.lower()
     assert "glycemia" not in text.lower()
@@ -218,7 +221,7 @@ def test_render_patient_roadmap_text_is_copy_ready_plain_text():
     assert "1. Lower plaque-driving cholesterol: High-intensity statin therapy usually lowers LDL cholesterol by at least one-half." in text
     assert "2. Protect the kidneys: Review kidney protection options with your clinician." in text
     assert "3. Aspirin safety: Do not start aspirin unless your clinician recommends it." in text
-    assert "4. Additional testing: Lp(a) can be checked once to guide long-term prevention." in text
+    assert "4. Additional testing: Lp(a) can be checked once to guide long-term prevention." not in text
     assert "Dominant action" not in text
     assert "dominant_action" not in text
     assert "action_domains" not in text
@@ -236,6 +239,72 @@ def test_render_patient_roadmap_text_is_copy_ready_plain_text():
         "2. Protect the kidneys"
     ) < text.index("3. Aspirin safety")
     assert "<div" not in text
+
+
+def test_patient_risk_summary_is_secondary_prevention_aware():
+    patient = Patient(age=66, sex="male", clinical_ascvd=True, ldl_c=120)
+    result = evaluate_patient(patient)
+    text = render_patient_roadmap_text(patient, result)
+
+    assert "prevention worth discussing" not in text
+    assert "Known cardiovascular disease is present." in text
+    assert "secondary prevention" in text
+
+
+def test_patient_risk_summary_ldl_190_not_derisked_by_prevent():
+    patient = Patient(age=42, sex="male", ldl_c=212, prevent_10y_ascvd=2.1, prevent_30y_ascvd=9.0)
+    result = evaluate_patient(patient)
+    text = render_patient_roadmap_text(patient, result)
+
+    assert "LDL-C is in a severe hypercholesterolemia range" in text
+    assert "should not rely on risk estimates alone" in text
+    assert "de-risk" not in text.lower()
+
+
+def test_patient_risk_summary_low_10_year_high_30_year_uses_lifetime_framing():
+    patient = Patient(age=43, sex="female", ldl_c=142)
+    result = RCCKMResult(
+        prevent_10y_ascvd=3.4,
+        prevent_30y_ascvd=24.0,
+        prevent_risk_category=RiskLevel.LOW,
+    )
+
+    sentence = build_patient_risk_summary_sentence(patient, result, result.prevent_30y_ascvd)
+
+    assert "short-term risk is low" in sentence
+    assert "longer-term risk is higher than expected" in sentence
+    assert "does not mean an event is likely soon" in sentence
+
+
+def test_patient_risk_summary_plaque_present_mentions_measured_plaque_burden():
+    patient = Patient(age=60, sex="female", cac=145, prevent_10y_ascvd=6.2, prevent_30y_ascvd=22.0)
+    result = RCCKMResult(
+        prevent_10y_ascvd=6.2,
+        prevent_30y_ascvd=22.0,
+        prevent_risk_category=RiskLevel.INTERMEDIATE,
+        plaque_category=PlaqueCategory.MODERATE,
+    )
+
+    sentence = build_patient_risk_summary_sentence(patient, result, result.prevent_30y_ascvd)
+
+    assert "Coronary plaque is present" in sentence
+    assert "measured plaque burden" in sentence
+
+
+def test_patient_risk_summary_high_primary_prevention_supports_lipid_discussion():
+    patient = Patient(age=64, sex="male", ldl_c=136)
+    result = RCCKMResult(
+        prevent_10y_ascvd=12.0,
+        prevent_30y_ascvd=32.0,
+        prevent_risk_category=RiskLevel.HIGH,
+    )
+
+    sentence = build_patient_risk_summary_sentence(patient, result, result.prevent_30y_ascvd)
+
+    assert sentence == (
+        "Your 10-year ASCVD risk is elevated, so prevention and "
+        "lipid-lowering therapy should be discussed with your clinician."
+    )
 
 
 def test_render_patient_roadmap_works_without_30_year_risk():

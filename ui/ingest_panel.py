@@ -81,6 +81,7 @@ WORKSHEET_KEY_BY_FIELD = {
     "suspected_fh_hefh": "input_suspected_fh_hefh",
     "incidental_cac": "input_incidental_cac",
     "incidental_cac_severity": "input_incidental_cac_severity",
+    "breast_arterial_calcification": "input_breast_arterial_calcification",
     "cac_percentile": "input_cac_percentile",
     "zip_code": "input_zip_code",
     "neighborhood_sdoh_context": "input_neighborhood_sdoh_context",

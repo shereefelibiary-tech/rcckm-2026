@@ -1,4 +1,4 @@
-DEMO: Healthy low-risk prevention
+DEMO: Low-risk clean prevention
 CASE: healthy_low_risk_prevention
 
 EMR:
@@ -32,7 +32,7 @@ Where you stand:
 - Care focus: Level 1 - Minimal risk signal
 
 Why risk is elevated:
-- Cholesterol particles: ApoB 70; LDL-C 88; non-HDL-C 106. These numbers help show plaque-driving cholesterol in the blood.
+- Cholesterol particles: ApoB 70; LDL-C 88. These numbers help show plaque-driving cholesterol in the blood.
 - Blood sugar / diabetes: A1c 5.2%. Improving blood sugar can lower long-term heart, kidney, and metabolic risk.
 - Kidney protection: eGFR 105; UACR 4. Kidney markers also help estimate heart and metabolic risk.
 - Blood pressure: 108/68 mmHg. Keeping blood pressure in a safer range protects the heart, brain, and kidneys.
@@ -41,7 +41,6 @@ Why risk is elevated:
 
 Current goals:
 - LDL-C: 88 mg/dL to -
-- non-HDL-C: 106 mg/dL to -
 - ApoB: 70 mg/dL to -
 - A1c: 5.2% to individualized
 - BP: 108/68 mmHg to <130/80 when appropriate
@@ -49,9 +48,7 @@ Current goals:
 - Weight: BMI 22.0 to individualized
 
 Next steps:
-1. Medication plan: No medication escalation today.
-2. Long-term prevention: Focus on weight, blood sugar, triglycerides, and long-term prevention.
-3. Aspirin safety: Do not start aspirin unless your clinician recommends it.
+1. Long-term prevention: Focus on weight, blood sugar, triglycerides, and long-term prevention.
 
 This roadmap is for discussion with your clinician. Medication decisions should be individualized.
 

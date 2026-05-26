@@ -5,11 +5,15 @@ from renderers.emr_renderer import render_emr_note
 from renderers.patient_roadmap import render_patient_roadmap_text
 from tools.demo_audit import audit_demo_cases, render_demo_output_snapshot, validate_demo_case
 from ui.demo_case_gallery import (
+    DEMO_CATEGORIES,
     DEMO_CASES,
+    demo_case_category,
     DEMO_PATIENTS,
     build_demo_patient,
     demo_case_description,
+    demo_case_metadata,
     demo_case_options,
+    demo_case_options_by_category,
     demo_patient_payloads,
 )
 
@@ -29,22 +33,52 @@ MANDATORY_BASELINE_FIELDS = (
 )
 
 
-def test_demo_case_gallery_exposes_fourteen_realistic_cases():
+def test_demo_case_gallery_exposes_curated_realistic_cases():
     options = demo_case_options()
 
-    assert len(options) == 14
+    assert 24 <= len(options) <= 35
     assert len(options) == len(DEMO_CASES)
     labels = [label for label, _case_name in options]
-    assert "Healthy low-risk prevention" in labels
-    assert "Sparse but realistic PCP intake" in labels
+    assert "Low-risk clean prevention" in labels
+    assert "Multiple enhancers, missing ApoB/Lp(a)" in labels
     assert "Younger patient with premature family history" in labels
     assert "Younger strong family history" not in labels
-    assert "Older multiple treated risk factors" in labels
+    assert "ACEi/ARB with persistent albuminuria" in labels
+    assert "Severe secondary prevention" in labels
+    assert "Incidental CAC on CT" in labels
+    assert "Breast arterial calcification" in labels
+
+
+def test_demo_case_gallery_groups_options_by_category():
+    assert set(DEMO_CATEGORIES) == {
+        "Foundational prevention",
+        "Atherogenic burden",
+        "Plaque and imaging",
+        "CKM / kidney / metabolic",
+        "Treatment-state cases",
+        "Special risk enhancers",
+    }
+    plaque_options = demo_case_options_by_category("Plaque and imaging")
+
+    assert plaque_options
+    assert all(demo_case_category(case_name) == "Plaque and imaging" for _label, case_name in plaque_options)
+    assert any(case_name == "cac_300_high_plaque_burden" for _label, case_name in plaque_options)
 
 
 @pytest.mark.parametrize("case_name", [case_name for _label, case_name in DEMO_CASES])
 def test_every_demo_case_has_selector_description(case_name):
     assert demo_case_description(case_name)
+
+
+@pytest.mark.parametrize("case_name", [case_name for _label, case_name in DEMO_CASES])
+def test_every_demo_case_has_product_showcase_metadata(case_name):
+    metadata = demo_case_metadata(case_name)
+
+    assert metadata["category"] in DEMO_CATEGORIES
+    assert metadata["expected_showcase_points"]
+    assert metadata["expected_primary_action"]
+    assert metadata["expected_level_or_level_range"]
+    assert metadata["expected_risk_framing"]
 
 
 @pytest.mark.parametrize("case_name", [case_name for _label, case_name in DEMO_CASES])
@@ -134,11 +168,7 @@ def test_demo_audit_utility_flags_no_errors_and_expected_sparse_warning():
     report = audit_demo_cases()
 
     assert report.errors == []
-    assert any(
-        "Sparse but realistic PCP intake" in warning
-        and "sparse advanced prevention data" in warning
-        for warning in report.warnings
-    )
+    assert any("sparse advanced prevention data" in warning for warning in report.warnings)
     assert "RCCKM Demo Case Audit" in report.format_summary()
     assert all(0 <= case.coherence_score <= 100 for case in report.cases)
     assert all(0 <= case.completeness_score <= 100 for case in report.cases)
@@ -191,6 +221,26 @@ def test_ckd_albuminuria_demo_is_action_oriented_without_passive_no_escalation()
     assert "Consider SGLT2 inhibitor if UACR is >=200 mg/g" in emr
     assert "hsCRP - inflammatory biomarker clarification" not in emr
     assert "Consider hsCRP only if inflammatory risk clarification would change management." in emr
+
+
+def test_severe_secondary_prevention_demo_uses_very_high_risk_ascvd_targets():
+    patient = build_demo_patient("severe_secondary_prevention")
+    result = evaluate_patient(patient)
+    emr = render_emr_note(patient, result)
+    roadmap = render_patient_roadmap_text(patient, result)
+    target = result.targets[0]
+
+    assert patient.clinical_ascvd is True
+    assert result.level_classification["level"] == "5"
+    assert target.ldl_c_target == 55
+    assert target.non_hdl_c_target == 85
+    assert target.apob_target == 65
+    assert "established ASCVD; CAC 5000 is context only" in emr
+    assert "Known cardiovascular disease is present, so treatment decisions are based on secondary-prevention goals rather than risk estimates alone." in emr
+    assert "very-high-risk ASCVD targets" in emr
+    assert "LDL-C <70 mg/dL remains the minimum secondary-prevention threshold" in emr
+    assert "PREVENT-informed primary-prevention target" not in emr
+    assert "Because heart artery disease is already established" in roadmap
 
 
 def test_demo_payloads_are_defensive_copies():

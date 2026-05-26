@@ -14,7 +14,6 @@ Why risk is elevated:
 
 Current goals:
 - LDL-C: - to <70 mg/dL
-- non-HDL-C: - to <100 mg/dL
 - ApoB: - to <80 mg/dL
 - A1c: 7.4% to individualized
 - Kidney / albuminuria: 210 mg/g; G3aA2 to reduce albuminuria / preserve eGFR
@@ -22,9 +21,6 @@ Current goals:
 Next steps:
 1. Protect the kidneys: Review kidney protection options with your clinician.
 2. Improve blood sugar trajectory: Keep diabetes care moving toward the safest individualized goal.
-3. Aspirin safety: Do not start aspirin unless your clinician recommends it.
-4. Additional testing: A calcium scan may help if treatment choices are still uncertain.
-5. Additional testing: Lp(a) can be checked once to guide long-term prevention.
-6. Additional testing: hsCRP can help clarify inflammatory risk context when clinically relevant.
+3. Additional testing: A calcium scan may help if treatment choices are still uncertain.
 
 This roadmap is for discussion with your clinician. Medication decisions should be individualized.

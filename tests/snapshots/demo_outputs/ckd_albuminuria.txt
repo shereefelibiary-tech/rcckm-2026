@@ -1,4 +1,4 @@
-DEMO: CKD / albuminuria
+DEMO: CKD G2A2 albuminuria
 CASE: ckd_albuminuria
 
 EMR:
@@ -39,7 +39,7 @@ Where you stand:
 
 Why risk is elevated:
 - Near-term estimated risk may be low, but 30-year risk is elevated enough to justify prevention discussion.
-- Cholesterol particles: ApoB 96; LDL-C 126; non-HDL-C 156. These numbers help show plaque-driving cholesterol in the blood.
+- Cholesterol particles: ApoB 96; LDL-C 126; non-HDL-C 156 (calculated). These numbers help show plaque-driving cholesterol in the blood.
 - Blood sugar / diabetes: A1c 6.0%. Improving blood sugar can lower long-term heart, kidney, and metabolic risk.
 - Kidney protection: eGFR 64; UACR 48. Kidney markers also help estimate heart and metabolic risk.
 - Blood pressure: 142/86 mmHg; treated. Keeping blood pressure in a safer range protects the heart, brain, and kidneys.
@@ -48,7 +48,7 @@ Why risk is elevated:
 
 Current goals:
 - LDL-C: 126 mg/dL to <100 mg/dL
-- non-HDL-C: 156 mg/dL to <130 mg/dL
+- non-HDL-C: 156 mg/dL calculated to <130 mg/dL
 - ApoB: 96 mg/dL to <90 mg/dL
 - A1c: 6.0% to individualized
 - BP: 142/86 mmHg; treated to <130/80 when appropriate
@@ -58,10 +58,7 @@ Current goals:
 Next steps:
 1. Lower plaque-driving cholesterol: Moderate-intensity statin therapy usually lowers LDL cholesterol by about one-third to one-half.
 2. Protect the kidneys: Review kidney protection options with your clinician.
-3. Keep blood pressure in a safer range: Use lifestyle and medicines as appropriate.
-4. Aspirin safety: Do not start aspirin unless your clinician recommends it.
-5. Additional testing: hsCRP can help clarify inflammatory risk context when clinically relevant.
-6. Next step: CAC may clarify plaque burden if treatment intensity remains uncertain.
+3. Additional testing: A calcium scan may help if treatment choices are still uncertain.
 
 This roadmap is for discussion with your clinician. Medication decisions should be individualized.
 

@@ -98,7 +98,7 @@ def test_severe_ldl_without_apob_appears_in_rss_panel():
 
     assert rss_total > 0
     assert any(item.label == "LDL-C" for item in get_rss_contributors(result))
-    assert '<strong class="rss-row-label">LDL-C</strong>' in rendered
+    assert '<strong class="rss-row-label">LDL-C 212 mg/dL</strong>' in rendered
     assert "LDL-C 212 mg/dL" in rendered
     assert "No active RSS contributors." not in rendered
 
@@ -138,19 +138,61 @@ def test_rss_title_and_contributor_labels_are_concise():
 
     assert "Where the Risk Is Coming From" in rendered
     assert "Why Risk Is Elevated" not in rendered
-    assert '<strong class="rss-row-label">A1c</strong>' in rows
-    assert '<strong class="rss-row-label">hsCRP</strong>' in rows
-    assert '<strong class="rss-row-label">Triglycerides</strong>' in rows
-    assert '<strong class="rss-row-label">ApoB / particle burden</strong>' in rows
-    assert '<strong class="rss-row-label">Albuminuria</strong>' in rows
-    assert '<strong class="rss-row-label">eGFR</strong>' in rows
-    assert '<strong class="rss-row-label">Family history</strong>' in rows
-    assert '<strong class="rss-row-label">Coronary calcium</strong>' in rows
+    assert '<strong class="rss-row-label">A1c 6%</strong>' in rows
+    assert '<strong class="rss-row-label">hsCRP 2.2 mg/L</strong>' in rows
+    assert '<strong class="rss-row-label">Triglycerides 186 mg/dL</strong>' in rows
+    assert '<strong class="rss-row-label">ApoB 104 mg/dL</strong>' in rows
+    assert '<span class="rss-row-value rss-muted">Particle burden</span>' in rows
+    assert '<strong class="rss-row-label">Albuminuria, UACR 45 mg/g</strong>' in rows
+    assert '<strong class="rss-row-label">Kidney filtration, eGFR 55</strong>' in rows
+    assert '<strong class="rss-row-label">Premature family history</strong>' in rows
+    assert '<strong class="rss-row-label">Coronary calcium 350</strong>' in rows
     assert "Elevated inflammatory biomarker" not in rows
     assert "Elevated triglycerides" not in rows
     assert "Elevated particle burden" not in rows
     assert "Prediabetes-range A1c" not in rows
     assert "Diabetes-range A1c" not in rows
+
+
+def test_rss_contributor_row_formatter_suppresses_duplicate_subtitles():
+    patient = Patient(
+        age=55,
+        sex="female",
+        diabetes=True,
+        a1c=7.1,
+        triglycerides=180,
+        apob=140,
+        lp_a_value=150,
+        lp_a_unit="nmol/L",
+        uacr=45,
+        egfr=55,
+        osa=True,
+        rheumatoid_arthritis=True,
+        incidental_cac=True,
+        cac=None,
+    )
+    result, rss_total, contributions = run_patient(patient)
+    rows = _row_html(build_rss_panel_html(rss_total, contributions, result))
+
+    assert '<strong class="rss-row-label">A1c 7.1%</strong>' in rows
+    assert '<span class="rss-row-value rss-muted">A1c 7.1%</span>' not in rows
+    assert '<strong class="rss-row-label">Triglycerides 180 mg/dL</strong>' in rows
+    assert '<span class="rss-row-value rss-muted">Triglycerides 180 mg/dL</span>' not in rows
+    assert '<strong class="rss-row-label">ApoB 140 mg/dL</strong>' in rows
+    assert rows.count("ApoB 140 mg/dL") == 1
+    assert '<strong class="rss-row-label">Lp(a) 150 nmol/L</strong>' in rows
+    assert rows.count("Lp(a) 150 nmol/L") == 1
+    assert '<strong class="rss-row-label">Albuminuria, UACR 45 mg/g</strong>' in rows
+    assert '<strong class="rss-row-label">Kidney filtration, eGFR 55</strong>' in rows
+    assert '<strong class="rss-row-label">Obstructive sleep apnea</strong>' in rows
+    assert '<strong class="rss-row-label">Rheumatoid arthritis</strong>' in rows
+    assert "Chronic inflammatory disease risk enhancer" in rows
+    assert '<strong class="rss-row-label">Incidental coronary calcium on CT</strong>' in rows
+    assert "Qualitative plaque evidence" in rows
+
+    before_points = sum(item.points for item in contributions)
+    after_points = sum(item["points"] for item in get_rss_display_items(result, contributions, rss_total)["contributors"])
+    assert before_points == after_points == rss_total
 
 
 def test_rss_markers_and_points_use_consistent_visual_system():
@@ -361,7 +403,7 @@ def test_tower_list_consistency_for_all_positive_contributors():
     for item in display["contributors"]:
         assert item["points"] > 0
         assert f'data-rss-id="{item["id"]}"' in tower
-        assert item["value_label"] in rows
+        assert item["label"] in rows
     assert sum(item["points"] for item in display["contributors"] if item["stack_in_tower"]) == rss_total
 
 
@@ -460,11 +502,11 @@ def test_many_contributors_case_stays_complete_without_forcing_tiny_tower_labels
     assert '<span class="rss-tower-label">eGFR 55</span>' not in tower
     assert '<span class="rss-tower-label">Lp(a) 80 nmol/L</span>' not in tower
     assert 'data-rss-id="lpa"' in tower
-    assert 'title="Lp(a) - Lp(a) 80 nmol/L - +2 RSS points"' in tower
+    assert 'title="Lp(a) 80 nmol/L - +2 RSS points"' in tower
     for item in display["contributors"]:
         assert f'data-rss-id="{item["id"]}"' in tower
         assert f'data-rss-id="{item["id"]}"' in rows
-        assert item["value_label"] in rows
+        assert item["label"] in rows
 
 
 def test_rss_contributor_typography_is_consistent_sans_serif():
@@ -537,7 +579,7 @@ def test_long_contributor_list_uses_clean_scroll_area_without_hiding_rows():
     assert "rss-driver-list--scroll" in html
     assert sum(item["points"] for item in display["contributors"] if item["stack_in_tower"]) == rss_total
     assert '<span class="rss-tower-label">Lp(a) 168 nmol/L</span>' in tower
-    assert 'title="Lp(a) - Lp(a) 168 nmol/L - +8 RSS points"' in tower
+    assert 'title="Lp(a) 168 nmol/L - +8 RSS points"' in tower
     assert "rss-tower-callout" not in html
     for item in display["contributors"]:
         assert f'data-rss-id="{item["id"]}"' in tower
@@ -579,7 +621,7 @@ def test_low_rss_18_case_has_callout_and_keeps_exact_tower_scale():
     assert "A1c" in rows
     assert "A1c 5.7%" in rows
     assert "ApoB 106 mg/dL" in rows
-    assert "TG 182 mg/dL" in rows
+    assert "Triglycerides 182 mg/dL" in rows
     assert "OSA" in rows
     assert "MASLD" in rows
     assert 'data-rss-low-callout="true"' in html
@@ -630,7 +672,7 @@ def test_moderate_rss_43_case_uses_readable_labels_only_without_callout():
     for item in display["contributors"]:
         assert f'data-rss-id="{item["id"]}"' in tower
         assert f'data-rss-id="{item["id"]}"' in rows
-        assert item["value_label"] in rows
+        assert item["label"] in rows
     assert "Missing clarifiers" not in html
 
 

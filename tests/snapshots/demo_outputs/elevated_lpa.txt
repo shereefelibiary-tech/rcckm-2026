@@ -34,7 +34,7 @@ Where you stand:
 - Care focus: Level 2 (2B) - Converging early risk signals
 
 Why risk is elevated:
-- Cholesterol particles: ApoB 86; LDL-C 124; non-HDL-C 134. These numbers help show plaque-driving cholesterol in the blood.
+- Cholesterol particles: ApoB 86; LDL-C 124. These numbers help show plaque-driving cholesterol in the blood.
 - Blood sugar / diabetes: A1c 5.3%. Improving blood sugar can lower long-term heart, kidney, and metabolic risk.
 - Kidney protection: eGFR 98; UACR 5. Kidney markers also help estimate heart and metabolic risk.
 - Blood pressure: 118/72 mmHg. Keeping blood pressure in a safer range protects the heart, brain, and kidneys.
@@ -43,7 +43,6 @@ Why risk is elevated:
 
 Current goals:
 - LDL-C: 124 mg/dL to -
-- non-HDL-C: 134 mg/dL to -
 - ApoB: 86 mg/dL to -
 - A1c: 5.3% to individualized
 - BP: 118/72 mmHg to <130/80 when appropriate
@@ -51,10 +50,8 @@ Current goals:
 - Weight: BMI 24.2 to individualized
 
 Next steps:
-1. Medication plan: No medication escalation required today; review Lp(a), family history, and long-term prevention options.
-2. Long-term prevention: Focus on weight, blood sugar, triglycerides, and long-term prevention.
-3. Aspirin safety: Do not start aspirin unless your clinician recommends it.
-4. Additional testing: A calcium scan may help if treatment choices are still uncertain.
+1. Long-term prevention: Focus on weight, blood sugar, triglycerides, and long-term prevention.
+2. Additional testing: A calcium scan may help if treatment choices are still uncertain.
 
 This roadmap is for discussion with your clinician. Medication decisions should be individualized.
 

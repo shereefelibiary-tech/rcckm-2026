@@ -7,6 +7,11 @@ from modules.prevent.lipid_bands import (
     lipid_recommendation_from_prevent_band,
 )
 from modules.risk_enhancers.reproductive import has_reproductive_risk_markers
+from modules.risk_enhancers.breast_arterial_calcification import (
+    BAC_CAC_CLARIFICATION_TEXT,
+    has_breast_arterial_calcification,
+)
+from modules.targets.engine import LDL_TARGET_VERY_HIGH_RISK_ASCVD
 
 
 def _has_diabetes(patient):
@@ -284,6 +289,7 @@ def _lipid_enhancer_context(patient, result=None):
         "elevated_lpa": _has_elevated_lpa(patient),
         "hypertriglyceridemia": _has_elevated_tg(patient),
         "cac_plaque": cac is not None and cac > 0,
+        "breast_arterial_calcification": has_breast_arterial_calcification(patient),
         "very_high_lipid_burden": (ldl_c is not None and ldl_c >= 160) or (apob is not None and apob >= 120),
         "ldl_apob_burden": (ldl_c is not None and ldl_c >= 130) or (apob is not None and apob >= 100),
         "inflammatory": bool(getattr(patient, "inflammatory_disease", False)),
@@ -601,8 +607,13 @@ def _lipid_action_text(patient, result):
             or (non_hdl_target is not None and getattr(patient, "non_hdl_c", None) is not None and patient.non_hdl_c >= non_hdl_target)
             or (apob_target is not None and getattr(patient, "apob", None) is not None and patient.apob >= apob_target)
         )
+        very_high_risk_target = ldl_target == LDL_TARGET_VERY_HIGH_RISK_ASCVD
         if above_target:
+            if very_high_risk_target:
+                return "Intensify secondary-prevention lipid-lowering therapy; treat toward very-high-risk ASCVD targets."
             return "Intensify secondary-prevention lipid-lowering therapy; treat toward ASCVD targets."
+        if very_high_risk_target:
+            return "Secondary-prevention lipid-lowering therapy indicated; treat toward very-high-risk ASCVD targets."
         return "Secondary-prevention lipid-lowering therapy indicated; treat toward ASCVD targets."
     ldl_c = getattr(patient, "ldl_c", None)
     if (ldl_c is not None and ldl_c >= 190) or bool(getattr(patient, "suspected_fh_hefh", False)):
@@ -872,11 +883,17 @@ def _build_testing_actions(patient, result):
     if cac_recommendation:
         lipid_line = _lipid_action_text(patient, result)
         lipid_treatment_forward = _lipid_line_is_treatment_forward(lipid_line)
+        cac_text = (
+            BAC_CAC_CLARIFICATION_TEXT
+            if has_breast_arterial_calcification(patient)
+            and getattr(patient, "cac", None) is None
+            else _cac_testing_action_text(cac_recommendation, lipid_treatment_forward)
+        )
         _add_action(
             recommendations,
             domains,
             "cac_testing",
-            _cac_testing_action_text(cac_recommendation, lipid_treatment_forward),
+            cac_text,
         )
 
     if not prioritize_uacr and getattr(patient, "uacr", None) is None and (
@@ -948,11 +965,17 @@ def _build_testing_actions(patient, result):
         if clarification.get("recommend_cac") and cac_recommendation:
             lipid_line = _lipid_action_text(patient, result)
             lipid_treatment_forward = _lipid_line_is_treatment_forward(lipid_line)
+            cac_text = (
+                BAC_CAC_CLARIFICATION_TEXT
+                if has_breast_arterial_calcification(patient)
+                and getattr(patient, "cac", None) is None
+                else _cac_testing_action_text(cac_recommendation, lipid_treatment_forward)
+            )
             _add_action(
                 recommendations,
                 domains,
                 "cac_testing",
-                _cac_testing_action_text(cac_recommendation, lipid_treatment_forward),
+                cac_text,
             )
         if clarification.get("recommend_uacr"):
             _add_action(

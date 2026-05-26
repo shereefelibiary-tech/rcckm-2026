@@ -5,6 +5,10 @@ from core.diagnosis_workflow import (
 )
 from modules.actions.scaffold import build_action_recommendation_lines
 from modules.levels.definitions import classify_continuum_position
+from modules.risk_enhancers.breast_arterial_calcification import (
+    breast_arterial_calcification_context,
+)
+from modules.risk_enhancers.incidental_cac import incidental_cac_context
 from modules.risk_enhancers.reproductive import reproductive_history_summary
 
 
@@ -43,9 +47,9 @@ def _plaque_summary(patient, result):
         return "CAC 0 measured; do not use CAC 0 to defer lipid-lowering therapy in LDL-C >=190 / possible FH pathway"
     if cac is not None:
         return f"CAC {cac:g}"
-    if getattr(patient, "incidental_cac", False):
-        severity = str(getattr(patient, "incidental_cac_severity", "") or "").strip()
-        return f"incidental CAC noted{f' ({severity})' if severity else ''}"
+    incidental_context = incidental_cac_context(patient)
+    if incidental_context:
+        return incidental_context
     if getattr(patient, "cac_not_done", False):
         return "unmeasured / CAC not performed"
 
@@ -361,7 +365,7 @@ def _append_unique(lines, line):
 
 def _prevent_impression_sentence(patient, result):
     if getattr(patient, "clinical_ascvd", False):
-        return "PREVENT not used for treatment decisions in established ASCVD."
+        return "Known cardiovascular disease is present, so treatment decisions are based on secondary-prevention goals rather than risk estimates alone."
 
     fragments = []
     if getattr(result, "prevent_10y_ascvd", None) is not None:
@@ -397,13 +401,13 @@ def _disease_context_sentence(patient, result):
         important_plaque = (
             getattr(patient, "clinical_ascvd", False)
             or getattr(patient, "cac", None) is not None
-            or getattr(patient, "incidental_cac", False)
+            or incidental_cac_context(patient)
             or "LDL-C >=190" in plaque_summary
             or measured_plaque_category
         )
         cac_action = "cac_testing" in (getattr(result, "action_domains", None) or {})
         if important_plaque or cac_action:
-            if plaque_summary.startswith("CAC "):
+            if plaque_summary.startswith("CAC ") or plaque_summary.startswith(("Mild incidental", "Moderate incidental", "Severe incidental", "Incidental coronary")):
                 context_parts.append(plaque_summary)
             else:
                 context_parts.append(f"plaque {plaque_summary}")
@@ -440,6 +444,9 @@ def _history_context_sentence(patient):
         parts.append(f"cancer survivor context{suffix}")
     if getattr(patient, "suspected_fh_hefh", False):
         parts.append("suspected FH / HeFH pathway")
+    bac_context = breast_arterial_calcification_context(patient)
+    if bac_context:
+        parts.append(bac_context)
     if bool(getattr(patient, "premature_fhx_ascvd", False)) or bool(
         getattr(patient, "family_history_premature_ascvd", False)
     ):
@@ -516,6 +523,8 @@ def _short_recommendation_line(recommendation):
         "Moderate-intensity lipid-lowering therapy is reasonable to reduce cumulative atherogenic exposure.": "Moderate-intensity lipid-lowering therapy reasonable.",
         "Moderate-intensity statin therapy is reasonable to reduce cumulative atherogenic exposure.": "Moderate-intensity statin therapy reasonable.",
         "Lipid-lowering therapy is indicated; treat toward high-risk targets.": "Lipid-lowering therapy indicated; treat toward high-risk targets.",
+        "Intensify secondary-prevention lipid-lowering therapy; treat toward very-high-risk ASCVD targets.": "Intensify secondary-prevention lipid-lowering therapy; treat toward very-high-risk ASCVD targets: LDL-C <55 mg/dL, non-HDL-C <85 mg/dL, and ApoB <65 mg/dL if available. LDL-C <70 mg/dL remains the minimum secondary-prevention threshold.",
+        "Secondary-prevention lipid-lowering therapy indicated; treat toward very-high-risk ASCVD targets.": "Treat toward very-high-risk ASCVD targets: LDL-C <55 mg/dL, non-HDL-C <85 mg/dL, and ApoB <65 mg/dL if available. LDL-C <70 mg/dL remains the minimum secondary-prevention threshold.",
         "High-intensity lipid-lowering therapy indicated; treat toward high-risk targets.": "High-intensity lipid-lowering therapy indicated.",
         "High-intensity or maximally tolerated statin therapy indicated.": "High-intensity or maximally tolerated statin indicated.",
         "Optimize kidney-protective therapy and confirm albuminuria persistence.": "Confirm albuminuria persistence and optimize kidney-protective therapy.",

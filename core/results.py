@@ -31,6 +31,10 @@ class RCCKMResult:
     plaque_category: Optional[PlaqueCategory] = None
     risk_level: Optional[RiskLevel] = None
     clinical_ascvd: bool = False
+    prevention_context: Optional[str] = None
+    prevention_context_primary_reason: Optional[str] = None
+    prevention_context_supporting_findings: list[str] = field(default_factory=list)
+    prevention_context_rule_id: Optional[str] = None
     severe_hypercholesterolemia: bool = False
     possible_fh_pathway: bool = False
     prevent_available: bool = False

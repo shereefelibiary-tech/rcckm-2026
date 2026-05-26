@@ -1,34 +1,55 @@
 RCCKM Demo Case Audit
-Cases checked: 14
+Cases checked: 32
 Errors: 0
 Warnings: 1
-Suggestions: 1
+Suggestions: 4
 
 Summary table:
 Score  Complete  Coherent  Readable  Showcase  Demo
-  100       100       100       100       100  Healthy low-risk prevention
-  100       100       100       100       100  Obesity / metabolic syndrome
+  100       100       100       100       100  Low-risk clean prevention
+  100       100       100       100       100  Borderline ASCVD discussion
+  100       100       100       100       100  Younger patient with premature family history
   100       100       100       100       100  Prediabetes / insulin resistance
   100       100       100       100       100  High ApoB discordance
+  100       100       100       100       100  LDL-C high, ApoB missing
+  100       100       100       100       100  LDL-C >=190 severe hypercholesterolemia
   100       100       100       100       100  Elevated Lp(a)
+  100       100       100       100       100  Hypertriglyceridemia / insulin resistance
   100       100       100       100       100  CAC 0 ambiguity resolution
   100       100       100       100       100  CAC 1-99 plaque present
-  100       100       100       100       100  CAC >=100 high plaque burden
-  100       100       100       100       100  CKD / albuminuria
-  100       100       100       100       100  Diabetes + CKM stage
+  100       100       100       100       100  CAC >=100 treatment clarification
+  100       100       100       100       100  CAC >=300 high plaque burden
+  100       100       100       100       100  Incidental CAC on CT
+  100       100       100       100       100  Breast arterial calcification
+  100       100       100       100       100  Type 2 diabetes without kidney disease
+  100       100       100       100       100  Type 2 diabetes with albuminuria
+  100       100       100       100       100  CKD G2A2 albuminuria
+  100       100       100       100       100  CKD G3aA2
+  100       100       100       100       100  Higher albuminuria / SGLT2 consideration
   100       100       100       100       100  On-treatment above-target lipids
-  100       100       100       100       100  Younger patient with premature family history
-  100       100       100       100       100  Older multiple treated risk factors
-   96        92       100       100        94  Sparse but realistic PCP intake
+  100       100       100       100       100  Statin intolerance
+  100       100       100       100       100  BP treated but above kidney goal
+  100       100       100       100       100  ACEi/ARB with persistent albuminuria
+  100       100       100       100       100  South Asian ancestry context
+  100       100       100       100       100  Active smoker prevention visit
+  100       100       100       100       100  Cancer survivor context
+   98       100       100       100        94  Low 10-year / elevated 30-year risk
+   98       100       100       100        94  High-intensity statin, add-on discussion
+   98       100       100       100        94  Severe secondary prevention
+   98       100       100       100        94  Rheumatoid arthritis risk enhancer
+   98        92       100       100       100  Multiple enhancers, missing ApoB/Lp(a)
 
-Strongest demos: Healthy low-risk prevention, Obesity / metabolic syndrome, Prediabetes / insulin resistance
-Weakest demos: Younger patient with premature family history, Older multiple treated risk factors, Sparse but realistic PCP intake
-Sparse demos: Sparse but realistic PCP intake
+Strongest demos: Low-risk clean prevention, Borderline ASCVD discussion, Younger patient with premature family history
+Weakest demos: Severe secondary prevention, Rheumatoid arthritis risk enhancer, Multiple enhancers, missing ApoB/Lp(a)
+Sparse demos: Multiple enhancers, missing ApoB/Lp(a)
 Contradictory demos: none
 Demos needing rewrite: none
 
 Warnings:
-- Sparse but realistic PCP intake: sparse advanced prevention data: apob, lp_a_value, uacr, hscrp
+- Multiple enhancers, missing ApoB/Lp(a): sparse advanced prevention data: apob, lp_a_value, uacr, hscrp
 
 Suggestions:
-- Sparse but realistic PCP intake: showcase concept may be too subtle: PCP intake
+- Low 10-year / elevated 30-year risk: showcase concept may be too subtle: prevention opportunity
+- High-intensity statin, add-on discussion: showcase concept may be too subtle: add-on therapy
+- Severe secondary prevention: showcase concept may be too subtle: add-on therapy
+- Rheumatoid arthritis risk enhancer: showcase concept may be too subtle: rheumatoid arthritis

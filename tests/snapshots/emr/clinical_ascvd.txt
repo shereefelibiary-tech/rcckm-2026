@@ -1,7 +1,7 @@
 RISK CONTINUUM CKM
 
 Level 5 - clinical ASCVD / secondary prevention.
-PREVENT not used for treatment decisions in established ASCVD.
+Known cardiovascular disease is present, so treatment decisions are based on secondary-prevention goals rather than risk estimates alone.
 CKM stage 4 with plaque established clinically.
 
 Assessment:
@@ -10,6 +10,6 @@ Assessment:
 Recommendations:
 - Secondary-prevention lipid-lowering therapy indicated; treat toward ASCVD targets.
 - Plaque is established clinically; CAC is not needed for current decision-making.
-- Antiplatelet therapy indicated for secondary prevention if clinically appropriate.
+- Antiplatelet therapy is indicated for secondary prevention if clinically appropriate and no contraindication is present.
 - Lp(a) - one-time risk assessment
 - Clarification testing should not delay treatment.

@@ -2,7 +2,13 @@ from core.engine import evaluate_patient
 from core.enums import RiskLevel
 from core.patient import Patient
 from core.results import RCCKMResult
-from modules.actions.scaffold import build_action_recommendation_lines, build_action_scaffold
+from modules.actions.scaffold import (
+    build_action_recommendation_lines,
+    build_action_scaffold,
+    build_action_instrument_panel,
+    build_compact_action_detail_lines,
+    build_compact_action_items,
+)
 from renderers.emr_renderer import render_emr_note
 from ui.report_layout import _build_action_html
 
@@ -177,7 +183,7 @@ def test_clinical_ascvd_uses_secondary_prevention_antiplatelet_wording():
     result = evaluate_patient(patient)
 
     assert _section(build_action_scaffold(patient, result), "Aspirin").line == (
-        "Antiplatelet therapy indicated for secondary prevention if clinically appropriate."
+        "Antiplatelet therapy is indicated for secondary prevention if clinically appropriate and no contraindication is present."
     )
 
 
@@ -204,15 +210,15 @@ def test_clinical_ascvd_with_cac_zero_uses_secondary_prevention_not_derisking():
     assert result.risk_level == RiskLevel.VERY_HIGH
     assert result.ckm_stage["stage"] == 4
     assert _section(sections, "Lipid therapy").line == (
-        "Intensify secondary-prevention lipid-lowering therapy; treat toward ASCVD targets."
+        "Intensify secondary-prevention lipid-lowering therapy; treat toward very-high-risk ASCVD targets."
     )
     assert _section(sections, "Coronary calcium").line == (
         "CAC 0 is discordant/historical and should not be used to de-risk established ASCVD."
     )
     assert _section(sections, "Aspirin").line == (
-        "Antiplatelet therapy indicated for secondary prevention if clinically appropriate."
+        "Antiplatelet therapy is indicated for secondary prevention if clinically appropriate and no contraindication is present."
     )
-    assert "PREVENT not used for treatment decisions in established ASCVD." in note
+    assert "Known cardiovascular disease is present, so treatment decisions are based on secondary-prevention goals rather than risk estimates alone." in note
     assert "PREVENT 10-year ASCVD risk" not in note
     assert "CAC 0 does not de-risk secondary prevention" in note
     assert "Clinical ASCVD / coronary artery disease with prior NSTEMI and PCI/stent" in diagnosis_text
@@ -234,39 +240,144 @@ def test_action_html_renders_structured_sections_without_loose_duplicate_list():
 
     html = _build_action_html(result, patient)
 
-    lipid_lead = "High-intensity lipid-lowering therapy indicated."
+    lipid_lead = "High-intensity therapy indicated"
     lipid_detail = "Treat toward high-risk targets."
-    cac_lead = "CAC 350 already measured."
-    cac_detail = "No repeat CAC needed for current decision-making."
-    aspirin_lead = "Aspirin may be considered only if bleeding risk is low."
-    aspirin_detail = "Use shared decision-making."
-    kidney_line = "Optimize kidney-protective therapy."
-    glycemia_line = "Optimize glycemic therapy."
+    aspirin_lead = "Consider only if low bleeding risk"
+    aspirin_detail = "Shared decision-making."
+    kidney_line = "Kidney protection"
+    kidney_detail = "Confirm albuminuria"
+    glycemia_line = "Optimize diabetes care"
 
     assert "Lipid therapy:" not in html
     assert "Coronary calcium:" not in html
-    assert "Aspirin:" not in html
     assert "Supporting actions:" not in html
     assert "Aspirin: Aspirin" not in html
     assert "Lipid therapy: Lipid" not in html
-    assert "action-number" in html
-    assert "action-lead" in html
+    assert html.count('class="action-domain ') == 7
+    assert "action-number" not in html
+    assert "<ol" not in html
+    assert "<li>High-intensity lipid-lowering therapy indicated" not in html
+    assert "action-grid" in html
+    assert "action-domain-label" in html
+    assert "action-status" in html
     assert "action-detail" in html
-    assert ".action-row:nth-child(even){background:rgba(47,95,143,0.035);}" in html
-    assert "border-top:1px solid rgba(7,26,47,0.07)" in html
+    assert "grid-template-columns:repeat(2,minmax(0,1fr))" in html
     assert "border-radius:10px" in html
-    assert "margin:0 -2px" in html
+    assert "Lipid lowering" in html
+    assert "CAC / plaque" in html
+    assert "Blood pressure" in html
+    assert "Data to clarify" in html
     assert lipid_lead in html
     assert lipid_detail in html
-    assert cac_lead in html
-    assert cac_detail in html
     assert aspirin_lead in html
     assert aspirin_detail in html
     assert kidney_line in html
+    assert kidney_detail in html
     assert glycemia_line in html
-    assert html.index(lipid_lead) < html.index(cac_lead) < html.index(aspirin_lead)
-    assert "CAC 350 already measured; no repeat CAC needed" not in html
+    assert "High-intensity lipid-lowering therapy indicated." not in html
+    assert "Recheck lipid profile 4-12 weeks" not in html
+    assert "CAC 350 already measured; no repeat CAC needed" in html
+    assert html.index("Lipid lowering") < html.index("CAC / plaque") < html.index(kidney_line)
+    assert "Show details" in html
     assert "\n            <div" not in html
+
+
+def test_action_instrument_panel_has_fixed_domain_order_and_neutral_slots():
+    patient = Patient(age=55, sex="male", cac=0, sbp=118, dbp=72, tc=180, hdl_c=55)
+    result = evaluate_patient(patient)
+
+    panel = build_action_instrument_panel(patient, result)
+
+    assert [item.domain_id for item in panel] == [
+        "lipid_lowering",
+        "plaque_cac",
+        "kidney_protection",
+        "blood_pressure",
+        "glycemia_metabolic",
+        "aspirin_antiplatelet",
+        "data_to_clarify",
+    ]
+    assert [item.label for item in panel] == [
+        "Lipid lowering",
+        "CAC / plaque",
+        "Kidney protection",
+        "Blood pressure",
+        "Glycemia / metabolic",
+        "Aspirin / antiplatelet",
+        "Data to clarify",
+    ]
+    assert all(item.status for item in panel)
+    assert all("None" not in item.status + item.detail for item in panel)
+    assert next(item for item in panel if item.domain_id == "blood_pressure").status == "At goal"
+    assert next(item for item in panel if item.domain_id == "glycemia_metabolic").status == "No glycemic action"
+    assert next(item for item in panel if item.domain_id == "aspirin_antiplatelet").status == "Not routine for primary prevention"
+
+
+def test_action_instrument_panel_groups_kidney_cac_aspirin_and_clarifiers():
+    patient = Patient(age=55, sex="male", cac=350, diabetes=True, a1c=7.1, egfr=55, uacr=45)
+    result = evaluate_patient(patient)
+    panel = {item.domain_id: item for item in build_action_instrument_panel(patient, result)}
+
+    assert panel["lipid_lowering"].status == "High-intensity therapy indicated"
+    assert panel["plaque_cac"].status == "CAC 350 already measured"
+    assert panel["plaque_cac"].detail == "No repeat CAC needed."
+    assert panel["kidney_protection"].status == "Confirm albuminuria"
+    assert "SGLT2" not in panel["blood_pressure"].status + panel["blood_pressure"].detail
+    assert panel["aspirin_antiplatelet"].status == "Consider only if low bleeding risk"
+    assert panel["data_to_clarify"].label == "Data to clarify"
+
+
+def test_action_instrument_panel_secondary_prevention_antiplatelet_slot():
+    patient = Patient(age=62, sex="male", clinical_ascvd=True, clinical_ascvd_context="prior MI")
+    result = evaluate_patient(patient)
+    panel = {item.domain_id: item for item in build_action_instrument_panel(patient, result)}
+
+    assert panel["lipid_lowering"].status == "Secondary-prevention lipid therapy"
+    assert panel["aspirin_antiplatelet"].status == "Secondary-prevention antiplatelet"
+    assert "primary prevention" not in panel["aspirin_antiplatelet"].status.lower()
+
+
+def test_compact_action_items_group_priorities_and_preserve_details():
+    patient = Patient(age=55, sex="male", cac=350, diabetes=True, a1c=7.1, egfr=55, uacr=45)
+    result = evaluate_patient(patient)
+
+    items = build_compact_action_items(patient, result)
+    details = build_compact_action_detail_lines(patient, result)
+    titles = [item.title for item in items]
+    subtitles = [item.subtitle for item in items]
+
+    assert len(items) <= 5
+    assert titles[:3] == [
+        "Intensify lipid-lowering",
+        "Protect kidneys",
+        "Optimize glycemia",
+    ]
+    assert "Confirm UACR; optimize BP/ACEi-ARB; consider SGLT2 if criteria met." in subtitles
+    assert "Aspirin: only if low bleeding risk" in titles
+    assert all("Recheck lipid profile 4-12 weeks" not in item.title + item.subtitle for item in items)
+    assert all("CAC 350 already measured" not in item.title + item.subtitle for item in items)
+    assert "CAC 350 already measured; no repeat CAC needed for current decision-making." in details
+    assert "Monitor lipids after therapy change." in details
+
+
+def test_compact_action_omits_routine_primary_prevention_aspirin():
+    patient = Patient(age=55, sex="male", cac=0)
+    result = evaluate_patient(patient)
+
+    text = " ".join(item.title + " " + item.subtitle for item in build_compact_action_items(patient, result))
+
+    assert "Aspirin not indicated for routine primary prevention" not in text
+    assert "Aspirin safety" not in text
+
+
+def test_compact_action_keeps_secondary_prevention_antiplatelet_visible():
+    patient = Patient(age=62, sex="male", clinical_ascvd=True, clinical_ascvd_context="prior MI")
+    result = evaluate_patient(patient)
+
+    items = build_compact_action_items(patient, result)
+
+    assert any(item.title == "Antiplatelet therapy" for item in items)
+    assert any("no contraindication" in item.subtitle for item in items)
 
 
 def test_emr_recommendations_use_action_scaffold():

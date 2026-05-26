@@ -1,0 +1,72 @@
+DEMO: High-intensity statin, add-on discussion
+CASE: high_intensity_add_on_discussion
+
+EMR:
+RISK CONTINUUM CKM
+
+Level 5 - very high plaque burden.
+10-year ASCVD risk: 7.86%.
+CKM stage 3 with kidney G2A1 and CAC 420.
+
+Assessment:
+- Severe subclinical coronary atherosclerosis / high CAC burden (ICD: I25.10)
+- Hypertriglyceridemia (ICD: E78.1)
+- Prediabetes (ICD: R73.03)
+- Elevated lipoprotein(a) (ICD: E78.41)
+
+Recommendations:
+- High-intensity lipid-lowering therapy indicated.
+- Aspirin only if bleeding risk is low after shared decision-making.
+- Consider hsCRP only if inflammatory risk clarification would change management.
+- Clarification testing should not delay treatment.
+
+PATIENT ROADMAP:
+Your Prevention Roadmap
+Your results show where you stand today and the most important steps to lower future heart, kidney, and metabolic risk.
+
+Where you stand:
+- 10-year ASCVD risk: 7.86%
+- Coronary plaque is present, so prevention decisions should account for measured plaque burden in addition to risk estimates.
+- About 8 out of 100 similar patients may have a heart attack, stroke, or related artery disease event over the next 10 years.
+- Coronary calcium score: 420, showing a high amount of plaque.
+- Care focus: Level 5 - Very high risk
+
+Why risk is elevated:
+- Artery plaque: CAC 420. The calcium score shows a high amount of coronary plaque.
+- Cholesterol particles: ApoB 102; LDL-C 104; non-HDL-C 142 (calculated). These numbers help show plaque-driving cholesterol in the blood.
+- Blood sugar / diabetes: A1c 5.9%. Improving blood sugar can lower long-term heart, kidney, and metabolic risk.
+- Kidney protection: eGFR 70; UACR 12. Kidney markers also help estimate heart and metabolic risk.
+- Blood pressure: 126/74 mmHg; treated. Keeping blood pressure in a safer range protects the heart, brain, and kidneys.
+- Other factors: Lp(a) 210 nmol/L. These details can shape the prevention plan with your clinician.
+- Other context: Lp(a) 210 nmol/L; BP 126/74; treated.
+
+Current goals:
+- LDL-C: 104 mg/dL to <70 mg/dL
+- non-HDL-C: 142 mg/dL calculated to <100 mg/dL
+- ApoB: 102 mg/dL to <80 mg/dL
+- A1c: 5.9% to individualized
+- BP: 126/74 mmHg; treated to <130/80 when appropriate
+- Kidney / albuminuria: 12 mg/g; G2A1 to reduce albuminuria / preserve eGFR
+- Weight: BMI 29.0 to individualized
+
+Next steps:
+1. Lower plaque-driving cholesterol: High-intensity statin therapy usually lowers LDL cholesterol by at least one-half.
+2. Aspirin safety: Do not start aspirin unless your clinician recommends it.
+
+This roadmap is for discussion with your clinician. Medication decisions should be individualized.
+
+ACTIONS:
+- High-intensity lipid-lowering therapy indicated; treat toward high-risk targets.
+- Recheck lipid profile 4-12 weeks after starting or intensifying therapy, then every 6-12 months.
+- CAC 420 already measured; no repeat CAC needed for current decision-making.
+- Aspirin may be considered only if bleeding risk is low after shared decision-making.
+- Consider hsCRP only if inflammatory risk clarification would change management.
+- Clarification testing should not delay treatment.
+
+RSS: 52
+RSS CONTRIBUTORS:
+- CAC plaque burden: 420.0 (+30)
+- ApoB elevation: 102.0 (+8)
+- Elevated Lp(a): 210.0 nmol/L (+8)
+- Hypertriglyceridemia: 190.0 (+4)
+- A1c elevation: 5.9 (+2)

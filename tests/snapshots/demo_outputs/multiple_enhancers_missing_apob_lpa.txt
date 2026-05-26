@@ -1,0 +1,79 @@
+DEMO: Multiple enhancers, missing ApoB/Lp(a)
+CASE: multiple_enhancers_missing_apob_lpa
+
+EMR:
+RISK CONTINUUM CKM
+
+Level 3B - actionable early CKM / atherogenic risk.
+10-year ASCVD risk: 4.9%.
+30-year ASCVD risk: 27%.
+CKM stage 2 with kidney G2; albuminuria not measured.
+UACR not available; obtain to complete kidney-risk assessment. Risk context: reproductive history: Preeclampsia; premature family history (Mother stroke age 62).
+
+Assessment:
+- Hypertriglyceridemia (ICD: E78.1)
+- Prediabetes (ICD: R73.03)
+
+Recommendations:
+- Short-term ASCVD risk is low, but longer-term risk and risk-enhancing factors may make lipid-lowering worth discussing. Moderate-intensity statin therapy may be reasonable after shared decision-making.
+- CAC not performed; plaque burden unmeasured.
+- Aspirin not indicated for routine primary prevention.
+- Treat BP toward goal <130/80.
+- ApoB - particle burden clarification
+- Lp(a) - one-time risk assessment
+
+PATIENT ROADMAP:
+Your Prevention Roadmap
+Your results show where you stand today and the most important steps to lower future heart, kidney, and metabolic risk.
+
+Where you stand:
+- 10-year ASCVD risk: 4.9%
+- 30-year ASCVD risk: 27%
+- About 27 out of 100 similar patients may have a heart attack, stroke, or related artery disease event over the next 30 years.
+- Your short-term risk is low, but your longer-term risk is higher than expected. This does not mean an event is likely soon. It means prevention now may lower your risk over time.
+- About 5 out of 100 similar patients may have a heart attack, stroke, or related artery disease event over the next 10 years.
+- Plaque status has not been measured.
+- Care focus: Level 3 (3B) - Actionable early CKM / atherogenic risk
+
+Why risk is elevated:
+- Near-term risk is borderline, but 30-year risk and multiple early risk markers support prevention discussion.
+- Cholesterol particles: LDL-C 142; non-HDL-C 178 (calculated). These numbers help show plaque-driving cholesterol in the blood.
+- Blood sugar / diabetes: A1c 6.0%. Improving blood sugar can lower long-term heart, kidney, and metabolic risk.
+- Kidney protection: eGFR 86. Kidney markers also help estimate heart and metabolic risk.
+- Blood pressure: 134/82 mmHg. Keeping blood pressure in a safer range protects the heart, brain, and kidneys.
+- Other factors: Mother stroke age 62; OSA; MASLD; History of preeclampsia. Pregnancy or menopause history can affect long-term heart risk.
+- Other context: BP 134/82; Mother stroke age 62; OSA; MASLD.
+
+Current goals:
+- LDL-C: 142 mg/dL to <100 mg/dL
+- non-HDL-C: 178 mg/dL calculated to <130 mg/dL
+- ApoB: - to <90 mg/dL
+- A1c: 6.0% to individualized
+- BP: 134/82 mmHg to <130/80 when appropriate
+- Kidney / albuminuria: G2 to reduce albuminuria / preserve eGFR
+- Weight: BMI 32.2 to individualized
+
+Next steps:
+1. Lower plaque-driving cholesterol: Moderate-intensity statin therapy usually lowers LDL cholesterol by about one-third to one-half.
+2. Protect the kidneys: Review kidney protection options with your clinician.
+3. Additional testing: A calcium scan may help if treatment choices are still uncertain.
+
+This roadmap is for discussion with your clinician. Medication decisions should be individualized.
+
+ACTIONS:
+- Short-term ASCVD risk is low, but longer-term risk and risk-enhancing factors may make lipid-lowering worth discussing. Moderate-intensity statin therapy may be reasonable after shared decision-making.
+- Recheck lipid profile 4-12 weeks after starting or intensifying therapy, then every 6-12 months.
+- CAC not performed; plaque burden unmeasured.
+- Aspirin not indicated for routine primary prevention.
+- Optimize BP to <130/80.
+- ApoB - particle burden clarification
+- Lp(a) - one-time risk assessment
+
+RSS: 15
+RSS CONTRIBUTORS:
+- Hypertriglyceridemia: 182.0 (+4)
+- A1c elevation: 6.0 (+2)
+- Premature family history: Mother stroke age 62 (+3)
+- OSA: True (+2)
+- MASLD: True (+2)
+- Preeclampsia: History of preeclampsia (+2)

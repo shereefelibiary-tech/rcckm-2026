@@ -1,15 +1,47 @@
 from core.patient import Patient
-from modules.targets.engine import build_target_result
+from modules.targets.engine import (
+    APOB_TARGET_HIGH_RISK_PRIMARY_PREVENTION,
+    APOB_TARGET_PRIMARY_PREVENTION_DEFAULT,
+    APOB_TARGET_SECONDARY_PREVENTION_MINIMUM,
+    APOB_TARGET_VERY_HIGH_RISK_ASCVD,
+    LDL_TARGET_HIGH_RISK_PRIMARY_PREVENTION,
+    LDL_TARGET_PRIMARY_PREVENTION_DEFAULT,
+    LDL_TARGET_SECONDARY_PREVENTION_MINIMUM,
+    LDL_TARGET_VERY_HIGH_RISK_ASCVD,
+    NON_HDL_TARGET_HIGH_RISK_PRIMARY_PREVENTION,
+    NON_HDL_TARGET_PRIMARY_PREVENTION_DEFAULT,
+    NON_HDL_TARGET_SECONDARY_PREVENTION_MINIMUM,
+    NON_HDL_TARGET_VERY_HIGH_RISK_ASCVD,
+    assign_lipid_targets,
+    build_target_result,
+    is_very_high_risk_ascvd,
+)
+
+
+def test_lipid_target_constants_are_centralized():
+    assert LDL_TARGET_PRIMARY_PREVENTION_DEFAULT == 100
+    assert LDL_TARGET_HIGH_RISK_PRIMARY_PREVENTION == 70
+    assert LDL_TARGET_SECONDARY_PREVENTION_MINIMUM == 70
+    assert LDL_TARGET_VERY_HIGH_RISK_ASCVD == 55
+    assert NON_HDL_TARGET_PRIMARY_PREVENTION_DEFAULT == 130
+    assert NON_HDL_TARGET_HIGH_RISK_PRIMARY_PREVENTION == 100
+    assert NON_HDL_TARGET_SECONDARY_PREVENTION_MINIMUM == 100
+    assert NON_HDL_TARGET_VERY_HIGH_RISK_ASCVD == 85
+    assert APOB_TARGET_PRIMARY_PREVENTION_DEFAULT == 90
+    assert APOB_TARGET_HIGH_RISK_PRIMARY_PREVENTION == 80
+    assert APOB_TARGET_SECONDARY_PREVENTION_MINIMUM == 80
+    assert APOB_TARGET_VERY_HIGH_RISK_ASCVD == 65
 
 
 def test_build_target_result_returns_clinical_ascvd_targets():
-    patient = Patient(age=65, sex="female", clinical_ascvd=True)
+    patient = Patient(age=60, sex="female", clinical_ascvd=True)
 
     result = build_target_result(patient)
 
     assert result.ldl_c_target == 70
     assert result.non_hdl_c_target == 100
     assert result.apob_target == 80
+    assert "PREVENT should not be used to de-risk" in result.rationale
 
 
 def test_build_target_result_returns_very_high_risk_ascvd_targets():
@@ -26,7 +58,8 @@ def test_build_target_result_returns_very_high_risk_ascvd_targets():
 
     assert result.ldl_c_target == 55
     assert result.non_hdl_c_target == 85
-    assert result.apob_target == 60
+    assert result.apob_target == 65
+    assert "LDL-C <70 mg/dL is the minimum secondary-prevention threshold" in result.rationale
 
 
 def test_build_target_result_returns_extensive_cac_targets():
@@ -68,7 +101,28 @@ def test_build_target_result_returns_very_high_targets_for_cac_1000():
 
     assert result.ldl_c_target == 55
     assert result.non_hdl_c_target == 85
-    assert result.apob_target == 60
+    assert result.apob_target == 65
+
+
+def test_very_high_risk_ascvd_helper_uses_clinical_ascvd_plus_features():
+    assert not is_very_high_risk_ascvd(Patient(age=61, sex="male", clinical_ascvd=False, cac=500))
+    assert not is_very_high_risk_ascvd(Patient(age=60, sex="male", clinical_ascvd=True))
+    assert is_very_high_risk_ascvd(Patient(age=60, sex="male", clinical_ascvd=True, diabetes=True))
+    assert is_very_high_risk_ascvd(Patient(age=60, sex="male", clinical_ascvd=True, uacr=45))
+    assert is_very_high_risk_ascvd(Patient(age=60, sex="male", clinical_ascvd=True, ldl_c=190))
+    assert is_very_high_risk_ascvd(Patient(age=60, sex="male", clinical_ascvd=True, apob=130))
+    assert is_very_high_risk_ascvd(Patient(age=60, sex="male", clinical_ascvd=True, lp_a_value=150, lp_a_unit="nmol/L"))
+    assert is_very_high_risk_ascvd(Patient(age=60, sex="male", clinical_ascvd=True, cac=300))
+
+
+def test_assign_lipid_targets_is_public_target_helper():
+    patient = Patient(age=67, sex="male", clinical_ascvd=True, diabetes=True)
+
+    result = assign_lipid_targets(patient)
+
+    assert result.ldl_c_target == 55
+    assert result.non_hdl_c_target == 85
+    assert result.apob_target == 65
 
 
 def test_build_target_result_returns_mild_cac_targets_for_cac_50():

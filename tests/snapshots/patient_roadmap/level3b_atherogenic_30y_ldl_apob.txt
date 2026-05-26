@@ -14,20 +14,16 @@ Where you stand:
 Why risk is elevated:
 - Early metabolic signals are present.
 - Near-term estimated risk may be low, but 30-year risk is elevated enough to justify prevention discussion.
-- Cholesterol particles: ApoB 121; LDL-C 166; non-HDL-C 202. These numbers help show plaque-driving cholesterol in the blood.
+- Cholesterol particles: ApoB 121; LDL-C 166. These numbers help show plaque-driving cholesterol in the blood.
 - Kidney protection: UACR 9. Kidney markers also help estimate heart and metabolic risk.
 
 Current goals:
 - LDL-C: 166 mg/dL to <100 mg/dL
-- non-HDL-C: 202 mg/dL to <130 mg/dL
 - ApoB: 121 mg/dL to <90 mg/dL
 - Kidney / albuminuria: 9 mg/g; A1 to reduce albuminuria / preserve eGFR
 
 Next steps:
 1. Lower plaque-driving cholesterol: Moderate-intensity statin therapy usually lowers LDL cholesterol by about one-third to one-half.
-2. Aspirin safety: Do not start aspirin unless your clinician recommends it.
-3. Additional testing: Lp(a) can be checked once to guide long-term prevention.
-4. Additional testing: hsCRP can help clarify inflammatory risk context when clinically relevant.
-5. Next step: CAC may clarify plaque burden if treatment intensity remains uncertain.
+2. Additional testing: A calcium scan may help if treatment choices are still uncertain.
 
 This roadmap is for discussion with your clinician. Medication decisions should be individualized.

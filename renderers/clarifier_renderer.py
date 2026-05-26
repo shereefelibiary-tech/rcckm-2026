@@ -111,7 +111,7 @@ def build_clarifier_card_html(result, include_title=True):
         visible_html = f'<ul class="clarifier-list">{"".join(visible_rows)}</ul>'
     else:
         visible_html = (
-            '<div class="clarifier-empty">No missing clarifiers flagged by the engine.</div>'
+            '<div class="clarifier-empty">Key clarifying data are available.</div>'
         )
 
     important_completed = [
@@ -130,7 +130,10 @@ def build_clarifier_card_html(result, include_title=True):
         )
 
     title_html = (
-        '<div class="clarifier-title rc-card-title">What would help clarify risk?</div>'
+        '<div class="clarifier-heading">'
+        '<div class="clarifier-title rc-card-title">Data that could clarify risk</div>'
+        '<div class="clarifier-subtitle">These items may improve confidence in the prevention plan.</div>'
+        '</div>'
         if include_title
         else ""
     )
@@ -155,7 +158,17 @@ def build_clarifier_card_html(result, include_title=True):
     font-weight: 750;
     letter-spacing: 0;
     line-height: 1.15;
-    margin-bottom: 8px;
+    margin-bottom: 2px;
+}}
+.clarifier-heading {{
+    margin-bottom: 7px;
+}}
+.clarifier-subtitle {{
+    color: rgba(7, 26, 47, 0.54);
+    font-family: var(--rc-font-body);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.25;
 }}
 .clarifier-list {{
     list-style: none;

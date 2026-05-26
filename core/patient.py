@@ -60,6 +60,7 @@ class Patient:
     suspected_fh_hefh: Optional[bool] = None
     incidental_cac: Optional[bool] = None
     incidental_cac_severity: Optional[str] = None
+    breast_arterial_calcification: Optional[str] = None
     cac_percentile: Optional[float] = None
     zip_code: Optional[str] = None
     neighborhood_sdoh_context: Optional[str] = None

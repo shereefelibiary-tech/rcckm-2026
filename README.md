@@ -33,3 +33,11 @@ This software is intended for clinician decision support and educational/prototy
 pip install -r requirements.txt
 streamlit run app.py
 ```
+
+## Render Deployment
+
+- Language: Python 3
+- Root Directory: blank
+- Build Command: `pip install -r requirements.txt`
+- Start Command: `streamlit run app.py --server.port $PORT --server.address 0.0.0.0`
+- Runtime: `python-3.12.7`

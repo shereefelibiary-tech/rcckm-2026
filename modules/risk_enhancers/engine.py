@@ -1,5 +1,10 @@
 from typing import Optional
 
+from modules.risk_enhancers.breast_arterial_calcification import (
+    breast_arterial_calcification_context,
+)
+from modules.risk_enhancers.incidental_cac import incidental_cac_context
+
 
 def identify_risk_enhancers(patient) -> list[str]:
     enhancers: list[str] = []
@@ -51,10 +56,13 @@ def identify_risk_enhancers(patient) -> list[str]:
     if getattr(patient, "suspected_fh_hefh", False):
         enhancers.append("Suspected FH / HeFH pathway")
 
-    if getattr(patient, "incidental_cac", False):
-        severity = str(getattr(patient, "incidental_cac_severity", "") or "").strip()
-        suffix = f" ({severity})" if severity else ""
-        enhancers.append(f"Incidental CAC on noncardiac CT{suffix}")
+    incidental_context = incidental_cac_context(patient)
+    if incidental_context:
+        enhancers.append(incidental_context)
+
+    bac_context = breast_arterial_calcification_context(patient)
+    if bac_context:
+        enhancers.append(bac_context)
 
     if getattr(patient, "active_cancer", False):
         enhancers.append("Active cancer context")

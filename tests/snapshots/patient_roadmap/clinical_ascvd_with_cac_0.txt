@@ -3,7 +3,7 @@ Your results show where you stand today and the most important steps to lower fu
 
 Where you stand:
 - 10-year ASCVD risk: 2.5%
-- Your 10-year ASCVD risk is low.
+- Known cardiovascular disease is present. The focus is secondary prevention: lowering the chance of future heart attack, stroke, or related artery disease events.
 - Near-term estimated risk is low.
 - About 3 out of 100 similar patients may have a heart attack, stroke, or related artery disease event over the next 10 years.
 - Known cardiovascular disease is present.
@@ -13,15 +13,12 @@ Why risk is elevated:
 - Artery plaque: Known cardiovascular disease. This means prevention decisions should be more treatment-focused.
 
 Current goals:
-- LDL-C: - to <55 mg/dL
-- non-HDL-C: - to <85 mg/dL
-- ApoB: - to <60 mg/dL
+- LDL-C: - to <70 mg/dL
+- ApoB: - to <80 mg/dL
 
 Next steps:
 1. Lower plaque-driving cholesterol: Treat toward the cholesterol goals above.
-2. Aspirin safety: Do not start aspirin unless your clinician recommends it.
-3. Additional testing: Lp(a) can be checked once to guide long-term prevention.
-4. Optional testing: Do not delay treatment while completing optional testing.
-5. Next step: CAC 0 is discordant/historical and should not be used to de-risk established ASCVD.
+2. Additional testing: A calcium scan may help if treatment choices are still uncertain.
+3. Aspirin safety: Do not start aspirin unless your clinician recommends it.
 
 This roadmap is for discussion with your clinician. Medication decisions should be individualized.

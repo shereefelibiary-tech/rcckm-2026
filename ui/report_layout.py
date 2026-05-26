@@ -3,7 +3,14 @@ from html import escape
 
 from core.engine import evaluate_patient
 from core.patient import Patient
-from modules.actions.scaffold import build_action_recommendation_lines
+from modules.actions.scaffold import (
+    build_action_instrument_panel,
+    build_compact_action_detail_lines,
+)
+from modules.lipids.non_hdl import (
+    format_non_hdl_display,
+    should_show_non_hdl_default,
+)
 from modules.rss.engine import (
     build_rss_contributions,
     build_rss_transparency,
@@ -286,8 +293,16 @@ def _target_context_line(result, target, patient=None):
     cac = getattr(patient, "cac", None) if patient is not None else None
     clinical_ascvd = bool(getattr(patient, "clinical_ascvd", False)) if patient is not None else False
 
-    if clinical_ascvd or "Clinical ASCVD" in rationale:
-        return "Very high-risk lipid targets."
+    if clinical_ascvd:
+        if getattr(target, "ldl_c_target", None) == 55:
+            return (
+                "Very-high-risk ASCVD targets; <70 mg/dL is the minimum "
+                "secondary-prevention LDL threshold."
+            )
+        return "Secondary-prevention targets; LDL-C <70 mg/dL is the minimum threshold."
+
+    if "Clinical ASCVD" in rationale or "Very-high-risk ASCVD" in rationale:
+        return rationale
 
     if cac is not None:
         try:
@@ -313,16 +328,40 @@ def _target_context_line(result, target, patient=None):
     return rationale or "No target pathway assigned yet."
 
 
-def _build_targets_html(result, patient=None):
+def _build_targets_html(result, patient=None, *, clinician_detail_mode=False):
     assigned_targets = []
     target = result.targets[0] if result.targets else None
     if target:
         if target.ldl_c_target is not None:
-            assigned_targets.append(("LDL-C", f"&lt;{target.ldl_c_target:g}", "mg/dL"))
-        if target.non_hdl_c_target is not None:
-            assigned_targets.append(("non-HDL-C", f"&lt;{target.non_hdl_c_target:g}", "mg/dL"))
+            assigned_targets.append(("LDL-C", f"&lt;{target.ldl_c_target:g}", "mg/dL", "", "primary"))
         if target.apob_target is not None:
-            assigned_targets.append(("ApoB", f"&lt;{target.apob_target:g}", "mg/dL"))
+            assigned_targets.append(("ApoB", f"&lt;{target.apob_target:g}", "mg/dL", "", "primary"))
+        triglycerides = getattr(patient, "triglycerides", None) if patient is not None else None
+        try:
+            triglycerides_value = float(triglycerides) if triglycerides is not None else None
+        except (TypeError, ValueError):
+            triglycerides_value = None
+        if triglycerides_value is not None and triglycerides_value >= 150:
+            tg_goal = 500 if triglycerides_value >= 500 else 150
+            assigned_targets.append(
+                ("TG", f"&lt;{tg_goal:g}", f"mg/dL · current {triglycerides_value:g}", "", "primary")
+            )
+        if patient is not None and should_show_non_hdl_default(
+            patient,
+            result,
+            {"clinician_detail_mode": clinician_detail_mode},
+        ):
+            non_hdl = format_non_hdl_display(patient, result)
+            if non_hdl:
+                assigned_targets.append(
+                    (
+                        "non-HDL-C",
+                        f"&lt;{non_hdl['target_value']:g}",
+                        f"mg/dL · current {non_hdl['current_value']:g}",
+                        non_hdl["subtitle"],
+                        "secondary",
+                    )
+                )
 
     if not assigned_targets:
         return ""
@@ -332,15 +371,20 @@ def _build_targets_html(result, patient=None):
         context_line = (
             f"{context_line} ApoB is shown as an RCCKM advanced particle target."
         )
-    target_cells = "".join(
-        (
-            '<div class="target-cell">'
+    def _target_cell(label, threshold, unit, note, priority):
+        note_html = f'<div class="target-note">{escape(note)}</div>' if note else ""
+        return (
+            f'<div class="target-cell target-cell-{escape(priority)}" title="{escape(note)}">'
             f'<div class="target-label">{escape(label)}</div>'
             f'<div class="target-value">{threshold}</div>'
             f'<div class="target-unit">{escape(unit)}</div>'
+            f"{note_html}"
             "</div>"
         )
-        for label, threshold, unit in assigned_targets
+
+    target_cells = "".join(
+        _target_cell(label, threshold, unit, note, priority)
+        for label, threshold, unit, note, priority in assigned_targets
     )
     return f"""
 <style>
@@ -367,11 +411,21 @@ def _build_targets_html(result, patient=None):
     border-bottom: 1px solid rgba(11, 31, 58, 0.09);
     padding: 2px 4px 8px 0;
 }}
+.target-cell-secondary {{
+    opacity: 0.78;
+}}
 .target-label {{
     color: rgba(17, 17, 17, 0.64);
     font-size: 0.78rem;
     font-weight: 850;
     line-height: 1.1;
+}}
+.target-note {{
+    color: rgba(7, 26, 47, 0.46);
+    font-size: 0.66rem;
+    font-weight: 650;
+    line-height: 1.12;
+    margin-top: 3px;
 }}
 .target-value {{
     color: var(--rc-black);
@@ -409,65 +463,61 @@ def _build_targets_html(result, patient=None):
 """
 
 
-def _action_parts(line):
-    text = str(line or "").strip()
-    if not text:
-        return "", ""
-
-    if text.startswith("CAC ") and " already measured; " in text:
-        lead, detail = text.split("; ", 1)
-        return f"{lead}.", detail[:1].upper() + detail[1:]
-
-    if text == "Aspirin may be considered only if bleeding risk is low after shared decision-making.":
-        return (
-            "Aspirin may be considered only if bleeding risk is low.",
-            "Use shared decision-making.",
-        )
-
-    if "; " in text:
-        lead, detail = text.split("; ", 1)
-        return f"{lead}.", detail[:1].upper() + detail[1:]
-
-    return text, ""
-
-
 def _build_action_html(result, patient=None):
     if not result.dominant_action and not result.recommendations:
         return ""
 
-    lines = build_action_recommendation_lines(patient, result)
+    items = build_action_instrument_panel(patient, result)
+    details = build_compact_action_detail_lines(patient, result)
     line_html = "".join(
         (
-            '<div class="action-row">'
-            f'<div class="action-number">{index}</div>'
-            '<div class="action-copy">'
-            f'<div class="action-lead">{escape(lead)}</div>'
-            + (f'<div class="action-detail">{escape(detail)}</div>' if detail else "")
-            + "</div></div>"
+            f'<div class="action-domain action-domain-{escape(item.state)} action-priority-{escape(item.priority)}">'
+            '<div class="action-domain-top">'
+            f'<div class="action-domain-label">{escape(item.label)}</div>'
+            f'<div class="action-indicator" aria-label="{escape(item.priority)} priority"></div>'
+            "</div>"
+            f'<div class="action-status">{escape(item.status)}</div>'
+            + (f'<div class="action-detail">{escape(item.detail)}</div>' if item.detail else "")
+            + "</div>"
         )
-        for index, line in enumerate(lines, start=1)
-        for lead, detail in [_action_parts(line)]
-        if lead
+        for item in items
     )
+    detail_html = ""
+    if details:
+        rows = "".join(f"<li>{escape(detail)}</li>" for detail in details)
+        detail_html = (
+            '<details class="action-details">'
+            '<summary>Show details</summary>'
+            f"<ul>{rows}</ul>"
+            "</details>"
+        )
 
     style = (
         "<style>"
-        ".action-card{padding:15px 17px 16px;}"
-        ".action-stack{counter-reset:action-step;display:grid;gap:0;}"
-        ".action-row{align-items:start;border-radius:10px;border-top:1px solid rgba(7,26,47,0.07);display:grid;gap:10px;grid-template-columns:24px 1fr;margin:0 -2px;padding:9px 10px;}"
-        ".action-row:nth-child(even){background:rgba(47,95,143,0.035);}"
-        ".action-row:first-child{border-top:0;}"
-        ".action-number{align-items:center;background:rgba(47,95,143,0.10);border-radius:999px;color:#2F5F8F;display:inline-flex;font-family:var(--rc-font-body);font-size:0.72rem;font-weight:900;height:22px;justify-content:center;line-height:1;width:22px;}"
-        ".action-copy{min-width:0;}"
-        ".action-lead{color:var(--rc-black);font-family:var(--rc-font-body);font-size:0.90rem;font-weight:850;line-height:1.25;}"
-        ".action-detail{color:rgba(7,26,47,0.62);font-family:var(--rc-font-body);font-size:0.80rem;font-weight:600;line-height:1.3;margin-top:2px;}"
+        ".action-card{padding:14px 16px 15px;}"
+        ".action-grid{display:grid;gap:8px;grid-template-columns:repeat(2,minmax(0,1fr));}"
+        ".action-domain{background:rgba(255,255,255,0.58);border:1px solid rgba(7,26,47,0.08);border-radius:10px;min-width:0;padding:8px 10px 9px;}"
+        ".action-domain-top{align-items:center;display:flex;gap:8px;justify-content:space-between;margin-bottom:4px;}"
+        ".action-domain-label{color:rgba(7,26,47,0.58);font-family:var(--rc-font-body);font-size:0.68rem;font-weight:850;letter-spacing:0.01em;line-height:1;text-transform:uppercase;}"
+        ".action-indicator{background:rgba(7,26,47,0.16);border-radius:999px;height:7px;width:7px;flex:0 0 auto;}"
+        ".action-priority-low .action-indicator{background:rgba(47,95,143,0.34);}"
+        ".action-priority-moderate .action-indicator{background:rgba(47,95,143,0.68);}"
+        ".action-priority-high .action-indicator{background:#8B0010;}"
+        ".action-status{color:var(--rc-black);font-family:var(--rc-font-body);font-size:0.86rem;font-weight:850;line-height:1.16;overflow-wrap:anywhere;}"
+        ".action-detail{color:rgba(7,26,47,0.62);font-family:var(--rc-font-body);font-size:0.72rem;font-weight:620;line-height:1.18;margin-top:3px;}"
+        ".action-details{border-top:1px solid rgba(7,26,47,0.08);color:rgba(7,26,47,0.62);font-family:var(--rc-font-body);font-size:0.74rem;font-weight:620;line-height:1.25;margin-top:7px;padding-top:7px;}"
+        ".action-details summary{cursor:pointer;font-weight:800;color:rgba(47,95,143,0.82);}"
+        ".action-details ul{margin:5px 0 0 18px;padding:0;}"
+        ".action-details li{margin:2px 0;}"
+        "@media(max-width:760px){.action-grid{grid-template-columns:1fr;}}"
         "</style>"
     )
     return (
         style
         + '<div class="rcckm-card rc-panel action-card">'
         + '<div class="rcckm-card-title rc-card-title">Action</div>'
-        + f'<div class="action-stack">{line_html}</div>'
+        + f'<div class="action-grid">{line_html}</div>'
+        + detail_html
         + "</div>"
     )
 
@@ -824,8 +874,7 @@ def render_report(st, patient):
     with action_col:
         _safe_panel(st, "Action", lambda: _build_action_html(result, patient))
 
-    render_html(st, _detail_section_header_html("Assessment candidates", "Coding support"))
-    render_diagnosis_confirm_panel(st, result, include_title=False)
+    render_diagnosis_confirm_panel(st, result, include_title=True)
 
     emr_note_text = _render_emr_note_text(patient, result)
     patient_roadmap_text = _render_patient_roadmap_text(patient, result)

@@ -2,6 +2,10 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from modules.cac_recommendation.engine import build_cac_age_gate_note
+from modules.prevention_context.engine import (
+    PREVENTION_CONTEXT_SECONDARY_ASCVD,
+    classify_prevention_context,
+)
 from modules.risk_enhancers.reproductive import has_reproductive_risk_markers
 
 
@@ -10,6 +14,27 @@ class ActionSection:
     label: str
     line: str = ""
     items: list[str] = field(default_factory=list)
+
+
+@dataclass
+class CompactActionItem:
+    title: str
+    subtitle: str = ""
+    detail: str = ""
+    source: str = ""
+
+
+@dataclass
+class ActionDomainReadout:
+    domain_id: str
+    label: str
+    status: str
+    detail: str = ""
+    priority: str = "none"
+    state: str = "neutral"
+    rule_id: str = ""
+    trace_inputs: dict[str, Any] = field(default_factory=dict)
+    detail_lines: list[str] = field(default_factory=list)
 
 
 TESTING_LABELS = {
@@ -93,6 +118,60 @@ def _unique(items: list[str]) -> list[str]:
     return out
 
 
+def _clean_readout_text(text: Any) -> str:
+    text = str(text or "").strip()
+    if text.lower() in {"none", "null", "nan"}:
+        return ""
+    return " ".join(text.split())
+
+
+def _make_readout(
+    domain_id: str,
+    label: str,
+    status: str,
+    detail: str = "",
+    *,
+    priority: str = "none",
+    state: str = "neutral",
+    rule_id: str = "",
+    trace_inputs: dict[str, Any] | None = None,
+    detail_lines: list[str] | None = None,
+) -> ActionDomainReadout:
+    return ActionDomainReadout(
+        domain_id=domain_id,
+        label=label,
+        status=_clean_readout_text(status) or "No active signal",
+        detail=_clean_readout_text(detail),
+        priority=priority,
+        state=state,
+        rule_id=rule_id,
+        trace_inputs=trace_inputs or {},
+        detail_lines=[_clean_readout_text(line) for line in (detail_lines or []) if _clean_readout_text(line)],
+    )
+
+
+def _append_compact(
+    items: list[CompactActionItem],
+    title: str,
+    subtitle: str = "",
+    detail: str = "",
+    source: str = "",
+) -> None:
+    title = str(title or "").strip()
+    subtitle = str(subtitle or "").strip()
+    detail = str(detail or "").strip()
+    if not title:
+        return
+    key = (title.lower(), subtitle.lower())
+    if any((item.title.lower(), item.subtitle.lower()) == key for item in items):
+        return
+    items.append(CompactActionItem(title, subtitle, detail, source))
+
+
+def _has_compact_source(items: list[CompactActionItem], source: str) -> bool:
+    return any(item.source == source for item in items)
+
+
 def _prevent_high(result: Any) -> bool:
     category = getattr(getattr(result, "prevent_risk_category", None), "value", None)
     category = category or getattr(result, "prevent_risk_category", None)
@@ -147,6 +226,13 @@ def _low_with_lpa_reproductive_context(patient: Any, result: Any) -> bool:
 
 def _clinical_ascvd(patient: Any) -> bool:
     return bool(getattr(patient, "clinical_ascvd", False))
+
+
+def _prevention_context(patient: Any, result: Any) -> str:
+    context = str(getattr(result, "prevention_context", "") or "").strip()
+    if context:
+        return context
+    return classify_prevention_context(patient, result)["prevention_context"]
 
 
 def _triglycerides(patient: Any) -> float | None:
@@ -273,8 +359,8 @@ def _aspirin_line(patient: Any, result: Any) -> str:
     age = _num(getattr(patient, "age", None))
     cac = _num(getattr(patient, "cac", None))
 
-    if _clinical_ascvd(patient):
-        return "Antiplatelet therapy indicated for secondary prevention if clinically appropriate."
+    if _prevention_context(patient, result) == PREVENTION_CONTEXT_SECONDARY_ASCVD:
+        return "Antiplatelet therapy is indicated for secondary prevention if clinically appropriate and no contraindication is present."
     if age is not None and age >= 70:
         return "Aspirin not indicated for routine primary prevention."
     if cac is None:
@@ -475,3 +561,416 @@ def build_action_recommendation_lines(patient: Any, result: Any) -> list[str]:
             lines.append(section.line)
         lines.extend(section.items)
     return _unique(lines)
+
+
+def _compact_lipid_item(line: str, monitoring: str | None = None) -> CompactActionItem | None:
+    lowered = str(line or "").lower()
+    if not lowered:
+        return None
+    detail = "Monitor lipids after therapy change." if monitoring else ""
+    if "secondary-prevention" in lowered:
+        subtitle = (
+            "Treat toward very-high-risk ASCVD targets."
+            if "very-high-risk ascvd targets" in lowered
+            else "Treat toward ASCVD targets."
+        )
+        return CompactActionItem(
+            "Intensify secondary-prevention lipid therapy",
+            subtitle,
+            detail,
+            "lipids",
+        )
+    if "high-intensity" in lowered or "maximally tolerated statin" in lowered:
+        subtitle = (
+            "Use high-intensity or maximally tolerated statin."
+            if "maximally tolerated statin" in lowered
+            else "Treat toward high-risk targets."
+        )
+        return CompactActionItem("Intensify lipid-lowering", subtitle, detail, "lipids")
+    if "moderate-intensity statin" in lowered:
+        return CompactActionItem(
+            "Start or discuss moderate-intensity statin",
+            _compact_lipid_rationale(line),
+            detail,
+            "lipids",
+        )
+    if "moderate-intensity lipid" in lowered:
+        return CompactActionItem(
+            "Start or discuss moderate-intensity lipid therapy",
+            _compact_lipid_rationale(line),
+            detail,
+            "lipids",
+        )
+    if "lipid-lowering therapy" in lowered or "statin therapy" in lowered:
+        subtitle = "Treat toward high-risk targets." if "high-risk targets" in lowered else "Treat toward lipid targets."
+        return CompactActionItem("Intensify lipid-lowering", subtitle, detail, "lipids")
+    if lowered.startswith("no medication escalation") or lowered.startswith("no escalation"):
+        return CompactActionItem(
+            "Continue lifestyle-focused prevention",
+            "No medication escalation today.",
+            "",
+            "lifestyle",
+        )
+    if lowered.startswith("continue lifestyle"):
+        return CompactActionItem("Continue lifestyle-focused prevention", "", "", "lifestyle")
+    return None
+
+
+def _compact_lipid_rationale(line: str) -> str:
+    text = str(line or "").strip().rstrip(".")
+    lowered = text.lower()
+    if "given " in lowered:
+        rationale = text[lowered.index("given ") :]
+        return rationale[:1].upper() + rationale[1:] + "."
+    if "after shared decision-making" in lowered:
+        return "Use shared decision-making."
+    if "primary prevention" in lowered:
+        return "Primary prevention risk discussion."
+    return "Use shared decision-making and lipid targets."
+
+
+def _compact_kidney_item(sections: list[ActionSection], patient: Any) -> CompactActionItem | None:
+    kidney_text = " ".join(
+        part
+        for section in sections
+        if section.label in {"Kidney / BP", "Supporting actions"}
+        for part in ([section.line] if section.line else []) + list(section.items or [])
+    )
+    lowered = kidney_text.lower()
+    if not lowered or not any(
+        token in lowered
+        for token in ("kidney", "uacr", "albuminuria", "acei", "ace inhibitor", "arb", "sglt2", "bp", "blood pressure")
+    ):
+        return None
+    if "add an sglt2" in lowered:
+        subtitle = "Add SGLT2 if no contraindication; optimize BP/ACEi-ARB."
+    elif bool(getattr(patient, "ace_arb", False)):
+        subtitle = "Confirm UACR; continue/optimize ACEi-ARB; consider SGLT2 if criteria met."
+    else:
+        subtitle = "Confirm UACR; optimize BP/ACEi-ARB; consider SGLT2 if criteria met."
+    return CompactActionItem("Protect kidneys", subtitle, "", "kidney")
+
+
+def _compact_glycemia_item(sections: list[ActionSection]) -> CompactActionItem | None:
+    text = " ".join(
+        part
+        for section in sections
+        if section.label in {"Kidney / BP", "Supporting actions"}
+        for part in ([section.line] if section.line else []) + list(section.items or [])
+    ).lower()
+    if "glycemic" not in text and "a1c" not in text and "diabetes" not in text:
+        return None
+    return CompactActionItem("Optimize glycemia", "Individualize A1c goal.", "", "glycemia")
+
+
+def _compact_cac_item(section: ActionSection | None) -> CompactActionItem | None:
+    line = str(getattr(section, "line", "") or "").strip()
+    lowered = line.lower()
+    if not line:
+        return None
+    if "already measured" in lowered or "no repeat cac" in lowered or "cac 0 measured" in lowered:
+        return None
+    if "cac 0 is discordant" in lowered:
+        return CompactActionItem("Do not de-risk from CAC 0", "Clinical ASCVD drives treatment decisions.", line, "cac")
+    if "cac reasonable" in lowered or "cac may clarify" in lowered or "plaque burden unmeasured" in lowered:
+        return CompactActionItem("Clarify plaque if needed", "CAC may help if treatment intensity remains uncertain.", "", "cac")
+    if "plaque present" in lowered:
+        return CompactActionItem("Account for measured plaque", line, "", "cac")
+    return None
+
+
+def _compact_aspirin_item(section: ActionSection | None) -> CompactActionItem | None:
+    line = str(getattr(section, "line", "") or "").strip()
+    lowered = line.lower()
+    if not line or "not indicated for routine primary prevention" in lowered:
+        return None
+    if "antiplatelet therapy is indicated" in lowered:
+        return CompactActionItem(
+            "Antiplatelet therapy",
+            "Use if clinically appropriate and no contraindication.",
+            "",
+            "aspirin",
+        )
+    if "bleeding risk" in lowered:
+        return CompactActionItem(
+            "Aspirin: only if low bleeding risk",
+            "Shared decision-making.",
+            "",
+            "aspirin",
+        )
+    return None
+
+
+def _compact_detail_lines(sections: list[ActionSection]) -> list[str]:
+    details: list[str] = []
+    for section in sections:
+        if section.label == "Monitoring":
+            _append_detail(details, "Monitor lipids after therapy change.")
+        elif section.label == "Coronary calcium":
+            line = str(section.line or "").strip()
+            if "already measured" in line.lower() or "no repeat cac" in line.lower():
+                _append_detail(details, line)
+        elif section.label == "Clarifiers":
+            for item in section.items:
+                _append_detail(details, item)
+    return details
+
+
+def _append_detail(details: list[str], text: str) -> None:
+    text = str(text or "").strip()
+    if text and text not in details:
+        details.append(text)
+
+
+def build_compact_action_items(
+    patient: Any,
+    result: Any,
+    *,
+    max_items: int = 5,
+) -> list[CompactActionItem]:
+    """Build the default high-yield Action card stack without changing detailed recommendations."""
+    sections = build_action_scaffold(patient, result)
+    by_label = {section.label: section for section in sections}
+    items: list[CompactActionItem] = []
+
+    monitoring = str(getattr(by_label.get("Monitoring"), "line", "") or "").strip() or None
+    lipid_section = by_label.get("Lipid therapy")
+    lipid_item = _compact_lipid_item(str(getattr(lipid_section, "line", "") or ""), monitoring)
+    if lipid_item:
+        _append_compact(items, lipid_item.title, lipid_item.subtitle, lipid_item.detail, lipid_item.source)
+
+    kidney_item = _compact_kidney_item(sections, patient)
+    if kidney_item:
+        _append_compact(items, kidney_item.title, kidney_item.subtitle, kidney_item.detail, kidney_item.source)
+
+    glycemia_item = _compact_glycemia_item(sections)
+    if glycemia_item:
+        _append_compact(items, glycemia_item.title, glycemia_item.subtitle, glycemia_item.detail, glycemia_item.source)
+
+    cac_item = _compact_cac_item(by_label.get("Coronary calcium"))
+    if cac_item:
+        _append_compact(items, cac_item.title, cac_item.subtitle, cac_item.detail, cac_item.source)
+
+    aspirin_item = _compact_aspirin_item(by_label.get("Aspirin"))
+    if aspirin_item:
+        _append_compact(items, aspirin_item.title, aspirin_item.subtitle, aspirin_item.detail, aspirin_item.source)
+
+    if not items:
+        for section in sections:
+            for text in ([section.line] if section.line else []) + list(section.items or []):
+                fallback = _compact_lipid_item(text)
+                if fallback:
+                    _append_compact(items, fallback.title, fallback.subtitle, fallback.detail, fallback.source)
+                    break
+            if items:
+                break
+
+    return items[:max_items] or [
+        CompactActionItem(
+            "Continue clinician-guided prevention review",
+            "",
+            "",
+            "fallback",
+        )
+    ]
+
+
+def build_compact_action_detail_lines(patient: Any, result: Any) -> list[str]:
+    """Return secondary details for an optional expanded UI area."""
+    return _compact_detail_lines(build_action_scaffold(patient, result))
+
+
+ACTION_PANEL_DOMAIN_ORDER = [
+    "lipid_lowering",
+    "plaque_cac",
+    "kidney_protection",
+    "blood_pressure",
+    "glycemia_metabolic",
+    "aspirin_antiplatelet",
+    "data_to_clarify",
+]
+
+
+def _line_to_lipid_readout(line: str) -> tuple[str, str, str, str]:
+    lowered = str(line or "").lower()
+    if "secondary-prevention" in lowered:
+        return "Secondary-prevention lipid therapy", "Treat toward ASCVD targets.", "high", "action"
+    if "add-on" in lowered or "nonstatin" in lowered:
+        return "Add-on therapy consideration", "If LDL-C/ApoB remain above target.", "high", "action"
+    if "high-intensity" in lowered or "maximally tolerated" in lowered:
+        return "High-intensity therapy indicated", "Treat toward high-risk targets.", "high", "action"
+    if "intensify" in lowered or "above target" in lowered:
+        return "Intensify lipid-lowering", "Treat toward lipid targets.", "high", "action"
+    if "moderate-intensity" in lowered:
+        if "reasonable" in lowered or "may be reasonable" in lowered or "discuss" in lowered:
+            return "Discuss moderate-intensity statin", "Use shared decision-making.", "moderate", "consider"
+        return "Start moderate-intensity statin", "Primary-prevention lipid therapy.", "moderate", "action"
+    if "lifestyle" in lowered:
+        return "Lifestyle-focused", "No routine medication escalation.", "low", "neutral"
+    if "no medication escalation" in lowered or "no escalation" in lowered:
+        return "No medication escalation", "Continue lifestyle-focused prevention.", "none", "neutral"
+    if "lipid-lowering therapy" in lowered or "statin therapy" in lowered:
+        return "Intensify lipid-lowering", "Treat toward lipid targets.", "moderate", "action"
+    return "Review lipid plan", "Use risk context and targets.", "low", "consider"
+
+
+def _plaque_readout(patient: Any, result: Any, section: ActionSection | None) -> ActionDomainReadout:
+    line = _clean_readout_text(getattr(section, "line", "") if section else "")
+    cac = _num(getattr(patient, "cac", None))
+    incidental = bool(getattr(patient, "incidental_cac", False))
+    severity = _clean_readout_text(getattr(patient, "incidental_cac_severity", ""))
+    if _prevention_context(patient, result) == PREVENTION_CONTEXT_SECONDARY_ASCVD:
+        if cac is not None:
+            return _make_readout(
+                "plaque_cac",
+                "CAC / plaque",
+                f"CAC {cac:g} is context only",
+                "Clinical ASCVD drives management.",
+                priority="low",
+                state="complete",
+                rule_id="action_panel_plaque_secondary_prevention",
+            )
+        return _make_readout(
+            "plaque_cac",
+            "CAC / plaque",
+            "Clinical ASCVD present",
+            "CAC is not needed for lipid decisions.",
+            priority="low",
+            state="complete",
+            rule_id="action_panel_plaque_secondary_prevention",
+        )
+    if cac is not None:
+        if cac == 0:
+            return _make_readout("plaque_cac", "CAC / plaque", "CAC 0: no calcified plaque", "Use overall risk context.", state="complete")
+        if 1 <= cac <= 99:
+            return _make_readout("plaque_cac", "CAC / plaque", f"CAC {cac:g}: plaque present", "Plaque supports prevention review.", priority="moderate", state="consider")
+        if cac >= 100:
+            return _make_readout("plaque_cac", "CAC / plaque", f"CAC {cac:g} already measured", "No repeat CAC needed.", priority="high", state="complete")
+    if incidental:
+        label = "Incidental CAC on CT"
+        detail = "Qualitative plaque evidence."
+        if severity and severity not in {"unknown", "present"}:
+            label = f"{severity.title()} incidental CAC"
+        return _make_readout("plaque_cac", "CAC / plaque", label, detail, priority="moderate", state="consider")
+    if line:
+        lowered = line.lower()
+        if "not routinely recommended at this age" in lowered:
+            return _make_readout("plaque_cac", "CAC / plaque", "CAC not routinely recommended", "Consider only if results change management.", priority="low", state="neutral")
+        if "cac reasonable" in lowered or "cac may clarify" in lowered:
+            return _make_readout("plaque_cac", "CAC / plaque", "CAC may clarify risk", "If treatment intensity remains uncertain.", priority="low", state="consider")
+    return _make_readout("plaque_cac", "CAC / plaque", "Not measured", "Plaque burden unmeasured.", state="neutral")
+
+
+def _kidney_readout(sections: list[ActionSection], patient: Any, result: Any) -> ActionDomainReadout:
+    domains = _domains(result)
+    text = " ".join(
+        part
+        for section in sections
+        if section.label in {"Kidney / BP", "Supporting actions", "Clarifiers"}
+        for part in ([section.line] if section.line else []) + list(section.items or [])
+    )
+    lowered = text.lower()
+    egfr = _num(getattr(patient, "egfr", None))
+    uacr = _num(getattr(patient, "uacr", None))
+    if "add an sglt2" in lowered:
+        return _make_readout("kidney_protection", "Kidney protection", "Add SGLT2 if eligible", "Optimize BP/ACEi-ARB.", priority="high", state="action")
+    if "sglt2" in lowered:
+        return _make_readout("kidney_protection", "Kidney protection", "Consider SGLT2 if criteria met", "Confirm albuminuria and optimize BP/ACEi-ARB.", priority="moderate", state="consider")
+    if "albuminuria" in lowered or (uacr is not None and uacr >= 30):
+        detail = "Continue/optimize ACEi-ARB and BP." if bool(getattr(patient, "ace_arb", False)) else "ACEi/ARB and BP per criteria."
+        return _make_readout("kidney_protection", "Kidney protection", "Confirm albuminuria", detail, priority="moderate", state="action")
+    if "uacr_testing" in domains:
+        return _make_readout("kidney_protection", "Kidney protection", "UACR needed", "Complete kidney-risk assessment.", priority="low", state="consider")
+    if egfr is not None or uacr is not None:
+        return _make_readout("kidney_protection", "Kidney protection", "No kidney-risk signal", "Current kidney markers reviewed.", state="complete")
+    return _make_readout("kidney_protection", "Kidney protection", "Kidney context not available", "UACR/eGFR can clarify risk.", priority="low", state="neutral")
+
+
+def _blood_pressure_readout(patient: Any, result: Any) -> ActionDomainReadout:
+    line = _domain_line(result, "blood_pressure")
+    sbp = _num(getattr(patient, "sbp", None))
+    dbp = _num(getattr(patient, "dbp", None))
+    if line:
+        lowered = line.lower()
+        if "treat bp" in lowered or "optimize bp" in lowered:
+            return _make_readout("blood_pressure", "Blood pressure", "Treat toward <130/80", "If tolerated.", priority="moderate", state="action")
+    if sbp is None or dbp is None:
+        return _make_readout("blood_pressure", "Blood pressure", "BP context not available", "Enter clinic or home BP.", state="neutral")
+    if sbp >= 130 or dbp >= 80:
+        return _make_readout("blood_pressure", "Blood pressure", "Review BP / confirm goal", f"Current {sbp:g}/{dbp:g}.", priority="low", state="consider")
+    return _make_readout("blood_pressure", "Blood pressure", "At goal", f"Current {sbp:g}/{dbp:g}.", state="complete")
+
+
+def _glycemia_readout(patient: Any, result: Any) -> ActionDomainReadout:
+    line = _domain_line(result, "glycemia")
+    a1c = _num(getattr(patient, "a1c", None))
+    diabetes = bool(getattr(patient, "diabetes", False))
+    bmi = _num(getattr(patient, "bmi", None))
+    if line or diabetes:
+        return _make_readout("glycemia_metabolic", "Glycemia / metabolic", "Optimize diabetes care", "Individualize A1c goal.", priority="moderate", state="action")
+    if a1c is not None and 5.7 <= a1c < 6.5:
+        return _make_readout("glycemia_metabolic", "Glycemia / metabolic", "Prediabetes prevention", "Weight and insulin-resistance focus.", priority="low", state="consider")
+    if bmi is not None and bmi >= 30:
+        return _make_readout("glycemia_metabolic", "Glycemia / metabolic", "Lifestyle / weight-focused prevention", "Address metabolic risk.", priority="low", state="consider")
+    return _make_readout("glycemia_metabolic", "Glycemia / metabolic", "No glycemic action", "No active glycemic signal.", state="neutral")
+
+
+def _aspirin_readout(patient: Any, result: Any, section: ActionSection | None) -> ActionDomainReadout:
+    line = _clean_readout_text(getattr(section, "line", "") if section else _aspirin_line(patient, result))
+    lowered = line.lower()
+    if "antiplatelet therapy is indicated" in lowered:
+        return _make_readout("aspirin_antiplatelet", "Aspirin / antiplatelet", "Secondary-prevention antiplatelet", "If appropriate and no contraindication.", priority="high", state="action")
+    if "bleeding risk" in lowered or "consider" in lowered:
+        return _make_readout("aspirin_antiplatelet", "Aspirin / antiplatelet", "Consider only if low bleeding risk", "Shared decision-making.", priority="low", state="consider")
+    return _make_readout("aspirin_antiplatelet", "Aspirin / antiplatelet", "Not routine for primary prevention", "Do not start routine aspirin.", state="neutral")
+
+
+def _clarifier_readout(result: Any) -> ActionDomainReadout:
+    clarifiers = _clarifier_items(result)
+    if not clarifiers:
+        return _make_readout("data_to_clarify", "Data to clarify", "Key data available", "No urgent clarifiers.", state="complete")
+    labels = []
+    for item in clarifiers:
+        label = item.split(" - ", 1)[0].replace("Obtain ", "").replace(" to complete kidney-risk assessment.", "")
+        if label.startswith("Consider hsCRP"):
+            label = "hsCRP"
+        labels.append(label)
+    return _make_readout(
+        "data_to_clarify",
+        "Data to clarify",
+        ", ".join(_unique(labels[:4])),
+        "Clarification should not delay indicated therapy.",
+        priority="low",
+        state="consider",
+        detail_lines=clarifiers,
+    )
+
+
+def build_action_instrument_panel(patient: Any, result: Any) -> list[ActionDomainReadout]:
+    """Return fixed-domain action readouts for the default clinical instrument panel."""
+    sections = build_action_scaffold(patient, result)
+    by_label = {section.label: section for section in sections}
+    lipid_line = _clean_readout_text(getattr(by_label.get("Lipid therapy"), "line", "") or _lipid_line(patient, result))
+    lipid_status, lipid_detail, lipid_priority, lipid_state = _line_to_lipid_readout(lipid_line)
+    monitoring = _clean_readout_text(getattr(by_label.get("Monitoring"), "line", ""))
+    lipid = _make_readout(
+        "lipid_lowering",
+        "Lipid lowering",
+        lipid_status,
+        lipid_detail,
+        priority=lipid_priority,
+        state=lipid_state,
+        rule_id="action_panel_lipid_lowering",
+        detail_lines=[monitoring] if monitoring else [],
+    )
+    panel = [
+        lipid,
+        _plaque_readout(patient, result, by_label.get("Coronary calcium")),
+        _kidney_readout(sections, patient, result),
+        _blood_pressure_readout(patient, result),
+        _glycemia_readout(patient, result),
+        _aspirin_readout(patient, result, by_label.get("Aspirin")),
+        _clarifier_readout(result),
+    ]
+    order = {domain_id: index for index, domain_id in enumerate(ACTION_PANEL_DOMAIN_ORDER)}
+    return sorted(panel, key=lambda item: order[item.domain_id])

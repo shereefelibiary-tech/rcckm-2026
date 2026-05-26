@@ -59,7 +59,8 @@ def test_build_clarifier_card_html_contains_quick_read_recommended_list():
 
     html = build_clarifier_card_html(result)
 
-    assert "What would help clarify risk?" in html
+    assert "Data that could clarify risk" in html
+    assert "These items may improve confidence in the prevention plan." in html
     assert "clarifier-list" in html
     assert "Lp(a)" in html
     assert "Lp(a) measurement" in html
@@ -93,5 +94,13 @@ def test_render_clarifier_card_uses_unsafe_markdown():
     html, unsafe = fake_st.calls[0]
     assert unsafe is True
     assert "clarifier-card" in html
-    assert "What would help clarify risk?" in html
+    assert "Data that could clarify risk" in html
     assert "Show completed clarifiers" not in html
+
+
+def test_build_clarifier_card_html_uses_concise_available_state_when_none_missing():
+    html = build_clarifier_card_html(RCCKMResult())
+
+    assert "Data that could clarify risk" in html
+    assert "Key clarifying data are available." in html
+    assert "No missing clarifiers flagged by the engine." not in html

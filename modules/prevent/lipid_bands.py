@@ -3,6 +3,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
+from modules.risk_enhancers.breast_arterial_calcification import (
+    has_breast_arterial_calcification,
+)
+
 
 PREVENT_ASCVD_EARLY_DISCUSSION_THRESHOLD = 3.0
 PREVENT_ASCVD_STATIN_DISCUSSION_THRESHOLD = 5.0
@@ -160,6 +164,8 @@ def get_major_lipid_risk_enhancers(patient: Any, engine_context: Any = None) -> 
         supporting.append("hypertension")
     if bool(getattr(patient, "inflammatory_disease", False)) or bool(getattr(patient, "rheumatoid_arthritis", False)) or bool(getattr(patient, "systemic_lupus", False)) or bool(getattr(patient, "psoriasis", False)) or bool(getattr(patient, "ibd", False)):
         supporting.append("inflammatory_condition")
+    if has_breast_arterial_calcification(patient):
+        supporting.append("breast_arterial_calcification")
     hscrp = _risk_float(getattr(patient, "hscrp", None))
     if hscrp is not None and hscrp >= 2:
         supporting.append("hscrp_ge_2")

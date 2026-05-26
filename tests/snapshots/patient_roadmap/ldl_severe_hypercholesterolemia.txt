@@ -4,6 +4,7 @@ Your results show where you stand today and the most important steps to lower fu
 Where you stand:
 - Missing inputs: total cholesterol, HDL-C, systolic BP, BP treatment status, statin/lipid-lowering therapy status, diabetes status, smoking status, BMI, eGFR
 - 10-year ASCVD risk: unavailable
+- LDL-C is in a severe hypercholesterolemia range, so lipid-lowering decisions should not rely on risk estimates alone.
 - PREVENT estimate unavailable from the current data.
 - Plaque status has not been measured.
 - Care focus: Level 3 (3B) - Actionable early CKM / atherogenic risk
@@ -13,15 +14,10 @@ Why risk is elevated:
 
 Current goals:
 - LDL-C: 212 mg/dL to <100 mg/dL
-- non-HDL-C: - to <130 mg/dL
 - ApoB: - to <90 mg/dL
 
 Next steps:
-1. Lower plaque-driving cholesterol: Treat toward the cholesterol goals above.
-2. Aspirin safety: Do not start aspirin unless your clinician recommends it.
-3. Additional testing: A calcium scan may help if treatment choices are still uncertain.
-4. Optional testing: Do not delay treatment while completing optional testing.
-5. Next step: Evaluate secondary causes and consider FH/cascade screening when appropriate.
-6. Next step: ApoB - particle burden clarification
+1. Lower plaque-driving cholesterol: High-intensity statin therapy usually lowers LDL cholesterol by at least one-half.
+2. Additional testing: A calcium scan may help if treatment choices are still uncertain.
 
 This roadmap is for discussion with your clinician. Medication decisions should be individualized.

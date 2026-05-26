@@ -9,15 +9,14 @@ def test_target_card_shows_apob_80_for_cac_100_primary_prevention():
     html = _build_targets_html(result, patient)
 
     assert "LDL-C" in html
-    assert "non-HDL-C" in html
     assert "ApoB" in html
     assert "&lt;70" in html
-    assert "&lt;100" in html
     assert "&lt;80" in html
+    assert "non-HDL-C" not in html
     assert "RCCKM advanced particle target" in html
 
 
-def test_target_card_shows_apob_60_for_very_high_risk_when_advanced_target_shown():
+def test_target_card_shows_apob_65_for_very_high_risk_when_advanced_target_shown():
     patient = Patient(
         age=65,
         sex="male",
@@ -31,5 +30,6 @@ def test_target_card_shows_apob_60_for_very_high_risk_when_advanced_target_shown
     html = _build_targets_html(result, patient)
 
     assert "ApoB" in html
-    assert "&lt;60" in html
+    assert "&lt;65" in html
+    assert "Very-high-risk ASCVD targets" in html
     assert "RCCKM advanced particle target" in html

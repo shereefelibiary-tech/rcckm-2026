@@ -794,6 +794,13 @@ def parse_smartphrase_report(text: str) -> ParseReport:
         "cancer_life_expectancy_gt_2y": [r"life\s+expectancy\s*(?:>|greater\s+than|over)\s*2\s*y", r"life\s+expectancy\s+at\s+least\s+2\s*y"],
         "suspected_fh_hefh": [r"suspected\s+(?:fh|hefh)", r"heterozygous\s+familial\s+hypercholesterolemia", r"familial\s+hypercholesterolemia", r"\bhefh\b"],
         "incidental_cac": [r"incidental\s+cac", r"incidental\s+coronary\s+(?:artery\s+)?calcification", r"coronary\s+(?:artery\s+)?calcification\s+(?:on|noted\s+on)\s+(?:ct|noncardiac\s+ct)"],
+        "breast_arterial_calcification": [
+            r"breast\s+arterial\s+calcification",
+            r"mammary\s+artery\s+calcification",
+            r"breast\s+artery\s+calcification",
+            r"vascular\s+calcification\s+on\s+mammogram",
+            r"arterial\s+calcifications?\s+on\s+mammogram",
+        ],
         "sglt2": [r"sglt2", r"sglt-2"],
         "glp1": [r"glp1", r"glp-1", r"incretin"],
         "ace_arb": [r"ace\s+inhibitor", r"arb", r"ace/arb"],
@@ -807,6 +814,19 @@ def parse_smartphrase_report(text: str) -> ParseReport:
         if found:
             confidence = "inferred" if field in {"bpTreated", "lipidLowering", "sglt2", "glp1", "ace_arb"} else "parsed"
             _record(report, field, value, confidence, "explicit boolean line")
+
+    bac_direct = re.search(
+        r"\b(?:breast\s+arterial\s+calcification|mammary\s+artery\s+calcification|breast\s+artery\s+calcification|vascular\s+calcification\s+on\s+mammogram|arterial\s+calcifications?\s+on\s+mammogram)\s*(?:=|:|is|noted)?\s*(unknown|absent|present|mild|moderate|severe|yes|no)?\b",
+        text,
+        re.IGNORECASE,
+    )
+    if bac_direct:
+        value = (bac_direct.group(1) or "present").lower()
+        if value == "yes":
+            value = "present"
+        elif value == "no":
+            value = "absent"
+        _record(report, "breast_arterial_calcification", value, "parsed", "breast arterial calcification context")
 
     clinical_found, clinical_ascvd_value = _parse_explicit_bool_line_status(
         text,
@@ -871,6 +891,15 @@ def parse_smartphrase_report(text: str) -> ParseReport:
     if report.extracted.get("incidental_cac") is True:
         severity = "severe" if re.search(r"\bsevere\b[^\n.;]{0,40}\b(?:incidental\s+)?(?:cac|coronary\s+(?:artery\s+)?calcification)\b|\b(?:incidental\s+)?(?:cac|coronary\s+(?:artery\s+)?calcification)\b[^\n.;]{0,40}\bsevere\b", text, re.IGNORECASE) else "present"
         _record(report, "incidental_cac_severity", severity, "parsed", "incidental CAC context")
+
+    if report.extracted.get("breast_arterial_calcification") is True:
+        bac_severity = "present"
+        for severity in ("severe", "moderate", "mild"):
+            pattern = rf"\b{severity}\b[^\n.;]{{0,60}}\b(?:breast\s+arterial|mammary\s+artery|breast\s+artery|vascular\s+calcification\s+on\s+mammogram|arterial\s+calcifications?\s+on\s+mammogram)|(?:breast\s+arterial|mammary\s+artery|breast\s+artery|vascular\s+calcification\s+on\s+mammogram|arterial\s+calcifications?\s+on\s+mammogram)[^\n.;]{{0,60}}\b{severity}\b"
+            if re.search(pattern, text, re.IGNORECASE):
+                bac_severity = severity
+                break
+        _record(report, "breast_arterial_calcification", bac_severity, "parsed", "breast arterial calcification context")
 
     ascvd_events = extract_ascvd_events(text)
     if "ascvd_clinical" not in report.extracted and ascvd_events["clinical_ascvd"] is not None:

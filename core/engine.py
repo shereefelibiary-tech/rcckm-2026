@@ -14,6 +14,8 @@ from modules.kdigo.engine import (
 )
 from modules.levels.level_classifier import classify_rcckm_level
 from modules.plaque.engine import build_plaque_result
+from modules.prevention_context.engine import classify_prevention_context
+from modules.lipids.non_hdl import calculate_non_hdl
 from modules.prevent.calculator import (
     calculate_prevent_summary,
 )
@@ -26,8 +28,8 @@ from rcckm.rule_trace import build_rule_traces
 
 
 def evaluate_patient(patient):
-    if patient.non_hdl_c is None and patient.tc is not None and patient.hdl_c is not None:
-        patient.non_hdl_c = patient.tc - patient.hdl_c
+    if patient.non_hdl_c is None:
+        patient.non_hdl_c = calculate_non_hdl(patient.tc, patient.hdl_c)
 
     family_history = build_family_history_payload(patient)
     patient.family_history_summary = family_history["summary"]
@@ -63,11 +65,21 @@ def evaluate_patient(patient):
             )
         )
     )
+    prevention_context = classify_prevention_context(
+        patient,
+        {"plaque_category": plaque_result.plaque_category},
+    )
 
     rcckm_result = RCCKMResult(
         plaque_category=plaque_result.plaque_category,
         risk_level=risk_level,
         clinical_ascvd=bool(patient.clinical_ascvd),
+        prevention_context=prevention_context["prevention_context"],
+        prevention_context_primary_reason=prevention_context["primary_reason"],
+        prevention_context_supporting_findings=list(
+            prevention_context["supporting_findings"]
+        ),
+        prevention_context_rule_id=prevention_context["rule_id"],
         severe_hypercholesterolemia=severe_hypercholesterolemia,
         possible_fh_pathway=possible_fh_pathway,
         prevent_available=bool(prevent_summary["available"]),

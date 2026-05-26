@@ -210,12 +210,13 @@ def _color_key(contribution):
 
 
 def _contribution_to_display_item(contribution):
-    primary, detail = contributor_explanation(contribution)
+    row = format_rss_contributor_label(contribution)
     return {
         "id": _contribution_id(contribution),
         "domain": _domain_key(contribution),
-        "label": primary,
-        "value_label": detail,
+        "label": row["title"],
+        "subtitle": row["subtitle"],
+        "value_label": row["tower_value"],
         "points": contribution.points,
         "severity": contribution.severity or _severity_for_points(contribution.points),
         "color_key": _color_key(contribution),
@@ -359,44 +360,99 @@ def teaching_label(contribution):
 
 def contributor_explanation(contribution):
     """Return the muted value/explanation line for an RSS contributor row."""
+    row = format_rss_contributor_label(contribution)
+    return row["title"], row["subtitle"]
+
+
+def _clean_duplicate_text(value):
+    return " ".join(
+        str(value or "")
+        .lower()
+        .replace("-", " ")
+        .replace("/", " ")
+        .replace("(", " ")
+        .replace(")", " ")
+        .replace(",", " ")
+        .split()
+    )
+
+
+def _meaningful_subtitle(title, subtitle):
+    """Suppress RSS subtitles that only repeat the contributor title."""
+    title = str(title or "").strip()
+    subtitle = str(subtitle or "").strip()
+    if not subtitle:
+        return ""
+    clean_title = _clean_duplicate_text(title)
+    clean_subtitle = _clean_duplicate_text(subtitle)
+    if clean_title == clean_subtitle:
+        return ""
+    if clean_subtitle and clean_subtitle in clean_title:
+        return ""
+    return subtitle
+
+
+def format_rss_contributor_label(contribution):
+    """Return scan-first display text for an RSS contributor row."""
     label = contribution.label
-    primary = {
-        "CAC plaque burden": "Coronary calcium",
-        "ApoB elevation": "ApoB / particle burden",
-        "LDL-C": "LDL-C",
-        "Reduced eGFR": "eGFR",
-        "Albuminuria": "Albuminuria",
-        "Diabetes": "A1c",
-        "A1c elevation": "A1c",
-        "Elevated Lp(a)": "Lp(a)",
-        "Hypertriglyceridemia": "Triglycerides",
-        "Inflammatory risk": "hsCRP",
-        "Premature family history": "Family history",
-        "RA": "RA",
-        "SLE": "SLE",
+    tower_value = format_tower_value(contribution)
+    title = {
+        "CAC plaque burden": f"Coronary calcium {tower_value.replace('CAC ', '')}" if tower_value else "Coronary calcium",
+        "ApoB elevation": tower_value or "ApoB",
+        "LDL-C": tower_value or "LDL-C",
+        "Reduced eGFR": f"Kidney filtration, {tower_value}" if tower_value else "Kidney filtration",
+        "Albuminuria": f"Albuminuria, {tower_value}" if tower_value else "Albuminuria",
+        "Diabetes": tower_value or "Diabetes",
+        "A1c elevation": tower_value or "A1c",
+        "Elevated Lp(a)": tower_value or "Lp(a)",
+        "Hypertriglyceridemia": tower_value.replace("TG ", "Triglycerides ") if tower_value else "Triglycerides",
+        "Inflammatory risk": tower_value or "hsCRP",
+        "Premature family history": "Premature family history",
+        "RA": "Rheumatoid arthritis",
+        "SLE": "Systemic lupus erythematosus",
         "Psoriasis": "Psoriasis",
-        "IBD": "IBD",
+        "IBD": "Inflammatory bowel disease",
         "HIV": "HIV",
-        "Inflammatory disease": "Inflammatory disease",
-        "OSA": "OSA",
+        "Inflammatory arthritis": "Inflammatory arthritis",
+        "Inflammatory disease": "Chronic inflammatory disease",
+        "OSA": "Obstructive sleep apnea",
         "MASLD": "MASLD",
+        "Incidental CAC": "Incidental coronary calcium on CT",
         "Premature menopause": "Premature menopause",
         "Early menopause": "Early menopause",
         "Preeclampsia": "Preeclampsia",
         "Gestational hypertension": "Gestational hypertension",
         "Gestational diabetes": "Gestational diabetes",
         "Preterm delivery": "Preterm delivery",
-        "SGA infant": "SGA infant",
+        "SGA infant": "Small-for-gestational-age infant",
         "Recurrent pregnancy loss": "Recurrent pregnancy loss",
         "PCOS / irregular menses": "PCOS / irregular menses",
         "Early menarche": "Early menarche",
         "Smoking": "Current smoking",
     }.get(label, contribution.rationale or label)
-    if label == "HIV":
-        detail = "HIV-related risk enhancer"
-    else:
-        detail = format_tower_value(contribution) or contribution.label
-    return primary, detail
+    if contribution.domain == "Reproductive History" and tower_value:
+        title = tower_value
+    subtitle = {
+        "ApoB elevation": "Particle burden",
+        "Premature family history": "" if isinstance(contribution.actual_value, bool) else str(contribution.actual_value or ""),
+        "RA": "Chronic inflammatory disease risk enhancer",
+        "SLE": "Chronic inflammatory disease risk enhancer",
+        "Psoriasis": "Chronic inflammatory disease risk enhancer",
+        "IBD": "Chronic inflammatory disease risk enhancer",
+        "Inflammatory arthritis": "Chronic inflammatory disease risk enhancer",
+        "Inflammatory disease": "Chronic inflammatory disease risk enhancer",
+        "HIV": "HIV-related risk enhancer",
+        "MASLD": "Fatty liver disease risk context",
+        "Incidental CAC": "Qualitative plaque evidence",
+    }.get(label, "")
+    return {
+        "title": title,
+        "subtitle": _meaningful_subtitle(title, subtitle),
+        "points": contribution.points,
+        "severity": contribution.severity,
+        "tower_value": tower_value or title,
+        "color": domain_color(contribution.domain),
+    }
 
 
 def numeric_value(contribution):
@@ -646,10 +702,11 @@ def build_rss_tower_html(rss_contributions):
                 f'{html.escape(tower_value)}'
                 f"</span>"
             )
-        compact_title = (
-            f'{item["label"]} - {tower_value or contribution.label} - '
-            f'+{item["points"]:g} RSS points'
-        )
+        compact_bits = [str(item["label"])]
+        if tower_value and _clean_duplicate_text(tower_value) != _clean_duplicate_text(item["label"]):
+            compact_bits.append(str(tower_value))
+        compact_bits.append(f'+{item["points"]:g} RSS points')
+        compact_title = " - ".join(compact_bits)
         segments.append(
             f'<div class="rss-tower-segment" '
             f'data-rss-id="{html.escape(str(item["id"]), quote=True)}" '
@@ -855,7 +912,12 @@ def build_rss_panel_html(rss_total, rss_contributions, result=None):
     for item in display_contributors:
         contribution = item["contribution"]
         primary = item["label"]
-        detail = item["value_label"]
+        detail = item.get("subtitle", "")
+        detail_html = (
+            f'<span class="rss-row-value rss-muted">{html.escape(detail)}</span>'
+            if detail
+            else ""
+        )
         evidence_heading, evidence_detail = evidence_note(contribution)
         row_title = f"{evidence_heading}. {evidence_detail}".strip()
         color = domain_color(contribution.domain)
@@ -867,7 +929,7 @@ def build_rss_panel_html(rss_total, rss_contributions, result=None):
             f'<div class="rss-marker rss-driver-color" style="background:{color};"></div>'
             f'<div class="rss-driver-copy">'
             f'<strong class="rss-row-label">{html.escape(primary)}</strong>'
-            f'<span class="rss-row-value rss-muted">{html.escape(detail)}</span></div>'
+            f'{detail_html}</div>'
             f'<div class="rss-row-points rss-driver-points">+{contribution.points:g}</div>'
             f'</div>'
         )

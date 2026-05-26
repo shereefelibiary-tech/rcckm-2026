@@ -108,7 +108,7 @@ def test_incidental_cac_creates_qualitative_plaque_context_without_score():
     emr = render_emr_note(patient, result)
 
     assert any(item.label == "Incidental CAC" and item.actual_value == "severe on noncardiac CT" for item in rss)
-    assert "incidental CAC noted (severe)" in emr
+    assert "Severe incidental coronary artery calcification noted on CT" in emr
     assert "CAC 0" not in emr
 
 

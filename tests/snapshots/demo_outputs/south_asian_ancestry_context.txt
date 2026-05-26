@@ -1,0 +1,72 @@
+DEMO: South Asian ancestry context
+CASE: south_asian_ancestry_context
+
+EMR:
+RISK CONTINUUM CKM
+
+Level 3B - actionable early CKM / atherogenic risk.
+10-year ASCVD risk: 3.8%.
+30-year ASCVD risk: 22%.
+CKM stage 2 with kidney G1A1 and plaque unmeasured / CAC not performed.
+Risk context: risk-enhancing ancestry/context: South Asian ancestry.
+
+Assessment:
+- Hypertriglyceridemia (ICD: E78.1)
+- Prediabetes (ICD: R73.03)
+
+Recommendations:
+- Short-term ASCVD risk is low, but longer-term risk and risk-enhancing factors may make lipid-lowering worth discussing. Moderate-intensity statin therapy may be reasonable after shared decision-making.
+- CAC reasonable if treatment decision remains uncertain.
+- Aspirin not indicated for routine primary prevention.
+- Consider hsCRP only if inflammatory risk clarification would change management.
+
+PATIENT ROADMAP:
+Your Prevention Roadmap
+Your results show where you stand today and the most important steps to lower future heart, kidney, and metabolic risk.
+
+Where you stand:
+- 10-year ASCVD risk: 3.8%
+- 30-year ASCVD risk: 22%
+- About 22 out of 100 similar patients may have a heart attack, stroke, or related artery disease event over the next 30 years.
+- Your short-term risk is low, but your longer-term risk is higher than expected. This does not mean an event is likely soon. It means prevention now may lower your risk over time.
+- About 4 out of 100 similar patients may have a heart attack, stroke, or related artery disease event over the next 10 years.
+- Plaque status has not been measured.
+- Care focus: Level 3 (3B) - Actionable early CKM / atherogenic risk
+
+Why risk is elevated:
+- Near-term risk is borderline, but 30-year risk and multiple early risk markers support prevention discussion.
+- Cholesterol particles: ApoB 108; LDL-C 138; non-HDL-C 168 (calculated). These numbers help show plaque-driving cholesterol in the blood.
+- Blood sugar / diabetes: A1c 5.8%. Improving blood sugar can lower long-term heart, kidney, and metabolic risk.
+- Kidney protection: eGFR 94; UACR 8. Kidney markers also help estimate heart and metabolic risk.
+- Blood pressure: 126/78 mmHg. Keeping blood pressure in a safer range protects the heart, brain, and kidneys.
+- Other factors: Lp(a) 68 nmol/L. These details can shape the prevention plan with your clinician.
+- Other context: Lp(a) 68 nmol/L; BP 126/78; South Asian ancestry.
+
+Current goals:
+- LDL-C: 138 mg/dL to <100 mg/dL
+- non-HDL-C: 168 mg/dL calculated to <130 mg/dL
+- ApoB: 108 mg/dL to <90 mg/dL
+- A1c: 5.8% to individualized
+- BP: 126/78 mmHg to <130/80 when appropriate
+- Kidney / albuminuria: 8 mg/g; G1A1 to reduce albuminuria / preserve eGFR
+- Weight: BMI 27.1 to individualized
+
+Next steps:
+1. Lower plaque-driving cholesterol: Moderate-intensity statin therapy usually lowers LDL cholesterol by about one-third to one-half.
+2. Additional testing: A calcium scan may help if treatment choices are still uncertain.
+
+This roadmap is for discussion with your clinician. Medication decisions should be individualized.
+
+ACTIONS:
+- Short-term ASCVD risk is low, but longer-term risk and risk-enhancing factors may make lipid-lowering worth discussing. Moderate-intensity statin therapy may be reasonable after shared decision-making.
+- Recheck lipid profile 4-12 weeks after starting or intensifying therapy, then every 6-12 months.
+- CAC reasonable for risk clarification if treatment decision remains uncertain.
+- Aspirin not indicated for routine primary prevention.
+- Consider hsCRP only if inflammatory risk clarification would change management.
+
+RSS: 16
+RSS CONTRIBUTORS:
+- ApoB elevation: 108.0 (+8)
+- Hypertriglyceridemia: 174.0 (+4)
+- A1c elevation: 5.8 (+2)
+- South Asian ancestry: True (+2)

@@ -1,0 +1,76 @@
+DEMO: CKD G3aA2
+CASE: ckd_g3a_a2
+
+EMR:
+RISK CONTINUUM CKM
+
+Level 3B - CKM stage 3 with albuminuria-mediated kidney and ASCVD risk.
+10-year ASCVD risk: 8.28%.
+CKM stage 3 with kidney G3aA2.
+
+Assessment:
+- CKD stage G3aA2 / albuminuria, confirm persistence if not already confirmed (ICD: R80.9)
+- Prediabetes (ICD: R73.03)
+
+Recommendations:
+- Moderate-intensity statin therapy is reasonable given borderline/intermediate ASCVD risk with albuminuria and metabolic risk-enhancing factors.
+- Confirm persistent albuminuria with repeat UACR if not already confirmed; optimize kidney-protective therapy.
+- Continue or optimize ACEi/ARB therapy if hypertension and persistent albuminuria are present.
+- Treat BP toward goal <130/80 if tolerated.
+- Consider SGLT2 inhibitor if UACR is >=200 mg/g, albuminuria persists at higher range, or CKD progression risk is elevated.
+- CAC not performed; plaque burden unmeasured.
+- Aspirin not indicated for routine primary prevention.
+- Consider hsCRP only if inflammatory risk clarification would change management.
+
+PATIENT ROADMAP:
+Your Prevention Roadmap
+Your results show where you stand today and the most important steps to lower future heart, kidney, and metabolic risk.
+
+Where you stand:
+- 10-year ASCVD risk: 8.28%
+- Your 10-year ASCVD risk is elevated, so prevention and lipid-lowering therapy should be discussed with your clinician.
+- About 8 out of 100 similar patients may have a heart attack, stroke, or related artery disease event over the next 10 years.
+- Plaque status has not been measured.
+- Care focus: Level 3 (3B) - Actionable early CKM / atherogenic risk
+
+Why risk is elevated:
+- Cholesterol particles: ApoB 94; LDL-C 118; non-HDL-C 146 (calculated). These numbers help show plaque-driving cholesterol in the blood.
+- Blood sugar / diabetes: A1c 5.8%. Improving blood sugar can lower long-term heart, kidney, and metabolic risk.
+- Kidney protection: eGFR 55; UACR 72. Kidney markers also help estimate heart and metabolic risk.
+- Blood pressure: 138/78 mmHg; treated. Keeping blood pressure in a safer range protects the heart, brain, and kidneys.
+- Other factors: Lp(a) 54 nmol/L. These details can shape the prevention plan with your clinician.
+- Other context: Lp(a) 54 nmol/L; BP 138/78; treated.
+
+Current goals:
+- LDL-C: 118 mg/dL to <100 mg/dL
+- non-HDL-C: 146 mg/dL calculated to <130 mg/dL
+- ApoB: 94 mg/dL to <90 mg/dL
+- A1c: 5.8% to individualized
+- BP: 138/78 mmHg; treated to <130/80 when appropriate
+- Kidney / albuminuria: 72 mg/g; G3aA2 to reduce albuminuria / preserve eGFR
+- Weight: BMI 31.2 to individualized
+
+Next steps:
+1. Lower plaque-driving cholesterol: Moderate-intensity statin therapy usually lowers LDL cholesterol by about one-third to one-half.
+2. Protect the kidneys: Review kidney protection options with your clinician.
+3. Additional testing: A calcium scan may help if treatment choices are still uncertain.
+
+This roadmap is for discussion with your clinician. Medication decisions should be individualized.
+
+ACTIONS:
+- Moderate-intensity statin therapy is reasonable given borderline/intermediate ASCVD risk with albuminuria and metabolic risk-enhancing factors.
+- Recheck lipid profile 4-12 weeks after starting or intensifying therapy, then every 6-12 months.
+- Confirm persistent albuminuria with repeat UACR if not already confirmed; optimize kidney-protective therapy.
+- Continue or optimize ACEi/ARB therapy if hypertension and persistent albuminuria are present.
+- Treat BP toward goal <130/80 if tolerated.
+- Consider SGLT2 inhibitor if UACR is >=200 mg/g, albuminuria persists at higher range, or CKD progression risk is elevated.
+- CAC not performed; plaque burden unmeasured.
+- Aspirin not indicated for routine primary prevention.
+- Consider hsCRP only if inflammatory risk clarification would change management.
+
+RSS: 17
+RSS CONTRIBUTORS:
+- ApoB elevation: 94.0 (+4)
+- Reduced eGFR: 55.0 (+5)
+- Albuminuria: 72.0 (+6)
+- A1c elevation: 5.8 (+2)

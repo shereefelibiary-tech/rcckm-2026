@@ -1,7 +1,18 @@
 from dataclasses import asdict
 
 from core.patient import Patient
+from modules.lipids.non_hdl import calculate_non_hdl
 from modules.lipids.statin_intensity import statin_intensity_help_text
+from modules.risk_enhancers.breast_arterial_calcification import (
+    BAC_ALLOWED_VALUES,
+    BAC_HELP_TEXT,
+    breast_arterial_calcification_display,
+    normalize_breast_arterial_calcification,
+)
+from modules.risk_enhancers.incidental_cac import (
+    INCIDENTAL_CAC_SEVERITY_OPTIONS,
+    normalize_incidental_cac_severity,
+)
 from modules.family_history.engine import (
     PREMATURE_FAMILY_HISTORY_HELP,
     build_family_history_payload,
@@ -76,6 +87,10 @@ FIELD_ALIASES = {
     "smoking": "smoker",
     "premature_family_history": "family_history_premature_ascvd",
     "premature_fhx_ascvd": "family_history_premature_ascvd",
+    "mammary_artery_calcification": "breast_arterial_calcification",
+    "breast_artery_calcification": "breast_arterial_calcification",
+    "vascular_calcification_on_mammogram": "breast_arterial_calcification",
+    "arterial_calcifications_on_mammogram": "breast_arterial_calcification",
 }
 
 WORKSHEET_KEY_BY_FIELD = {
@@ -144,6 +159,7 @@ WORKSHEET_KEY_BY_FIELD = {
     "suspected_fh_hefh": "input_suspected_fh_hefh",
     "incidental_cac": "input_incidental_cac",
     "incidental_cac_severity": "input_incidental_cac_severity",
+    "breast_arterial_calcification": "input_breast_arterial_calcification",
     "cac_percentile": "input_cac_percentile",
     "zip_code": "input_zip_code",
     "neighborhood_sdoh_context": "input_neighborhood_sdoh_context",
@@ -181,6 +197,8 @@ def patient_to_payload(patient):
         "lpa_unit": patient.lp_a_unit,
         "smoking": patient.smoking,
         "premature_family_history": patient.family_history_premature_ascvd,
+        "mammary_artery_calcification": patient.breast_arterial_calcification,
+        "breast_artery_calcification": patient.breast_arterial_calcification,
     }
     payload.update(aliases)
     return payload
@@ -211,6 +229,12 @@ def build_patient_from_inputs(inputs):
     bmi = parse_optional_float(values.get("bmi"))
     if bmi is None and height_in and weight_lb:
         bmi = round(weight_lb * 703 / (height_in * height_in), 1)
+    incidental_cac = _optional_bool(values, "incidental_cac")
+    incidental_cac_severity = (
+        normalize_incidental_cac_severity(values.get("incidental_cac_severity"))
+        if incidental_cac
+        else None
+    )
     patient = Patient(
         age=parse_optional_int(values.get("age")),
         sex=str(sex).lower(),
@@ -263,8 +287,11 @@ def build_patient_from_inputs(inputs):
         cancer_survivor=_optional_bool(values, "cancer_survivor"),
         cancer_life_expectancy_gt_2y=_optional_bool(values, "cancer_life_expectancy_gt_2y"),
         suspected_fh_hefh=_optional_bool(values, "suspected_fh_hefh"),
-        incidental_cac=_optional_bool(values, "incidental_cac"),
-        incidental_cac_severity=_empty_to_none(values.get("incidental_cac_severity")),
+        incidental_cac=incidental_cac,
+        incidental_cac_severity=incidental_cac_severity,
+        breast_arterial_calcification=normalize_breast_arterial_calcification(
+            values.get("breast_arterial_calcification")
+        ),
         cac_percentile=normalize_cac_percentile(parse_optional_float(values.get("cac_percentile"))),
         zip_code=_empty_to_none(values.get("zip_code")),
         neighborhood_sdoh_context=_empty_to_none(values.get("neighborhood_sdoh_context")),
@@ -306,8 +333,8 @@ def build_patient_from_inputs(inputs):
         prevent_age=parse_optional_float(values.get("prevent_age")),
         prevent_percentile=parse_optional_float(values.get("prevent_percentile")),
     )
-    if patient.non_hdl_c is None and patient.tc is not None and patient.hdl_c is not None:
-        patient.non_hdl_c = patient.tc - patient.hdl_c
+    if patient.non_hdl_c is None:
+        patient.non_hdl_c = calculate_non_hdl(patient.tc, patient.hdl_c)
 
     family_history = build_family_history_payload(patient)
     patient.family_history_summary = family_history["summary"]
@@ -762,26 +789,52 @@ def render_manual_worksheet(st, parsed):
                 inputs["cancer_life_expectancy_gt_2y"] = _checkbox_input(
                     st, "Life expectancy >2y", parsed, "cancer_life_expectancy_gt_2y"
                 )
+            extra1, extra2, extra3, extra4, extra5 = st.columns([1, 1.25, 1, 1, 1.25])
+            with extra1:
                 inputs["incidental_cac"] = _checkbox_input(
                     st, "Incidental CAC on CT", parsed, "incidental_cac"
                 )
-            extra1, extra2, extra3, extra4 = st.columns([1, 1, 1, 1.25])
-            with extra1:
-                severity_options = ["", "present", "severe"]
-                parsed_severity = parsed.get("incidental_cac_severity") or ""
+            with extra2:
+                severity_options = list(INCIDENTAL_CAC_SEVERITY_OPTIONS)
+                incidental_checked = bool(inputs.get("incidental_cac"))
+                if not incidental_checked and "input_incidental_cac_severity" in st.session_state:
+                    st.session_state["input_incidental_cac_severity"] = "present"
+                parsed_severity = normalize_incidental_cac_severity(
+                    parsed.get("incidental_cac_severity")
+                )
                 inputs["incidental_cac_severity"] = st.selectbox(
-                    "Incidental CAC severity",
+                    "Severity",
                     severity_options,
                     key="input_incidental_cac_severity",
+                    disabled=not incidental_checked,
                     **(
                         {}
                         if "input_incidental_cac_severity" in st.session_state
                         else {"index": severity_options.index(parsed_severity) if parsed_severity in severity_options else 0}
                     ),
                 )
-            with extra2:
-                inputs["cac_percentile"] = _numeric_input(st, "CAC percentile", parsed, "cac_percentile")
+                if not incidental_checked:
+                    inputs["incidental_cac_severity"] = None
             with extra3:
+                bac_options = list(BAC_ALLOWED_VALUES)
+                parsed_bac = normalize_breast_arterial_calcification(
+                    parsed.get("breast_arterial_calcification")
+                )
+                inputs["breast_arterial_calcification"] = st.selectbox(
+                    "Breast arterial calcification on mammogram",
+                    bac_options,
+                    format_func=lambda value: breast_arterial_calcification_display(value).title(),
+                    key="input_breast_arterial_calcification",
+                    help=BAC_HELP_TEXT,
+                    **(
+                        {}
+                        if "input_breast_arterial_calcification" in st.session_state
+                        else {"index": bac_options.index(parsed_bac) if parsed_bac in bac_options else 0}
+                    ),
+                )
+            with extra4:
+                inputs["cac_percentile"] = _numeric_input(st, "CAC percentile", parsed, "cac_percentile")
+            with extra5:
                 inputs["zip_code"] = st.text_input(
                     "ZIP / SDOH support",
                     key="input_zip_code",
@@ -791,16 +844,6 @@ def render_manual_worksheet(st, parsed):
                         else {"value": parsed.get("zip_code") or ""}
                     ),
                 )
-            with extra4:
-                inputs["higher_risk_ancestry_context"] = st.text_input(
-                    "Other ancestry/context",
-                    key="input_higher_risk_ancestry_context",
-                    **(
-                        {}
-                        if "input_higher_risk_ancestry_context" in st.session_state
-                        else {"value": parsed.get("higher_risk_ancestry_context") or ""}
-                    ),
-                )
                 inputs["neighborhood_sdoh_context"] = st.text_input(
                     "Neighborhood context",
                     key="input_neighborhood_sdoh_context",
@@ -808,6 +851,16 @@ def render_manual_worksheet(st, parsed):
                         {}
                         if "input_neighborhood_sdoh_context" in st.session_state
                         else {"value": parsed.get("neighborhood_sdoh_context") or ""}
+                    ),
+                )
+            with st.container():
+                inputs["higher_risk_ancestry_context"] = st.text_input(
+                    "Other ancestry/context",
+                    key="input_higher_risk_ancestry_context",
+                    **(
+                        {}
+                        if "input_higher_risk_ancestry_context" in st.session_state
+                        else {"value": parsed.get("higher_risk_ancestry_context") or ""}
                     ),
                 )
         inputs["inflammatory_disease"] = bool(inputs.get("inflammatory_disease")) or any(

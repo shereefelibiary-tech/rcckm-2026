@@ -12,7 +12,7 @@ Where you stand:
 
 Why risk is elevated:
 - Near-term estimated risk may be low, but 30-year risk is elevated enough to justify prevention discussion.
-- Cholesterol particles: ApoB 102; non-HDL-C 165. These numbers help show plaque-driving cholesterol in the blood.
+- Cholesterol particles: ApoB 102. These numbers help show plaque-driving cholesterol in the blood.
 - Blood sugar / diabetes: A1c 5.9%. Improving blood sugar can lower long-term heart, kidney, and metabolic risk.
 - Kidney protection: eGFR 76. Kidney markers also help estimate heart and metabolic risk.
 - Other factors: Lp(a) 80 nmol/L. These details can shape the prevention plan with your clinician.
@@ -20,17 +20,13 @@ Why risk is elevated:
 
 Current goals:
 - LDL-C: - to <100 mg/dL
-- non-HDL-C: 165 mg/dL to <130 mg/dL
 - ApoB: 102 mg/dL to <90 mg/dL
 - A1c: 5.9% to individualized
 - Kidney / albuminuria: G2 to reduce albuminuria / preserve eGFR
 
 Next steps:
 1. Lower plaque-driving cholesterol: Moderate-intensity statin therapy usually lowers LDL cholesterol by about one-third to one-half.
-2. Keep blood pressure in a safer range: Use lifestyle and medicines as appropriate.
-3. Aspirin safety: Do not start aspirin unless your clinician recommends it.
-4. Additional testing: Urine albumin test can help check early kidney stress.
-5. Additional testing: hsCRP can help clarify inflammatory risk context when clinically relevant.
-6. Next step: CAC may clarify plaque burden if treatment intensity remains uncertain.
+2. Protect the kidneys: Review kidney protection options with your clinician.
+3. Additional testing: A calcium scan may help if treatment choices are still uncertain.
 
 This roadmap is for discussion with your clinician. Medication decisions should be individualized.

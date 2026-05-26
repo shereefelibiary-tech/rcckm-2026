@@ -1,0 +1,65 @@
+DEMO: Cancer survivor context
+CASE: cancer_survivor_context
+
+EMR:
+RISK CONTINUUM CKM
+
+Level 3B - actionable early CKM / atherogenic risk.
+10-year ASCVD risk: 5.2%.
+30-year ASCVD risk: 19%.
+CKM stage 0 with kidney G2A1 and plaque unmeasured / CAC not performed.
+Risk context: cancer survivor context with life expectancy >2 years.
+
+Assessment:
+- No diagnosis candidates generated.
+
+Recommendations:
+- Moderate-intensity statin therapy is reasonable given borderline ASCVD risk with risk-enhancing factors.
+- CAC may clarify plaque burden if treatment intensity remains uncertain.
+- Aspirin not indicated for routine primary prevention.
+
+PATIENT ROADMAP:
+Your Prevention Roadmap
+Your results show where you stand today and the most important steps to lower future heart, kidney, and metabolic risk.
+
+Where you stand:
+- 10-year ASCVD risk: 5.2%
+- 30-year ASCVD risk: 19%
+- About 19 out of 100 similar patients may have a heart attack, stroke, or related artery disease event over the next 30 years.
+- Your 10-year ASCVD risk is moderate, and your 30-year risk is elevated enough to make prevention worth discussing.
+- About 5 out of 100 similar patients may have a heart attack, stroke, or related artery disease event over the next 10 years.
+- Plaque status has not been measured.
+- Care focus: Level 3 (3B) - Actionable early CKM / atherogenic risk
+
+Why risk is elevated:
+- Near-term estimated risk may be low, but 30-year risk is elevated enough to justify prevention discussion.
+- Cholesterol particles: ApoB 98; LDL-C 136. These numbers help show plaque-driving cholesterol in the blood.
+- Blood sugar / diabetes: A1c 5.6%. Improving blood sugar can lower long-term heart, kidney, and metabolic risk.
+- Kidney protection: eGFR 82; UACR 8. Kidney markers also help estimate heart and metabolic risk.
+- Blood pressure: 128/78 mmHg. Keeping blood pressure in a safer range protects the heart, brain, and kidneys.
+- Other factors: Lp(a) 44 nmol/L. These details can shape the prevention plan with your clinician.
+- Other context: Lp(a) 44 nmol/L; BP 128/78; cancer survivor context.
+
+Current goals:
+- LDL-C: 136 mg/dL to <100 mg/dL
+- ApoB: 98 mg/dL to <90 mg/dL
+- A1c: 5.6% to individualized
+- BP: 128/78 mmHg to <130/80 when appropriate
+- Kidney / albuminuria: 8 mg/g; G2A1 to reduce albuminuria / preserve eGFR
+- Weight: BMI 27.8 to individualized
+
+Next steps:
+1. Lower plaque-driving cholesterol: Moderate-intensity statin therapy usually lowers LDL cholesterol by about one-third to one-half.
+2. Additional testing: A calcium scan may help if treatment choices are still uncertain.
+
+This roadmap is for discussion with your clinician. Medication decisions should be individualized.
+
+ACTIONS:
+- Moderate-intensity statin therapy is reasonable given borderline ASCVD risk with risk-enhancing factors.
+- Recheck lipid profile 4-12 weeks after starting or intensifying therapy, then every 6-12 months.
+- CAC may clarify plaque burden if treatment intensity remains uncertain.
+- Aspirin not indicated for routine primary prevention.
+
+RSS: 4
+RSS CONTRIBUTORS:
+- ApoB elevation: 98.0 (+4)

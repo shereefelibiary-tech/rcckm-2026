@@ -1,4 +1,4 @@
-DEMO: Diabetes + CKM stage
+DEMO: Type 2 diabetes with albuminuria
 CASE: diabetes_ckm_stage
 
 EMR:
@@ -28,13 +28,13 @@ Your results show where you stand today and the most important steps to lower fu
 
 Where you stand:
 - 10-year ASCVD risk: 15.85%
-- Your 10-year ASCVD risk is high.
+- Your 10-year ASCVD risk is elevated, so prevention and lipid-lowering therapy should be discussed with your clinician.
 - About 16 out of 100 similar patients may have a heart attack, stroke, or related artery disease event over the next 10 years.
 - Plaque status has not been measured.
 - Care focus: Level 3 (3B) - Actionable early CKM / atherogenic risk
 
 Why risk is elevated:
-- Cholesterol particles: ApoB 110; LDL-C 132; non-HDL-C 167. These numbers help show plaque-driving cholesterol in the blood.
+- Cholesterol particles: ApoB 110; LDL-C 132; non-HDL-C 167 (calculated). These numbers help show plaque-driving cholesterol in the blood.
 - Blood sugar / diabetes: A1c 7.4%. Improving blood sugar can lower long-term heart, kidney, and metabolic risk.
 - Kidney protection: eGFR 52; UACR 210. Kidney markers also help estimate heart and metabolic risk.
 - Blood pressure: 136/80 mmHg; treated. Keeping blood pressure in a safer range protects the heart, brain, and kidneys.
@@ -43,7 +43,7 @@ Why risk is elevated:
 
 Current goals:
 - LDL-C: 132 mg/dL to <70 mg/dL
-- non-HDL-C: 167 mg/dL to <100 mg/dL
+- non-HDL-C: 167 mg/dL calculated to <100 mg/dL
 - ApoB: 110 mg/dL to <80 mg/dL
 - A1c: 7.4% to individualized
 - BP: 136/80 mmHg; treated to <130/80 when appropriate
@@ -54,9 +54,7 @@ Next steps:
 1. Lower plaque-driving cholesterol: Moderate-intensity statin therapy usually lowers LDL cholesterol by about one-third to one-half.
 2. Protect the kidneys: Review kidney protection options with your clinician.
 3. Improve blood sugar trajectory: Keep diabetes care moving toward the safest individualized goal.
-4. Keep blood pressure in a safer range: Use lifestyle and medicines as appropriate.
-5. Aspirin safety: Do not start aspirin unless your clinician recommends it.
-6. Additional testing: A calcium scan may help if treatment choices are still uncertain.
+4. Additional testing: A calcium scan may help if treatment choices are still uncertain.
 
 This roadmap is for discussion with your clinician. Medication decisions should be individualized.
 

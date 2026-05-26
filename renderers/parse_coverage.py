@@ -31,6 +31,7 @@ FIELD_SPECS: tuple[tuple[str, str, str | None], ...] = (
     ("Creatinine", "creatinine", "mg/dL"),
     ("Calcium score", "cac", None),
     ("CAC not done", "cac_not_done", None),
+    ("Breast arterial calcification", "breast_arterial_calcification", None),
     ("Clinical ASCVD", "clinical_ascvd", None),
     ("Smoking", "smoker", None),
     ("Family history", "family_history_premature_ascvd", None),

@@ -1,11 +1,19 @@
 from html import escape
 from textwrap import dedent
 
-from modules.actions.scaffold import build_action_recommendation_lines
+from modules.actions.scaffold import (
+    build_action_recommendation_lines,
+    build_compact_action_items,
+)
+from modules.lipids.non_hdl import format_non_hdl_display, should_show_non_hdl_default
 from modules.lipids.statin_intensity import get_statin_intensity_definition
 from modules.levels.definitions import classify_continuum_position, get_level_definition_payload
 from modules.plaque.engine import format_cac_percentile_context
 from modules.prevent.lipid_bands import LOW_10YR_HIGH_30YR_PATIENT_SUMMARY
+from modules.risk_enhancers.breast_arterial_calcification import (
+    BAC_PATIENT_CONTEXT_TEXT,
+    has_breast_arterial_calcification,
+)
 from modules.risk_enhancers.reproductive import (
     reproductive_history_summary,
     reproductive_marker_items,
@@ -208,7 +216,7 @@ def _patient_risk_category_word(category):
     return "not fully calculated"
 
 
-def _where_stand_summary_sentence(result, ascvd_30y):
+def _primary_prevention_risk_summary_sentence(result, ascvd_30y):
     category_word = _patient_risk_category_word(_risk_category(result))
     if ascvd_30y is None:
         return f"Your 10-year ASCVD risk is {category_word}."
@@ -233,6 +241,80 @@ def _where_stand_summary_sentence(result, ascvd_30y):
         f"Your 10-year ASCVD risk is {category_word}, and your "
         "30-year ASCVD risk helps guide prevention planning."
     )
+
+
+def _has_clinical_ascvd(patient, result):
+    return bool(
+        getattr(patient, "clinical_ascvd", False)
+        or getattr(result, "clinical_ascvd", False)
+    )
+
+
+def _has_severe_ldl_or_fh_pathway(patient, result):
+    ldl_c = getattr(patient, "ldl_c", None)
+    return bool(
+        (ldl_c is not None and ldl_c >= 190)
+        or getattr(patient, "suspected_fh_hefh", False)
+        or getattr(result, "severe_hypercholesterolemia", False)
+        or getattr(result, "possible_fh_pathway", False)
+    )
+
+
+def _has_measured_coronary_plaque(patient, result):
+    cac = getattr(patient, "cac", None)
+    if cac is not None:
+        try:
+            return float(cac) > 0
+        except (TypeError, ValueError):
+            return False
+    plaque_category = _display_value(getattr(result, "plaque_category", None))
+    return str(plaque_category or "").upper() not in {"", "NONE", "UNKNOWN"}
+
+
+def build_patient_risk_summary_sentence(patient, result, ascvd_30y=None):
+    """Build the patient-facing Where-you-stand summary from engine outputs."""
+    if _has_clinical_ascvd(patient, result):
+        return (
+            "Known cardiovascular disease is present. The focus is secondary "
+            "prevention: lowering the chance of future heart attack, stroke, "
+            "or related artery disease events."
+        )
+    if _has_severe_ldl_or_fh_pathway(patient, result):
+        return (
+            "LDL-C is in a severe hypercholesterolemia range, so lipid-lowering "
+            "decisions should not rely on risk estimates alone."
+        )
+    if _has_measured_coronary_plaque(patient, result):
+        return (
+            "Coronary plaque is present, so prevention decisions should account "
+            "for measured plaque burden in addition to risk estimates."
+        )
+
+    risk_10y = getattr(result, "prevent_10y_ascvd", None)
+    if risk_10y is None:
+        return ""
+    try:
+        low_short_term = risk_10y is not None and float(risk_10y) < 5
+    except (TypeError, ValueError):
+        low_short_term = _patient_risk_category_word(_risk_category(result)) == "low"
+    try:
+        elevated_30y = ascvd_30y is not None and float(ascvd_30y) >= 10
+    except (TypeError, ValueError):
+        elevated_30y = False
+    if low_short_term and elevated_30y:
+        return LOW_10YR_HIGH_30YR_PATIENT_SUMMARY
+
+    try:
+        high_10y = risk_10y is not None and float(risk_10y) >= 7.5
+    except (TypeError, ValueError):
+        high_10y = False
+    if high_10y or _patient_risk_category_word(_risk_category(result)) == "high":
+        return (
+            "Your 10-year ASCVD risk is elevated, so prevention and "
+            "lipid-lowering therapy should be discussed with your clinician."
+        )
+
+    return _primary_prevention_risk_summary_sentence(result, ascvd_30y)
 
 
 def _patient_safe_phrase(text):
@@ -407,14 +489,14 @@ def _contributor_groups(patient, result):
 
     apob = getattr(patient, "apob", None)
     ldl = getattr(patient, "ldl_c", None)
-    non_hdl = getattr(patient, "non_hdl_c", None)
     lipids = []
     if apob is not None:
         lipids.append(f"ApoB {_fmt(apob)} mg/dL")
     if ldl is not None:
         lipids.append(f"LDL-C {_fmt(ldl)} mg/dL")
-    if non_hdl is not None:
-        lipids.append(f"non-HDL-C {_fmt(non_hdl)} mg/dL")
+    non_hdl = format_non_hdl_display(patient, result) if should_show_non_hdl_default(patient, result) else None
+    if non_hdl:
+        lipids.append(f"non-HDL-C {_fmt(non_hdl['current_value'])} mg/dL calculated")
     if lipids:
         groups.append(("Cholesterol particles", "; ".join(lipids)))
 
@@ -496,6 +578,8 @@ def _contributor_groups(patient, result):
         other_context.append("cancer survivor context")
     if getattr(patient, "incidental_cac", False) and getattr(patient, "cac", None) is None:
         other_context.append("incidental CAC noted")
+    if has_breast_arterial_calcification(patient):
+        other_context.append("breast arterial calcification on mammogram")
 
     reproductive_summary = reproductive_history_summary(patient, patient_facing=True)
     if reproductive_summary:
@@ -557,16 +641,26 @@ def _patient_contributor_groups(patient, result):
                 )
             )
 
+    if has_breast_arterial_calcification(patient):
+        groups.append(
+            (
+                "Imaging context",
+                "Breast arterial calcification",
+                BAC_PATIENT_CONTEXT_TEXT,
+                "blue",
+            )
+        )
+
     apob = getattr(patient, "apob", None)
     ldl = getattr(patient, "ldl_c", None)
-    non_hdl = getattr(patient, "non_hdl_c", None)
     lipid_bits = []
     if apob is not None:
         lipid_bits.append(f"ApoB {_fmt(apob)}")
     if ldl is not None:
         lipid_bits.append(f"LDL-C {_fmt(ldl)}")
-    if non_hdl is not None:
-        lipid_bits.append(f"non-HDL-C {_fmt(non_hdl)}")
+    non_hdl = format_non_hdl_display(patient, result) if should_show_non_hdl_default(patient, result) else None
+    if non_hdl:
+        lipid_bits.append(f"non-HDL-C {_fmt(non_hdl['current_value'])} (calculated)")
     if lipid_bits:
         groups.append(
             (
@@ -673,14 +767,13 @@ def _target_rows(patient, result):
                 f"<{_fmt(target.ldl_c_target)} mg/dL" if target and target.ldl_c_target is not None else "-",
             )
         )
-    if getattr(patient, "non_hdl_c", None) is not None or (
-        target and target.non_hdl_c_target is not None
-    ):
+    non_hdl = format_non_hdl_display(patient, result) if should_show_non_hdl_default(patient, result) else None
+    if non_hdl:
         rows.append(
             (
                 "non-HDL-C",
-                _fmt(getattr(patient, "non_hdl_c", None), " mg/dL") or "-",
-                f"<{_fmt(target.non_hdl_c_target)} mg/dL" if target and target.non_hdl_c_target is not None else "-",
+                (_fmt(non_hdl["current_value"], " mg/dL") or "-") + " calculated",
+                f"<{_fmt(non_hdl['target_value'])} mg/dL",
             )
         )
     if getattr(patient, "apob", None) is not None or (
@@ -752,6 +845,46 @@ def _recommendation_rows(patient, result):
 
 
 def _patient_next_steps(patient, result):
+    compact_items = build_compact_action_items(patient, result, max_items=5)
+    compact_rows = []
+    compact_seen = set()
+    for item in compact_items:
+        lowered = f"{item.title} {item.subtitle}".lower()
+        if "lipid" in lowered or "statin" in lowered or "cholesterol" in lowered:
+            label = "Lower plaque-driving cholesterol"
+            if "high-intensity" in lowered or "high-risk targets" in lowered:
+                detail = get_statin_intensity_definition("high").patient_friendly_summary
+            elif "moderate-intensity" in lowered:
+                detail = get_statin_intensity_definition("moderate").patient_friendly_summary
+            elif "very-high-risk ascvd targets" in lowered:
+                detail = "Because heart artery disease is already established and additional high-risk features are present, the LDL cholesterol goal is lower than for routine prevention."
+            else:
+                detail = "Treat toward the cholesterol goals above."
+        elif "protect kidneys" in lowered:
+            label = "Protect the kidneys"
+            detail = "Review kidney protection options with your clinician."
+        elif "glycemia" in lowered:
+            label = "Improve blood sugar trajectory"
+            detail = "Keep diabetes care moving toward the safest individualized goal."
+        elif "plaque" in lowered or "cac" in lowered or "calcium" in lowered:
+            label = "Additional testing"
+            detail = "A calcium scan may help if treatment choices are still uncertain."
+        elif "aspirin" in lowered or "antiplatelet" in lowered:
+            label = "Aspirin safety"
+            detail = "Do not start aspirin unless your clinician recommends it."
+        elif "lifestyle" in lowered:
+            label = "Long-term prevention"
+            detail = "Focus on weight, blood sugar, triglycerides, and long-term prevention."
+        else:
+            label = item.title
+            detail = item.subtitle or "Continue prevention review with your clinician."
+        key = (label, detail)
+        if key not in compact_seen:
+            compact_seen.add(key)
+            compact_rows.append(key)
+    if compact_rows:
+        return compact_rows
+
     rows = []
     seen = set()
     for item in _recommendation_items(patient, result):
@@ -767,6 +900,9 @@ def _patient_next_steps(patient, result):
         elif "hscrp" in lowered:
             label = "Additional testing"
             detail = "hsCRP can help clarify inflammatory risk context when clinically relevant."
+        elif "very-high-risk ascvd targets" in lowered:
+            label = "Lower plaque-driving cholesterol"
+            detail = "Because heart artery disease is already established and additional high-risk features are present, the LDL cholesterol goal is lower than for routine prevention."
         elif "high-intensity statin" in lowered or "high-intensity lipid" in lowered:
             label = "Lower plaque-driving cholesterol"
             detail = get_statin_intensity_definition("high").patient_friendly_summary
@@ -950,15 +1086,18 @@ def _patient_driver_sections(patient, result):
         elif value == 0:
             context.append("CAC 0")
 
+    if has_breast_arterial_calcification(patient):
+        context.append(BAC_PATIENT_CONTEXT_TEXT)
+
     apob = getattr(patient, "apob", None)
     ldl = getattr(patient, "ldl_c", None)
-    non_hdl = getattr(patient, "non_hdl_c", None)
     if apob is not None:
         lipid_bits = [f"ApoB {_fmt(apob)}"]
         if ldl is not None:
             lipid_bits.append(f"LDL-C {_fmt(ldl)}")
-        if non_hdl is not None:
-            lipid_bits.append(f"non-HDL-C {_fmt(non_hdl)}")
+        non_hdl = format_non_hdl_display(patient, result) if should_show_non_hdl_default(patient, result) else None
+        if non_hdl:
+            lipid_bits.append(f"non-HDL-C {_fmt(non_hdl['current_value'])} calculated")
         priority.append(
             (
                 f"ApoB {_fmt(apob)} - elevated particle burden",
@@ -968,12 +1107,13 @@ def _patient_driver_sections(patient, result):
                 "amber",
             )
         )
-    elif ldl is not None or non_hdl is not None:
+    elif ldl is not None or should_show_non_hdl_default(patient, result):
         lipid_bits = []
         if ldl is not None:
             lipid_bits.append(f"LDL-C {_fmt(ldl)}")
-        if non_hdl is not None:
-            lipid_bits.append(f"non-HDL-C {_fmt(non_hdl)}")
+        non_hdl = format_non_hdl_display(patient, result) if should_show_non_hdl_default(patient, result) else None
+        if non_hdl:
+            lipid_bits.append(f"non-HDL-C {_fmt(non_hdl['current_value'])} calculated")
         priority.append(("Cholesterol particles", "These numbers show plaque-driving cholesterol in the blood. Current values: " + "; ".join(lipid_bits) + ".", "amber"))
 
     a1c = getattr(patient, "a1c", None)
@@ -1033,6 +1173,8 @@ def _patient_driver_sections(patient, result):
         context.append("cancer survivor context")
     if getattr(patient, "incidental_cac", False) and getattr(patient, "cac", None) is None:
         context.append("incidental CAC noted")
+    if has_breast_arterial_calcification(patient):
+        context.append("breast arterial calcification on mammogram")
     inflammatory = _inflammatory_context(patient)
     if inflammatory:
         context.extend(inflammatory)
@@ -1113,8 +1255,9 @@ def _text_lines(patient, result):
         prevent_30y_text = _prevent_30y_explanation(ascvd_30y)
         if prevent_30y_text:
             lines.append(f"- {prevent_30y_text}")
-    if risk is not None:
-        lines.append(f"- {_where_stand_summary_sentence(result, ascvd_30y)}")
+    summary_sentence = build_patient_risk_summary_sentence(patient, result, ascvd_30y)
+    if summary_sentence:
+        lines.append(f"- {summary_sentence}")
     lines.extend(
         [
             f"- {_prevent_explanation(risk)}",
@@ -1435,10 +1578,11 @@ def render_patient_roadmap(patient, result):
     level, level_detail = _continuum_label(patient, result)
 
     stand_detail = ""
+    stand_detail = build_patient_risk_summary_sentence(patient, result, ascvd_30y)
     if risk is None:
-        stand_detail = _prevent_unavailable_reason_text(result)
+        unavailable = _prevent_unavailable_reason_text(result)
+        stand_detail = f"{stand_detail} {unavailable}".strip() if stand_detail else unavailable
     else:
-        stand_detail = _where_stand_summary_sentence(result, ascvd_30y)
         if ascvd_30y is None:
             unsupported = str(getattr(result, "prevent_unsupported_reason", "") or "").strip()
             if unsupported:

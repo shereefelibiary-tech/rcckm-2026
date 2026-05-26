@@ -12,23 +12,19 @@ Where you stand:
 
 Why risk is elevated:
 - Near-term risk is borderline, but 30-year risk and multiple early risk markers support prevention discussion.
-- Cholesterol particles: ApoB 92; LDL-C 126; non-HDL-C 156. These numbers help show plaque-driving cholesterol in the blood.
+- Cholesterol particles: ApoB 92; LDL-C 126; non-HDL-C 156 (calculated). These numbers help show plaque-driving cholesterol in the blood.
 - Blood sugar / diabetes: A1c 6.1%. Improving blood sugar can lower long-term heart, kidney, and metabolic risk.
 - Kidney protection: eGFR 82; UACR 34. Kidney markers also help estimate heart and metabolic risk.
 
 Current goals:
 - LDL-C: 126 mg/dL to <100 mg/dL
-- non-HDL-C: 156 mg/dL to <130 mg/dL
+- non-HDL-C: 156 mg/dL calculated to <130 mg/dL
 - ApoB: 92 mg/dL to <90 mg/dL
 - A1c: 6.1% to individualized
 - Kidney / albuminuria: 34 mg/g; G2A2 to reduce albuminuria / preserve eGFR
 
 Next steps:
-1. Lower plaque-driving cholesterol: Treat toward the cholesterol goals above.
-2. Protect the kidneys: Review kidney protection options with your clinician.
-3. Aspirin safety: Do not start aspirin unless your clinician recommends it.
-4. Additional testing: A calcium scan may help if treatment choices are still uncertain.
-5. Additional testing: Lp(a) can be checked once to guide long-term prevention.
-6. Additional testing: hsCRP can help clarify inflammatory risk context when clinically relevant.
+1. Protect the kidneys: Review kidney protection options with your clinician.
+2. Additional testing: A calcium scan may help if treatment choices are still uncertain.
 
 This roadmap is for discussion with your clinician. Medication decisions should be individualized.

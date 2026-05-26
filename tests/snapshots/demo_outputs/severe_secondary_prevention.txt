@@ -1,0 +1,83 @@
+DEMO: Severe secondary prevention
+CASE: severe_secondary_prevention
+
+EMR:
+RISK CONTINUUM CKM
+
+Level 5 - clinical ASCVD / secondary prevention.
+Known cardiovascular disease is present, so treatment decisions are based on secondary-prevention goals rather than risk estimates alone.
+CKM stage 4 with diabetic kidney involvement and plaque established ASCVD; CAC 5000 is context only.
+Risk context: suspected FH / HeFH pathway; premature family history (Father MI age 48). LDL-C >=190 / possible FH pathway: PREVENT should not be used to de-risk treatment.
+
+Assessment:
+- Type 2 diabetes mellitus with CKD G3aA2 and albuminuria (ICD: E11.22; CKD stage 3a ICD: N18.31)
+- Severe hypercholesterolemia (ICD: E78.00)
+- Elevated ApoB / atherogenic particle burden (ICD: E78.89)
+- Hypertriglyceridemia (ICD: E78.1)
+- Clinical ASCVD / coronary artery disease with prior MI with PCI; ischemic stroke; PAD (ICD: I25.10)
+- Elevated lipoprotein(a) (ICD: E78.41)
+
+Recommendations:
+- Intensify secondary-prevention lipid-lowering therapy; treat toward very-high-risk ASCVD targets: LDL-C <55 mg/dL, non-HDL-C <85 mg/dL, and ApoB <65 mg/dL if available. LDL-C <70 mg/dL remains the minimum secondary-prevention threshold.
+- Evaluate secondary causes and consider FH/cascade screening when appropriate.
+- Confirm persistent albuminuria with repeat UACR if not already confirmed; optimize kidney-protective therapy.
+- Continue or optimize ACEi/ARB therapy if hypertension and persistent albuminuria are present.
+- CAC 5000 may be documented as plaque context; secondary-prevention management is driven by clinical ASCVD.
+- Antiplatelet therapy is indicated for secondary prevention if clinically appropriate and no contraindication is present.
+
+PATIENT ROADMAP:
+Your Prevention Roadmap
+Your results show where you stand today and the most important steps to lower future heart, kidney, and metabolic risk.
+
+Where you stand:
+- 10-year ASCVD risk: 31.42%
+- Known cardiovascular disease is present. The focus is secondary prevention: lowering the chance of future heart attack, stroke, or related artery disease events.
+- About 31 out of 100 similar patients may have a heart attack, stroke, or related artery disease event over the next 10 years.
+- Known cardiovascular disease is present.
+- Care focus: Level 5 - Very high risk
+
+Why risk is elevated:
+- Lp(a) and family history increase long-term risk context.
+- Artery plaque: Known cardiovascular disease. This means prevention decisions should be more treatment-focused.
+- Cholesterol particles: ApoB 156; LDL-C 205; non-HDL-C 274 (calculated). These numbers help show plaque-driving cholesterol in the blood.
+- Blood sugar / diabetes: A1c 7.8%. Improving blood sugar can lower long-term heart, kidney, and metabolic risk.
+- Kidney protection: eGFR 55; UACR 86. Kidney markers also help estimate heart and metabolic risk.
+- Blood pressure: 138/82 mmHg; treated. Keeping blood pressure in a safer range protects the heart, brain, and kidneys.
+- Other factors: Lp(a) 225 nmol/L; Father MI age 48. These details can shape the prevention plan with your clinician.
+- Other context: Lp(a) 225 nmol/L; BP 138/82; treated; Father MI age 48.
+
+Current goals:
+- LDL-C: 205 mg/dL to <55 mg/dL
+- non-HDL-C: 274 mg/dL calculated to <85 mg/dL
+- ApoB: 156 mg/dL to <65 mg/dL
+- A1c: 7.8% to individualized
+- BP: 138/82 mmHg; treated to <130/80 when appropriate
+- Kidney / albuminuria: 86 mg/g; G3aA2 to reduce albuminuria / preserve eGFR
+- Weight: BMI 31.3 to individualized
+
+Next steps:
+1. Lower plaque-driving cholesterol: Because heart artery disease is already established and additional high-risk features are present, the LDL cholesterol goal is lower than for routine prevention.
+2. Protect the kidneys: Review kidney protection options with your clinician.
+3. Aspirin safety: Do not start aspirin unless your clinician recommends it.
+
+This roadmap is for discussion with your clinician. Medication decisions should be individualized.
+
+ACTIONS:
+- Intensify secondary-prevention lipid-lowering therapy; treat toward very-high-risk ASCVD targets.
+- Evaluate secondary causes and consider FH/cascade screening when appropriate.
+- Confirm persistent albuminuria with repeat UACR if not already confirmed; optimize kidney-protective therapy.
+- Continue or optimize ACEi/ARB therapy if hypertension and persistent albuminuria are present.
+- CAC 5000 may be documented as plaque context; secondary-prevention management is driven by clinical ASCVD.
+- Antiplatelet therapy is indicated for secondary prevention if clinically appropriate and no contraindication is present.
+
+RSS: 94
+RSS CONTRIBUTORS:
+- CAC plaque burden: 5000.0 (+40)
+- ApoB elevation: 156.0 (+12)
+- Elevated Lp(a): 225.0 nmol/L (+8)
+- Reduced eGFR: 55.0 (+5)
+- Albuminuria: 86.0 (+6)
+- Hypertriglyceridemia: 340.0 (+4)
+- Diabetes: 7.8 (+8)
+- Premature family history: Father MI age 48 (+3)
+- Suspected FH / HeFH: True (+8)

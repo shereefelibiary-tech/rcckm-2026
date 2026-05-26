@@ -17,6 +17,7 @@ from renderers.rss_renderer import (
     build_rss_panel_html,
     format_tower_value,
     get_rss_display_contributions,
+    get_rss_display_items,
 )
 from renderers.where_patient_falls import build_where_patient_falls_html
 
@@ -389,11 +390,11 @@ def test_rss_module_uses_shared_visual_order_for_tower_and_list():
     html = build_rss_panel_html(rss_total, contributions)
 
     expected = [
-        "A1c",
-        "Albuminuria",
-        "eGFR",
-        "ApoB / particle burden",
-        "Coronary calcium",
+        "A1c 7.1%",
+        "Albuminuria, UACR 45 mg/g",
+        "Kidney filtration, eGFR 55",
+        "ApoB 110 mg/dL",
+        "Coronary calcium 350",
     ]
     tower_expected = [
         "A1c 7.1%",
@@ -416,7 +417,8 @@ def test_rss_module_uses_shared_visual_order_for_tower_and_list():
     for item in display_contributions:
         tower_value = format_tower_value(item)
         assert tower_value in tower
-        assert tower_value in driver_list
+    for item in get_rss_display_items(None, contributions, rss_total)["contributors"]:
+        assert item["label"] in driver_list
     assert "CAC 350" in html
     assert "ApoB 110 mg/dL" in html
     assert "eGFR 55" in html
@@ -440,11 +442,11 @@ def test_rss_tower_and_rows_match_exact_visual_order_without_sorting_copy():
     rows = html.split('<div class="rss-driver-list">', 1)[1]
 
     row_expected = [
-        "A1c",
-        "Albuminuria",
-        "eGFR",
-        "ApoB / particle burden",
-        "Coronary calcium",
+        "A1c 7.1%",
+        "Albuminuria, UACR 45 mg/g",
+        "Kidney filtration, eGFR 55",
+        "ApoB 110 mg/dL",
+        "Coronary calcium 350",
     ]
 
     assert "Tower shows RSS burden" not in html
@@ -469,11 +471,16 @@ def test_targets_card_uses_compact_horizontal_target_line():
     assert "target-value" in html
     assert "LDL-C" in html
     assert "&lt;70" in html
-    assert "non-HDL-C" in html
-    assert "&lt;100" in html
     assert "ApoB" in html
     assert "&lt;80" in html
-    assert html.count("mg/dL") >= 3
+    assert "TG" in html
+    assert "current 180" in html
+    assert "non-HDL-C" in html
+    assert "&lt;100" in html
+    assert "current 157" in html
+    assert "Calculated from total cholesterol minus HDL-C." in html
+    assert "target-cell-secondary" in html
+    assert html.count("mg/dL") >= 4
     assert "High plaque burden (CAC 350)." in html
     assert "rcckm-metric-grid" not in html
     assert "target-separator" not in html
@@ -488,14 +495,56 @@ def test_assessment_candidates_are_compact_and_deduped():
     combined = "\n".join(str(message) for message in fake_st.messages)
     assert "detail-section-title" in combined
     assert "Assessment candidates" in combined
-    assert "Confirmed / accepted" in combined
+    assert "Clinical diagnoses and coding support" in combined
+    assert "dx-panel" in combined
+    assert "dx-column-panel" in combined
+    assert "Accepted" in combined
+    assert "Confirmed / accepted" not in combined
     assert "Confirmed by data" not in combined
-    assert "Review suggested" in combined
+    assert "Needs review" in combined
+    assert "Review suggested" not in combined
     assert "ICD:" in combined
+    assert "dx-code-chip" in combined
+    assert "Evidence:" in combined
     assert "confirm_dx" not in combined
     button_labels = [message[1] for message in fake_st.messages if message[0] == "button"]
     assert "Review" not in button_labels
     assert "Suppress" not in button_labels
+
+
+def test_assessment_candidate_rows_use_chips_and_clean_evidence():
+    from core.engine import evaluate_patient
+    from core.patient import Patient
+    from core.diagnosis_workflow import prepare_diagnosis_display_entries
+    from ui.diagnosis_confirm_panel import _candidate_html
+
+    result = evaluate_patient(
+        Patient(
+            age=60,
+            sex="male",
+            cac=350,
+            diabetes=True,
+            egfr=55,
+            uacr=45,
+            triglycerides=180,
+        )
+    )
+    rows = prepare_diagnosis_display_entries(result)
+    html = "\n".join(_candidate_html(row, confirmed=True) for row in rows)
+
+    assert "dx-code-chip" in html
+    assert "ICD: I25.10" in html
+    assert "ICD: E11.22" in html
+    assert "ICD: N18.31" in html
+    assert html.count("ICD: E11.22") == 1
+    assert "HCC-supported" in html
+    assert "Evidence: CAC ≥300" in html
+    assert "Evidence: Diabetes documented; eGFR &lt;60; albuminuria present" in html
+    assert "Evidence: eGFR 45-59" in html
+    assert "Evidence: triglycerides ≥150 mg/dL" in html
+    assert "diabetes flag" not in html
+    assert "dominant_action" not in html
+    assert "action_domains" not in html
 
 
 def test_assessment_candidates_do_not_show_family_history_context_as_review_item():

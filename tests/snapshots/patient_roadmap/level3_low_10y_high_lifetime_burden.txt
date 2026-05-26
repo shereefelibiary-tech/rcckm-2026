@@ -13,23 +13,18 @@ Where you stand:
 
 Why risk is elevated:
 - Early metabolic signals are present.
-- Cholesterol particles: ApoB 118; LDL-C 164; non-HDL-C 188. These numbers help show plaque-driving cholesterol in the blood.
+- Cholesterol particles: ApoB 118; LDL-C 164; non-HDL-C 188 (calculated). These numbers help show plaque-driving cholesterol in the blood.
 - Blood sugar / diabetes: A1c 5.9%. Improving blood sugar can lower long-term heart, kidney, and metabolic risk.
 - Other factors: family history. These details can shape the prevention plan with your clinician.
 - Other context: family history.
 
 Current goals:
 - LDL-C: 164 mg/dL to <100 mg/dL
-- non-HDL-C: 188 mg/dL to <130 mg/dL
+- non-HDL-C: 188 mg/dL calculated to <130 mg/dL
 - ApoB: 118 mg/dL to <90 mg/dL
 - A1c: 5.9% to individualized
 
 Next steps:
 1. Lower plaque-driving cholesterol: Moderate-intensity statin therapy usually lowers LDL cholesterol by about one-third to one-half.
-2. Aspirin safety: Do not start aspirin unless your clinician recommends it.
-3. Additional testing: A calcium scan may help if treatment choices are still uncertain.
-4. Additional testing: Lp(a) can be checked once to guide long-term prevention.
-5. Additional testing: Urine albumin test can help check early kidney stress.
-6. Additional testing: hsCRP can help clarify inflammatory risk context when clinically relevant.
 
 This roadmap is for discussion with your clinician. Medication decisions should be individualized.

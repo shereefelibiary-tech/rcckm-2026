@@ -20,10 +20,6 @@ Current goals:
 - A1c: 5.2% to individualized
 
 Next steps:
-1. Medication plan: No medication escalation today.
-2. Long-term prevention: Focus on weight, blood sugar, triglycerides, and long-term prevention.
-3. Aspirin safety: Do not start aspirin unless your clinician recommends it.
-4. Additional testing: Lp(a) can be checked once to guide long-term prevention.
-5. Next step: CAC 0 measured; no calcified plaque detected.
+1. Long-term prevention: Focus on weight, blood sugar, triglycerides, and long-term prevention.
 
 This roadmap is for discussion with your clinician. Medication decisions should be individualized.

@@ -4,7 +4,12 @@ except ModuleNotFoundError:
     st = None
 
 from ui.ingest_panel import parse_ingest_text, render_ingest_panel
-from ui.demo_case_gallery import build_demo_patient, demo_case_description, demo_case_options
+from ui.demo_case_gallery import (
+    DEMO_CATEGORIES,
+    build_demo_patient,
+    demo_case_description,
+    demo_case_options_by_category,
+)
 from ui.input_worksheet import (
     apply_patient_to_session_state,
     build_patient_from_inputs,
@@ -134,7 +139,12 @@ def main():
         st.caption(
             "Load a realistic primary-care scenario with standard vitals and lipids to see how RCCKM structures risk, action, EMR documentation, and the patient roadmap."
         )
-        demo_options = demo_case_options()
+        selected_category = st.selectbox(
+            "Demo category",
+            ["All", *DEMO_CATEGORIES],
+            key="demo_case_gallery_category",
+        )
+        demo_options = demo_case_options_by_category(selected_category)
         labels = [label for label, _case_name in demo_options]
         selected_label = st.selectbox(
             "Demo case",

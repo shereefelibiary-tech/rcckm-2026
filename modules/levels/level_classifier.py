@@ -1,6 +1,11 @@
 from dataclasses import asdict, dataclass, field
 from typing import Any
 
+from modules.risk_enhancers.breast_arterial_calcification import (
+    has_breast_arterial_calcification,
+)
+from modules.risk_enhancers.incidental_cac import incidental_cac_context
+
 
 @dataclass
 class LevelClassification:
@@ -168,6 +173,7 @@ def _enhancer_burden_count(patient) -> int:
             bool(getattr(patient, "hiv", False)),
             bool(getattr(patient, "south_asian_ancestry", False)),
             bool(getattr(patient, "filipino_ancestry", False)),
+            has_breast_arterial_calcification(patient),
         )
         if present
     )
@@ -234,6 +240,8 @@ def _mild_signal_drivers(patient, result) -> list[str]:
         drivers.append("South Asian ancestry")
     if getattr(patient, "filipino_ancestry", False):
         drivers.append("Filipino ancestry")
+    if has_breast_arterial_calcification(patient):
+        drivers.append("breast arterial calcification")
     hscrp = _num(getattr(patient, "hscrp", None))
     if hscrp is not None and hscrp >= 2:
         drivers.append("hsCRP >=2")
@@ -286,9 +294,10 @@ def _actionable_burden_drivers(patient, result) -> list[str]:
 def _plaque_status(patient) -> str:
     if bool(getattr(patient, "clinical_ascvd", False)):
         return "Clinical ASCVD"
-    if bool(getattr(patient, "incidental_cac", False)) and getattr(patient, "cac", None) is None:
-        severity = str(getattr(patient, "incidental_cac_severity", "") or "").strip()
-        return f"Incidental CAC noted{f' ({severity})' if severity else ''}"
+    if getattr(patient, "cac", None) is None:
+        incidental_context = incidental_cac_context(patient)
+        if incidental_context:
+            return incidental_context
     cac = _num(getattr(patient, "cac", None))
     if cac is None:
         if bool(getattr(patient, "cac_not_done", False)):

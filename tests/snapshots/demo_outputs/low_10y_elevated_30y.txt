@@ -1,0 +1,71 @@
+DEMO: Low 10-year / elevated 30-year risk
+CASE: low_10y_elevated_30y
+
+EMR:
+RISK CONTINUUM CKM
+
+Level 3B - actionable early CKM / atherogenic risk.
+10-year ASCVD risk: 3.4%.
+30-year ASCVD risk: 24%.
+CKM stage 2 with kidney G1A1.
+
+Assessment:
+- Elevated ApoB / atherogenic particle burden (ICD: E78.89)
+- Hypertriglyceridemia (ICD: E78.1)
+- Prediabetes (ICD: R73.03)
+
+Recommendations:
+- Short-term ASCVD risk is low, but longer-term risk and risk-enhancing factors may make lipid-lowering worth discussing. Moderate-intensity statin therapy may be reasonable after shared decision-making.
+- CAC not routinely recommended at this age; consider only if results would change management.
+- Aspirin not indicated for routine primary prevention.
+- Lp(a) - one-time risk assessment
+- Consider hsCRP only if inflammatory risk clarification would change management.
+
+PATIENT ROADMAP:
+Your Prevention Roadmap
+Your results show where you stand today and the most important steps to lower future heart, kidney, and metabolic risk.
+
+Where you stand:
+- 10-year ASCVD risk: 3.4%
+- 30-year ASCVD risk: 24%
+- About 24 out of 100 similar patients may have a heart attack, stroke, or related artery disease event over the next 30 years.
+- Your short-term risk is low, but your longer-term risk is higher than expected. This does not mean an event is likely soon. It means prevention now may lower your risk over time.
+- About 3 out of 100 similar patients may have a heart attack, stroke, or related artery disease event over the next 10 years.
+- Plaque status has not been measured.
+- Care focus: Level 3 (3B) - Actionable early CKM / atherogenic risk
+
+Why risk is elevated:
+- Near-term risk is borderline, but 30-year risk and multiple early risk markers support prevention discussion.
+- Cholesterol particles: ApoB 122; LDL-C 146; non-HDL-C 174 (calculated). These numbers help show plaque-driving cholesterol in the blood.
+- Blood sugar / diabetes: A1c 5.8%. Improving blood sugar can lower long-term heart, kidney, and metabolic risk.
+- Kidney protection: eGFR 96; UACR 7. Kidney markers also help estimate heart and metabolic risk.
+- Blood pressure: 124/76 mmHg. Keeping blood pressure in a safer range protects the heart, brain, and kidneys.
+- Other context: BP 124/76.
+
+Current goals:
+- LDL-C: 146 mg/dL to <100 mg/dL
+- non-HDL-C: 174 mg/dL calculated to <130 mg/dL
+- ApoB: 122 mg/dL to <90 mg/dL
+- A1c: 5.8% to individualized
+- BP: 124/76 mmHg to <130/80 when appropriate
+- Kidney / albuminuria: 7 mg/g; G1A1 to reduce albuminuria / preserve eGFR
+- Weight: BMI 28.1 to individualized
+
+Next steps:
+1. Lower plaque-driving cholesterol: Moderate-intensity statin therapy usually lowers LDL cholesterol by about one-third to one-half.
+
+This roadmap is for discussion with your clinician. Medication decisions should be individualized.
+
+ACTIONS:
+- Short-term ASCVD risk is low, but longer-term risk and risk-enhancing factors may make lipid-lowering worth discussing. Moderate-intensity statin therapy may be reasonable after shared decision-making.
+- Recheck lipid profile 4-12 weeks after starting or intensifying therapy, then every 6-12 months.
+- CAC not routinely recommended at this age; consider only if results would change management.
+- Aspirin not indicated for routine primary prevention.
+- Lp(a) - one-time risk assessment
+- Consider hsCRP only if inflammatory risk clarification would change management.
+
+RSS: 14
+RSS CONTRIBUTORS:
+- ApoB elevation: 122.0 (+8)
+- Hypertriglyceridemia: 156.0 (+4)
+- A1c elevation: 5.8 (+2)

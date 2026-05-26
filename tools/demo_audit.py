@@ -14,6 +14,7 @@ from ui.demo_case_gallery import (
     DEMO_PATIENTS,
     build_demo_patient,
     demo_case_description,
+    demo_case_metadata,
 )
 from ui.report_layout import run_patient
 
@@ -86,6 +87,25 @@ EXPECTED_SHOWCASE = {
 }
 
 SHOWCASE_TERMS = {
+    "borderline ASCVD risk": ("borderline", "ascvd risk", "moderate-intensity"),
+    "low 10-year high 30-year": ("low short-term", "longer-term", "30-year ascvd"),
+    "LDL-C": ("ldl-c",),
+    "LDL-C >=190": ("ldl-c >=190", "severe hypercholesterolemia"),
+    "FH pathway": ("fh", "family history", "ldl-c >=190"),
+    "hypertriglyceridemia": ("hypertriglyceridemia", "triglycerides"),
+    "CAC >=100": ("cac 145", "coronary calcium", "plaque"),
+    "incidental CAC": ("incidental coronary", "incidental cac"),
+    "breast arterial calcification": ("breast arterial calcification",),
+    "CKD G3aA2": ("g3a", "a2", "kidney"),
+    "SGLT2": ("sglt2",),
+    "add-on therapy": ("add-on", "intensification", "above target"),
+    "BP treated above goal": ("bp", "blood pressure", "goal"),
+    "ACEi/ARB": ("acei/arb", "ace inhibitor", "arb"),
+    "rheumatoid arthritis": ("rheumatoid arthritis",),
+    "South Asian ancestry": ("south asian ancestry",),
+    "active smoking": ("smoking", "current smoking"),
+    "cancer survivor": ("cancer survivor", "cancer survivorship"),
+    "multiple enhancers": ("risk context", "preeclampsia", "family history", "osa", "masld"),
     "low-risk complete data": ("low", "no medication escalation", "complete"),
     "lifestyle prevention": ("lifestyle", "continue lifestyle"),
     "metabolic risk": ("metabolic", "triglycerides", "bmi", "osa", "masld"),
@@ -311,7 +331,20 @@ def audit_demo_case(label: str, case_name: str) -> DemoCaseAudit:
     """Evaluate one demo case for data, clinical, output, and UX coherence."""
     finding = DemoCaseAudit(case_name=case_name, label=label)
     payload = DEMO_PATIENTS.get(case_name, {})
-    finding.showcase_concepts = EXPECTED_SHOWCASE.get(case_name, ())
+    metadata = demo_case_metadata(case_name)
+    finding.showcase_concepts = tuple(
+        metadata.get("expected_showcase_points")
+        or EXPECTED_SHOWCASE.get(case_name, ())
+    )
+    for field in (
+        "category",
+        "expected_showcase_points",
+        "expected_primary_action",
+        "expected_level_or_level_range",
+        "expected_risk_framing",
+    ):
+        if not metadata.get(field):
+            finding.errors.append(f"missing demo metadata `{field}`")
 
     missing_mandatory = _missing(payload, MANDATORY_BASELINE_FIELDS)
     for field in missing_mandatory:

@@ -24,7 +24,7 @@ def test_clinical_ascvd_cac_zero_secondary_prevention_guardrail():
     prevent_html = render_prevent_card(result)
     diagnosis_text = " ".join(candidate.name for candidate in result.diagnosis_candidates)
 
-    assert "PREVENT not used for treatment decisions in established ASCVD." in emr
+    assert "Known cardiovascular disease is present, so treatment decisions are based on secondary-prevention goals rather than risk estimates alone." in emr
     assert "PREVENT not used for treatment decisions in established ASCVD." in prevent_html
     assert "CAC 0 does not de-risk secondary prevention" in emr
     assert "Intensify secondary-prevention lipid-lowering therapy" in emr
@@ -32,7 +32,7 @@ def test_clinical_ascvd_cac_zero_secondary_prevention_guardrail():
 
 
 def test_secondary_prevention_target_tiers_high_and_very_high():
-    high_risk = evaluate_patient(Patient(age=65, sex="female", clinical_ascvd=True))
+    high_risk = evaluate_patient(Patient(age=60, sex="female", clinical_ascvd=True))
     assert high_risk.targets[0].ldl_c_target == 70
     assert high_risk.targets[0].non_hdl_c_target == 100
 

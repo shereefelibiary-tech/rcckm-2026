@@ -2,6 +2,10 @@ from html import escape
 
 from modules.levels.definitions import classify_continuum_position
 from modules.plaque.engine import format_cac_percentile_context
+from modules.risk_enhancers.breast_arterial_calcification import (
+    breast_arterial_calcification_display,
+    has_breast_arterial_calcification,
+)
 from modules.risk_enhancers.reproductive import reproductive_marker_items
 from ui.html import render_html
 from ui.theme import component_theme_css
@@ -382,6 +386,7 @@ def _build_grouped_rows(patient, result, *, show_not_active=False):
         "HSCRP": [],
         "INFLAMMATORY DISEASE": [],
         "HIV": [],
+        "RISK ENHANCERS": [],
         "REPRODUCTIVE HISTORY": [],
         "SLEEP / HYPOXIA": [],
         "LIVER / MASLD": [],
@@ -605,6 +610,20 @@ def _build_grouped_rows(patient, result, *, show_not_active=False):
             "MASLD",
             "liver/metabolic context",
             ["MASLD reported"],
+            "enhancer context",
+            active=True,
+        )
+
+    bac_present = has_breast_arterial_calcification(patient)
+    if bac_present:
+        value = breast_arterial_calcification_display(
+            getattr(patient, "breast_arterial_calcification", None)
+        )
+        add_row(
+            "RISK ENHANCERS",
+            "Breast arterial calcification",
+            "non-coronary vascular calcification marker; not a CAC equivalent",
+            [f"BAC {value} on mammogram"],
             "enhancer context",
             active=True,
         )
