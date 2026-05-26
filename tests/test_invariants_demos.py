@@ -69,7 +69,7 @@ def test_demo_outputs_are_complete_and_safe(label, case_name):
     assert "Assessment:" in text
     assert "Recommendations:" in text
     assert "Where you stand" in text
-    assert "Next steps" in text
+    assert "Your next steps" in text
     assert_absent(text, DEMO_FORBIDDEN_FRAGMENTS)
     assert "{{" not in text and "}}" not in text
     assert " None " not in f" {text} "

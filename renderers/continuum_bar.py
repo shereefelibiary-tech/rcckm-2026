@@ -74,7 +74,6 @@ def build_continuum_bar_html(patient, result):
             active_attrs = (
                 ' role="button" tabindex="0"'
                 f' aria-label="Current level explanation: {tooltip_attr}"'
-                f' title="{tooltip_attr}"'
                 f' data-tooltip="{tooltip_attr}"'
             )
         cards.append(

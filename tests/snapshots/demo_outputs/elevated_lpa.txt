@@ -23,17 +23,19 @@ PATIENT ROADMAP:
 Your Prevention Roadmap
 Your results show where you stand today and the most important steps to lower future heart, kidney, and metabolic risk.
 
+STEP 1
 Where you stand:
 - 10-year ASCVD risk: 0.7%
-- 30-year ASCVD risk: 5.29%
 - Near-term estimated risk is low.
+- 30-year ASCVD risk: 5.29%
 - About 5 out of 100 similar patients may have a heart attack, stroke, or related artery disease event over the next 30 years.
 - Your 10-year ASCVD risk is low, and your 30-year ASCVD risk helps guide prevention planning.
 - About 1 out of 100 similar patients may have a heart attack, stroke, or related artery disease event over the next 10 years.
 - Plaque status has not been measured.
 - Care focus: Level 2 (2B) - Converging early risk signals
 
-Why risk is elevated:
+STEP 2
+Why your risk is higher:
 - Cholesterol particles: ApoB 86; LDL-C 124. These numbers help show plaque-driving cholesterol in the blood.
 - Blood sugar / diabetes: A1c 5.3%. Improving blood sugar can lower long-term heart, kidney, and metabolic risk.
 - Kidney protection: eGFR 98; UACR 5. Kidney markers also help estimate heart and metabolic risk.
@@ -41,7 +43,8 @@ Why risk is elevated:
 - Other factors: Lp(a) 188 nmol/L; History of preeclampsia. Pregnancy or menopause history can affect long-term heart risk.
 - Other context: Lp(a) 188 nmol/L; BP 118/72.
 
-Current goals:
+STEP 3
+Your goals:
 - LDL-C: 124 mg/dL to -
 - ApoB: 86 mg/dL to -
 - A1c: 5.3% to individualized
@@ -49,7 +52,8 @@ Current goals:
 - Kidney / albuminuria: 5 mg/g; G1A1 to reduce albuminuria / preserve eGFR
 - Weight: BMI 24.2 to individualized
 
-Next steps:
+STEP 4
+Your next steps:
 1. Long-term prevention: Focus on weight, blood sugar, triglycerides, and long-term prevention.
 2. Additional testing: A calcium scan may help if treatment choices are still uncertain.
 

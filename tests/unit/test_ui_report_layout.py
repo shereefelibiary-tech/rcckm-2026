@@ -1,8 +1,11 @@
 from ui.input_worksheet import build_patient_from_inputs, label_with_unit
 from ui.report_state import hash_worksheet_state, worksheet_payload_from_source
-from core.results import DiagnosisCandidate
+from core.patient import Patient
+from core.results import DiagnosisCandidate, RCCKMResult
+from modules.risk_enhancers.masld import MASLD_SHORT_LABEL, MASLD_TOOLTIP
 from ui.diagnosis_confirm_panel import prioritize_linked_diagnoses
 from ui.report_layout import (
+    _build_action_html,
     _build_targets_html,
     demo_patient,
     render_report,
@@ -503,6 +506,73 @@ def test_targets_card_shows_severe_triglycerides_when_pathway_relevant():
     assert "Pancreatitis-risk TG pathway active." in html
 
 
+def _action_html_for_lipid_recommendation(recommendation):
+    result = RCCKMResult(dominant_action=recommendation, recommendations=[recommendation])
+    return _build_action_html(result, Patient(age=55, sex="male"))
+
+
+def _visible_action_status_fragment(html):
+    return html.split('<div class="action-status">', 1)[1].split("</div>", 1)[0]
+
+
+def test_action_lipid_status_has_high_intensity_statin_tooltip_only():
+    html = _action_html_for_lipid_recommendation(
+        "High-intensity lipid-lowering therapy indicated; treat toward high-risk targets."
+    )
+    status_fragment = _visible_action_status_fragment(html)
+
+    assert "High-intensity therapy indicated" in status_fragment
+    assert "action-status-tooltip" in status_fragment
+    assert "data-action-tooltip=" in status_fragment
+    assert "title=" not in status_fragment
+    assert "High-intensity statin therapy usually lowers LDL-C by ≥50%." in status_fragment
+    assert "atorvastatin 40-80 mg daily" in status_fragment
+    assert "rosuvastatin 20-40 mg daily" in status_fragment
+    assert status_fragment.index("High-intensity therapy indicated") < status_fragment.index(
+        "data-action-tooltip="
+    )
+
+
+def test_action_lipid_status_has_moderate_intensity_statin_tooltip_only():
+    html = _action_html_for_lipid_recommendation(
+        "Moderate-intensity statin therapy is reasonable given borderline ASCVD risk with risk-enhancing factors."
+    )
+    status_fragment = _visible_action_status_fragment(html)
+
+    assert "Discuss moderate-intensity statin" in status_fragment
+    assert "data-action-tooltip=" in status_fragment
+    assert "title=" not in status_fragment
+    assert "Moderate-intensity statin therapy usually lowers LDL-C by 30-49%." in status_fragment
+    assert "atorvastatin 10-20 mg daily" in status_fragment
+    assert "simvastatin 20-40 mg daily" in status_fragment
+
+
+def test_action_lipid_status_has_low_intensity_statin_tooltip_only():
+    html = _action_html_for_lipid_recommendation(
+        "Low-intensity statin therapy may be used when clinically appropriate."
+    )
+    status_fragment = _visible_action_status_fragment(html)
+
+    assert "Low-intensity statin" in status_fragment
+    assert "data-action-tooltip=" in status_fragment
+    assert "title=" not in status_fragment
+    assert "Low-intensity statin therapy usually lowers LDL-C by &lt;30%." in status_fragment
+    assert "pravastatin 10-20 mg daily" in status_fragment
+    assert "simvastatin 10 mg daily" in status_fragment
+
+
+def test_action_lipid_status_does_not_tooltip_add_on_without_intensity():
+    html = _action_html_for_lipid_recommendation(
+        "If already on maximally tolerated statin and LDL-C/ApoB remain above target, consider add-on lipid-lowering therapy."
+    )
+    status_fragment = _visible_action_status_fragment(html)
+
+    assert "Add-on therapy consideration" in status_fragment
+    assert "action-status-tooltip" not in status_fragment
+    assert "data-action-tooltip" not in status_fragment
+    assert "atorvastatin" not in status_fragment.lower()
+
+
 def test_assessment_candidates_are_compact_and_deduped():
     fake_st = _FakeStreamlit()
 
@@ -839,6 +909,18 @@ def test_worksheet_numeric_labels_include_compact_units():
         caption.value for caption in at.caption
     )
     assert not any("<span" in label or "</span>" in label for label in labels)
+
+
+def test_worksheet_masld_checkbox_uses_compact_label_with_tooltip():
+    from streamlit.testing.v1 import AppTest
+
+    at = AppTest.from_file("app.py")
+    at.run(timeout=10)
+
+    masld_checkbox = next(widget for widget in at.checkbox if widget.key == "input_masld")
+    assert masld_checkbox.label == MASLD_SHORT_LABEL
+    assert masld_checkbox.proto.help == MASLD_TOOLTIP
+    assert all(widget.label != "Metabolic fatty liver disease" for widget in at.checkbox)
 
 
 def test_hash_worksheet_state_uses_canonical_fields_only():

@@ -1,24 +1,28 @@
 Your Prevention Roadmap
 Your results show where you stand today and the most important steps to lower future heart, kidney, and metabolic risk.
 
-Where you stand:
+STEP 1
 - Missing inputs: total cholesterol, HDL-C, systolic BP, BP treatment status, statin/lipid-lowering therapy status, smoking status, BMI
+Where you stand:
 - 10-year ASCVD risk: unavailable
 - PREVENT estimate unavailable from the current data.
 - Plaque status has not been measured.
 - Care focus: Level 3 (3B) - Actionable early CKM / atherogenic risk
 
-Why risk is elevated:
+STEP 2
+Why your risk is higher:
 - Blood sugar / diabetes: A1c 7.4%. Improving blood sugar can lower long-term heart, kidney, and metabolic risk.
 - Kidney protection: eGFR 52; UACR 210. Kidney markers also help estimate heart and metabolic risk.
 
-Current goals:
+STEP 3
+Your goals:
 - LDL-C: - to <70 mg/dL
 - ApoB: - to <80 mg/dL
 - A1c: 7.4% to individualized
 - Kidney / albuminuria: 210 mg/g; G3aA2 to reduce albuminuria / preserve eGFR
 
-Next steps:
+STEP 4
+Your next steps:
 1. Protect the kidneys: Review kidney protection options with your clinician.
 2. Improve blood sugar trajectory: Keep diabetes care moving toward the safest individualized goal.
 3. Additional testing: A calcium scan may help if treatment choices are still uncertain.

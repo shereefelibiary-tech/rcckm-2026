@@ -805,6 +805,8 @@ def _line_to_lipid_readout(line: str) -> tuple[str, str, str, str]:
         if "reasonable" in lowered or "may be reasonable" in lowered or "discuss" in lowered:
             return "Discuss moderate-intensity statin", "Use shared decision-making.", "moderate", "consider"
         return "Start moderate-intensity statin", "Primary-prevention lipid therapy.", "moderate", "action"
+    if "low-intensity" in lowered:
+        return "Low-intensity statin", "Use clinician-guided context.", "low", "consider"
     if "lifestyle" in lowered:
         return "Lifestyle-focused", "No routine medication escalation.", "low", "neutral"
     if "no medication escalation" in lowered or "no escalation" in lowered:

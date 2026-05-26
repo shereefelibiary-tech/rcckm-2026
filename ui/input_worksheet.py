@@ -13,7 +13,7 @@ from modules.risk_enhancers.incidental_cac import (
     INCIDENTAL_CAC_SEVERITY_OPTIONS,
     normalize_incidental_cac_severity,
 )
-from modules.risk_enhancers.masld import MASLD_PATIENT_LABEL, MASLD_TOOLTIP
+from modules.risk_enhancers.masld import MASLD_SHORT_LABEL, MASLD_TOOLTIP
 from modules.family_history.engine import (
     PREMATURE_FAMILY_HISTORY_HELP,
     build_family_history_payload,
@@ -742,7 +742,7 @@ def render_manual_worksheet(st, parsed):
         with pe_cols[4]:
             inputs["masld"] = _checkbox_input(
                 st,
-                MASLD_PATIENT_LABEL,
+                MASLD_SHORT_LABEL,
                 parsed,
                 "masld",
                 help=MASLD_TOOLTIP,

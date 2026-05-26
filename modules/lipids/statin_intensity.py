@@ -8,6 +8,7 @@ class StatinIntensityDefinition:
     examples: tuple[str, ...]
     patient_friendly_summary: str
     clinician_summary: str
+    tooltip_text: str
 
 
 _DEFINITIONS = {
@@ -24,6 +25,10 @@ _DEFINITIONS = {
         clinician_summary=(
             "Low-intensity statin therapy: expected LDL-C reduction <30%; "
             "examples include pravastatin 10-20 mg or simvastatin 10 mg daily."
+        ),
+        tooltip_text=(
+            "Low-intensity statin therapy usually lowers LDL-C by <30%. "
+            "Examples: pravastatin 10-20 mg daily or simvastatin 10 mg daily."
         ),
     ),
     "moderate": StatinIntensityDefinition(
@@ -43,6 +48,11 @@ _DEFINITIONS = {
             "Moderate-intensity statin therapy: expected LDL-C reduction 30% to 49%; "
             "examples include atorvastatin 10-20 mg or rosuvastatin 5-10 mg daily."
         ),
+        tooltip_text=(
+            "Moderate-intensity statin therapy usually lowers LDL-C by 30-49%. "
+            "Examples: atorvastatin 10-20 mg daily, rosuvastatin 5-10 mg daily, "
+            "pravastatin 40-80 mg daily, or simvastatin 20-40 mg daily."
+        ),
     ),
     "high": StatinIntensityDefinition(
         label="High-intensity statin therapy",
@@ -57,6 +67,10 @@ _DEFINITIONS = {
         clinician_summary=(
             "High-intensity statin therapy: expected LDL-C reduction >=50%; "
             "examples include atorvastatin 40-80 mg or rosuvastatin 20-40 mg daily."
+        ),
+        tooltip_text=(
+            "High-intensity statin therapy usually lowers LDL-C by ≥50%. "
+            "Examples: atorvastatin 40-80 mg daily or rosuvastatin 20-40 mg daily."
         ),
     ),
 }

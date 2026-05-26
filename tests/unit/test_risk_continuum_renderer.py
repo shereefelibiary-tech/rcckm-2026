@@ -35,6 +35,8 @@ def test_build_risk_continuum_html_highlights_plaque_phenotype_level():
     assert "role=\"button\"" in html
     assert "aria-label=" in html
     assert "data-tooltip=" in html
+    active_tag = html.split('class="rc-card rc-level-4 rc-card-active"', 1)[1].split(">", 1)[0]
+    assert " title=" not in active_tag
     assert "Current level explanation:" in html
     assert "rc-level-why" not in html
     assert "Why?" not in html
@@ -204,6 +206,8 @@ def test_level_tooltip_explains_level_5_high_cac():
     assert escape_for_test(tooltip) in html
     assert 'class="rc-card rc-level-5 rc-card-active" role="button" tabindex="0"' in html
     assert "Current level explanation:" in html
+    active_tag = html.split('class="rc-card rc-level-5 rc-card-active"', 1)[1].split(">", 1)[0]
+    assert " title=" not in active_tag
     assert '<span class="rc-level-help"' not in html
     assert "Why?" not in html
 

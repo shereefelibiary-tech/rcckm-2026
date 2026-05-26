@@ -26,6 +26,7 @@ PATIENT ROADMAP:
 Your Prevention Roadmap
 Your results show where you stand today and the most important steps to lower future heart, kidney, and metabolic risk.
 
+STEP 1
 Where you stand:
 - 10-year ASCVD risk: 8.32%
 - Coronary plaque is present, so prevention decisions should account for measured plaque burden in addition to risk estimates.
@@ -33,7 +34,8 @@ Where you stand:
 - Coronary calcium score: 350, showing a high amount of plaque.
 - Care focus: Level 5 - Very high risk
 
-Why risk is elevated:
+STEP 2
+Why your risk is higher:
 - Lp(a) and family history increase long-term risk context.
 - Artery plaque: CAC 350. The calcium score shows a high amount of coronary plaque.
 - Cholesterol particles: ApoB 110; LDL-C 126; non-HDL-C 168 (calculated). These numbers help show plaque-driving cholesterol in the blood.
@@ -43,7 +45,8 @@ Why risk is elevated:
 - Other factors: Lp(a) 160 nmol/L; Brother MI age 50. These details can shape the prevention plan with your clinician.
 - Other context: Lp(a) 160 nmol/L; BP 136/82; treated; Brother MI age 50.
 
-Current goals:
+STEP 3
+Your goals:
 - LDL-C: 126 mg/dL to <70 mg/dL
 - non-HDL-C: 168 mg/dL calculated to <100 mg/dL
 - ApoB: 110 mg/dL to <80 mg/dL
@@ -52,7 +55,8 @@ Current goals:
 - Kidney / albuminuria: 18 mg/g; G2A1 to reduce albuminuria / preserve eGFR
 - Weight: BMI 30.1 to individualized
 
-Next steps:
+STEP 4
+Your next steps:
 1. Lower plaque-driving cholesterol: Discuss stronger cholesterol-lowering therapy.
 2. Protect the kidneys: Review kidney protection options with your clinician.
 3. Aspirin safety: Do not start aspirin unless your clinician recommends it.

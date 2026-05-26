@@ -1558,11 +1558,11 @@ def _render_patient_roadmap_legacy(patient, result):
         <div class="roadmap-detail">{escape(_prevent_explanation(risk))}</div>
         <div class="roadmap-detail">{escape(continuum_detail)} &bull; {escape(_plaque_status(patient, result))}</div>
     </div>
-    <div class="roadmap-section-title">Why risk is elevated</div>
+    <div class="roadmap-section-title">Why your risk is higher</div>
     {contributors_html}
-    <div class="roadmap-section-title">Current goals</div>
+    <div class="roadmap-section-title">Your goals</div>
     <div class="roadmap-goals-line">{goal_html}</div>
-    <div class="roadmap-section-title">Next steps</div>
+    <div class="roadmap-section-title">Your next steps</div>
     {next_html}
     <div class="roadmap-footer">This roadmap supports clinician review and shared decision-making.</div>
 </div>
@@ -2055,20 +2055,20 @@ def render_patient_roadmap(patient, result):
         ),
         _roadmap_section_html(
             "STEP 2",
-            "Why risk is elevated",
-            "The main findings driving your prevention plan.",
+            "Why your risk is higher",
+            "The main reasons your risk is higher.",
             drivers_body,
         ),
         _roadmap_section_html(
             "STEP 3",
-            "Current goals",
-            "Targets to discuss with your clinician.",
+            "Your goals",
+            "Targets to review with your clinician.",
             goals_body,
         ),
         _roadmap_section_html(
             "STEP 4",
-            "Next steps",
-            "The highest-yield actions to reduce future risk.",
+            "Your next steps",
+            "The most important steps to lower future risk.",
             next_body,
         ),
         '<div class="roadmap-footer">This roadmap is for discussion with your clinician. Medication decisions should be individualized.</div>',

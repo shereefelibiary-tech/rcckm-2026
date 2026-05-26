@@ -29,6 +29,7 @@ PATIENT ROADMAP:
 Your Prevention Roadmap
 Your results show where you stand today and the most important steps to lower future heart, kidney, and metabolic risk.
 
+STEP 1
 Where you stand:
 - 10-year ASCVD risk: 31.42%
 - Known cardiovascular disease is present. The focus is secondary prevention: lowering the chance of future heart attack, stroke, or related artery disease events.
@@ -36,7 +37,8 @@ Where you stand:
 - Known cardiovascular disease is present.
 - Care focus: Level 5 - Very high risk
 
-Why risk is elevated:
+STEP 2
+Why your risk is higher:
 - Lp(a) and family history increase long-term risk context.
 - Artery plaque: Known cardiovascular disease. This means prevention decisions should be more treatment-focused.
 - Cholesterol particles: ApoB 156; LDL-C 205; non-HDL-C 274 (calculated). These numbers help show plaque-driving cholesterol in the blood.
@@ -46,7 +48,8 @@ Why risk is elevated:
 - Other factors: Lp(a) 225 nmol/L; Father MI age 48. These details can shape the prevention plan with your clinician.
 - Other context: Lp(a) 225 nmol/L; BP 138/82; treated; Father MI age 48.
 
-Current goals:
+STEP 3
+Your goals:
 - LDL-C: 205 mg/dL to <55 mg/dL
 - non-HDL-C: 274 mg/dL calculated to <85 mg/dL
 - ApoB: 156 mg/dL to <65 mg/dL
@@ -55,7 +58,8 @@ Current goals:
 - Kidney / albuminuria: 86 mg/g; G3aA2 to reduce albuminuria / preserve eGFR
 - Weight: BMI 31.3 to individualized
 
-Next steps:
+STEP 4
+Your next steps:
 1. Lower plaque-driving cholesterol: Because heart artery disease is already established and additional high-risk features are present, the LDL cholesterol goal is lower than for routine prevention.
 2. Protect the kidneys: Review kidney protection options with your clinician.
 3. Aspirin safety: Do not start aspirin unless your clinician recommends it.

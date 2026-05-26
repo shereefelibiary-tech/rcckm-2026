@@ -41,7 +41,19 @@ def test_patient_roadmap_has_required_sections_and_no_clinician_only_artifacts()
             prevent_30y_ascvd=30.65,
         )
     )["outputs"]["roadmap"]
-    assert_present(roadmap, ("Where you stand", "Why risk is elevated", "Current goals", "Next steps"))
+    assert_present(
+        roadmap,
+        (
+            "STEP 1",
+            "Where you stand",
+            "STEP 2",
+            "Why your risk is higher",
+            "STEP 3",
+            "Your goals",
+            "STEP 4",
+            "Your next steps",
+        ),
+    )
     assert_absent(roadmap, ROADMAP_FORBIDDEN)
     assert_no_contradictions(roadmap)
 

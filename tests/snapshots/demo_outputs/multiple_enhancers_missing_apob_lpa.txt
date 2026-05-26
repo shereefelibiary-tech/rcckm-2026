@@ -26,6 +26,7 @@ PATIENT ROADMAP:
 Your Prevention Roadmap
 Your results show where you stand today and the most important steps to lower future heart, kidney, and metabolic risk.
 
+STEP 1
 Where you stand:
 - 10-year ASCVD risk: 4.9%
 - 30-year ASCVD risk: 27%
@@ -35,7 +36,8 @@ Where you stand:
 - Plaque status has not been measured.
 - Care focus: Level 3 (3B) - Actionable early CKM / atherogenic risk
 
-Why risk is elevated:
+STEP 2
+Why your risk is higher:
 - Near-term risk is borderline, but 30-year risk and multiple early risk markers support prevention discussion.
 - Cholesterol particles: LDL-C 142; non-HDL-C 178 (calculated). These numbers help show plaque-driving cholesterol in the blood.
 - Blood sugar / diabetes: A1c 6.0%. Improving blood sugar can lower long-term heart, kidney, and metabolic risk.
@@ -44,7 +46,8 @@ Why risk is elevated:
 - Other factors: Mother stroke age 62; OSA; Metabolic fatty liver disease; History of preeclampsia. Pregnancy or menopause history can affect long-term heart risk.
 - Other context: BP 134/82; Mother stroke age 62; OSA; fatty liver disease risk context.
 
-Current goals:
+STEP 3
+Your goals:
 - LDL-C: 142 mg/dL to <100 mg/dL
 - non-HDL-C: 178 mg/dL calculated to <130 mg/dL
 - ApoB: - to <90 mg/dL
@@ -53,7 +56,8 @@ Current goals:
 - Kidney / albuminuria: G2 to reduce albuminuria / preserve eGFR
 - Weight: BMI 32.2 to individualized
 
-Next steps:
+STEP 4
+Your next steps:
 1. Lower plaque-driving cholesterol: Discuss cholesterol-lowering therapy.
 2. Protect the kidneys: Review kidney protection options with your clinician.
 3. Additional testing: A calcium scan may help if treatment choices are still uncertain.

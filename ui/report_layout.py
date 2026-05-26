@@ -11,6 +11,7 @@ from modules.lipids.non_hdl import (
     format_non_hdl_display,
     should_show_non_hdl_default,
 )
+from modules.lipids.statin_intensity import get_statin_intensity_definition
 from modules.rss.engine import (
     build_rss_contributions,
     build_rss_transparency,
@@ -605,6 +606,39 @@ def _build_targets_html(result, patient=None, *, clinician_detail_mode=False):
 """
 
 
+def _statin_intensity_from_action_status(status):
+    lowered = str(status or "").lower()
+    if "high-intensity" in lowered:
+        return "high"
+    if "moderate-intensity" in lowered:
+        return "moderate"
+    if "low-intensity" in lowered:
+        return "low"
+    return None
+
+
+def _action_status_html(item):
+    status = str(item.status or "")
+    intensity = (
+        _statin_intensity_from_action_status(status)
+        if item.domain_id == "lipid_lowering"
+        else None
+    )
+    if not intensity:
+        return f'<div class="action-status">{escape(status)}</div>'
+    definition = get_statin_intensity_definition(intensity)
+    tooltip = escape(definition.tooltip_text, quote=True)
+    return (
+        '<div class="action-status">'
+        '<span class="action-status-tooltip" role="button" tabindex="0"'
+        f' aria-label="{escape(status, quote=True)}. {tooltip}"'
+        f' data-action-tooltip="{tooltip}">'
+        f"{escape(status)}"
+        "</span>"
+        "</div>"
+    )
+
+
 def _build_action_html(result, patient=None):
     if not result.dominant_action and not result.recommendations:
         return ""
@@ -616,7 +650,7 @@ def _build_action_html(result, patient=None):
             f'<div class="action-domain action-domain-{escape(item.state)} action-priority-{escape(item.priority)}">'
             f'<div class="action-domain-label">{escape(item.label)}:</div>'
             '<div class="action-copy">'
-            f'<div class="action-status">{escape(item.status)}</div>'
+            f"{_action_status_html(item)}"
             + (f'<div class="action-detail">{escape(item.detail)}</div>' if item.detail else "")
             + "</div>"
             + "</div>"
@@ -635,13 +669,17 @@ def _build_action_html(result, patient=None):
 
     style = (
         "<style>"
-        ".action-card{padding:14px 16px 15px;}"
+        ".action-card{overflow:visible;padding:14px 16px 15px;}"
         ".action-readout{display:grid;gap:0;}"
-        ".action-domain{border-top:1px solid rgba(7,26,47,0.075);display:grid;grid-template-columns:148px minmax(0,1fr);padding:8px 0 9px;}"
+        ".action-domain{border-top:1px solid rgba(7,26,47,0.075);display:grid;grid-template-columns:148px minmax(0,1fr);overflow:visible;padding:8px 0 9px;}"
         ".action-domain:first-child{border-top:0;padding-top:2px;}"
         ".action-domain-label{color:rgba(7,26,47,0.70);font-family:var(--rc-font-body);font-size:0.86rem;font-weight:800;line-height:1.24;}"
-        ".action-copy{min-width:0;}"
+        ".action-copy{min-width:0;overflow:visible;}"
         ".action-status{color:var(--rc-black);font-family:var(--rc-font-body);font-size:0.90rem;font-weight:760;line-height:1.24;overflow-wrap:anywhere;}"
+        ".action-status-tooltip{border-bottom:1px dotted rgba(47,95,143,0.45);cursor:help;display:inline;outline:none;position:relative;}"
+        ".action-status-tooltip::after{background:rgba(7,26,47,0.96);border-radius:9px;box-shadow:0 12px 26px rgba(7,26,47,0.20);color:#fff;content:attr(data-action-tooltip);font-size:0.78rem;font-weight:650;left:0;line-height:1.32;max-width:min(340px,72vw);min-width:min(280px,72vw);opacity:0;padding:10px 11px;pointer-events:none;position:absolute;text-align:left;top:calc(100% + 9px);transform:translateY(4px);transition:opacity 120ms ease,transform 120ms ease;visibility:hidden;white-space:normal;z-index:9999;}"
+        ".action-status-tooltip:hover::after,.action-status-tooltip:focus::after{opacity:1;transform:translateY(0);visibility:visible;}"
+        ".action-status-tooltip:focus-visible{border-radius:3px;box-shadow:0 0 0 3px rgba(47,95,143,0.18);}"
         ".action-detail{color:rgba(7,26,47,0.60);font-family:var(--rc-font-body);font-size:0.80rem;font-weight:580;line-height:1.24;margin-top:2px;}"
         ".action-domain-neutral .action-status,.action-domain-complete .action-status{color:rgba(7,26,47,0.66);font-weight:700;}"
         ".action-details{border-top:1px solid rgba(7,26,47,0.08);color:rgba(7,26,47,0.62);font-family:var(--rc-font-body);font-size:0.76rem;font-weight:620;line-height:1.28;margin-top:8px;padding-top:8px;}"

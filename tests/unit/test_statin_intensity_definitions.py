@@ -16,6 +16,8 @@ def test_moderate_intensity_definition_is_standardized():
     assert "Rosuvastatin 5-10 mg daily" in definition.examples
     assert "one-third to one-half" in definition.patient_friendly_summary
     assert "expected LDL-C reduction 30% to 49%" in definition.clinician_summary
+    assert "usually lowers LDL-C by 30-49%" in definition.tooltip_text
+    assert "atorvastatin 10-20 mg daily" in definition.tooltip_text
 
 
 def test_low_intensity_definition_is_standardized():
@@ -26,6 +28,8 @@ def test_low_intensity_definition_is_standardized():
     assert "Simvastatin 10 mg daily" in definition.examples
     assert "less than one-third" in definition.patient_friendly_summary
     assert "expected LDL-C reduction <30%" in definition.clinician_summary
+    assert "usually lowers LDL-C by <30%" in definition.tooltip_text
+    assert "pravastatin 10-20 mg daily" in definition.tooltip_text
 
 
 def test_high_intensity_definition_is_standardized():
@@ -36,6 +40,8 @@ def test_high_intensity_definition_is_standardized():
     assert "Rosuvastatin 20-40 mg daily" in definition.examples
     assert "at least one-half" in definition.patient_friendly_summary
     assert "expected LDL-C reduction >=50%" in definition.clinician_summary
+    assert "usually lowers LDL-C by ≥50%" in definition.tooltip_text
+    assert "atorvastatin 40-80 mg daily" in definition.tooltip_text
 
 
 def test_statin_intensity_help_text_uses_single_source_definitions():

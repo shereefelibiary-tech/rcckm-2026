@@ -75,9 +75,12 @@ def test_render_patient_roadmap_groups_full_clinical_story_without_raw_html():
     assert "STEP 3" in html
     assert "STEP 4" in html
     assert "Your estimated artery disease risk and current care level." in html
-    assert "The main findings driving your prevention plan." in html
-    assert "Targets to discuss with your clinician." in html
-    assert "The highest-yield actions to reduce future risk." in html
+    assert "Why your risk is higher" in html
+    assert "The main reasons your risk is higher." in html
+    assert "Your goals" in html
+    assert "Targets to review with your clinician." in html
+    assert "Your next steps" in html
+    assert "The most important steps to lower future risk." in html
     assert "Your Prevention Roadmap" in html
     assert "Your results show where you stand today and the most important steps to lower future heart, kidney, and metabolic risk." in html
     assert "roadmap-subtitle" in html
@@ -147,7 +150,7 @@ def test_render_patient_roadmap_groups_full_clinical_story_without_raw_html():
     assert "Medication decisions should be individualized." in html
     assert "Dominant action" not in html
     assert 'roadmap-row-label">Next step' not in html
-    next_section = html.split('<div class="roadmap-section-title">Next steps</div>', 1)[1]
+    next_section = html.split('<div class="roadmap-section-title">Your next steps</div>', 1)[1]
     assert next_section.index("Lower plaque-driving cholesterol") < next_section.index("Protect the kidneys") < next_section.index("Aspirin safety")
     assert "Supporting actions:" not in html
     assert "Lipid therapy:" not in html
@@ -212,6 +215,7 @@ def test_render_patient_roadmap_text_is_copy_ready_plain_text():
 
     assert "Your Prevention Roadmap" in text
     assert "Your results show where you stand today" in text
+    assert "STEP 1" in text
     assert "Where you stand:" in text
     assert "- 10-year ASCVD risk: 8.2%" in text
     assert "- 30-year ASCVD risk: 24.5%" in text
@@ -231,7 +235,12 @@ def test_render_patient_roadmap_text_is_copy_ready_plain_text():
     assert "glycemia" not in text.lower()
     assert "clarification" not in text.lower()
     assert "- LDL-C: 132 mg/dL to <70 mg/dL" in text
-    assert "Next steps:" in text
+    assert "STEP 2" in text
+    assert "Why your risk is higher:" in text
+    assert "STEP 3" in text
+    assert "Your goals:" in text
+    assert "STEP 4" in text
+    assert "Your next steps:" in text
     assert "1. Lower plaque-driving cholesterol: Discuss stronger cholesterol-lowering therapy." in text
     assert "2. Protect the kidneys: Review kidney protection options with your clinician." in text
     assert "3. Aspirin safety: Do not start aspirin unless your clinician recommends it." in text
