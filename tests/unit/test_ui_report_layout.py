@@ -2,7 +2,10 @@ import inspect
 
 from ui.input_worksheet import (
     _parsed_with_bmi_fallback,
+    ancestry_context_to_flags,
+    apply_patient_to_session_state,
     build_patient_from_inputs,
+    infer_ancestry_context_option,
     label_with_unit,
     render_incidental_cac_control,
     render_manual_worksheet,
@@ -1039,21 +1042,25 @@ def test_worksheet_sections_use_regular_grid_columns():
     assert 'st, "Creatinine", parsed, "creatinine"' not in source
     assert 'section_heading(st, "Calcification / plaque imaging")' in source
     assert 'section_heading(st, "Family history / lipid genetics")' in source
-    assert 'section_heading(st, "Additional context")' in source
+    assert 'section_heading(\n            st,\n            "Inflammation / immune context",' in source
+    assert "Inflammatory, autoimmune, HIV, cancer, and related risk modifiers." in source
+    assert 'section_heading(st, "Additional context")' not in source
     assert 'section_heading(st, "Plaque / History / Enhancers")' not in source
     assert 'cac_cols = st.columns([2.15, 0.72, 0.52, 1.0], gap="small")' in source
     assert '"No CAC"' in source
     assert 'calcification_cols = st.columns([3.15, 2.2], gap="small")' in source
     assert 'family_cols = st.columns([1.35, 3.65], gap="small")' in source
+    assert 'genetics_cols = st.columns([1.35, 1.35, 2.3], gap="small")' in source
     assert 'context_cols = st.columns([1.25, 0.62, 0.74], gap="small")' in source
     assert "render_incidental_cac_control(st, parsed)" in source
     assert "render_ancestry_context_control(st, parsed)" in source
     assert "Inflammatory / autoimmune" in source
     assert "HIV / cancer context" in source
-    assert "More context" in source
+    assert "More immune / inflammatory context" in source
+    assert "More context" not in source
     assert "Edit family history details" not in source
     family_index = source.index('section_heading(st, "Family history / lipid genetics")')
-    additional_context_index = source.index('section_heading(st, "Additional context")')
+    additional_context_index = source.index('"Inflammation / immune context"')
     family_source = source[family_index:additional_context_index]
     assert '"Event type"' not in family_source
     assert '"Age at event"' not in family_source
@@ -1147,8 +1154,59 @@ def test_low_actionability_context_fields_are_not_in_default_worksheet():
     assert "Neighborhood context" not in visible_text
     assert "Other ancestry/context" not in visible_text
     checkbox_labels = {widget.label for widget in at.checkbox}
-    assert "South Asian" in checkbox_labels
-    assert "Filipino" in checkbox_labels
+    assert "South Asian" not in checkbox_labels
+    assert "Filipino" not in checkbox_labels
+    ancestry = next(widget for widget in at.selectbox if widget.label == "Ancestry context")
+    assert list(ancestry.options) == [
+        "None / not specified",
+        "South Asian",
+        "Filipino",
+        "Other / not listed",
+    ]
+
+
+def test_ancestry_context_dropdown_maps_to_canonical_flags():
+    assert infer_ancestry_context_option({}) == "None / not specified"
+    assert infer_ancestry_context_option({"south_asian_ancestry": True, "filipino_ancestry": True}) == "South Asian"
+    assert infer_ancestry_context_option({"filipino_ancestry": True}) == "Filipino"
+    assert ancestry_context_to_flags("None / not specified") == {
+        "south_asian_ancestry": False,
+        "filipino_ancestry": False,
+        "higher_risk_ancestry_context": None,
+    }
+    assert ancestry_context_to_flags("South Asian")["south_asian_ancestry"] is True
+    assert ancestry_context_to_flags("South Asian")["filipino_ancestry"] is False
+    assert ancestry_context_to_flags("Filipino")["filipino_ancestry"] is True
+    assert ancestry_context_to_flags("Filipino")["south_asian_ancestry"] is False
+    assert ancestry_context_to_flags("Other / not listed") == {
+        "south_asian_ancestry": False,
+        "filipino_ancestry": False,
+        "higher_risk_ancestry_context": None,
+    }
+
+
+def test_patient_state_sets_compact_ancestry_dropdown_from_legacy_booleans():
+    state = {}
+
+    apply_patient_to_session_state(
+        state,
+        Patient(age=42, sex="male", south_asian_ancestry=True, filipino_ancestry=False),
+        overwrite=True,
+    )
+
+    assert state["input_south_asian_ancestry"] is True
+    assert state["input_filipino_ancestry"] is False
+    assert state["input_ancestry_context"] == "South Asian"
+
+    apply_patient_to_session_state(
+        state,
+        Patient(age=42, sex="male", south_asian_ancestry=False, filipino_ancestry=True),
+        overwrite=True,
+    )
+
+    assert state["input_south_asian_ancestry"] is False
+    assert state["input_filipino_ancestry"] is True
+    assert state["input_ancestry_context"] == "Filipino"
 
 
 def test_low_actionability_context_values_do_not_change_patient_output_state():

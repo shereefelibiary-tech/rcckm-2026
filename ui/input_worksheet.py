@@ -88,6 +88,12 @@ SUSPECTED_FH_HEFH_HELP = (
 LIFE_EXPECTANCY_GT_2Y_HELP = (
     "Helps determine whether preventive treatment is likely to provide meaningful benefit over the patient's expected time horizon."
 )
+ANCESTRY_CONTEXT_OPTIONS = (
+    "None / not specified",
+    "South Asian",
+    "Filipino",
+    "Other / not listed",
+)
 
 
 def label_with_unit(label: str, unit: str | None) -> str:
@@ -251,6 +257,8 @@ def apply_patient_to_session_state(state, patient, *, overwrite=False):
 
     if patient.bp_treated is not None and (overwrite or "input_bp_meds" not in state):
         state["input_bp_meds"] = bool(patient.bp_treated)
+    if overwrite or "input_ancestry_context" not in state:
+        state["input_ancestry_context"] = infer_ancestry_context_option(payload)
 
 
 def build_patient_from_inputs(inputs):
@@ -566,19 +574,37 @@ def render_incidental_cac_control(st, parsed):
     return incidental_cac, severity if incidental_checked else None
 
 
+def infer_ancestry_context_option(values):
+    """Map legacy ancestry booleans into the compact worksheet select value."""
+    if bool(values.get("south_asian_ancestry")):
+        return "South Asian"
+    if bool(values.get("filipino_ancestry")):
+        return "Filipino"
+    return "None / not specified"
+
+
+def ancestry_context_to_flags(option):
+    """Preserve canonical boolean fields while keeping the worksheet compact."""
+    return {
+        "south_asian_ancestry": option == "South Asian",
+        "filipino_ancestry": option == "Filipino",
+        "higher_risk_ancestry_context": None,
+    }
+
+
 def render_ancestry_context_control(st, parsed):
-    st.markdown(
-        '<div class="worksheet-group-label">Ancestry context</div>',
-        unsafe_allow_html=True,
+    option = st.selectbox(
+        "Ancestry context",
+        ANCESTRY_CONTEXT_OPTIONS,
+        key="input_ancestry_context",
+        **(
+            {}
+            if "input_ancestry_context" in st.session_state
+            else {"index": ANCESTRY_CONTEXT_OPTIONS.index(infer_ancestry_context_option(parsed))}
+        ),
     )
-    ancestry_cols = st.columns(2, gap="small")
-    with ancestry_cols[0]:
-        south_asian = _checkbox_input(
-            st, "South Asian", parsed, "south_asian_ancestry"
-        )
-    with ancestry_cols[1]:
-        filipino = _checkbox_input(st, "Filipino", parsed, "filipino_ancestry")
-    return south_asian, filipino
+    flags = ancestry_context_to_flags(option)
+    return flags["south_asian_ancestry"], flags["filipino_ancestry"]
 
 
 def _set_no_cac_state():
@@ -924,7 +950,7 @@ def render_manual_worksheet(st, parsed):
                 st.caption("No premature family history selected.")
             else:
                 st.caption(_family_history_summary_from_state(st, {**parsed, **inputs}))
-        genetics_cols = st.columns([1.2, 2.0, 2.0], gap="small")
+        genetics_cols = st.columns([1.35, 1.35, 2.3], gap="small")
         with genetics_cols[0]:
             _control_label_spacer(st)
             inputs["suspected_fh_hefh"] = _checkbox_input(
@@ -941,7 +967,11 @@ def render_manual_worksheet(st, parsed):
             ) = render_ancestry_context_control(st, parsed)
 
     with st.container(border=True):
-        section_heading(st, "Additional context")
+        section_heading(
+            st,
+            "Inflammation / immune context",
+            "Inflammatory, autoimmune, HIV, cancer, and related risk modifiers.",
+        )
         context_cols = st.columns([1.25, 0.62, 0.74], gap="small")
         with context_cols[0]:
             inputs["hscrp"] = _numeric_input(st, "hsCRP", parsed, "hscrp", step=0.1)
@@ -965,7 +995,7 @@ def render_manual_worksheet(st, parsed):
                 inputs.get("ibd"),
             ]
         )
-        with st.expander("More context", expanded=False):
+        with st.expander("More immune / inflammatory context", expanded=False):
             advanced_cols = st.columns([1.25, 1.15], gap="medium")
             with advanced_cols[0]:
                 st.markdown("**Inflammatory / autoimmune**")

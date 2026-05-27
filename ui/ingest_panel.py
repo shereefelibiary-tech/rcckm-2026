@@ -124,7 +124,7 @@ TWO_DECIMAL_WORKSHEET_FIELDS = {"creatinine"}
 PARSER_CONTROLLED_SESSION_KEYS = (
     set(WORKSHEET_KEY_BY_FIELD.values())
     | set(EXTRA_SESSION_KEY_BY_FIELD.values())
-    | {"input_bp_meds"}
+    | {"input_bp_meds", "input_ancestry_context"}
 )
 
 BOOLEAN_WORKSHEET_FIELDS = {
@@ -385,6 +385,17 @@ def _mark_parsed_source(state, widget_key, parse_id):
     }
 
 
+def _sync_ancestry_context_select(state, parsed, parse_id):
+    if bool((parsed or {}).get("south_asian_ancestry")):
+        value = "South Asian"
+    elif bool((parsed or {}).get("filipino_ancestry")):
+        value = "Filipino"
+    else:
+        value = "None / not specified"
+    state["input_ancestry_context"] = value
+    _mark_parsed_source(state, "input_ancestry_context", parse_id)
+
+
 def apply_parsed_to_session_state(state, parsed, *, clear_existing=True):
     if clear_existing:
         clear_parser_controlled_session_state(state)
@@ -435,6 +446,8 @@ def apply_parsed_to_session_state(state, parsed, *, clear_existing=True):
         if field == "cac" and value is not None:
             state["input_cac_not_done"] = False
             _mark_parsed_source(state, "input_cac_not_done", parse_id)
+    if "south_asian_ancestry" in (parsed or {}) or "filipino_ancestry" in (parsed or {}):
+        _sync_ancestry_context_select(state, parsed, parse_id)
 
 
 def _snapshot_worksheet_state(state):

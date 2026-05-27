@@ -72,6 +72,7 @@ def _clear_worksheet_state():
     for widget_key in WORKSHEET_KEY_BY_FIELD.values():
         st.session_state.pop(widget_key, None)
     st.session_state.pop("input_bp_meds", None)
+    st.session_state.pop("input_ancestry_context", None)
     for key in list(st.session_state.keys()):
         if str(key).startswith("_unknown_input_"):
             st.session_state.pop(key, None)

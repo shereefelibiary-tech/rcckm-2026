@@ -104,6 +104,28 @@ def test_new_parse_applies_false_booleans_over_old_true_values():
     assert state["input_masld"] is False
 
 
+def test_ancestry_parse_syncs_compact_dropdown_state():
+    state = {}
+
+    apply_parsed_to_session_state(
+        state,
+        parse_ingest_report("South Asian ancestry: Yes\nFilipino ancestry: Yes")["parsed"],
+    )
+
+    assert state["input_south_asian_ancestry"] is True
+    assert state["input_filipino_ancestry"] is True
+    assert state["input_ancestry_context"] == "South Asian"
+
+    apply_parsed_to_session_state(
+        state,
+        parse_ingest_report("South Asian ancestry: No\nFilipino ancestry: Yes")["parsed"],
+    )
+
+    assert state["input_south_asian_ancestry"] is False
+    assert state["input_filipino_ancestry"] is True
+    assert state["input_ancestry_context"] == "Filipino"
+
+
 def test_new_parse_applies_unknown_booleans_over_old_true_values():
     state = {}
 
