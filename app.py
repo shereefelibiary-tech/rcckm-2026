@@ -5,6 +5,7 @@ except ModuleNotFoundError:
 
 import time
 
+from core.version import RCCKM_VERSION
 from ui.ingest_panel import parse_ingest_text, render_ingest_panel
 from ui.demo_case_gallery import (
     DEMO_CATEGORIES,
@@ -218,6 +219,7 @@ def main():
             key="show_raw_renderer_html",
             help="Developer-only: show raw renderer HTML in collapsed expanders.",
         )
+        st.caption(f"RCCKM {RCCKM_VERSION} beta")
 
     if active_section == "Validation & Safety":
         render_validation_safety(st)

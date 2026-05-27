@@ -299,15 +299,15 @@ def test_report_hierarchy_is_clinician_first_and_patient_roadmap_last():
     assessment_index = next(i for i, message in enumerate(messages) if "Data-derived diagnoses" in message)
     targets_index = next(i for i, message in enumerate(messages) if "targets-compact" in message)
     action_index = next(i for i, message in enumerate(messages) if "action-card" in message)
+    emr_index = next(i for i, message in enumerate(messages) if "Risk Continuum - EMR Note" in message)
     roadmap_index = next(i for i, message in enumerate(messages) if "roadmap-card" in message)
     copy_index = next(i for i, message in enumerate(messages) if "Copy patient roadmap" in message)
-    emr_index = next(i for i, message in enumerate(messages) if "Risk Continuum - EMR Note" in message)
     export_index = next(i for i, message in enumerate(messages) if "Export / Print" in message)
 
     assert continuum_index < prevent_index < drivers_index < ckm_index
     assert ckm_index < where_index < assessment_index < targets_index
-    assert targets_index < action_index < roadmap_index < copy_index < emr_index
-    assert emr_index < export_index
+    assert targets_index < action_index < emr_index < roadmap_index < copy_index
+    assert copy_index < export_index
 
 
 def test_export_print_section_uses_plain_text_outputs_and_downloads():

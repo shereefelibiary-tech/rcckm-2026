@@ -153,7 +153,7 @@ Must not show:
 
 Source:
 - `modules/diagnoses/engine.py`
-- `diagnosis_workflow.py`
+- `core/diagnosis_workflow.py`
 - `ui/diagnosis_confirm_panel.py`
 
 ## 9. EMR Note

@@ -207,8 +207,8 @@ def test_build_action_plan_uses_glycemic_action_for_a1c_7():
 
     plan = build_action_plan(patient, RCCKMResult())
 
-    assert plan["dominant_action"] == "Optimize glycemic therapy."
-    assert plan["domains"]["glycemia"] == "Optimize glycemic therapy."
+    assert plan["dominant_action"] == "Optimize diabetes care."
+    assert plan["domains"]["glycemia"] == "Optimize diabetes care."
 
 
 def test_build_action_plan_uses_bp_action_when_bp_above_target():
@@ -343,9 +343,9 @@ def test_build_action_plan_returns_domain_specific_neutral_status_when_no_signal
     )
 
     assert plan == {
-        "dominant_action": "No medication changes based on current risk profile.",
-        "recommendations": ["No medication changes based on current risk profile."],
-        "domains": {"none": "No medication changes based on current risk profile."},
+        "dominant_action": "No active domain changes from current risk profile.",
+        "recommendations": ["No active domain changes from current risk profile."],
+        "domains": {"none": "No active domain changes from current risk profile."},
     }
 
 
@@ -375,7 +375,7 @@ def test_build_action_plan_limits_recommendations_to_four_by_priority():
     assert plan["recommendations"] == [
         "Lipid-lowering therapy is indicated; treat toward high-risk targets.",
         "Confirm persistent albuminuria with repeat UACR if not already confirmed; optimize kidney-protective therapy.",
-        "Optimize glycemic therapy.",
+        "Optimize diabetes care.",
         "Clarification testing should not delay treatment.",
     ]
     assert len(plan["recommendations"]) == 4
@@ -389,7 +389,7 @@ def test_build_action_plan_adds_testing_after_treatment_actions():
     plan = build_action_plan(patient, RCCKMResult())
 
     assert plan["recommendations"] == [
-        "Optimize glycemic therapy.",
+        "Optimize diabetes care.",
         "Obtain ApoB to define atherogenic particle burden.",
         "Check Lp(a) once.",
         "Obtain UACR to complete kidney-risk assessment.",
@@ -439,10 +439,10 @@ def test_build_action_plan_adds_hscrp_for_metabolic_or_family_history_context():
 
     plan = build_action_plan(patient, RCCKMResult())
 
-    assert "Consider hsCRP to clarify inflammatory biomarker context." in plan["recommendations"]
+    assert "Obtain hsCRP if inflammatory risk clarification would change management." in plan["recommendations"]
     assert (
         plan["domains"]["hscrp_testing"]
-        == "Consider hsCRP to clarify inflammatory biomarker context."
+        == "Obtain hsCRP if inflammatory risk clarification would change management."
     )
 
 

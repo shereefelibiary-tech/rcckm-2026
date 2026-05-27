@@ -1066,6 +1066,13 @@ def render_report(st, patient):
     emr_note_text = _render_emr_note_text(patient, result)
     patient_roadmap_text = _render_patient_roadmap_text(patient, result)
 
+    render_html(st, _detail_section_header_html("EMR note", "Copy-ready clinical text"))
+    _safe_panel(
+        st,
+        "EMR note",
+        lambda: render_emr_copy_box(st, emr_note_text),
+    )
+
     render_html(st, _detail_section_header_html("Patient roadmap", "Patient-facing handout"))
     _safe_panel(
         st,
@@ -1082,13 +1089,6 @@ def render_report(st, patient):
             height_px=420,
             button_label="Copy patient roadmap",
         ),
-    )
-
-    render_html(st, _detail_section_header_html("EMR note", "Copy-ready clinical text"))
-    _safe_panel(
-        st,
-        "EMR note",
-        lambda: render_emr_copy_box(st, emr_note_text),
     )
     render_export_print_section(
         st,

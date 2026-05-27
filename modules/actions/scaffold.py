@@ -82,9 +82,13 @@ def _domains(result: Any) -> dict[str, str]:
     domains = dict(getattr(result, "action_domains", None) or {})
     recommendations = [str(x or "").strip() for x in getattr(result, "recommendations", []) or []]
     for recommendation in recommendations:
-        if not recommendation or recommendation == "Treatment is reasonable.":
+        if not recommendation:
             continue
         low = recommendation.lower()
+        if "reasonable" in low and low.startswith(("treatment", "lipid-lowering therapy")):
+            continue
+        if low.startswith("no medication changes"):
+            continue
         if ("lipid-lowering" in low or "statin therapy" in low) and "lipids" not in domains:
             domains["lipids"] = recommendation
         elif low.startswith("optimize kidney") and "kidney" not in domains:
@@ -307,6 +311,10 @@ def _lipid_line(patient: Any, result: Any) -> str:
         return line
 
     dominant = str(getattr(result, "dominant_action", None) or "").strip()
+    dominant_low = dominant.lower()
+    if ("reasonable" in dominant_low and dominant_low.startswith(("treatment", "lipid-lowering therapy"))) or dominant_low.startswith("no medication changes"):
+        dominant = ""
+        dominant_low = ""
     non_lipid_starts = (
         "Optimize kidney",
         "Confirm persistent albuminuria",
@@ -327,7 +335,7 @@ def _lipid_line(patient: Any, result: Any) -> str:
         "Repeat fasting",
         "No escalation",
         "No medication changes",
-        "Treatment is reasonable",
+        "No active domain changes",
     )
     if dominant and not dominant.startswith(non_lipid_starts):
         return dominant
@@ -466,7 +474,7 @@ def _clarifier_items_without(result: Any, excluded: set[str]) -> list[str]:
 def _supporting_items(result: Any) -> list[str]:
     mapping = {
         "kidney": _domain_line(result, "kidney") or "Optimize kidney-protective therapy.",
-        "glycemia": "Optimize glycemic therapy.",
+        "glycemia": _domain_line(result, "glycemia") or "Optimize diabetes care.",
         "ace_arb": _domain_line(result, "ace_arb"),
         "blood_pressure": _domain_line(result, "blood_pressure") or "Treat BP toward goal <130/80.",
         "sglt2": _domain_line(result, "sglt2"),
@@ -1191,12 +1199,14 @@ def _clarifier_readout(result: Any) -> ActionDomainReadout:
         label = item.split(" - ", 1)[0].replace("Obtain ", "").replace(" to complete kidney-risk assessment.", "")
         if label.startswith("Consider hsCRP"):
             label = "hsCRP"
+        if label.startswith("Obtain hsCRP"):
+            label = "hsCRP"
         labels.append(label)
     return _make_readout(
         "data_to_clarify",
         "Data to clarify",
         "Complete key data",
-        ", ".join(_unique(labels[:4])) + " as relevant.",
+        ", ".join(_unique(labels[:4])) + ".",
         priority="low",
         state="consider",
         detail_lines=clarifiers,
@@ -1244,6 +1254,8 @@ def _attach_surface_lines(
             item.patient_line = _lipid_patient_line(item.status, item.detail, lipid_line)
         elif item.domain_id == "plaque_cac":
             line = _line_or_none(getattr(by_label.get("Coronary calcium"), "line", ""))
+            if line and "already measured" in line.lower():
+                line = line.replace(" already measured", "")
             item.emr_line = line or _readout_sentence(item)
             if "not routinely" in item.status.lower() or "may clarify" in item.status.lower():
                 item.patient_line = "A calcium scan may help only if treatment choices are still uncertain."
@@ -1254,7 +1266,7 @@ def _attach_surface_lines(
                 and any(ch.isdigit() for ch in item.status)
                 and "may clarify" not in item.status.lower()
             ):
-                item.patient_line = "Your calcium score is already part of the prevention plan."
+                item.patient_line = "Your calcium score is included in the prevention plan."
             else:
                 item.patient_line = "Plaque testing is interpreted with the overall risk picture."
         elif item.domain_id == "kidney_protection":
@@ -1295,8 +1307,8 @@ def _attach_surface_lines(
                 item.emr_lines = list(item.detail_lines)
                 item.patient_line = "A few tests may clarify the prevention plan."
             else:
-                item.emr_line = _readout_sentence(item)
-                item.emr_lines = [item.emr_line]
+                item.emr_line = ""
+                item.emr_lines = []
                 item.patient_line = ""
 
     return panel

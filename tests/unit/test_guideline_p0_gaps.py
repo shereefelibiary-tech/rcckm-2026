@@ -95,5 +95,7 @@ def test_lipid_monitoring_line_added_when_lipid_therapy_considered():
 
     lines = build_action_recommendation_lines(patient, result)
 
-    assert lines[0] == "Risk discussion reasonable; consider lipid-lowering therapy."
+    assert lines[0] == (
+        "Discuss moderate-intensity statin therapy given reproductive risk markers and borderline ASCVD risk."
+    )
     assert any("4-12 weeks" in line and "6-12 months" in line for line in lines)

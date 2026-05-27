@@ -260,7 +260,7 @@ def _demo_action_and_emr(case_name):
         (
             "cac_300_high_plaque_burden",
             ("High-intensity therapy indicated", "CAC 350"),
-            ("High-intensity lipid-lowering therapy indicated", "CAC 350 already measured"),
+            ("High-intensity lipid-lowering therapy indicated", "CAC 350; no repeat CAC needed"),
         ),
         (
             "severe_secondary_prevention",
@@ -365,7 +365,7 @@ def test_severe_secondary_prevention_demo_uses_very_high_risk_ascvd_targets():
     assert "very-high-risk ASCVD targets" in emr
     assert "LDL-C <70 mg/dL remains the minimum secondary-prevention threshold" in emr
     assert "PREVENT-informed primary-prevention target" not in emr
-    assert "Because heart artery disease is already established" in roadmap
+    assert "Known cardiovascular disease is present" in roadmap
 
 
 def test_demo_payloads_are_defensive_copies():

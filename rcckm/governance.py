@@ -14,6 +14,24 @@ FORBIDDEN_FRAGMENTS = (
     "action_domains",
     "risk_continuum_sublevel",
     "Supporting actions:",
+    "Lipid-lowering therapy is reasonable.",
+    "Treatment is reasonable.",
+    "Risk discussion reasonable; consider lipid-lowering therapy.",
+    "Optimize glycemic therapy.",
+    "Optimize therapy.",
+    "Consider hsCRP to clarify inflammatory biomarker context.",
+    "No medication changes based on current risk profile.",
+    "No medication escalation today.",
+    "as clinically indicated",
+    "when safe",
+    "per criteria",
+    "may improve confidence",
+    "Key clarifying data are available",
+    "Already available",
+    "Data that could clarify risk",
+    "CAC already measured",
+    "Treat BP toward <130/80 if tolerated",
+    "suggested goal",
 )
 
 CONTRADICTION_PAIRS = (
@@ -25,11 +43,16 @@ CONTRADICTION_PAIRS = (
 )
 
 VAGUE_RECOMMENDATION_FRAGMENTS = (
+    "lipid-lowering therapy is reasonable",
     "may be reasonable if",
     "risk-enhancing factors support treatment",
     "apob/ldl-c burden support treatment",
     "as clinically indicated",
+    "if appropriate",
+    "when safe",
+    "per criteria",
     "optimize therapy",
+    "optimize glycemic therapy",
     "risk-factor control",
     "management as appropriate",
     "treatment is reasonable",
@@ -190,7 +213,7 @@ def extract_domain_signals(text: str) -> dict[str, bool]:
             "secondary-prevention antiplatelet",
             "antiplatelet therapy. use if no contraindication",
         ),
-    )
+    ) and "do not start aspirin" not in lowered
     return {
         "lipid_intensify": _contains_any(
             lowered,
@@ -363,6 +386,54 @@ def audit_cross_surface_alignment(
         _add(findings, "cross_surface_alignment", "Secondary-prevention text appears to de-risk treatment using primary-prevention framing.")
 
     return findings
+
+
+def audit_all_surfaces(
+    patient: Any,
+    result: Any,
+    rendered_surfaces: dict[str, str],
+) -> dict[str, Any]:
+    """Audit rendered Action, EMR, patient, and demo surfaces for drift and stale visible wording."""
+    findings: list[GovernanceFinding] = []
+    failing_domains: set[str] = set()
+    failing_strings: dict[str, list[str]] = {}
+
+    action_text = rendered_surfaces.get("action", "") or rendered_surfaces.get("action_card", "")
+    emr_text = rendered_surfaces.get("emr", "")
+    patient_text = rendered_surfaces.get("patient", "") or rendered_surfaces.get("roadmap", "")
+    demo_text = rendered_surfaces.get("demo", "")
+
+    for surface, text in rendered_surfaces.items():
+        lowered = _lower(text)
+        for fragment in FORBIDDEN_FRAGMENTS:
+            if fragment.lower() in lowered:
+                failing_strings.setdefault(surface, []).append(fragment)
+                _add(findings, surface, f"Forbidden visible fragment present: {fragment}")
+
+    drift_findings = audit_cross_surface_alignment(action_text, emr_text, "\n".join([patient_text, demo_text]))
+    findings.extend(drift_findings)
+    for finding in drift_findings:
+        message = finding.message.lower()
+        for domain in (
+            "lipid",
+            "cac",
+            "kidney",
+            "bp",
+            "glycemia",
+            "aspirin",
+            "data",
+            "secondary",
+        ):
+            if domain in message:
+                failing_domains.add(domain)
+
+    findings.extend(validate_output_safety(patient, result, "\n".join(rendered_surfaces.values())))
+
+    return {
+        "findings": findings,
+        "failing_domains": sorted(failing_domains),
+        "failing_strings": failing_strings,
+    }
 
 
 def _has_actionable_therapy(patient: Any, result: Any) -> bool:

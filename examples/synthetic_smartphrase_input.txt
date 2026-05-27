@@ -1,0 +1,16 @@
+Synthetic example. Not real patient data.
+
+RCCKM smartphrase review:
+Age 60 male.
+BP 136/82 on treatment.
+TC 214, LDL-C 126, HDL-C 46, triglycerides 210.
+ApoB 110 mg/dL.
+Lp(a) 160 nmol/L.
+A1c 6.0%.
+eGFR 74 mL/min/1.73m2.
+UACR 18 mg/g.
+CAC score 350 Agatston.
+Brother MI age 50.
+No clinical ASCVD.
+Never smoker.
+No diabetes.

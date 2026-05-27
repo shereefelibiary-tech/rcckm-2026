@@ -8,9 +8,9 @@ from ui.ingest_panel import (
 
 
 def test_ingest_phi_warning_detects_common_identifiers():
-    assert contains_phi("MRN 12345")
+    assert contains_phi("MRN TEST-0000")
     assert contains_phi("patient@example.com")
-    assert contains_phi("555-123-4567")
+    assert contains_phi("555-010-0000")
 
 
 def test_parse_ingest_text_family_history_structured_fields():

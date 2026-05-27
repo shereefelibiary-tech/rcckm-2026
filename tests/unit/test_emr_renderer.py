@@ -54,7 +54,7 @@ def test_render_emr_note_outputs_plain_text_sections_in_order():
     assert "- Type 2 diabetes mellitus (ICD: E11.9)" in note
 
     lipid_line = "- High-intensity lipid-lowering therapy indicated."
-    cac_line = "- CAC 350 already measured; no repeat CAC needed for current decision-making."
+    cac_line = "- CAC 350; no repeat CAC needed for current decision-making."
     aspirin_line = "- Aspirin only if bleeding risk is low after shared decision-making."
     assert lipid_line in note
     assert "Recheck lipids in 4-12 weeks" not in note
@@ -115,6 +115,7 @@ def test_render_emr_note_avoids_duplicate_recommendations_and_generic_action():
     assert "Treatment is reasonable." not in note
     assert "Supporting actions:" not in note
     assert note.count("- Treat BP toward goal <130/80.") == 1
+    assert "No active domain changes" not in note
 
 
 def test_demo_emr_note_prioritizes_composite_diagnoses_and_decisive_actions():
@@ -142,7 +143,8 @@ def test_demo_emr_note_prioritizes_composite_diagnoses_and_decisive_actions():
     assert "High-intensity lipid-lowering therapy indicated." in note
     assert "premature family history" in note
     assert "Lipid-lowering therapy is reasonable." not in note
-    assert "Optimize kidney-protective and glycemic therapy." in note
+    assert "Confirm persistent albuminuria" in note
+    assert "Optimize diabetes care." in note
     assert "Supporting actions:" not in note
 
 
@@ -199,7 +201,7 @@ def test_emr_note_is_materially_shorter_than_legacy_risk_summary_shape():
             "- CAC 350 already measured; no repeat CAC needed for current decision-making.",
             "- Aspirin may be considered only if bleeding risk is low after shared decision-making.",
             "- Optimize kidney-protective therapy.",
-            "- Optimize glycemic therapy.",
+            "- Optimize diabetes care.",
         ]
     )
 

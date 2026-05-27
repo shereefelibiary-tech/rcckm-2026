@@ -131,7 +131,7 @@ def test_render_patient_roadmap_groups_full_clinical_story_without_raw_html():
     assert "Lp(a)" in html
     assert "180 nmol/L" in html
     assert "Other context" in html
-    assert "Blood pressure" not in html
+    assert "Blood pressure" in html
     assert "BP 138/82; treated" in html
     assert "Sleep / hypoxia" not in html
     assert "Liver / MASLD" not in html
@@ -247,8 +247,9 @@ def test_render_patient_roadmap_text_is_copy_ready_plain_text():
     assert "STEP 4" in text
     assert "Your next steps:" in text
     assert "1. Lower plaque-driving cholesterol: Discuss stronger cholesterol-lowering therapy." in text
-    assert "2. Protect the kidneys: Review kidney protection options with your clinician." in text
-    assert "3. Aspirin safety: Do not start aspirin unless your clinician recommends it." in text
+    assert "2. Artery plaque: Your calcium score is included in the prevention plan." in text
+    assert "3. Protect the kidneys: Review kidney protection options with your clinician." in text
+    assert "6. Aspirin safety: Do not start aspirin unless your clinician recommends it." in text
     assert "4. Additional testing: Lp(a) can be checked once to guide long-term prevention." not in text
     assert "Dominant action" not in text
     assert "dominant_action" not in text
@@ -264,8 +265,8 @@ def test_render_patient_roadmap_text_is_copy_ready_plain_text():
     assert "Lipid therapy:" not in text
     assert "Aspirin: Aspirin" not in text
     assert text.index("1. Lower plaque-driving cholesterol") < text.index(
-        "2. Protect the kidneys"
-    ) < text.index("3. Aspirin safety")
+        "3. Protect the kidneys"
+    ) < text.index("6. Aspirin safety")
     assert "<div" not in text
 
 

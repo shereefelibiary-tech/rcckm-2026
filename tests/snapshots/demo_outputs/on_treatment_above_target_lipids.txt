@@ -17,7 +17,7 @@ Assessment:
 Recommendations:
 - Intensify lipid-lowering therapy; treat toward LDL-C <70 and non-HDL-C <100.
 - Given prior high-intensity statin intolerance, consider maximally tolerated statin strategy and nonstatin intensification.
-- CAC 145 already measured; no repeat CAC needed for current decision-making.
+- CAC 145; no repeat CAC needed for current decision-making.
 - Consider hsCRP only if inflammatory risk clarification would change management.
 - Blood pressure: At goal. Current 124/76; goal <130/80.
 - Glycemia / metabolic: Prediabetes prevention. A1c 5.8%; weight/activity focus.
@@ -50,14 +50,18 @@ Your goals:
 - non-HDL-C: 162 mg/dL calculated to <100 mg/dL
 - ApoB: 112 mg/dL to <80 mg/dL
 - A1c: 5.8% to individualized
-- BP: 124/76 mmHg; treated to <130/80 when appropriate
+- BP: 124/76 mmHg; treated to <130/80
 - Kidney / albuminuria: 11 mg/g; G2A1 to reduce albuminuria / preserve eGFR
 - Weight: BMI 28.8 to individualized
 
 STEP 4
 Your next steps:
-1. Lower plaque-driving cholesterol: Treat toward the cholesterol goals above.
-2. Aspirin safety: Do not start aspirin unless your clinician recommends it.
+1. Lower plaque-driving cholesterol: Discuss stronger cholesterol-lowering therapy.
+2. Artery plaque: Your calcium score is included in the prevention plan.
+3. Protect the kidneys: Kidney markers do not show an immediate action signal.
+4. Blood pressure: Blood pressure is reviewed as part of the prevention plan.
+5. Blood sugar: Keep diabetes or metabolic care moving toward the safest individualized goal.
+6. Aspirin safety: Do not start aspirin unless your clinician recommends it.
 
 ACTIONS:
 - Lipid lowering: Intensify lipid-lowering. LDL-C 124; target <70. ApoB 112; target <80.
@@ -66,7 +70,7 @@ ACTIONS:
 - Blood pressure: At goal. Current 124/76; goal <130/80.
 - Glycemia / metabolic: Prediabetes prevention. A1c 5.8%; weight/activity focus.
 - Aspirin / antiplatelet: Consider only if low bleeding risk. Shared decision-making.
-- Data to clarify: Complete key data. hsCRP as relevant.
+- Data to clarify: Complete key data. hsCRP.
 
 RSS: 42
 RSS CONTRIBUTORS:

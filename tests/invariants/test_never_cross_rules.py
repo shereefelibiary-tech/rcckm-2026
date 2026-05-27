@@ -72,7 +72,7 @@ def test_cac_already_measured_does_not_recommend_repeat_for_current_decision():
     patient, result = evaluate_case({"age": 60, "sex": "male", "cac": 350})
     actions = action_text(result, patient)
 
-    assert "CAC 350 already measured" in actions
+    assert "CAC 350" in actions
     assert "no repeat CAC needed for current decision-making" in actions
     assert_absent(actions, ["CAC reasonable for risk clarification", "CAC may clarify plaque burden"])
 
@@ -123,7 +123,7 @@ def test_glycemic_and_kidney_actions_surface_when_criteria_are_present():
     patient, result = evaluate_case({"age": 55, "sex": "male", "diabetes": True, "a1c": 7.1, "egfr": 55, "uacr": 45})
     text = visible_text(patient, result)
 
-    assert "Optimize glycemic therapy" in text
+    assert "Optimize diabetes care" in text
     assert "kidney-protective" in text
     assert "Albuminuria" in diagnosis_text(result)
 

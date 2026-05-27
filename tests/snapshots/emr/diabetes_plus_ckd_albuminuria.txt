@@ -10,7 +10,8 @@ Assessment:
 Recommendations:
 - Lipid lowering: no escalation based on current LDL-C/ApoB and ASCVD risk profile.
 - Plaque burden unmeasured.
-- Optimize kidney-protective and glycemic therapy.
+- Confirm persistent albuminuria with repeat UACR if not already confirmed; optimize kidney-protective therapy.
+- Optimize diabetes care.
 - Add an SGLT2 inhibitor for kidney and cardiovascular protection if no contraindication, despite ACEi/ARB therapy.
 - Blood pressure: BP needed. No current BP available.
 - Aspirin not indicated for routine primary prevention.

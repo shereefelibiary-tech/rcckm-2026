@@ -9,7 +9,7 @@ import pytest
 from core.engine import evaluate_patient
 from core.patient import Patient
 from modules.actions.scaffold import build_domain_actions, render_domain_actions_for_surface
-from rcckm.governance import audit_cross_surface_alignment, extract_domain_signals
+from rcckm.governance import audit_all_surfaces, audit_cross_surface_alignment, extract_domain_signals
 from renderers.emr_renderer import render_emr_note
 from renderers.patient_roadmap import render_patient_roadmap_text
 from ui.demo_case_gallery import DEMO_CASES, build_demo_patient
@@ -34,6 +34,21 @@ DEMO_DRIVER_TERMS = {
     "breast_arterial_calcification_demo": ("Breast arterial calcification",),
     "severe_secondary_prevention": ("secondary prevention", "ASCVD"),
 }
+
+
+FORBIDDEN_VISIBLE_STRINGS = (
+    "Treatment is reasonable.",
+    "Lipid-lowering therapy is reasonable.",
+    "No medication escalation today.",
+    "when safe",
+    "suggested goal",
+    "per criteria",
+    "as clinically indicated",
+    "Key clarifying data are available",
+    "Already available",
+    "Data that could clarify risk",
+    "CAC already measured",
+)
 
 
 def _strip_html(text: str) -> str:
@@ -91,8 +106,18 @@ def _assert_no_surface_drift(case_name: str, surfaces: dict[str, str], patient: 
     target_signals = extract_domain_signals(targets)
     all_signals = extract_domain_signals(all_text)
 
+    for surface_name, text in surfaces.items():
+        for forbidden in FORBIDDEN_VISIBLE_STRINGS:
+            assert forbidden.lower() not in text.lower(), (
+                f"Forbidden visible string in {surface_name}. Case: {case_name}. String: {forbidden}"
+            )
+
     findings = audit_cross_surface_alignment(action, emr, "\n".join([roadmap, targets, demo]))
     assert findings == [], f"{case_name}: {[finding.message for finding in findings]}"
+    audit = audit_all_surfaces(patient, evaluate_patient(patient), surfaces)
+    assert audit["failing_strings"] == {}, (
+        f"{case_name}: forbidden strings from governance audit: {audit['failing_strings']}"
+    )
 
     if action_signals["lipid_intensify"]:
         assert (

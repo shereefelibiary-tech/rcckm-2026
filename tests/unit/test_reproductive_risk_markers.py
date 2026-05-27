@@ -91,7 +91,9 @@ def test_borderline_prevent_with_reproductive_marker_supports_lipid_discussion()
 
     plan = build_action_plan(patient, result)
 
-    assert plan["dominant_action"] == "Risk discussion reasonable; consider lipid-lowering therapy."
+    assert plan["dominant_action"] == (
+        "Discuss moderate-intensity statin therapy given reproductive risk markers and borderline ASCVD risk."
+    )
 
 
 def test_negative_reproductive_history_does_not_score_rss():

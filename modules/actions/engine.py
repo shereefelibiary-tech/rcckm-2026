@@ -703,10 +703,10 @@ def _lipid_action_text(patient, result):
                 "Moderate-intensity lipid-lowering therapy is reasonable to reduce cumulative atherogenic exposure."
                 if _borderline_albuminuria_or_trajectory_path(patient, result)
                 else (
-                "Risk discussion reasonable; consider lipid-lowering therapy."
+                "Discuss moderate-intensity statin therapy given reproductive risk markers and borderline ASCVD risk."
                     if (_prevent_ascvd_3_to_5(result) or _prevent_borderline(result))
                     and has_reproductive_risk_markers(patient)
-                    else "Lipid-lowering therapy is reasonable."
+                    else "Discuss moderate-intensity statin therapy."
                 )
             )
         )
@@ -824,7 +824,7 @@ def _build_treatment_actions(patient, result):
             recommendations,
             domains,
             "glycemia",
-            "Optimize glycemic therapy.",
+            "Optimize diabetes care.",
         )
 
     if _treatment_should_not_wait(patient, result):
@@ -976,7 +976,7 @@ def _build_testing_actions(patient, result):
             recommendations,
             domains,
             "hscrp_testing",
-            "Consider hsCRP to clarify inflammatory biomarker context.",
+            "Obtain hsCRP if inflammatory risk clarification would change management.",
         )
 
     if triglycerides is not None and 400 <= triglycerides < 500:
@@ -1044,7 +1044,7 @@ def build_action_plan(patient, result):
             recommendations,
             domains,
             "none",
-            "No medication changes based on current risk profile.",
+            "No active domain changes from current risk profile.",
         )
 
     if not _very_severe_tg(patient):

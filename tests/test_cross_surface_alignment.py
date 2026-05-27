@@ -48,7 +48,11 @@ def test_all_demo_surfaces_share_structured_domain_actions(label, case_name):
         or (domain.domain_id == "data_to_clarify" and not domain.detail_lines)
         for domain in domains
     ), label
-    assert all(domain.emr_line for domain in domains), label
+    assert all(
+        domain.emr_line
+        or (domain.domain_id == "data_to_clarify" and not domain.detail_lines)
+        for domain in domains
+    ), label
     assert action_text.strip(), label
     assert emr_text.strip(), label
     assert patient_text.strip(), label
@@ -86,14 +90,14 @@ def test_all_demo_surfaces_share_structured_domain_actions(label, case_name):
         (
             "cac_300_high_plaque_burden",
             ("High-intensity therapy indicated", "CAC 350"),
-            ("High-intensity lipid-lowering therapy indicated", "CAC 350 already measured"),
+            ("High-intensity lipid-lowering therapy indicated", "CAC 350; no repeat CAC needed"),
             ("calcium score",),
         ),
         (
             "severe_secondary_prevention",
             ("Secondary-prevention lipid therapy", "Antiplatelet therapy"),
             ("secondary-prevention lipid-lowering therapy", "Antiplatelet therapy is indicated for secondary prevention"),
-            ("heart artery disease",),
+            ("known cardiovascular disease",),
         ),
         (
             "cac_zero_ambiguity_resolution",
@@ -104,7 +108,7 @@ def test_all_demo_surfaces_share_structured_domain_actions(label, case_name):
         (
             "healthy_low_risk_prevention",
             ("No lipid escalation", "Key data available"),
-            ("no escalation", "Key data available"),
+            ("no escalation", "No kidney-risk signal"),
             ("cholesterol",),
         ),
     ],

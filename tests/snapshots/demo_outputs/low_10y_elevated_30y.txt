@@ -51,13 +51,18 @@ Your goals:
 - non-HDL-C: 174 mg/dL calculated to <130 mg/dL
 - ApoB: 122 mg/dL to <90 mg/dL
 - A1c: 5.8% to individualized
-- BP: 124/76 mmHg to <130/80 when appropriate
+- BP: 124/76 mmHg to <130/80
 - Kidney / albuminuria: 7 mg/g; G1A1 to reduce albuminuria / preserve eGFR
 - Weight: BMI 28.1 to individualized
 
 STEP 4
 Your next steps:
 1. Lower plaque-driving cholesterol: Discuss cholesterol-lowering therapy.
+2. Artery plaque: A calcium scan may help only if treatment choices are still uncertain.
+3. Protect the kidneys: Kidney markers do not show an immediate action signal.
+4. Blood pressure: Blood pressure is reviewed as part of the prevention plan.
+5. Blood sugar: Keep diabetes or metabolic care moving toward the safest individualized goal.
+6. Aspirin safety: Do not start aspirin unless your clinician recommends it.
 
 ACTIONS:
 - Lipid lowering: Discuss moderate-intensity statin. LDL-C 146; target <100. ApoB 122; target <90.
@@ -66,7 +71,7 @@ ACTIONS:
 - Blood pressure: At goal. Current 124/76; goal <130/80.
 - Glycemia / metabolic: Prediabetes prevention. A1c 5.8%; weight/activity focus.
 - Aspirin / antiplatelet: Not routine for primary prevention. Do not start routine aspirin.
-- Data to clarify: Complete key data. Lp(a), hsCRP as relevant.
+- Data to clarify: Complete key data. Lp(a), hsCRP.
 
 RSS: 14
 RSS CONTRIBUTORS:

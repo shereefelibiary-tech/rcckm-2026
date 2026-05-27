@@ -1,0 +1,28 @@
+Synthetic example. Not real patient data.
+
+Your Prevention Roadmap
+Your results and next steps.
+
+STEP 1
+Where you stand:
+- CAC 350: high plaque burden.
+- Care focus: Level 5 - Very high risk.
+
+STEP 2
+Why your risk is higher:
+- Artery plaque: CAC 350.
+- Cholesterol particles: ApoB 110; LDL-C 126.
+- Other factors: Lp(a) 160 nmol/L; brother MI age 50.
+
+STEP 3
+Your goals:
+- LDL-C: current 126; goal <70.
+- ApoB: current 110; goal <80.
+- BP: current 136/82; goal <130/80.
+
+STEP 4
+Your next steps:
+1. Lower plaque-driving cholesterol: discuss stronger cholesterol-lowering therapy.
+2. Artery plaque: calcium score is included in the prevention plan.
+3. Blood pressure: review BP goals with your clinician.
+4. Aspirin safety: review only if bleeding risk is low.

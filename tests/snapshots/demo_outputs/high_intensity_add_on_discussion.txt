@@ -16,7 +16,7 @@ Assessment:
 
 Recommendations:
 - High-intensity lipid-lowering therapy indicated.
-- CAC 420 already measured; no repeat CAC needed for current decision-making.
+- CAC 420; no repeat CAC needed for current decision-making.
 - Consider hsCRP only if inflammatory risk clarification would change management.
 - Clarification testing should not delay treatment.
 - Blood pressure: At goal. Current 126/74; goal <130/80.
@@ -50,14 +50,18 @@ Your goals:
 - non-HDL-C: 142 mg/dL calculated to <100 mg/dL
 - ApoB: 102 mg/dL to <80 mg/dL
 - A1c: 5.9% to individualized
-- BP: 126/74 mmHg; treated to <130/80 when appropriate
+- BP: 126/74 mmHg; treated to <130/80
 - Kidney / albuminuria: 12 mg/g; G2A1 to reduce albuminuria / preserve eGFR
 - Weight: BMI 29.0 to individualized
 
 STEP 4
 Your next steps:
 1. Lower plaque-driving cholesterol: Discuss stronger cholesterol-lowering therapy.
-2. Aspirin safety: Do not start aspirin unless your clinician recommends it.
+2. Artery plaque: Your calcium score is included in the prevention plan.
+3. Protect the kidneys: Kidney markers do not show an immediate action signal.
+4. Blood pressure: Blood pressure is reviewed as part of the prevention plan.
+5. Blood sugar: Keep diabetes or metabolic care moving toward the safest individualized goal.
+6. Aspirin safety: Do not start aspirin unless your clinician recommends it.
 
 ACTIONS:
 - Lipid lowering: High-intensity therapy indicated. LDL-C 104; target <70. ApoB 102; target <80.
@@ -66,7 +70,7 @@ ACTIONS:
 - Blood pressure: At goal. Current 126/74; goal <130/80.
 - Glycemia / metabolic: Prediabetes prevention. A1c 5.9%; weight/activity focus.
 - Aspirin / antiplatelet: Consider only if low bleeding risk. Shared decision-making.
-- Data to clarify: Complete key data. hsCRP, Clarification testing should not delay treatment. as relevant.
+- Data to clarify: Complete key data. hsCRP, Clarification testing should not delay treatment..
 
 RSS: 52
 RSS CONTRIBUTORS:

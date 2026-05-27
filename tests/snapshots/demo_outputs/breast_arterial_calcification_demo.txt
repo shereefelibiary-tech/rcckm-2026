@@ -19,7 +19,6 @@ Recommendations:
 - Blood pressure: At goal. Current 126/78; goal <130/80.
 - Glycemia / metabolic: No glycemic action. A1c 5.6.
 - Aspirin not indicated for routine primary prevention.
-- Data to clarify: Key data available. Complete.
 
 PATIENT ROADMAP:
 Your Prevention Roadmap
@@ -50,13 +49,18 @@ Your goals:
 - LDL-C: 132 mg/dL to <100 mg/dL
 - ApoB: 98 mg/dL to <90 mg/dL
 - A1c: 5.6% to individualized
-- BP: 126/78 mmHg to <130/80 when appropriate
+- BP: 126/78 mmHg to <130/80
 - Kidney / albuminuria: 9 mg/g; G2A1 to reduce albuminuria / preserve eGFR
 - Weight: BMI 27.6 to individualized
 
 STEP 4
 Your next steps:
-1. Additional testing: A calcium scan may help if treatment choices are still uncertain.
+1. Lower plaque-driving cholesterol: Review the cholesterol plan with your clinician.
+2. Artery plaque: A calcium scan may help only if treatment choices are still uncertain.
+3. Protect the kidneys: Kidney markers do not show an immediate action signal.
+4. Blood pressure: Blood pressure is reviewed as part of the prevention plan.
+5. Blood sugar: No immediate blood sugar action is shown from the current data.
+6. Aspirin safety: Do not start aspirin unless your clinician recommends it.
 
 ACTIONS:
 - Lipid lowering: Review lipid plan. LDL-C 132; target <100. ApoB 98; target <90.

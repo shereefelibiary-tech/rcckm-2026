@@ -6,6 +6,28 @@ from typing import Any
 import re
 
 
+# Higher-priority linked/composite diagnoses are displayed first and may suppress
+# lower-yield standalone diagnoses.
+DIAGNOSIS_DISPLAY_PRIORITY = {
+    "clinical ascvd": 0,
+    "severe subclinical coronary atherosclerosis": 1,
+    "subclinical coronary atherosclerosis": 2,
+    "type 2 diabetes mellitus with diabetic chronic kidney disease": 3,
+    "type 2 diabetes mellitus with albuminuria": 4,
+    "chronic kidney disease, stage 5": 5,
+    "chronic kidney disease, stage 4": 6,
+    "chronic kidney disease, stage 3b": 7,
+    "chronic kidney disease, stage 3a": 8,
+    "severely increased albuminuria": 9,
+    "albuminuria": 10,
+    "type 2 diabetes mellitus": 11,
+    "severe hypercholesterolemia": 12,
+    "elevated apob": 13,
+    "severe hypertriglyceridemia": 14,
+    "hypertriglyceridemia": 15,
+}
+
+
 def _as_float(x: Any) -> float | None:
     try:
         if x is None:
@@ -128,6 +150,7 @@ def augment_diagnoses_with_bmi_glp1(
 
 
 def _extract_code_list(value: Any) -> list[str]:
+    """Return normalized code strings from list, dict-list, or pipe-delimited input."""
     codes: list[str] = []
     if isinstance(value, list):
         for ent in value:
@@ -235,6 +258,8 @@ def normalize_diagnosis_entries(out: Any) -> list[dict[str, Any]]:
         if not label:
             continue
         if "family history" in label.lower():
+            # Family history is handled as a risk enhancer/context signal, not as a
+            # data-derived diagnosis candidate.
             continue
         if not dx_id:
             dx_id = label
@@ -303,6 +328,7 @@ def normalize_diagnosis_entries(out: Any) -> list[dict[str, Any]]:
 
 
 def _normalize_status(status_raw: str, label: str, source: str = "") -> str:
+    """Map raw engine/review status into confirmed-by-data or review-suggested state."""
     status = str(status_raw or "").strip().lower().replace("-", "_")
     label_l = str(label or "").strip().lower()
     source_l = str(source or "").strip().lower()
@@ -322,7 +348,7 @@ def _normalize_status(status_raw: str, label: str, source: str = "") -> str:
 
 
 def normalize_diagnosis_pipeline(out: dict[str, Any]) -> list[dict[str, Any]]:
-    """Normalize diagnoses and update the in-flight pipeline source of truth."""
+    """Normalize diagnosis rows and replace the pipeline synthesis payload with them."""
     diagnoses = normalize_diagnosis_entries(out)
     out["diagnosisSynthesis"] = diagnoses
     return diagnoses
@@ -337,7 +363,7 @@ def _diagnosis_key(dx: Any) -> str:
 
 
 def prioritize_linked_diagnoses(candidates: list[Any]) -> list[Any]:
-    """Display-level dedupe: keep linked/composite diagnoses ahead of fragments."""
+    """Return display-ordered diagnoses after suppressing lower-yield fragments."""
     rows = list(candidates or [])
     keys = {_diagnosis_key(candidate) for candidate in rows}
 
@@ -366,27 +392,8 @@ def prioritize_linked_diagnoses(candidates: list[Any]) -> list[Any]:
     if has_prediabetes:
         suppressed.add("hyperglycemia")
 
-    order = {
-        "clinical ascvd": 0,
-        "severe subclinical coronary atherosclerosis": 1,
-        "subclinical coronary atherosclerosis": 2,
-        "type 2 diabetes mellitus with diabetic chronic kidney disease": 3,
-        "type 2 diabetes mellitus with albuminuria": 4,
-        "chronic kidney disease, stage 5": 5,
-        "chronic kidney disease, stage 4": 6,
-        "chronic kidney disease, stage 3b": 7,
-        "chronic kidney disease, stage 3a": 8,
-        "severely increased albuminuria": 9,
-        "albuminuria": 10,
-        "type 2 diabetes mellitus": 11,
-        "severe hypercholesterolemia": 12,
-        "elevated apob": 13,
-        "severe hypertriglyceridemia": 14,
-        "hypertriglyceridemia": 15,
-    }
-
     visible = [candidate for candidate in rows if _diagnosis_key(candidate) not in suppressed]
-    return sorted(visible, key=lambda candidate: order.get(_diagnosis_key(candidate), 50))
+    return sorted(visible, key=lambda candidate: DIAGNOSIS_DISPLAY_PRIORITY.get(_diagnosis_key(candidate), 50))
 
 
 def _result_kdigo_stage(out: Any) -> str:
@@ -450,7 +457,7 @@ def prepare_diagnosis_display_entries(out: Any) -> list[dict[str, Any]]:
 
 
 def apply_confirmations(all_dx: list[dict[str, Any]], confirmed_ids: set[str] | list[str]) -> list[dict[str, Any]]:
-    """Mark selected normalized diagnoses as clinician-confirmed for export."""
+    """Promote selected review diagnoses to accepted rows with confirmed ICD/HCC codes."""
     confirmed_ids_set = {str(x) for x in (confirmed_ids or [])}
     upgraded: list[dict[str, Any]] = []
     for row in all_dx:
@@ -482,7 +489,7 @@ def apply_diagnosis_review_overrides(
     review_ids: set[str] | list[str] | None = None,
     include_suppressed: bool = False,
 ) -> list[dict[str, Any]]:
-    """Apply UI-only diagnosis accept/review/suppress state.
+    """Apply UI-only accept/review/suppress state to normalized diagnosis rows.
 
     This does not change diagnostic thresholds; it only changes which normalized
     candidates are displayed/exported for the current clinician review session.
@@ -521,7 +528,7 @@ def apply_diagnosis_review_overrides(
 
 
 def split_diagnoses(all_dx: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-    """Split normalized diagnoses into confirmed and review-suggested groups."""
+    """Split rows into accepted diagnoses and review-needed diagnoses for rendering."""
     confirmed_dx = [
         d
         for d in all_dx
@@ -536,7 +543,7 @@ def split_diagnoses(all_dx: list[dict[str, Any]]) -> tuple[list[dict[str, Any]],
 
 
 def build_confirmed_code_exports(confirmed_dx: list[dict[str, Any]]) -> dict[str, dict[str, list[str]]]:
-    """Build ICD/HCC export payloads from confirmed diagnosis rows."""
+    """Export only accepted ICD/HCC codes from confirmed diagnosis rows."""
     icd: list[str] = []
     hcc: list[str] = []
     for d in confirmed_dx:

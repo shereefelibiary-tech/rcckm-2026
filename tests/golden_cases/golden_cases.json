@@ -129,7 +129,7 @@
       "ckm_stage": 2,
       "prevent_category": "LOW",
       "required_diagnosis": "Prediabetes",
-      "required_action": "No medication changes based on current risk profile"
+      "required_action": "No active domain changes from current risk profile"
     },
     "required_phrases": [
       "Level 2B - converging early risk signals",
@@ -419,7 +419,7 @@
       ],
       "risk_continuum_sublevel": "2A",
       "required_driver": "ApoB",
-      "required_action": "Lipid-lowering"
+      "required_action": "Discuss moderate-intensity statin"
     },
     "forbidden_phrases": [
       "<div class=",
@@ -489,7 +489,7 @@
       ],
       "required_driver": "A1c",
       "required_diagnosis": "Type 2 diabetes",
-      "required_action": "glycemic",
+      "required_action": "diabetes care",
       "required_clarifier": "UACR"
     },
     "forbidden_phrases": [

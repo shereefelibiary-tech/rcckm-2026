@@ -794,10 +794,11 @@ def _target_rows(patient, result):
             )
         )
     if getattr(patient, "a1c", None) is not None:
-        rows.append(("A1c", _fmt(getattr(patient, "a1c", None), "%", 1), "individualized"))
+        a1c_goal = "<7.0%" if bool(getattr(patient, "diabetes", False)) else "individualized"
+        rows.append(("A1c", _fmt(getattr(patient, "a1c", None), "%", 1), a1c_goal))
     bp = _bp_value(patient)
     if bp:
-        rows.append(("BP", bp, "<130/80 when appropriate"))
+        rows.append(("BP", bp, "<130/80"))
     if getattr(patient, "uacr", None) is not None or getattr(result, "kdigo_stage", None):
         rows.append(
             (
@@ -855,53 +856,29 @@ def _recommendation_rows(patient, result):
 
 
 def _patient_next_steps(patient, result):
-    compact_items = build_compact_action_items(patient, result, max_items=5)
-    compact_rows = []
-    compact_seen = set()
-    for item in compact_items:
-        lowered = f"{item.title} {item.subtitle}".lower()
-        if "lipid" in lowered or "statin" in lowered or "cholesterol" in lowered:
-            label = "Lower plaque-driving cholesterol"
-            if "high-intensity" in lowered or "high-risk targets" in lowered:
-                detail = "Discuss stronger cholesterol-lowering therapy."
-            elif "moderate-intensity" in lowered:
-                detail = "Discuss cholesterol-lowering therapy."
-            elif "very-high-risk ascvd targets" in lowered:
-                detail = "Because heart artery disease is already established and additional high-risk features are present, the LDL cholesterol goal is lower than for routine prevention."
-            else:
-                detail = "Treat toward the cholesterol goals above."
-        elif "protect kidneys" in lowered:
-            label = "Protect the kidneys"
-            detail = "Review kidney protection options with your clinician."
-        elif "glycemia" in lowered:
-            label = "Improve blood sugar trajectory"
-            detail = "Keep diabetes care moving toward the safest individualized goal."
-        elif (
-            "no repeat cac" in lowered
-            or "already measured" in lowered
-            or "cac 0" in lowered
-            or "measured plaque" in lowered
-        ):
-            label = "Artery plaque"
-            detail = "CAC already measured; no repeat scan needed for this decision."
-        elif "plaque" in lowered or "cac" in lowered or "calcium" in lowered:
-            label = "Additional testing"
-            detail = "A calcium scan may help if treatment choices are still uncertain."
-        elif "aspirin" in lowered or "antiplatelet" in lowered:
-            label = "Aspirin safety"
-            detail = "Do not start aspirin unless your clinician recommends it."
-        elif "lifestyle" in lowered:
-            label = "Long-term prevention"
-            detail = "Focus on weight, blood sugar, triglycerides, and long-term prevention."
-        else:
-            label = item.title
-            detail = item.subtitle or "Continue prevention review with your clinician."
+    domain_label_map = {
+        "lipid_lowering": "Lower plaque-driving cholesterol",
+        "plaque_cac": "Artery plaque",
+        "kidney_protection": "Protect the kidneys",
+        "blood_pressure": "Blood pressure",
+        "glycemia_metabolic": "Blood sugar",
+        "inflammation_context": "Inflammation",
+        "aspirin_antiplatelet": "Aspirin safety",
+        "data_to_clarify": "Additional testing",
+    }
+    domain_rows = []
+    seen = set()
+    for item in build_domain_actions(patient, result):
+        detail = str(getattr(item, "patient_line", "") or "").strip()
+        if not detail:
+            continue
+        label = domain_label_map.get(getattr(item, "domain_id", ""), getattr(item, "label", "Plan"))
         key = (label, detail)
-        if key not in compact_seen:
-            compact_seen.add(key)
-            compact_rows.append(key)
-    if compact_rows:
-        return compact_rows
+        if key not in seen:
+            seen.add(key)
+            domain_rows.append(key)
+    if domain_rows:
+        return domain_rows[:6]
 
     rows = []
     seen = set()

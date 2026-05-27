@@ -1,0 +1,21 @@
+Synthetic example. Not real patient data.
+
+RISK CONTINUUM CKM
+
+Level 5 - very high plaque burden.
+10-year ASCVD risk: example elevated value.
+CKM stage 3 with kidney G2A1 and CAC 350.
+Risk context: premature family history; elevated Lp(a).
+
+Assessment:
+- Severe subclinical coronary atherosclerosis / high CAC burden (ICD: I25.10)
+- Hypertriglyceridemia (ICD: E78.1)
+- Prediabetes (ICD: R73.03)
+- Elevated lipoprotein(a) (ICD: E78.41)
+
+Recommendations:
+- High-intensity lipid-lowering therapy indicated.
+- CAC 350; no repeat CAC needed for current decision-making.
+- Treat BP toward goal <130/80.
+- Glycemia / metabolic: Prediabetes prevention. A1c 6%; weight/activity focus.
+- Aspirin only if bleeding risk is low after shared decision-making.

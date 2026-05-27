@@ -537,7 +537,7 @@ def _short_recommendation_line(recommendation):
         "Optimize BP to <130/80.": "Treat BP toward goal <130/80.",
         "CAC reasonable for risk clarification if treatment decision remains uncertain.": "CAC reasonable if treatment decision remains uncertain.",
         "Aspirin may be considered only if bleeding risk is low after shared decision-making.": "Aspirin only if bleeding risk is low after shared decision-making.",
-        "Consider hsCRP to clarify inflammatory biomarker context.": "Consider hsCRP if inflammatory biomarker context would change management.",
+        "Obtain hsCRP if inflammatory risk clarification would change management.": "Obtain hsCRP only if inflammatory risk clarification would change management.",
     }
     return replacements.get(recommendation, recommendation)
 
@@ -625,12 +625,12 @@ def render_emr_note(patient, result):
             ]
             rendered_recommendations.insert(
                 min(combined_index, len(rendered_recommendations)),
-                "Optimize kidney-protective and glycemic therapy.",
+                "Optimize kidney protection and diabetes care.",
             )
 
         for rendered in rendered_recommendations:
             lines.append(f"- {rendered}")
     else:
-        lines.append("- No medication changes based on current risk profile.")
+        lines.append("- No active domain changes from current risk profile.")
 
     return "\n".join(lines)

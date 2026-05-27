@@ -154,7 +154,7 @@ def test_cac_100_299_on_treatment_above_target_uses_intensification_wording():
     assert "Lipid-lowering therapy is reasonable" not in recommendations
     assert "Intensify lipid-lowering therapy" in recommendations
     assert "maximally tolerated statin strategy and nonstatin intensification" in recommendations
-    assert "CAC 145 already measured; no repeat CAC needed" in recommendations
+    assert "CAC 145; no repeat CAC needed" in recommendations
     assert "CAC reasonable" not in recommendations
     assert "Subclinical coronary atherosclerosis" in note
     assert "Severe subclinical coronary atherosclerosis" not in note
@@ -486,7 +486,7 @@ def test_emr_recommendations_use_action_scaffold():
     note = render_emr_note(patient, result)
 
     lipid_line = "- High-intensity lipid-lowering therapy indicated."
-    cac_line = "- CAC 350 already measured; no repeat CAC needed for current decision-making."
+    cac_line = "- CAC 350; no repeat CAC needed for current decision-making."
     aspirin_line = "- Aspirin only if bleeding risk is low after shared decision-making."
     assert lipid_line in note
     assert "Recheck lipids in 4-12 weeks" not in note
@@ -509,10 +509,10 @@ def test_flat_recommendation_lines_keep_order_without_visible_scaffold_labels():
         "High-intensity lipid-lowering therapy indicated; treat toward high-risk targets.",
         "Recheck lipid profile 4-12 weeks after starting or intensifying therapy, then every 6-12 months.",
         "Confirm persistent albuminuria with repeat UACR if not already confirmed; optimize kidney-protective therapy.",
-        "Optimize glycemic therapy.",
+        "Optimize diabetes care.",
     ]
     assert any("optimize kidney-protective therapy" in line for line in lines)
-    assert "Optimize glycemic therapy." in lines
+    assert "Optimize diabetes care." in lines
     assert "CAC 350 already measured; no repeat CAC needed for current decision-making." in lines
     assert "Aspirin may be considered only if bleeding risk is low after shared decision-making." in lines
     assert not any(line.startswith(("Lipid therapy:", "Coronary calcium:", "Aspirin:", "Supporting actions:")) for line in lines)
@@ -542,7 +542,7 @@ def test_emr_very_severe_hypertriglyceridemia_uses_pancreatitis_pathway():
     assert "Refer to registered dietitian nutritionist." in note
     assert "Consider fibrate or prescription omega-3 therapy to lower TG." in note
     assert "Address ASCVD risk with lipid-lowering therapy guided by non-HDL-C/ApoB." in note
-    assert "- Optimize glycemic therapy." in note
+    assert "- Optimize diabetes care." in note
     assert "- Recheck fasting lipid profile after treatment changes." in note
     assert note.index("lower TG to reduce pancreatitis risk") < note.index("guided by non-HDL-C/ApoB")
 

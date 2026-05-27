@@ -16,7 +16,7 @@ Assessment:
 Recommendations:
 - Moderate-intensity statin therapy is reasonable given borderline ASCVD risk with risk-enhancing factors.
 - CAC not performed; plaque burden unmeasured.
-- Optimize glycemic therapy.
+- Optimize diabetes care.
 - Blood pressure: At goal. Current 128/78; goal <130/80.
 - Aspirin not indicated for routine primary prevention.
 - Consider hsCRP only if inflammatory risk clarification would change management.
@@ -49,16 +49,19 @@ Your goals:
 - LDL-C: 122 mg/dL to <70 mg/dL
 - non-HDL-C: 160 mg/dL calculated to <100 mg/dL
 - ApoB: 104 mg/dL to <80 mg/dL
-- A1c: 7.1% to individualized
-- BP: 128/78 mmHg to <130/80 when appropriate
+- A1c: 7.1% to <7.0%
+- BP: 128/78 mmHg to <130/80
 - Kidney / albuminuria: 8 mg/g; G1A1 to reduce albuminuria / preserve eGFR
 - Weight: BMI 31.3 to individualized
 
 STEP 4
 Your next steps:
 1. Lower plaque-driving cholesterol: Discuss cholesterol-lowering therapy.
-2. Improve blood sugar trajectory: Keep diabetes care moving toward the safest individualized goal.
-3. Additional testing: A calcium scan may help if treatment choices are still uncertain.
+2. Artery plaque: Plaque testing is interpreted with the overall risk picture.
+3. Protect the kidneys: Kidney markers do not show an immediate action signal.
+4. Blood pressure: Blood pressure is reviewed as part of the prevention plan.
+5. Blood sugar: Keep diabetes or metabolic care moving toward the safest individualized goal.
+6. Aspirin safety: Do not start aspirin unless your clinician recommends it.
 
 ACTIONS:
 - Lipid lowering: Discuss moderate-intensity statin. LDL-C 122; target <70. ApoB 104; target <80.
@@ -67,7 +70,7 @@ ACTIONS:
 - Blood pressure: At goal. Current 128/78; goal <130/80.
 - Glycemia / metabolic: Optimize diabetes care. A1c 7.1%; goal <7.0.
 - Aspirin / antiplatelet: Not routine for primary prevention. Do not start routine aspirin.
-- Data to clarify: Complete key data. hsCRP as relevant.
+- Data to clarify: Complete key data. hsCRP.
 
 RSS: 20
 RSS CONTRIBUTORS:

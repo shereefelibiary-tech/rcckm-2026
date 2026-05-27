@@ -15,11 +15,15 @@ jobs:
       - name: Install test dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install pytest streamlit pandas
+          python -m pip install -r requirements.txt
+      - name: App import smoke test
+        run: python -c "import app; from core.version import RCCKM_VERSION; assert RCCKM_VERSION"
       - name: Golden cases
         run: python -m pytest tests/golden_cases
       - name: Never-cross invariants
         run: python -m pytest tests/invariants
+      - name: Governance and drift tests
+        run: python -m pytest tests/test_clinical_governance.py tests/test_cross_surface_drift.py tests/test_cross_surface_alignment.py
       - name: Snapshot contracts
         run: python -m pytest tests/snapshots
       - name: Layered validation runner
