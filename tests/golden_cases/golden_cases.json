@@ -133,7 +133,6 @@
     },
     "required_phrases": [
       "Level 2B - converging early risk signals",
-      "Near-term estimated risk is low",
       "Early metabolic signals are present",
       "Hypertriglyceridemia",
       "Prediabetes",
@@ -187,7 +186,7 @@
       "Level 3B - elevated lifetime cardiometabolic risk despite low short-term event risk",
       "10-year ASCVD risk: 1.37%",
       "30-year ASCVD risk: 9.09%",
-      "Moderate-intensity statin therapy may be reasonable after shared decision-making",
+      "Moderate-intensity statin therapy reasonable",
       "CAC not routinely recommended at this age; consider only if results would change management",
       "Aspirin not indicated for routine primary prevention",
       "premature family history",
@@ -234,8 +233,7 @@
       "10-year ASCVD risk: 1.2%",
       "30-year ASCVD risk: 10.5%",
       "Lipid lowering: no escalation based on current LDL-C/ApoB and ASCVD risk profile",
-      "CAC may clarify plaque burden if treatment intensity remains uncertain",
-      "Near-term estimated risk may be low, but 30-year risk is elevated enough to justify prevention discussion"
+      "CAC may clarify plaque burden if treatment intensity remains uncertain"
     ],
     "forbidden_phrases": [
       "Subclinical coronary atherosclerosis",
@@ -349,8 +347,7 @@
       "Obtain UACR to complete kidney-risk assessment",
       "Aspirin not indicated for routine primary prevention",
       "Lp(a) 132 nmol/L",
-      "reproductive history: Early menopause 43; Gestational hypertension; Gestational diabetes",
-      "Near-term risk is borderline, but 30-year risk and multiple early risk markers support prevention discussion"
+      "reproductive history: Early menopause 43; Gestational hypertension; Gestational diabetes"
     ],
     "forbidden_phrases": [
       "BORDERLINE.",

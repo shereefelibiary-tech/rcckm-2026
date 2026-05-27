@@ -16,22 +16,25 @@ Assessment:
 
 Recommendations:
 - Continue lifestyle-focused prevention; no lipid escalation today based on current LDL-C/ApoB and ASCVD risk profile.
-- RA is a risk enhancer; ensure inflammation is clinically controlled and avoid undertreating traditional risk factors.
 - CAC is not routinely needed at this risk level; use only if results would change lipid-treatment decisions.
+- Kidney protection: No kidney-risk signal. eGFR/UACR available.
+- Blood pressure: At goal. Current 124/76; goal <130/80.
+- Glycemia / metabolic: No glycemic action. A1c 5.4.
+- RA is a risk enhancer; ensure inflammation is clinically controlled and avoid undertreating traditional risk factors.
 - Aspirin not indicated for routine primary prevention.
+- Data to clarify: Key data available. Complete.
 
 PATIENT ROADMAP:
 Your Prevention Roadmap
-Your results show where you stand today and the most important steps to lower future heart, kidney, and metabolic risk.
+Your results and next steps.
 
 STEP 1
 Where you stand:
 - 10-year ASCVD risk: 1.54%
-- Near-term estimated risk is low.
 - 30-year ASCVD risk: 9.85%
-- About 10 out of 100 similar patients may have a heart attack, stroke, or related artery disease event over the next 30 years.
-- Your 10-year ASCVD risk is low, and your 30-year ASCVD risk helps guide prevention planning.
-- About 2 out of 100 similar patients may have a heart attack, stroke, or related artery disease event over the next 10 years.
+- About 10 in 100 similar patients may have a heart attack, stroke, or related artery disease event over 30 years.
+- 10-year ASCVD risk is low.
+- About 2 in 100 similar patients may have a heart attack, stroke, or related artery disease event over 10 years.
 - Plaque status has not been measured.
 - Care focus: Level 3 (3A) - Elevated long-term risk trajectory
 
@@ -57,13 +60,15 @@ STEP 4
 Your next steps:
 1. Long-term prevention: Focus on weight, blood sugar, triglycerides, and long-term prevention.
 
-This roadmap is for discussion with your clinician. Medication decisions should be individualized.
-
 ACTIONS:
-- Continue lifestyle-focused prevention; no lipid escalation today based on current LDL-C/ApoB and ASCVD risk profile.
-- RA is a risk enhancer; ensure inflammation is clinically controlled and avoid undertreating traditional risk factors.
-- CAC is not routinely needed at this risk level; use only if results would change lipid-treatment decisions.
-- Aspirin not indicated for routine primary prevention.
+- Lipid lowering: Lifestyle-focused. LDL-C 132. ApoB 94.
+- CAC / plaque: Not measured. Plaque burden unmeasured.
+- Kidney protection: No kidney-risk signal. eGFR/UACR available.
+- Blood pressure: At goal. Current 124/76; goal <130/80.
+- Glycemia / metabolic: No glycemic action. A1c 5.4.
+- Inflammation: Inflammatory risk enhancer. RA is a risk enhancer; ensure inflammation is clinically controlled and avoid undertreating traditional risk factors.
+- Aspirin / antiplatelet: Not routine for primary prevention. Do not start routine aspirin.
+- Data to clarify: Key data available. Complete.
 
 RSS: 9
 RSS CONTRIBUTORS:

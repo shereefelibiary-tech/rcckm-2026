@@ -646,6 +646,59 @@ label,
     color: var(--rcckm-muted);
 }
 
+.parse-signal-chips {
+    align-items: center;
+    animation: parseSignalReveal 180ms ease-out both;
+    background: rgba(255, 253, 248, 0.72);
+    border: 1px solid rgba(11, 31, 58, 0.10);
+    border-radius: 999px;
+    box-shadow: 0 8px 22px rgba(11, 31, 58, 0.055);
+    color: rgba(7, 26, 47, 0.72);
+    display: inline-flex;
+    gap: 8px;
+    margin: 8px 0 10px;
+    max-width: 100%;
+    padding: 6px 9px;
+}
+
+.parse-signal-chips-fade {
+    animation: parseSignalFade 900ms ease-out forwards;
+}
+
+.parse-signal-label {
+    color: rgba(7, 26, 47, 0.56);
+    font-size: 0.76rem;
+    font-weight: 800;
+}
+
+.parse-signal-pulse {
+    background: var(--rc-garnet);
+    border-radius: 999px;
+    box-shadow: 0 0 0 0 rgba(115, 0, 10, 0.22);
+    height: 7px;
+    width: 7px;
+    animation: parseSignalPulse 760ms ease-out 1;
+}
+
+.parse-chip-row {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.parse-chip {
+    border: 1px solid rgba(47, 95, 143, 0.18);
+    border-radius: 999px;
+    background: rgba(47, 95, 143, 0.07);
+    color: rgba(7, 26, 47, 0.76);
+    display: inline-flex;
+    font-size: 0.75rem;
+    font-weight: 780;
+    line-height: 1;
+    padding: 0.25rem 0.48rem;
+    white-space: nowrap;
+}
+
 div[data-testid="stVerticalBlockBorderWrapper"] {
     border-color: var(--rcckm-line) !important;
     border-radius: 12px !important;
@@ -877,6 +930,13 @@ div[data-testid="stButton"] button[kind="primary"] {
     line-height: 1 !important;
     min-height: var(--worksheet-field-height) !important;
     padding: 0.20rem 0.72rem !important;
+    box-shadow: 0 8px 18px rgba(7, 26, 47, 0.16), inset 0 1px 0 rgba(255, 253, 248, 0.10) !important;
+    transform: translateY(0) scale(1) !important;
+    transition:
+        transform 95ms ease,
+        box-shadow 95ms ease,
+        background-color 120ms ease,
+        border-color 120ms ease !important;
     white-space: nowrap !important;
 }
 
@@ -885,6 +945,22 @@ div[data-testid="stButton"] button[kind="primary"]:hover {
     border-color: var(--rc-garnet) !important;
     background: var(--rc-garnet) !important;
     color: #fffdf8 !important;
+    box-shadow: 0 10px 22px rgba(7, 26, 47, 0.18), 0 0 0 1px rgba(115, 0, 10, 0.08) !important;
+}
+
+.stButton > button[kind="primary"]:active,
+div[data-testid="stButton"] button[kind="primary"]:active {
+    border-color: var(--rc-garnet-deep) !important;
+    background: var(--rc-garnet-deep) !important;
+    box-shadow: 0 2px 6px rgba(7, 26, 47, 0.14), inset 0 2px 5px rgba(0, 0, 0, 0.18) !important;
+    transform: translateY(3px) scale(0.985) !important;
+}
+
+.stButton > button[kind="primary"]:focus-visible,
+div[data-testid="stButton"] button[kind="primary"]:focus-visible {
+    box-shadow:
+        0 8px 18px rgba(7, 26, 47, 0.16),
+        0 0 0 3px rgba(47, 95, 143, 0.22) !important;
 }
 
 .stButton > button[kind="secondary"]:hover,
@@ -910,6 +986,92 @@ div[data-testid="stDataFrame"] {
     border: 1px solid var(--rcckm-line);
     border-radius: 14px;
     overflow: hidden;
+}
+
+@keyframes rcckmReportReveal {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes parseSignalReveal {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes parseSignalPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(115, 0, 10, 0.24);
+    }
+    100% {
+        box-shadow: 0 0 0 7px rgba(115, 0, 10, 0);
+    }
+}
+
+@keyframes parseSignalFade {
+    0%, 68% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-3px);
+    }
+}
+
+.rc-shell,
+.prevent-card,
+.rss-module,
+.ckm-kdigo-strip,
+.wpf-card,
+.targets-compact,
+.action-card,
+.assessment-panel,
+.roadmap-card {
+    animation: rcckmReportReveal 220ms ease-out both;
+}
+
+.prevent-card { animation-delay: 45ms; }
+.rss-module { animation-delay: 80ms; }
+.ckm-kdigo-strip,
+.wpf-card { animation-delay: 110ms; }
+.assessment-panel { animation-delay: 145ms; }
+.targets-compact,
+.action-card { animation-delay: 175ms; }
+.roadmap-card { animation-delay: 220ms; }
+
+@media (prefers-reduced-motion: reduce) {
+    .stButton > button,
+    div[data-testid="stButton"] button,
+    .rc-shell,
+    .prevent-card,
+    .rss-module,
+    .ckm-kdigo-strip,
+    .wpf-card,
+    .targets-compact,
+    .action-card,
+    .assessment-panel,
+    .roadmap-card {
+        animation: none !important;
+        transition: none !important;
+        transform: none !important;
+    }
+    .parse-signal-chips,
+    .parse-signal-chips-fade,
+    .parse-signal-pulse {
+        animation: none !important;
+    }
 }
 
 div[data-testid="stRadio"] {

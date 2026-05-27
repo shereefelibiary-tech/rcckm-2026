@@ -11,8 +11,11 @@ Assessment:
 - Prediabetes (ICD: R73.03)
 
 Recommendations:
-- Focus on early risk reduction given metabolic risk signals and strong family history.
-- Moderate-intensity statin therapy may be reasonable after shared decision-making if ApoB/LDL-C burden, family history, or clinician judgment supports treatment.
+- Moderate-intensity statin therapy reasonable.
 - CAC not routinely recommended at this age; consider only if results would change management.
+- Lp(a) - one-time risk assessment
+- Obtain UACR to complete kidney-risk assessment.
+- Consider hsCRP only if inflammatory risk clarification would change management.
+- Blood pressure: BP needed. No current BP available.
+- Glycemia / metabolic: Prediabetes prevention. A1c 5.9%; weight/activity focus.
 - Aspirin not indicated for routine primary prevention.
-- Consider ApoB, Lp(a), and hsCRP for further risk clarification if not already available.

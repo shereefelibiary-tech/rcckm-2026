@@ -626,15 +626,16 @@ def _statin_intensity_from_action_status(status):
 
 def _action_status_html(item):
     status = str(item.status or "")
+    hover_detail = str(getattr(item, "hover_detail", "") or "")
     intensity = (
         _statin_intensity_from_action_status(status)
         if item.domain_id == "lipid_lowering"
         else None
     )
-    if not intensity:
+    if not intensity and not hover_detail:
         return f'<div class="action-status">{escape(status)}</div>'
-    definition = get_statin_intensity_definition(intensity)
-    tooltip = escape(definition.tooltip_text, quote=True)
+    tooltip_text = get_statin_intensity_definition(intensity).tooltip_text if intensity else hover_detail
+    tooltip = escape(tooltip_text, quote=True)
     return (
         '<div class="action-status">'
         '<span class="action-status-tooltip" role="button" tabindex="0"'
@@ -655,14 +656,15 @@ def _build_action_html(result, patient=None):
     line_html = "".join(
         (
             f'<div class="action-domain action-domain-{escape(item.state)} action-priority-{escape(item.priority)}">'
-            f'<div class="action-domain-label">{escape(item.label)}:</div>'
+            f'<div class="action-number" aria-hidden="true">{index}</div>'
+            f'<div class="action-domain-label">{escape(item.label)}</div>'
             '<div class="action-copy">'
             f"{_action_status_html(item)}"
             + (f'<div class="action-detail">{escape(item.detail)}</div>' if item.detail else "")
             + "</div>"
             + "</div>"
         )
-        for item in items
+        for index, item in enumerate(items, start=1)
     )
     detail_html = ""
     if details:
@@ -678,9 +680,10 @@ def _build_action_html(result, patient=None):
         "<style>"
         ".action-card{overflow:visible;padding:14px 16px 15px;}"
         ".action-readout{display:grid;gap:0;}"
-        ".action-domain{border-top:1px solid rgba(7,26,47,0.075);display:grid;grid-template-columns:148px minmax(0,1fr);overflow:visible;padding:8px 0 9px;}"
+        ".action-domain{border-top:1px solid rgba(7,26,47,0.075);display:grid;grid-template-columns:32px 150px minmax(0,1fr);column-gap:12px;overflow:visible;padding:8px 0 9px;}"
         ".action-domain:first-child{border-top:0;padding-top:2px;}"
-        ".action-domain-label{color:rgba(7,26,47,0.70);font-family:var(--rc-font-body);font-size:0.86rem;font-weight:800;line-height:1.24;}"
+        ".action-number{align-items:center;background:rgba(47,95,143,0.10);border:1px solid rgba(47,95,143,0.18);border-radius:999px;color:rgba(47,95,143,0.92);display:flex;font-family:var(--rc-font-body);font-size:0.78rem;font-weight:850;height:22px;justify-content:center;line-height:1;margin-top:1px;width:22px;}"
+        ".action-domain-label{color:rgba(7,26,47,0.72);font-family:var(--rc-font-body);font-size:0.88rem;font-weight:820;line-height:1.24;min-width:0;}"
         ".action-copy{min-width:0;overflow:visible;}"
         ".action-status{color:var(--rc-black);font-family:var(--rc-font-body);font-size:0.90rem;font-weight:760;line-height:1.24;overflow-wrap:anywhere;}"
         ".action-status-tooltip{border-bottom:1px dotted rgba(47,95,143,0.45);cursor:help;display:inline;outline:none;position:relative;}"
@@ -693,7 +696,7 @@ def _build_action_html(result, patient=None):
         ".action-details summary{cursor:pointer;font-weight:800;color:rgba(47,95,143,0.82);}"
         ".action-details ul{margin:5px 0 0 18px;padding:0;}"
         ".action-details li{margin:2px 0;}"
-        "@media(max-width:760px){.action-domain{grid-template-columns:1fr;gap:2px;padding:8px 0;}}"
+        "@media(max-width:760px){.action-domain{grid-template-columns:32px minmax(0,1fr);column-gap:10px;row-gap:2px;padding:8px 0;}.action-copy{grid-column:2;}.action-domain-label{align-self:center;}}"
         "</style>"
     )
     return (
@@ -1046,11 +1049,7 @@ def render_report(st, patient):
         ),
     )
 
-    _safe_panel(
-        st,
-        "Risk clarifiers",
-        lambda: _build_clarifier_card_html(result, patient),
-    )
+    render_diagnosis_confirm_panel(st, result, include_title=True)
 
     target_col, action_col = st.columns([1, 1.15])
     with target_col:
@@ -1058,17 +1057,14 @@ def render_report(st, patient):
     with action_col:
         _safe_panel(st, "Action", lambda: _build_action_html(result, patient))
 
-    render_diagnosis_confirm_panel(st, result, include_title=True)
+    _safe_panel(
+        st,
+        "Risk clarifiers",
+        lambda: _build_clarifier_card_html(result, patient),
+    )
 
     emr_note_text = _render_emr_note_text(patient, result)
     patient_roadmap_text = _render_patient_roadmap_text(patient, result)
-
-    render_html(st, _detail_section_header_html("EMR note", "Copy-ready clinical text"))
-    _safe_panel(
-        st,
-        "EMR note",
-        lambda: render_emr_copy_box(st, emr_note_text),
-    )
 
     render_html(st, _detail_section_header_html("Patient roadmap", "Patient-facing handout"))
     _safe_panel(
@@ -1086,6 +1082,13 @@ def render_report(st, patient):
             height_px=420,
             button_label="Copy patient roadmap",
         ),
+    )
+
+    render_html(st, _detail_section_header_html("EMR note", "Copy-ready clinical text"))
+    _safe_panel(
+        st,
+        "EMR note",
+        lambda: render_emr_copy_box(st, emr_note_text),
     )
     render_export_print_section(
         st,

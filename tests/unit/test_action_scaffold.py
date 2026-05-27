@@ -1,3 +1,5 @@
+import re
+
 from core.engine import evaluate_patient
 from core.enums import RiskLevel
 from core.patient import Patient
@@ -18,6 +20,13 @@ def _section(sections, label):
         if section.label == label:
             return section
     raise AssertionError(f"Missing action section: {label}")
+
+
+def _visible_action_readout_text(html):
+    readout = html.split('<div class="action-readout">', 1)[1].split("</details>", 1)[0]
+    readout = readout.split("<details", 1)[0]
+    readout = re.sub(r"<[^>]+>", " ", readout)
+    return " ".join(readout.split())
 
 
 def test_cac_missing_intermediate_prevent_frames_cac_as_clarifier():
@@ -145,7 +154,7 @@ def test_cac_100_299_on_treatment_above_target_uses_intensification_wording():
     assert "Lipid-lowering therapy is reasonable" not in recommendations
     assert "Intensify lipid-lowering therapy" in recommendations
     assert "maximally tolerated statin strategy and nonstatin intensification" in recommendations
-    assert "CAC 145 already measured; no repeat CAC needed" not in recommendations
+    assert "CAC 145 already measured; no repeat CAC needed" in recommendations
     assert "CAC reasonable" not in recommendations
     assert "Subclinical coronary atherosclerosis" in note
     assert "Severe subclinical coronary atherosclerosis" not in note
@@ -235,17 +244,17 @@ def test_primary_prevention_cac_zero_still_means_no_calcified_plaque_detected():
 
 
 def test_action_html_renders_structured_sections_without_loose_duplicate_list():
-    patient = Patient(age=55, sex="male", cac=350, diabetes=True, a1c=7.1, egfr=55, uacr=45)
+    patient = Patient(age=55, sex="male", cac=350, diabetes=True, a1c=7.1, egfr=55, uacr=45, ldl_c=132, apob=110)
     result = evaluate_patient(patient)
 
     html = _build_action_html(result, patient)
 
     lipid_lead = "High-intensity therapy indicated"
-    lipid_detail = "Treat toward high-risk targets."
+    lipid_detail = "LDL-C"
     aspirin_lead = "Consider only if low bleeding risk"
     aspirin_detail = "Shared decision-making."
     kidney_line = "Kidney protection"
-    kidney_detail = "Confirm albuminuria"
+    kidney_detail = "UACR 45"
     glycemia_line = "Optimize diabetes care"
 
     assert "Lipid therapy:" not in html
@@ -254,7 +263,9 @@ def test_action_html_renders_structured_sections_without_loose_duplicate_list():
     assert "Aspirin: Aspirin" not in html
     assert "Lipid therapy: Lipid" not in html
     assert html.count('class="action-domain ') == 7
-    assert "action-number" not in html
+    assert "action-number" in html
+    assert '<div class="action-number" aria-hidden="true">1</div>' in html
+    assert '<div class="action-number" aria-hidden="true">7</div>' in html
     assert "<ol" not in html
     assert "<li>High-intensity lipid-lowering therapy indicated" not in html
     assert "action-readout" in html
@@ -264,7 +275,7 @@ def test_action_html_renders_structured_sections_without_loose_duplicate_list():
     assert "action-detail" in html
     assert "text-transform:uppercase" not in html
     assert "action-indicator" not in html
-    assert "grid-template-columns:148px minmax(0,1fr)" in html
+    assert "grid-template-columns:32px 150px minmax(0,1fr)" in html
     assert "Lipid lowering" in html
     assert "CAC / plaque" in html
     assert "Blood pressure" in html
@@ -276,9 +287,23 @@ def test_action_html_renders_structured_sections_without_loose_duplicate_list():
     assert kidney_line in html
     assert kidney_detail in html
     assert glycemia_line in html
+    assert "A1c 7.1%; goal &lt;7.0." in html
+    assert "suggested goal" not in html
+    assert "when safe" not in html
+    assert "if appropriate" not in html
     assert "High-intensity lipid-lowering therapy indicated." not in html
     assert "Recheck lipid profile 4-12 weeks" not in html
-    assert "CAC 350 already measured; no repeat CAC needed" in html
+    visible_action_text = _visible_action_readout_text(html)
+    assert "CAC 350" in visible_action_text
+    assert "CAC 350 already measured" not in visible_action_text
+    assert "already measured" not in visible_action_text
+    assert "High plaque burden; no repeat CAC needed." not in visible_action_text
+    assert "Treat BP toward <130/80 if tolerated" not in visible_action_text
+    assert "if tolerated" not in visible_action_text
+    assert "per criteria" not in visible_action_text
+    assert "when safe" not in visible_action_text
+    assert "suggested goal" not in visible_action_text
+    assert "High plaque burden; no repeat CAC needed." in html
     assert html.index("Lipid lowering") < html.index("CAC / plaque") < html.index(kidney_line)
     assert "Show details" in html
     assert "\n            <div" not in html
@@ -310,23 +335,61 @@ def test_action_instrument_panel_has_fixed_domain_order_and_neutral_slots():
     ]
     assert all(item.status for item in panel)
     assert all("None" not in item.status + item.detail for item in panel)
+    assert all("if tolerated" not in item.status + item.detail for item in panel)
+    assert all("No urgent clarifiers" not in item.status + item.detail for item in panel)
+    assert all("reviewed." not in item.status + item.detail for item in panel)
     assert next(item for item in panel if item.domain_id == "blood_pressure").status == "At goal"
-    assert next(item for item in panel if item.domain_id == "glycemia_metabolic").status == "No immediate action"
+    assert next(item for item in panel if item.domain_id == "glycemia_metabolic").status == "A1c needed"
     assert next(item for item in panel if item.domain_id == "aspirin_antiplatelet").status == "Not routine for primary prevention"
 
 
 def test_action_instrument_panel_groups_kidney_cac_aspirin_and_clarifiers():
-    patient = Patient(age=55, sex="male", cac=350, diabetes=True, a1c=7.1, egfr=55, uacr=45)
+    patient = Patient(age=55, sex="male", cac=350, diabetes=True, a1c=7.1, egfr=55, uacr=45, ldl_c=132, apob=110)
     result = evaluate_patient(patient)
     panel = {item.domain_id: item for item in build_action_instrument_panel(patient, result)}
 
     assert panel["lipid_lowering"].status == "High-intensity therapy indicated"
-    assert panel["plaque_cac"].status == "CAC 350 already measured"
-    assert panel["plaque_cac"].detail == "No repeat CAC needed."
-    assert panel["kidney_protection"].status == "Confirm albuminuria"
+    assert "LDL-C" in panel["lipid_lowering"].detail
+    assert panel["plaque_cac"].status == "CAC 350"
+    assert panel["plaque_cac"].detail == ""
+    assert panel["plaque_cac"].hover_detail == "High plaque burden; no repeat CAC needed."
+    assert panel["kidney_protection"].status == "Optimize kidney protection"
+    assert "UACR 45" in panel["kidney_protection"].detail
+    assert "Consider SGLT2 for diabetic CKD" in panel["kidney_protection"].detail
+    assert "per criteria" not in panel["kidney_protection"].detail
+    assert "SGLT2 benefit is strongest" in panel["kidney_protection"].hover_detail
     assert "SGLT2" not in panel["blood_pressure"].status + panel["blood_pressure"].detail
+    assert panel["blood_pressure"].status == "BP needed"
     assert panel["aspirin_antiplatelet"].status == "Consider only if low bleeding risk"
     assert panel["data_to_clarify"].label == "Data to clarify"
+
+
+def test_action_instrument_panel_keeps_kidney_and_bp_messages_separate():
+    patient = Patient(
+        age=62,
+        sex="male",
+        diabetes=True,
+        ace_arb=True,
+        egfr=55,
+        uacr=45,
+        sbp=132,
+        dbp=82,
+    )
+    result = evaluate_patient(patient)
+    panel = {item.domain_id: item for item in build_action_instrument_panel(patient, result)}
+
+    kidney_text = panel["kidney_protection"].status + " " + panel["kidney_protection"].detail
+    bp_text = panel["blood_pressure"].status + " " + panel["blood_pressure"].detail
+
+    assert panel["kidney_protection"].status == "Optimize kidney protection"
+    assert "UACR 45" in kidney_text
+    assert "continue ACEi-ARB" in kidney_text
+    assert "Consider SGLT2 for diabetic CKD" in kidney_text
+    assert "BP" not in kidney_text
+    assert "<130/80" not in kidney_text
+    assert panel["blood_pressure"].status == "Treat toward <130/80"
+    assert panel["blood_pressure"].detail == "Current 132/82."
+    assert "BP goals should be individualized" in panel["blood_pressure"].hover_detail
 
 
 def test_action_instrument_panel_secondary_prevention_antiplatelet_slot():
@@ -335,8 +398,42 @@ def test_action_instrument_panel_secondary_prevention_antiplatelet_slot():
     panel = {item.domain_id: item for item in build_action_instrument_panel(patient, result)}
 
     assert panel["lipid_lowering"].status == "Secondary-prevention lipid therapy"
-    assert panel["aspirin_antiplatelet"].status == "Secondary-prevention antiplatelet"
+    assert panel["aspirin_antiplatelet"].status == "Antiplatelet therapy"
     assert "primary prevention" not in panel["aspirin_antiplatelet"].status.lower()
+
+
+def test_action_kidney_sglt2_branches_are_specific_and_hovered():
+    lower_a2 = Patient(age=64, sex="male", egfr=55, uacr=80, diabetes=False, ace_arb=True)
+    diabetic_ckd = Patient(age=64, sex="male", egfr=55, uacr=80, diabetes=True, ace_arb=True)
+    strong = Patient(age=64, sex="male", egfr=55, uacr=220, diabetes=False, ace_arb=True)
+    low_egfr = Patient(age=64, sex="male", egfr=18, uacr=350, diabetes=True, ace_arb=True)
+
+    lower_item = {item.domain_id: item for item in build_action_instrument_panel(lower_a2, evaluate_patient(lower_a2))}[
+        "kidney_protection"
+    ]
+    diabetic_item = {
+        item.domain_id: item for item in build_action_instrument_panel(diabetic_ckd, evaluate_patient(diabetic_ckd))
+    }["kidney_protection"]
+    strong_item = {item.domain_id: item for item in build_action_instrument_panel(strong, evaluate_patient(strong))}[
+        "kidney_protection"
+    ]
+    low_egfr_item = {
+        item.domain_id: item for item in build_action_instrument_panel(low_egfr, evaluate_patient(low_egfr))
+    }["kidney_protection"]
+
+    assert lower_item.status == "Monitor albuminuria"
+    assert lower_item.detail == "UACR 80; continue/optimize ACEi-ARB."
+    assert "SGLT2" not in lower_item.status + lower_item.detail
+    assert diabetic_item.status == "Optimize kidney protection"
+    assert diabetic_item.detail == "UACR 80; continue ACEi-ARB. Consider SGLT2 for diabetic CKD."
+    assert "SGLT2 benefit is strongest" in diabetic_item.hover_detail
+    assert strong_item.status == "Add SGLT2 if no contraindication"
+    assert strong_item.detail == "UACR 220; eGFR 55."
+    assert "UACR >=200" in strong_item.hover_detail
+    assert low_egfr_item.status == "Do not newly start SGLT2 routinely"
+    assert "nephrology guidance" in low_egfr_item.detail
+    for item in (lower_item, diabetic_item, strong_item, low_egfr_item):
+        assert "per criteria" not in item.status + item.detail
 
 
 def test_compact_action_items_group_priorities_and_preserve_details():
@@ -354,11 +451,11 @@ def test_compact_action_items_group_priorities_and_preserve_details():
         "Protect kidneys",
         "Optimize glycemia",
     ]
-    assert "Confirm UACR; optimize BP/ACEi-ARB; consider SGLT2 if criteria met." in subtitles
+    assert "Monitor UACR; optimize ACEi-ARB." in subtitles
     assert "Aspirin: only if low bleeding risk" in titles
     assert all("Recheck lipid profile 4-12 weeks" not in item.title + item.subtitle for item in items)
     assert all("CAC 350 already measured" not in item.title + item.subtitle for item in items)
-    assert "CAC 350 already measured; no repeat CAC needed for current decision-making." in details
+    assert "CAC 350 already measured; no repeat CAC needed for current decision-making." not in details
     assert "Monitor lipids after therapy change." in details
 
 
@@ -393,7 +490,7 @@ def test_emr_recommendations_use_action_scaffold():
     aspirin_line = "- Aspirin only if bleeding risk is low after shared decision-making."
     assert lipid_line in note
     assert "Recheck lipids in 4-12 weeks" not in note
-    assert cac_line not in note
+    assert cac_line in note
     assert aspirin_line in note
     assert "- Lipid therapy:" not in note
     assert "- Coronary calcium:" not in note
@@ -441,12 +538,12 @@ def test_emr_very_severe_hypertriglyceridemia_uses_pancreatitis_pathway():
     assert patient.non_hdl_c == 254
     assert "Atherogenic/metabolic burden:" not in note
     assert "- Very severe hypertriglyceridemia: lower TG to reduce pancreatitis risk." in note
-    assert "- Very-low-fat diet; eliminate alcohol and added sugars/refined carbohydrates." in note
-    assert "- Refer to registered dietitian nutritionist." in note
-    assert "- Consider fibrate or prescription omega-3 therapy to lower TG." in note
-    assert "- Address ASCVD risk with lipid-lowering therapy guided by non-HDL-C/ApoB." in note
+    assert "Very-low-fat diet; eliminate alcohol and added sugars/refined carbohydrates." in note
+    assert "Refer to registered dietitian nutritionist." in note
+    assert "Consider fibrate or prescription omega-3 therapy to lower TG." in note
+    assert "Address ASCVD risk with lipid-lowering therapy guided by non-HDL-C/ApoB." in note
     assert "- Optimize glycemic therapy." in note
-    assert "- Recheck fasting lipid profile after treatment changes." not in note
+    assert "- Recheck fasting lipid profile after treatment changes." in note
     assert note.index("lower TG to reduce pancreatitis risk") < note.index("guided by non-HDL-C/ApoB")
 
 
@@ -502,7 +599,6 @@ def test_low_risk_complete_data_below_cac_age_threshold_stays_calm_without_cac_r
     assert not any(section.label == "Coronary calcium" for section in sections)
     assert "- No diagnosis candidates generated." in note
     assert "- Lipid lowering: no escalation based on current LDL-C/ApoB and ASCVD risk profile." in recommendations
-    assert "- Continue lifestyle-based prevention." in recommendations
     assert "- Aspirin not indicated for routine primary prevention." in recommendations
     assert "CAC reasonable" not in recommendations
     assert "CAC not performed" not in recommendations

@@ -2,7 +2,11 @@ from __future__ import annotations
 
 from core.patient import Patient
 from core.engine import evaluate_patient
-from rcckm.governance import audit_result, validate_recommendation_directness
+from rcckm.governance import (
+    audit_cross_surface_alignment,
+    audit_result,
+    validate_recommendation_directness,
+)
 from rcckm.rule_trace import build_rule_traces
 from tests.helpers import render_all_outputs
 
@@ -11,7 +15,14 @@ def _audit(patient_dict):
     patient = Patient(**patient_dict)
     result = evaluate_patient(patient)
     outputs = render_all_outputs(patient, result)
-    return patient, result, outputs, audit_result(patient, result, outputs["visible"])
+    return patient, result, outputs, audit_result(
+        patient,
+        result,
+        outputs["visible"],
+        action_card_text=outputs["actions"],
+        emr_text=outputs["emr"],
+        patient_text=outputs["roadmap"],
+    )
 
 
 def test_major_recommendations_have_structured_rule_traces():

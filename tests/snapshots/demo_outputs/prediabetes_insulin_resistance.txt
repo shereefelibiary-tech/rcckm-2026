@@ -18,27 +18,29 @@ Recommendations:
 - Lipid lowering: no escalation based on current LDL-C/ApoB and ASCVD risk profile.
 - Continue lifestyle-based prevention.
 - CAC may clarify plaque burden if treatment intensity remains uncertain.
+- Kidney protection: No kidney-risk signal. eGFR/UACR available.
+- Blood pressure: At goal. Current 128/78; goal <130/80.
+- Glycemia / metabolic: Prediabetes prevention. A1c 6.1%; weight/activity focus.
 - Aspirin not indicated for routine primary prevention.
+- Data to clarify: Key data available. Complete.
 
 PATIENT ROADMAP:
 Your Prevention Roadmap
-Your results show where you stand today and the most important steps to lower future heart, kidney, and metabolic risk.
+Your results and next steps.
 
 STEP 1
 Where you stand:
 - 10-year ASCVD risk: 1.92%
-- Near-term estimated risk is low.
 - 30-year ASCVD risk: 11.81%
-- About 12 out of 100 similar patients may have a heart attack, stroke, or related artery disease event over the next 30 years.
-- Your short-term risk is low, but your longer-term risk is higher than expected. This does not mean an event is likely soon. It means prevention now may lower your risk over time.
-- About 2 out of 100 similar patients may have a heart attack, stroke, or related artery disease event over the next 10 years.
+- About 12 in 100 similar patients may have a heart attack, stroke, or related artery disease event over 30 years.
+- 10-year risk is low; 30-year risk is higher than expected.
+- About 2 in 100 similar patients may have a heart attack, stroke, or related artery disease event over 10 years.
 - Plaque status has not been measured.
 - Care focus: Level 3 (3B) - Actionable early CKM / atherogenic risk
 
 STEP 2
 Why your risk is higher:
 - Early metabolic signals are present.
-- Near-term estimated risk may be low, but 30-year risk is elevated enough to justify prevention discussion.
 - Cholesterol particles: ApoB 92; LDL-C 122; non-HDL-C 152 (calculated). These numbers help show plaque-driving cholesterol in the blood.
 - Blood sugar / diabetes: A1c 6.1%. Improving blood sugar can lower long-term heart, kidney, and metabolic risk.
 - Kidney protection: eGFR 88; UACR 12. Kidney markers also help estimate heart and metabolic risk.
@@ -61,13 +63,14 @@ Your next steps:
 1. Lower plaque-driving cholesterol: Treat toward the cholesterol goals above.
 2. Additional testing: A calcium scan may help if treatment choices are still uncertain.
 
-This roadmap is for discussion with your clinician. Medication decisions should be individualized.
-
 ACTIONS:
-- Lipid lowering: no escalation based on current LDL-C/ApoB and ASCVD risk profile.
-- Continue lifestyle-based prevention.
-- CAC may clarify plaque burden if treatment intensity remains uncertain.
-- Aspirin not indicated for routine primary prevention.
+- Lipid lowering: No lipid escalation. LDL-C 122; target <100. ApoB 92; target <90.
+- CAC / plaque: CAC may clarify risk. Use only if it would change lipid-treatment intensity.
+- Kidney protection: No kidney-risk signal. eGFR/UACR available.
+- Blood pressure: At goal. Current 128/78; goal <130/80.
+- Glycemia / metabolic: Prediabetes prevention. A1c 6.1%; weight/activity focus.
+- Aspirin / antiplatelet: Not routine for primary prevention. Do not start routine aspirin.
+- Data to clarify: Key data available. Complete.
 
 RSS: 12
 RSS CONTRIBUTORS:

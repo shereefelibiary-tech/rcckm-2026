@@ -12,8 +12,9 @@ Assessment:
 
 Recommendations:
 - Moderate-intensity statin therapy is reasonable given borderline ASCVD risk with risk-enhancing factors.
-- Obtain UACR to complete kidney-risk assessment.
-- Treat BP toward goal <130/80.
 - CAC may clarify plaque burden if treatment intensity remains uncertain.
+- Treat BP toward goal <130/80.
+- Glycemia / metabolic: Prediabetes prevention. A1c 5.9%; weight/activity focus.
 - Aspirin not indicated for routine primary prevention.
+- Obtain UACR to complete kidney-risk assessment.
 - Consider hsCRP only if inflammatory risk clarification would change management.

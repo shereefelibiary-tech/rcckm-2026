@@ -11,6 +11,9 @@ Assessment:
 Recommendations:
 - High-intensity or maximally tolerated statin indicated.
 - Evaluate secondary causes and consider FH/cascade screening when appropriate.
-- Aspirin not indicated for routine primary prevention.
+- Plaque burden unmeasured.
 - ApoB - particle burden clarification
 - Clarification testing should not delay treatment.
+- Blood pressure: BP needed. No current BP available.
+- Glycemia / metabolic: A1c needed. No current A1c available.
+- Aspirin not indicated for routine primary prevention.

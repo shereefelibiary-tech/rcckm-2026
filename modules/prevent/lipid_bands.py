@@ -29,13 +29,11 @@ PREVENT_ASCVD_30YR_HIGH_THRESHOLD = 30.0
 PREVENT_ASCVD_30YR_VERY_HIGH_THRESHOLD = 50.0
 
 LOW_10YR_HIGH_30YR_PATIENT_SUMMARY = (
-    "Your short-term risk is low, but your longer-term risk is higher than expected. "
-    "This does not mean an event is likely soon. It means prevention now may lower your risk over time."
+    "10-year risk is low; 30-year risk is higher than expected."
 )
 
 LOW_10YR_HIGH_30YR_APOB_PATIENT_SUMMARY = (
-    "Your short-term risk is low, but your longer-term risk and cholesterol particle burden are higher than expected. "
-    "This makes earlier cholesterol-lowering therapy reasonable to discuss."
+    "10-year risk is low; 30-year risk and cholesterol particle burden are higher than expected."
 )
 
 LOW_10YR_HIGH_30YR_CLINICIAN_SUMMARY = (

@@ -137,7 +137,7 @@ def test_aspirin_not_routinely_recommended_and_cac_not_repeated_when_measured():
         or "Aspirin only if bleeding risk is low after shared decision-making." in text
     )
     assert "CAC 350" in text
-    assert "no repeat CAC needed" not in text
+    assert "no repeat CAC needed" in text
     assert "Coronary calcium reasonable for plaque clarification" not in "\n".join(action_lines(result))
 
 

@@ -95,59 +95,36 @@ def build_clarifier_items(result, patient=None):
     return items
 
 
-def build_clarifier_card_html(result, include_title=True, patient=None):
+def get_missing_clarification_tests(patient, result):
     items = build_clarifier_items(result, patient=patient)
-    recommended_items = [item for item in items if item["status"] != "complete"]
-    completed_items = [item for item in items if item["status"] == "complete"]
-
-    def _short_reason(item):
-        label = item["label"]
-        reason_map = {
-            "ApoB": "particle burden clarification",
-            "Lp(a)": "Lp(a) measurement",
-            "CAC": "plaque burden clarification",
-            "UACR": "complete kidney-risk assessment",
-            "hsCRP": "inflammatory risk context",
-            "Repeat fasting lipids": "triglyceride confirmation",
-        }
-        return reason_map.get(label, item["reason"])
-
-    def _bullet(item):
-        return (
-            f'<li title="{escape(item["reason"], quote=True)}">'
-            f'<span class="clarifier-name">{escape(item["label"])}</span>'
-            f'<span class="clarifier-dash">&mdash;</span>'
-            f'<span class="clarifier-reason">{escape(_short_reason(item))}</span>'
-            "</li>"
+    priority = {"ApoB": 1, "Lp(a)": 2, "CAC": 3, "UACR": 4, "hsCRP": 5}
+    return [
+        item["label"]
+        for item in sorted(
+            (
+                item
+                for item in items
+                if item["status"] != "complete" and item["label"] in priority
+            ),
+            key=lambda item: priority[item["label"]],
         )
-
-    visible_rows = [_bullet(item) for item in recommended_items]
-    if visible_rows:
-        visible_html = f'<ul class="clarifier-list">{"".join(visible_rows)}</ul>'
-    else:
-        visible_html = (
-            '<div class="clarifier-empty">Key clarifying data are available.</div>'
-        )
-
-    important_completed = [
-        item
-        for item in completed_items
-        if item["label"] in {"ApoB", "Lp(a)", "CAC", "UACR", "hsCRP"}
     ]
-    completed_html = ""
-    if important_completed:
-        available = " &bull; ".join(escape(item["label"]) for item in important_completed)
-        completed_html = (
-            '<div class="clarifier-available">'
-            "<span>Already available:</span> "
-            f"{available}"
-            + "</div>"
-        )
+
+
+def should_render_clarification_card(missing_tests):
+    return len(list(missing_tests or [])) > 0
+
+
+def build_clarifier_card_html(result, include_title=True, patient=None):
+    missing_tests = get_missing_clarification_tests(patient, result)
+    if not should_render_clarification_card(missing_tests):
+        return ""
+
+    tests_html = " &bull; ".join(escape(label) for label in missing_tests)
 
     title_html = (
         '<div class="clarifier-heading">'
-        '<div class="clarifier-title rc-card-title">Data that could clarify risk</div>'
-        '<div class="clarifier-subtitle">These items may improve confidence in the prevention plan.</div>'
+        '<div class="clarifier-title rc-card-title">Additional tests that may help clarify:</div>'
         '</div>'
         if include_title
         else ""
@@ -161,7 +138,7 @@ def build_clarifier_card_html(result, include_title=True, patient=None):
     border-left: 3px solid rgba(47, 95, 143, 0.36);
     border-radius: 0;
     background: rgba(255, 253, 248, 0.72);
-    padding: 4px 0 4px 10px;
+    padding: 5px 0 5px 10px;
     margin: 2px 0 4px;
     box-shadow: none;
     font-family: var(--rc-font-body);
@@ -173,69 +150,21 @@ def build_clarifier_card_html(result, include_title=True, patient=None):
     font-weight: 750;
     letter-spacing: 0;
     line-height: 1.15;
-    margin-bottom: 2px;
+    margin-bottom: 0;
 }}
 .clarifier-heading {{
-    margin-bottom: 7px;
+    margin-bottom: 3px;
 }}
-.clarifier-subtitle {{
-    color: rgba(7, 26, 47, 0.54);
-    font-family: var(--rc-font-body);
-    font-size: 11px;
-    font-weight: 600;
-    line-height: 1.25;
-}}
-.clarifier-list {{
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}}
-.clarifier-list li {{
+.clarifier-tests {{
     color: rgba(7, 26, 47, 0.78);
-    font-size: 12px;
-    font-weight: 650;
-    line-height: 1.32;
-    margin: 1px 0;
-}}
-.clarifier-list li::before {{
-    color: #2F5F8F;
-    content: "\\2022";
-    font-weight: 950;
-    margin-right: 6px;
-}}
-.clarifier-name {{
-    color: #071A2F;
-    font-weight: 900;
-}}
-.clarifier-dash {{
-    color: rgba(7, 26, 47, 0.46);
-    padding: 0 4px;
-}}
-.clarifier-reason {{
-    color: rgba(7, 26, 47, 0.72);
-}}
-.clarifier-empty {{
-    color: rgba(7, 26, 47, 0.62);
-    font-size: 12px;
-    font-weight: 650;
-    line-height: 1.32;
-}}
-.clarifier-available {{
-    color: rgba(7, 26, 47, 0.52);
-    font-size: 11px;
-    font-weight: 650;
-    line-height: 1.28;
-    margin-top: 4px;
-}}
-.clarifier-available span {{
-    color: rgba(7, 26, 47, 0.60);
-    font-weight: 850;
+    font-size: 12.5px;
+    font-weight: 760;
+    line-height: 1.25;
 }}
 </style>
 <div class="clarifier-card rc-panel-compact">
 {title_html}
-{visible_html}
-{completed_html}
+<div class="clarifier-tests">{tests_html}</div>
 </div>
 """.strip()
 
@@ -246,5 +175,7 @@ def render_clarifier_card(result, st_module=None, patient=None):
 
     from ui.html import render_html
 
-    render_html(st_module, build_clarifier_card_html(result, patient=patient))
+    html = build_clarifier_card_html(result, patient=patient)
+    if html:
+        render_html(st_module, html)
 

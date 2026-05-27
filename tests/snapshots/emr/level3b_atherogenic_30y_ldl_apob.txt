@@ -12,6 +12,8 @@ Assessment:
 Recommendations:
 - Moderate-intensity statin therapy reasonable.
 - CAC may clarify plaque burden if treatment intensity remains uncertain.
-- Aspirin not indicated for routine primary prevention.
 - Lp(a) - one-time risk assessment
 - Consider hsCRP only if inflammatory risk clarification would change management.
+- Blood pressure: BP needed. No current BP available.
+- Glycemia / metabolic: A1c needed. No current A1c available.
+- Aspirin not indicated for routine primary prevention.

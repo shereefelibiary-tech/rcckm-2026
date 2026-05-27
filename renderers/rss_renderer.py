@@ -449,7 +449,7 @@ def format_rss_contributor_label(contribution):
         "Inflammatory arthritis": "Chronic inflammatory disease risk enhancer",
         "Inflammatory disease": "Chronic inflammatory disease risk enhancer",
         "HIV": "HIV-related risk enhancer",
-        "MASLD": MASLD_SHORT_LABEL,
+        "MASLD": "",
         "Incidental CAC": "Qualitative plaque evidence",
     }.get(label, "")
     return {

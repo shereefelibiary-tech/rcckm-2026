@@ -15,28 +15,29 @@ Assessment:
 - Prediabetes (ICD: R73.03)
 
 Recommendations:
-- Short-term ASCVD risk is low, but longer-term risk and risk-enhancing factors may make lipid-lowering worth discussing. Moderate-intensity statin therapy may be reasonable after shared decision-making.
+- Discuss moderate-intensity statin therapy given South Asian ancestry, elevated ApoB/triglyceride burden, and elevated 30-year ASCVD risk despite low 10-year ASCVD risk.
 - CAC reasonable if treatment decision remains uncertain.
-- Aspirin not indicated for routine primary prevention.
 - Consider hsCRP only if inflammatory risk clarification would change management.
+- Blood pressure: At goal. Current 126/78; goal <130/80.
+- Glycemia / metabolic: Prediabetes prevention. A1c 5.8%; weight/activity focus.
+- Aspirin not indicated for routine primary prevention.
 
 PATIENT ROADMAP:
 Your Prevention Roadmap
-Your results show where you stand today and the most important steps to lower future heart, kidney, and metabolic risk.
+Your results and next steps.
 
 STEP 1
 Where you stand:
 - 10-year ASCVD risk: 3.8%
 - 30-year ASCVD risk: 22%
-- About 22 out of 100 similar patients may have a heart attack, stroke, or related artery disease event over the next 30 years.
-- Your short-term risk is low, but your longer-term risk is higher than expected. This does not mean an event is likely soon. It means prevention now may lower your risk over time.
-- About 4 out of 100 similar patients may have a heart attack, stroke, or related artery disease event over the next 10 years.
+- About 22 in 100 similar patients may have a heart attack, stroke, or related artery disease event over 30 years.
+- 10-year risk is low; 30-year risk is higher than expected.
+- About 4 in 100 similar patients may have a heart attack, stroke, or related artery disease event over 10 years.
 - Plaque status has not been measured.
 - Care focus: Level 3 (3B) - Actionable early CKM / atherogenic risk
 
 STEP 2
 Why your risk is higher:
-- Near-term risk is borderline, but 30-year risk and multiple early risk markers support prevention discussion.
 - Cholesterol particles: ApoB 108; LDL-C 138; non-HDL-C 168 (calculated). These numbers help show plaque-driving cholesterol in the blood.
 - Blood sugar / diabetes: A1c 5.8%. Improving blood sugar can lower long-term heart, kidney, and metabolic risk.
 - Kidney protection: eGFR 94; UACR 8. Kidney markers also help estimate heart and metabolic risk.
@@ -59,14 +60,14 @@ Your next steps:
 1. Lower plaque-driving cholesterol: Discuss cholesterol-lowering therapy.
 2. Additional testing: A calcium scan may help if treatment choices are still uncertain.
 
-This roadmap is for discussion with your clinician. Medication decisions should be individualized.
-
 ACTIONS:
-- Short-term ASCVD risk is low, but longer-term risk and risk-enhancing factors may make lipid-lowering worth discussing. Moderate-intensity statin therapy may be reasonable after shared decision-making.
-- Recheck lipid profile 4-12 weeks after starting or intensifying therapy, then every 6-12 months.
-- CAC reasonable for risk clarification if treatment decision remains uncertain.
-- Aspirin not indicated for routine primary prevention.
-- Consider hsCRP only if inflammatory risk clarification would change management.
+- Lipid lowering: Discuss moderate-intensity statin. LDL-C 138; target <100. ApoB 108; target <90.
+- CAC / plaque: CAC may clarify risk. Use only if it would change lipid-treatment intensity.
+- Kidney protection: No kidney-risk signal. eGFR/UACR available.
+- Blood pressure: At goal. Current 126/78; goal <130/80.
+- Glycemia / metabolic: Prediabetes prevention. A1c 5.8%; weight/activity focus.
+- Aspirin / antiplatelet: Not routine for primary prevention. Do not start routine aspirin.
+- Data to clarify: Complete key data. hsCRP as relevant.
 
 RSS: 16
 RSS CONTRIBUTORS:

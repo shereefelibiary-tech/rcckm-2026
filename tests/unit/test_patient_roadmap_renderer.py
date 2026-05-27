@@ -82,11 +82,11 @@ def test_render_patient_roadmap_groups_full_clinical_story_without_raw_html():
     assert "Your next steps" in html
     assert "The most important steps to lower future risk." in html
     assert "Your Prevention Roadmap" in html
-    assert "Your results show where you stand today and the most important steps to lower future heart, kidney, and metabolic risk." in html
+    assert "Your results and next steps." in html
     assert "roadmap-subtitle" in html
     assert "roadmap-risk-card" in html
     assert "roadmap-driver-row" in html
-    assert html.count('<div class="roadmap-driver-row">') == 3
+    assert html.count('<div class="roadmap-driver-row">') == 2
     assert "roadmap-context-chip" in html
     assert "roadmap-goal-item" in html
     assert "roadmap-step-list" in html
@@ -106,15 +106,17 @@ def test_render_patient_roadmap_groups_full_clinical_story_without_raw_html():
     assert "ASCVD means artery/plaque-related events" not in html
     assert "PREVENT-age" not in html
     assert "PREVENT percentile" not in html
-    assert "About 8 out of 100 similar patients may have a heart attack, stroke, or related artery disease event" in html
-    assert "About 25 out of 100 similar patients may have a heart attack, stroke, or related artery disease event" in html
+    assert "About 8 in 100 similar patients may have a heart attack, stroke, or related artery disease event over 10 years." in html
+    assert "About 25 in 100 similar patients may have a heart attack, stroke, or related artery disease event over 30 years." in html
+    assert "near-term estimated risk" not in html.lower()
+    assert "longer-term risk trajectory" not in html.lower()
+    assert "estimated population risk" not in html.lower()
     assert "cardiovascular event" not in html
     assert "Level 5" in html
-    assert "Coronary calcium score 350" in html
-    assert "Coronary calcium score: 350, showing a high amount of plaque." in html
+    assert "CAC 350: high plaque burden." in html
     assert "Level 5 - Very high risk" in html
     assert "Very high risk / high plaque burden" not in html
-    assert "Coronary calcium score 350 - high plaque burden" in html
+    assert "Coronary calcium score 350 - high plaque burden" not in html
     assert "ApoB 110 - elevated particle burden" in html
     assert "Atherogenic burden" not in html
     assert "Atherogenic particle burden" not in html
@@ -146,8 +148,8 @@ def test_render_patient_roadmap_groups_full_clinical_story_without_raw_html():
     assert "Protect the kidneys" in html
     assert "Review kidney protection options with your clinician." in html
     assert "Lp(a) can be checked once to guide long-term prevention." not in html
-    assert "This roadmap is for discussion with your clinician." in html
-    assert "Medication decisions should be individualized." in html
+    assert "This roadmap is for discussion with your clinician." not in html
+    assert "Medication decisions should be individualized." not in html
     assert "Dominant action" not in html
     assert 'roadmap-row-label">Next step' not in html
     next_section = html.split('<div class="roadmap-section-title">Your next steps</div>', 1)[1]
@@ -214,19 +216,22 @@ def test_render_patient_roadmap_text_is_copy_ready_plain_text():
     text = render_patient_roadmap_text(_patient(), _result())
 
     assert "Your Prevention Roadmap" in text
-    assert "Your results show where you stand today" in text
+    assert "Your results and next steps." in text
     assert "STEP 1" in text
     assert "Where you stand:" in text
     assert "- 10-year ASCVD risk: 8.2%" in text
     assert "- 30-year ASCVD risk: 24.5%" in text
-    assert "About 25 out of 100 similar patients may have a heart attack, stroke, or related artery disease event over the next 30 years." in text
-    assert "Coronary plaque is present, so prevention decisions should account for measured plaque burden in addition to risk estimates." in text
+    assert "About 25 in 100 similar patients may have a heart attack, stroke, or related artery disease event over 30 years." in text
+    assert "near-term estimated risk" not in text.lower()
+    assert "longer-term risk trajectory" not in text.lower()
+    assert "estimated population risk" not in text.lower()
+    assert "Coronary plaque is present, so prevention decisions should account for measured plaque burden in addition to risk estimates." not in text
     assert "cardiovascular event" not in text
     assert "PREVENT Total CVD" not in text
     assert "ASCVD means artery/plaque-related events" not in text
     assert "PREVENT-age" not in text
     assert "PREVENT percentile" not in text
-    assert "- Coronary calcium score: 350, showing a high amount of plaque." in text
+    assert "- CAC 350: high plaque burden." in text
     assert "Artery plaque: CAC 350." in text
     assert "Cholesterol particles: ApoB 110; LDL-C 132." in text
     assert "non-HDL-C" not in text
@@ -271,7 +276,6 @@ def test_patient_risk_summary_is_secondary_prevention_aware():
 
     assert "prevention worth discussing" not in text
     assert "Known cardiovascular disease is present." in text
-    assert "secondary prevention" in text
 
 
 def test_patient_risk_summary_ldl_190_not_derisked_by_prevent():
@@ -294,12 +298,10 @@ def test_patient_risk_summary_low_10_year_high_30_year_uses_lifetime_framing():
 
     sentence = build_patient_risk_summary_sentence(patient, result, result.prevent_30y_ascvd)
 
-    assert "short-term risk is low" in sentence
-    assert "longer-term risk is higher than expected" in sentence
-    assert "does not mean an event is likely soon" in sentence
+    assert sentence == "10-year risk is low; 30-year risk is higher than expected."
 
 
-def test_patient_risk_summary_plaque_present_mentions_measured_plaque_burden():
+def test_patient_risk_summary_plaque_present_does_not_duplicate_plaque_line():
     patient = Patient(age=60, sex="female", cac=145, prevent_10y_ascvd=6.2, prevent_30y_ascvd=22.0)
     result = RCCKMResult(
         prevent_10y_ascvd=6.2,
@@ -310,8 +312,7 @@ def test_patient_risk_summary_plaque_present_mentions_measured_plaque_burden():
 
     sentence = build_patient_risk_summary_sentence(patient, result, result.prevent_30y_ascvd)
 
-    assert "Coronary plaque is present" in sentence
-    assert "measured plaque burden" in sentence
+    assert sentence == ""
 
 
 def test_patient_risk_summary_high_primary_prevention_supports_lipid_discussion():
@@ -367,27 +368,26 @@ def test_patient_roadmap_cac_percentile_context_is_secondary_to_absolute_score()
         Patient(age=45, sex="female", cac=0, cac_percentile=99),
         RCCKMResult(plaque_category=PlaqueCategory.NONE),
     )
-    assert "Coronary calcium score: 0, with no calcified plaque detected." in cac_zero
+    assert "CAC 0: no calcified plaque detected." in cac_zero
     assert "expected for age and sex" not in cac_zero
 
     mild_high_percentile = render_patient_roadmap(
         Patient(age=45, sex="male", cac=38, cac_percentile=82),
         result,
     )
-    assert "Coronary calcium score: 38, showing mild calcified plaque detected." in mild_high_percentile
-    assert "Higher than expected for age and sex." in mild_high_percentile
-    assert "mild plaque" in mild_high_percentile
+    assert "CAC 38: plaque present." in mild_high_percentile
+    assert "Higher than expected for age and sex." not in mild_high_percentile
 
     moderate_low_percentile = render_patient_roadmap(
         Patient(age=65, sex="female", cac=145, cac_percentile=52),
         RCCKMResult(plaque_category=PlaqueCategory.MODERATE),
     )
-    assert "Coronary calcium score: 145, showing moderate calcified plaque burden." in moderate_low_percentile
+    assert "CAC 145: moderate plaque burden." in moderate_low_percentile
     assert "Within the expected range" not in moderate_low_percentile
 
     severe_with_percentile = render_patient_roadmap(
         Patient(age=65, sex="female", cac=350, cac_percentile=95),
         RCCKMResult(plaque_category=PlaqueCategory.SEVERE),
     )
-    assert "Coronary calcium score: 350, showing a high amount of plaque." in severe_with_percentile
+    assert "CAC 350: high plaque burden." in severe_with_percentile
     assert "expected for age and sex" not in severe_with_percentile

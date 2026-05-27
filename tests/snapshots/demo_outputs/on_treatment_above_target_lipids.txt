@@ -17,19 +17,21 @@ Assessment:
 Recommendations:
 - Intensify lipid-lowering therapy; treat toward LDL-C <70 and non-HDL-C <100.
 - Given prior high-intensity statin intolerance, consider maximally tolerated statin strategy and nonstatin intensification.
-- Aspirin not routine for primary prevention; consider only if bleeding risk is low and shared decision-making supports it.
+- CAC 145 already measured; no repeat CAC needed for current decision-making.
 - Consider hsCRP only if inflammatory risk clarification would change management.
+- Blood pressure: At goal. Current 124/76; goal <130/80.
+- Glycemia / metabolic: Prediabetes prevention. A1c 5.8%; weight/activity focus.
+- Aspirin not routine for primary prevention; consider only if bleeding risk is low and shared decision-making supports it.
 
 PATIENT ROADMAP:
 Your Prevention Roadmap
-Your results show where you stand today and the most important steps to lower future heart, kidney, and metabolic risk.
+Your results and next steps.
 
 STEP 1
 Where you stand:
 - 10-year ASCVD risk: 3.83%
-- Coronary plaque is present, so prevention decisions should account for measured plaque burden in addition to risk estimates.
-- About 4 out of 100 similar patients may have a heart attack, stroke, or related artery disease event over the next 10 years.
-- Coronary calcium score: 145, showing moderate calcified plaque burden. Higher than expected for age and sex.
+- About 4 in 100 similar patients may have a heart attack, stroke, or related artery disease event over 10 years.
+- CAC 145: moderate plaque burden.
 - Care focus: Level 4 - Subclinical atherosclerosis present
 
 STEP 2
@@ -57,15 +59,14 @@ Your next steps:
 1. Lower plaque-driving cholesterol: Treat toward the cholesterol goals above.
 2. Aspirin safety: Do not start aspirin unless your clinician recommends it.
 
-This roadmap is for discussion with your clinician. Medication decisions should be individualized.
-
 ACTIONS:
-- Intensify lipid-lowering therapy; treat toward LDL-C <70 and non-HDL-C <100.
-- Given prior high-intensity statin intolerance, consider maximally tolerated statin strategy and nonstatin intensification.
-- Recheck lipid profile 4-12 weeks after starting or intensifying therapy, then every 6-12 months.
-- CAC 145 already measured; no repeat CAC needed for current decision-making.
-- Aspirin not routine for primary prevention; consider only if bleeding risk is low and shared decision-making supports it.
-- Consider hsCRP only if inflammatory risk clarification would change management.
+- Lipid lowering: Intensify lipid-lowering. LDL-C 124; target <70. ApoB 112; target <80.
+- CAC / plaque: CAC 145.
+- Kidney protection: No kidney-risk signal. eGFR/UACR available.
+- Blood pressure: At goal. Current 124/76; goal <130/80.
+- Glycemia / metabolic: Prediabetes prevention. A1c 5.8%; weight/activity focus.
+- Aspirin / antiplatelet: Consider only if low bleeding risk. Shared decision-making.
+- Data to clarify: Complete key data. hsCRP as relevant.
 
 RSS: 42
 RSS CONTRIBUTORS:

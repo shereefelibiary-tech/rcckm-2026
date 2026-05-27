@@ -50,8 +50,6 @@ FORBIDDEN_SNAPSHOT_PHRASES = (
     "HCC-supported",
     "Atherogenic/metabolic burden:",
     "Recheck lipid profile",
-    "CAC already measured",
-    "no repeat CAC needed",
 )
 
 

@@ -161,6 +161,210 @@ def validate_recommendation_directness(text: str) -> list[GovernanceFinding]:
     return findings
 
 
+def _contains_any(text: str, fragments: tuple[str, ...]) -> bool:
+    lowered = _lower(text)
+    return any(fragment in lowered for fragment in fragments)
+
+
+def extract_domain_signals(text: str) -> dict[str, bool]:
+    """Extract coarse clinical recommendation signals from rendered text."""
+    lowered = _lower(text)
+    cac_numeric = bool(re.search(r"\bcac\s*(?:score\s*)?(?:=|:)?\s*\d+", lowered))
+    calcium_numeric = bool(re.search(r"\bcalcium score\s*(?:=|:)?\s*\d+", lowered))
+    aspirin_consider = _contains_any(
+        lowered,
+        (
+            "aspirin may be considered",
+            "consider only if low bleeding risk",
+            "consider aspirin",
+            "aspirin: only if low bleeding risk",
+        ),
+    )
+    antiplatelet_positive = _contains_any(
+        lowered,
+        (
+            "antiplatelet therapy is indicated",
+            "aspirin recommended",
+            "start aspirin",
+            "aspirin therapy indicated",
+            "secondary-prevention antiplatelet",
+            "antiplatelet therapy. use if no contraindication",
+        ),
+    )
+    return {
+        "lipid_intensify": _contains_any(
+            lowered,
+            (
+                "intensify lipid",
+                "intensify secondary-prevention lipid",
+                "high-intensity therapy indicated",
+                "high-intensity or maximally tolerated statin indicated",
+                "high-intensity lipid-lowering",
+                "secondary-prevention lipid therapy",
+                "add-on lipid-lowering",
+                "discuss lipid-lowering therapy",
+                "lipid-lowering therapy recommended",
+                "lipid-lowering therapy is reasonable",
+                "lipid-lowering therapy is favored",
+            ),
+        ),
+        "lipid_no_escalation": _contains_any(
+            lowered,
+            (
+                "no lipid escalation",
+                "lipid lowering: no escalation",
+                "no escalation based on current ldl-c/apob",
+            ),
+        ),
+        "statin_moderate": "moderate-intensity statin" in lowered,
+        "statin_high": _contains_any(lowered, ("high-intensity statin", "high-intensity therapy indicated")),
+        "cac_measured": cac_numeric or calcium_numeric or _contains_any(
+            lowered,
+            (
+                "cac already measured",
+                "cac 0",
+                "calcified plaque detected",
+                "plaque present",
+                "high plaque burden",
+                "elevated plaque burden",
+            ),
+        ),
+        "cac_missing": _contains_any(
+            lowered,
+            (
+                "cac not performed",
+                "cac not done",
+                "plaque burden unmeasured",
+                "not measured",
+            ),
+        ),
+        "cac_recommend_obtain": _contains_any(
+            lowered,
+            (
+                "obtain cac",
+                "cac may clarify",
+                "cac reasonable",
+                "calcium scan may help",
+                "cac - risk clarification",
+                "cac - plaque burden clarification",
+                "consider cac",
+            ),
+        ),
+        "kidney_albuminuria": bool(re.search(r"\buacr\s*(?:=|:)?\s*\d+", lowered))
+        or _contains_any(lowered, ("albuminuria", "uacr a2", "uacr a3")),
+        "sglt2_consider": _contains_any(
+            lowered,
+            (
+                "consider sglt2",
+                "add sglt2",
+                "add an sglt2",
+                "use sglt2",
+                "sglt2 inhibitor",
+            ),
+        ),
+        "bp_goal": _contains_any(lowered, ("<130/80", "130/80", "blood pressure goal", "bp goal")),
+        "glycemia_action": _contains_any(
+            lowered,
+            (
+                "optimize diabetes",
+                "optimize glycemia",
+                "prediabetes prevention",
+                "a1c",
+                "glycemia / metabolic",
+            ),
+        ),
+        "aspirin_negative": _contains_any(
+            lowered,
+            (
+                "aspirin not indicated",
+                "not routine for primary prevention",
+                "do not start routine aspirin",
+                "aspirin is not routine",
+            ),
+        ),
+        "aspirin_positive": antiplatelet_positive,
+        "aspirin_conditional": aspirin_consider,
+        "secondary_prevention": _contains_any(
+            lowered,
+            (
+                "secondary prevention",
+                "secondary-prevention",
+                "clinical ascvd",
+                "known cardiovascular disease is present",
+            ),
+        ),
+        "primary_prevention": "primary prevention" in lowered or "primary-prevention" in lowered,
+        "diagnoses_coding": _contains_any(lowered, ("assessment candidates", "icd", "hcc", "diagnosis")),
+        "data_clarifiers": _contains_any(lowered, ("data to clarify", "clarifier", "obtain apob", "obtain uacr", "lp(a)")),
+    }
+
+
+def audit_cross_surface_alignment(
+    action_card_text: str,
+    emr_text: str,
+    patient_text: str = "",
+) -> list[GovernanceFinding]:
+    """Flag semantic drift between Action, EMR, and patient recommendation surfaces."""
+    findings: list[GovernanceFinding] = []
+    action = _lower(action_card_text)
+    emr = _lower(emr_text)
+    patient = _lower(patient_text)
+    combined = f"{emr}\n{patient}"
+    action_signals = extract_domain_signals(action_card_text)
+    emr_signals = extract_domain_signals(emr_text)
+    combined_signals = extract_domain_signals(combined)
+
+    if action_signals["lipid_intensify"] and not (
+        combined_signals["lipid_intensify"]
+        or _contains_any(
+            combined,
+            (
+                "treat toward lipid",
+                "lipid-lowering therapy is favored",
+                "lipid-lowering therapy recommended",
+                "lipid-lowering therapy indicated",
+            ),
+        )
+    ):
+        _add(
+            findings,
+            "cross_surface_alignment",
+            "Drift detected: Action card says lipid intensification but EMR/patient text lacks lipid intensification.",
+        )
+    if action_signals["statin_high"] and "high-intensity" not in combined:
+        _add(findings, "cross_surface_alignment", "Action card high-intensity lipid therapy is missing from EMR/patient text.")
+    if action_signals["statin_moderate"] and "moderate-intensity statin" not in combined:
+        _add(findings, "cross_surface_alignment", "Action card moderate-intensity statin language is missing from EMR/patient text.")
+    if action_signals["lipid_no_escalation"] and (
+        emr_signals["lipid_intensify"] or emr_signals["statin_moderate"] or emr_signals["statin_high"]
+    ):
+        _add(findings, "cross_surface_alignment", "Action card says no lipid escalation while EMR recommends lipid escalation.")
+    if "statin therapy is reasonable" in emr and action_signals["lipid_no_escalation"]:
+        _add(findings, "cross_surface_alignment", "EMR recommends statin therapy while Action card says no lipid escalation.")
+    if emr_signals["aspirin_negative"] and action_signals["aspirin_positive"] and not action_signals["secondary_prevention"]:
+        _add(findings, "cross_surface_alignment", "Aspirin recommendation differs between Action card and EMR.")
+    if action_signals["aspirin_negative"] and emr_signals["aspirin_positive"] and not emr_signals["secondary_prevention"]:
+        _add(findings, "cross_surface_alignment", "Aspirin recommendation differs between Action card and EMR.")
+    if action_signals["cac_measured"] and emr_signals["cac_missing"]:
+        _add(findings, "cross_surface_alignment", "CAC status differs between Action card and EMR.")
+    if action_signals["cac_measured"] and combined_signals["cac_recommend_obtain"]:
+        _add(findings, "cross_surface_alignment", "CAC already measured but another surface recommends obtaining CAC.")
+    if action_signals["kidney_albuminuria"] and not emr_signals["kidney_albuminuria"]:
+        _add(findings, "cross_surface_alignment", "Kidney action mentions albuminuria but EMR lacks UACR/albuminuria context.")
+    if "no kidney-risk signal" in action and (emr_signals["sglt2_consider"] or "optimize kidney-protective" in emr):
+        _add(findings, "cross_surface_alignment", "Kidney recommendation differs between Action card and EMR.")
+    if combined_signals["secondary_prevention"] and _contains_any(
+        combined,
+        (
+            "prevention worth discussing",
+            "low prevent score lowers treatment",
+        ),
+    ):
+        _add(findings, "cross_surface_alignment", "Secondary-prevention text appears to de-risk treatment using primary-prevention framing.")
+
+    return findings
+
+
 def _has_actionable_therapy(patient: Any, result: Any) -> bool:
     domains = getattr(result, "action_domains", None) or {}
     actionable_domains = {
@@ -292,11 +496,21 @@ def _coerce_trace(trace: Any) -> RecommendationTrace:
     return RecommendationTrace(**dict(trace))
 
 
-def audit_result(patient: Any, result: Any, visible_text: str) -> GovernanceAudit:
+def audit_result(
+    patient: Any,
+    result: Any,
+    visible_text: str,
+    *,
+    action_card_text: str = "",
+    emr_text: str = "",
+    patient_text: str = "",
+) -> GovernanceAudit:
     """Run governance traceability and safety checks for one evaluated patient."""
     raw_traces = list(getattr(result, "rule_traces", None) or build_rule_traces(patient, result))
     traces = [_coerce_trace(trace) for trace in raw_traces]
     findings = validate_output_safety(patient, result, visible_text)
+    if action_card_text or emr_text or patient_text:
+        findings.extend(audit_cross_surface_alignment(action_card_text, emr_text, patient_text))
     major_recommendations = [
         text
         for text in (getattr(result, "recommendations", None) or [])

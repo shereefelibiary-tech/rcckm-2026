@@ -58,7 +58,7 @@ def test_render_emr_note_outputs_plain_text_sections_in_order():
     aspirin_line = "- Aspirin only if bleeding risk is low after shared decision-making."
     assert lipid_line in note
     assert "Recheck lipids in 4-12 weeks" not in note
-    assert cac_line not in note
+    assert cac_line in note
     assert aspirin_line in note
     assert "- Lipid therapy:" not in note
     assert "- Coronary calcium:" not in note
@@ -220,8 +220,6 @@ def test_emr_note_excludes_workflow_and_metadata_noise():
         "HCC-supported",
         "Atherogenic/metabolic burden:",
         "Recheck lipid profile",
-        "CAC already measured",
-        "no repeat CAC needed",
     ]
     for phrase in forbidden:
         assert phrase not in note

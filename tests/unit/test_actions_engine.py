@@ -62,7 +62,7 @@ def test_albuminuria_with_elevated_bp_uses_kidney_protective_action_not_passive_
         "Confirm persistent albuminuria with repeat UACR if not already confirmed; optimize kidney-protective therapy."
     )
     assert plan["domains"]["blood_pressure"] == (
-        "Treat BP toward goal <130/80 if tolerated."
+        "Treat BP toward goal <130/80."
     )
     assert "ACEi/ARB" in plan["domains"]["ace_arb"]
 

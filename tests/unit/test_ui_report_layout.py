@@ -175,9 +175,18 @@ def test_custom_html_renderers_return_html_strings():
         "clarifiers": build_clarifier_card_html(result),
     }
 
-    for html in rendered.values():
+    for name, html in rendered.items():
         assert isinstance(html, str)
-        assert "<div" in html
+        if name == "clarifiers":
+            assert html == ""
+        else:
+            assert "<div" in html
+
+    clarifier_html = build_clarifier_card_html(
+        RCCKMResult(clarification={"recommend_apob": True, "recommend_lpa": True})
+    )
+    assert "<div" in clarifier_html
+    assert "Additional tests that may help clarify:" in clarifier_html
 
 
 def test_report_uses_component_html_for_custom_renderers():
@@ -214,7 +223,7 @@ def test_report_uses_component_html_for_custom_renderers():
     assert "drivers-card" not in inline_html
     assert "rss-support-card" not in inline_html
     assert "wpf-card" in inline_html
-    assert "clarifier-card" in inline_html
+    assert "clarifier-card" not in inline_html
     assert "ckm-kdigo-strip" in inline_html
     ckm_html = inline_html.split('class="ckm-kdigo-strip"', 1)[1][:1000]
     assert "CKM Stage 3" in ckm_html
@@ -242,7 +251,6 @@ def test_report_uses_component_html_for_custom_renderers():
         "contributors largest first",
         "RSS support view",
         "confirmed by data",
-        "data-derived",
         "YOU ARE HERE",
         "Cardiometabolic-kidney context",
         "Active signals:",
@@ -288,19 +296,18 @@ def test_report_hierarchy_is_clinician_first_and_patient_roadmap_last():
     drivers_index = next(i for i, message in enumerate(messages) if "rss-module" in message)
     ckm_index = next(i for i, message in enumerate(messages) if "ckm-kdigo-strip" in message)
     where_index = next(i for i, message in enumerate(messages) if "wpf-card" in message)
-    clarifier_index = next(i for i, message in enumerate(messages) if "clarifier-card" in message)
+    assessment_index = next(i for i, message in enumerate(messages) if "Data-derived diagnoses" in message)
     targets_index = next(i for i, message in enumerate(messages) if "targets-compact" in message)
     action_index = next(i for i, message in enumerate(messages) if "action-card" in message)
-    assessment_index = next(i for i, message in enumerate(messages) if "Assessment candidates" in message)
-    emr_index = next(i for i, message in enumerate(messages) if "Risk Continuum - EMR Note" in message)
     roadmap_index = next(i for i, message in enumerate(messages) if "roadmap-card" in message)
     copy_index = next(i for i, message in enumerate(messages) if "Copy patient roadmap" in message)
+    emr_index = next(i for i, message in enumerate(messages) if "Risk Continuum - EMR Note" in message)
     export_index = next(i for i, message in enumerate(messages) if "Export / Print" in message)
 
     assert continuum_index < prevent_index < drivers_index < ckm_index
-    assert ckm_index < where_index < clarifier_index < targets_index < action_index
-    assert action_index < assessment_index < emr_index < roadmap_index < copy_index
-    assert copy_index < export_index
+    assert ckm_index < where_index < assessment_index < targets_index
+    assert targets_index < action_index < roadmap_index < copy_index < emr_index
+    assert emr_index < export_index
 
 
 def test_export_print_section_uses_plain_text_outputs_and_downloads():
@@ -595,6 +602,19 @@ def test_action_lipid_status_does_not_tooltip_add_on_without_intensity():
     assert "atorvastatin" not in status_fragment.lower()
 
 
+def test_action_kidney_status_uses_custom_hover_detail_without_native_title():
+    patient = Patient(age=60, sex="female", diabetes=True, egfr=55, uacr=45, ace_arb=True)
+    result = run_patient(patient)[0]
+    html = _build_action_html(result, patient)
+
+    assert "SGLT2 per criteria" not in html
+    assert "per criteria" not in html
+    assert "Consider SGLT2 for diabetic CKD" in html
+    assert "action-status-tooltip" in html
+    assert "SGLT2 benefit is strongest with diabetes plus CKD" in html
+    assert "title=" not in html.split("SGLT2 benefit is strongest", 1)[0].rsplit("<span", 1)[-1]
+
+
 def test_assessment_candidates_are_compact_and_deduped():
     fake_st = _FakeStreamlit()
 
@@ -602,8 +622,14 @@ def test_assessment_candidates_are_compact_and_deduped():
 
     combined = "\n".join(str(message) for message in fake_st.messages)
     assert "detail-section-title" in combined
-    assert "Assessment candidates" in combined
-    assert "Clinical diagnoses and coding support" in combined
+    assert "Data-derived diagnoses" in combined
+    assert "Diagnoses and coding supported by the current data." in combined
+    assert "Assessment candidates" not in combined
+    assert "Clinical diagnoses and coding support" not in combined
+    assert "Candidate diagnoses" not in combined
+    assert "Data Dx" not in combined
+    assert "AI diagnoses" not in combined
+    assert "Suggested diagnoses" not in combined
     assert "dx-panel" in combined
     assert "dx-compact-list" in combined
     assert "<div class='dx-column-panel'>" not in combined
@@ -906,10 +932,44 @@ def test_app_loads_with_demo_patient_and_unified_input_flow():
     assert at.session_state["active_patient"] is None
     assert any(button.label == "Parse" for button in at.button)
     assert any(button.label == "Clear" for button in at.button)
-    assert any(button.label == "Interpret reviewed worksheet" for button in at.button)
+    assert any(button.label == "Interpret risk" for button in at.button)
     markdown_text = "\n".join(str(message.value) for message in at.markdown)
-    assert "Review the worksheet, then click Interpret reviewed worksheet." in markdown_text
+    assert "Review the worksheet, then click Interpret risk." in markdown_text
     assert "10-Year Cardiovascular Risk" not in markdown_text
+
+
+def test_interpret_button_uses_premium_processing_copy():
+    source = inspect.getsource(__import__("app"))
+
+    assert 'button_label = "Interpreting..." if is_interpreting else "Interpret risk"' in source
+    assert 'st.button(button_label, type="primary", disabled=is_interpreting)' in source
+    assert 'st.spinner("Interpreting...")' in source
+    assert "time.sleep(0.65 - elapsed)" in source
+    assert "_detected_signal_chips" in source
+    assert "show_detected_signal_chips" in source
+    assert "Synthesizing risk" not in source
+    assert "Interpret reviewed worksheet" not in source
+
+
+def test_detected_signal_chips_only_use_parsed_signals():
+    app_module = __import__("app")
+
+    report = {
+        "parsed": {
+            "apob": 112,
+            "cac": 350,
+            "uacr": 45,
+            "a1c": 7.1,
+            "family_history_age_at_event": 49,
+            "ldl_c": 132,
+            "egfr": None,
+        }
+    }
+
+    chips = app_module._detected_signal_chips(report)
+
+    assert chips == ["ApoB", "CAC", "UACR", "A1c", "Family history", "LDL-C"]
+    assert app_module._detected_signal_chips({"parsed": {}}) == []
 
 
 def test_demo_case_gallery_loads_case_and_clears_report_state():
@@ -1026,6 +1086,15 @@ def test_worksheet_theme_standardizes_field_sizing_and_labels():
     assert "white-space: nowrap" in css
     assert "border-radius: var(--worksheet-field-radius)" in css
     assert 'div[data-testid="stButton"] button {\n    border: 1px solid rgba(11, 31, 58, 0.18) !important;\n    border-radius: var(--worksheet-field-radius)' in css
+    assert 'div[data-testid="stButton"] button[kind="primary"]:active' in css
+    assert "translateY(3px) scale(0.985)" in css
+    assert "rcckmReportReveal" in css
+    assert ".parse-signal-chips" in css
+    assert ".parse-chip" in css
+    assert "parseSignalReveal" in css
+    assert "parseSignalPulse" in css
+    assert "parseSignalFade" in css
+    assert "@media (prefers-reduced-motion: reduce)" in css
     assert "div[data-testid=\"stNumberInput\"] > div" in css
     assert ".worksheet-control-label-spacer" in css
     assert ".incidental-cac-control-marker" in css
@@ -1447,7 +1516,7 @@ def test_pasting_new_text_after_interpret_clears_existing_report():
 
     at = AppTest.from_file("app.py")
     at.run(timeout=10)
-    _click_button_by_label(at, "Interpret reviewed worksheet")
+    _click_button_by_label(at, "Interpret risk")
 
     assert at.session_state["report_generated"] is True
     assert at.session_state["current_result"] is not None
@@ -1459,7 +1528,7 @@ def test_pasting_new_text_after_interpret_clears_existing_report():
     assert at.session_state["current_result"] is None
     assert at.session_state["worksheet_dirty"] is True
     markdown_text = "\n".join(str(message.value) for message in at.markdown)
-    assert "Worksheet changed. Click Interpret reviewed worksheet to update the report." in markdown_text
+    assert "Worksheet changed. Click Interpret risk to update the report." in markdown_text
 
 
 def test_parse_new_text_updates_worksheet_but_keeps_report_cleared_until_interpret():
@@ -1467,7 +1536,7 @@ def test_parse_new_text_updates_worksheet_but_keeps_report_cleared_until_interpr
 
     at = AppTest.from_file("app.py")
     at.run(timeout=10)
-    _click_button_by_label(at, "Interpret reviewed worksheet")
+    _click_button_by_label(at, "Interpret risk")
     assert at.session_state["report_generated"] is True
 
     at.text_area[0].set_value("60M BP 132/78 TC 210 LDL 142 HDL 42 TG 180")
@@ -1485,7 +1554,7 @@ def test_manual_edit_after_interpret_hides_stale_report_until_reinterpreted():
 
     at = AppTest.from_file("app.py")
     at.run(timeout=10)
-    _click_button_by_label(at, "Interpret reviewed worksheet")
+    _click_button_by_label(at, "Interpret risk")
     assert at.session_state["report_generated"] is True
 
     for widget in at.text_input:
@@ -1498,9 +1567,9 @@ def test_manual_edit_after_interpret_hides_stale_report_until_reinterpreted():
     assert at.session_state["current_result"] is None
     assert at.session_state["worksheet_dirty"] is True
     markdown_text = "\n".join(str(message.value) for message in at.markdown)
-    assert "Worksheet changed. Click Interpret reviewed worksheet to update the report." in markdown_text
+    assert "Worksheet changed. Click Interpret risk to update the report." in markdown_text
 
-    _click_button_by_label(at, "Interpret reviewed worksheet")
+    _click_button_by_label(at, "Interpret risk")
     assert at.session_state["report_generated"] is True
     assert at.session_state["worksheet_dirty"] is False
 
@@ -1590,7 +1659,7 @@ def test_manual_app_run_shows_debug_payload_and_nonzero_rss():
         if checkbox.label == "Diabetes":
             checkbox.set_value(True)
 
-    _click_button_by_label(at, "Interpret reviewed worksheet")
+    _click_button_by_label(at, "Interpret risk")
 
     assert len(at.exception) == 0
     assert any("Debug: patient payload" in str(expander.label) for expander in at.expander)

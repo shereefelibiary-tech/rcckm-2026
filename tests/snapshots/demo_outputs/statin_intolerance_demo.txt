@@ -16,18 +16,21 @@ Recommendations:
 - Lipid-lowering therapy is favored because coronary plaque is already present despite low short-term ASCVD risk.
 - Given prior high-intensity statin intolerance, consider maximally tolerated statin strategy and nonstatin intensification.
 - CAC 90 measured; plaque present.
+- Kidney protection: No kidney-risk signal. eGFR/UACR available.
+- Blood pressure: At goal. Current 128/76; goal <130/80.
+- Glycemia / metabolic: Prediabetes prevention. A1c 5.7%; weight/activity focus.
 - Aspirin not indicated for routine primary prevention.
+- Data to clarify: Key data available. Complete.
 
 PATIENT ROADMAP:
 Your Prevention Roadmap
-Your results show where you stand today and the most important steps to lower future heart, kidney, and metabolic risk.
+Your results and next steps.
 
 STEP 1
 Where you stand:
 - 10-year ASCVD risk: 3.96%
-- Coronary plaque is present, so prevention decisions should account for measured plaque burden in addition to risk estimates.
-- About 4 out of 100 similar patients may have a heart attack, stroke, or related artery disease event over the next 10 years.
-- Coronary calcium score: 90, showing mild calcified plaque detected.
+- About 4 in 100 similar patients may have a heart attack, stroke, or related artery disease event over 10 years.
+- CAC 90: plaque present.
 - Care focus: Level 4 - Subclinical atherosclerosis present
 
 STEP 2
@@ -53,15 +56,16 @@ Your goals:
 STEP 4
 Your next steps:
 1. Lower plaque-driving cholesterol: Treat toward the cholesterol goals above.
-2. Additional testing: A calcium scan may help if treatment choices are still uncertain.
-
-This roadmap is for discussion with your clinician. Medication decisions should be individualized.
+2. Artery plaque: CAC already measured; no repeat scan needed for this decision.
 
 ACTIONS:
-- Lipid-lowering therapy is favored because coronary plaque is already present despite low short-term ASCVD risk.
-- Given prior high-intensity statin intolerance, consider maximally tolerated statin strategy and nonstatin intensification.
-- CAC 90 measured; plaque present.
-- Aspirin not indicated for routine primary prevention.
+- Lipid lowering: Intensify lipid-lowering. LDL-C 146; target <100. ApoB 116; target <90.
+- CAC / plaque: CAC 90.
+- Kidney protection: No kidney-risk signal. eGFR/UACR available.
+- Blood pressure: At goal. Current 128/76; goal <130/80.
+- Glycemia / metabolic: Prediabetes prevention. A1c 5.7%; weight/activity focus.
+- Aspirin / antiplatelet: Not routine for primary prevention. Do not start routine aspirin.
+- Data to clarify: Key data available. Complete.
 
 RSS: 22
 RSS CONTRIBUTORS:

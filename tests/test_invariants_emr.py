@@ -15,8 +15,6 @@ EMR_FORBIDDEN = (
     "HCC-supported",
     "Atherogenic/metabolic burden:",
     "Recheck lipid profile",
-    "CAC already measured",
-    "no repeat CAC needed",
     "dominant_action",
     "action_domains",
     "risk_continuum_sublevel",

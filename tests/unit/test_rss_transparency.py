@@ -356,7 +356,7 @@ def test_small_condition_contributors_stack_individually():
     assert "OSA" in rows
     assert "Psoriasis" in rows
     assert "Metabolic fatty liver disease" in rows
-    assert "MASLD" in rows
+    assert "MASLD" not in rows
     assert '<span class="rss-tower-label">OSA</span>' not in tower
     assert '<span class="rss-tower-label">Psoriasis</span>' not in tower
     assert '<span class="rss-tower-label">MASLD</span>' not in tower
@@ -369,8 +369,7 @@ def test_masld_rss_display_uses_readable_primary_label_without_duplication():
     masld = next(item for item in display["contributors"] if item["id"] == "masld")
 
     assert masld["label"] == "Metabolic fatty liver disease"
-    assert masld["subtitle"] == "MASLD"
-    assert masld["label"] != masld["subtitle"]
+    assert masld["subtitle"] == ""
     assert masld["value_label"] == "Metabolic fatty liver disease"
 
 
@@ -384,7 +383,8 @@ def test_missing_lpa_appears_as_missing_clarifier_when_relevant():
     assert "Missing clarifiers" not in html
     assert "One-time risk assessment" not in html
     assert "Lp(a)" in clarifier_html
-    assert "Lp(a) measurement" in clarifier_html
+    assert "Additional tests that may help clarify:" in clarifier_html
+    assert "Lp(a) measurement" not in clarifier_html
 
 
 def test_missing_a1c_and_family_history_do_not_render_as_normal():
@@ -637,7 +637,7 @@ def test_low_rss_18_case_has_callout_and_keeps_exact_tower_scale():
     assert "Triglycerides 182 mg/dL" in rows
     assert "OSA" in rows
     assert "Metabolic fatty liver disease" in rows
-    assert "MASLD" in rows
+    assert "MASLD" not in rows
     assert "Fatty liver disease risk context" not in rows
     assert 'data-rss-low-callout="true"' in html
     assert "Top:" in html
@@ -700,7 +700,8 @@ def test_cac_missing_clarifier_is_separate_from_rss_card():
     assert "Missing clarifiers" not in rss_html
     assert "plaque burden clarification" not in rss_html.lower()
     assert "CAC" in clarifier_html
-    assert "plaque burden clarification" in clarifier_html
+    assert "Additional tests that may help clarify:" in clarifier_html
+    assert "plaque burden clarification" not in clarifier_html
 
 
 def test_hiv_rss_label_is_not_generic_inflammatory_disease():

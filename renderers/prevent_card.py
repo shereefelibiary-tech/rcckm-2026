@@ -47,17 +47,11 @@ def _plain_language_line(risk_value, category):
         return "PREVENT estimate unavailable from the current data."
 
     people = max(0, int(round(value)))
-    category_note = {
-        "low": "Estimated population risk remains low.",
-        "borderline": "Estimated population risk is borderline.",
-        "intermediate": "Estimated population risk is elevated.",
-        "high": "Estimated population risk is elevated.",
-    }.get(category, "")
     sentence = (
-        f"About {people} out of 100 similar patients may experience an "
-        "atherosclerotic event over 10 years."
+        f"About {people} in 100 similar patients may have a "
+        "heart attack, stroke, or related artery disease event over 10 years."
     )
-    return f"{sentence} This is the near-term estimated risk. {category_note}".strip()
+    return sentence
 
 
 def _trajectory_line(risk_value):
@@ -68,8 +62,8 @@ def _trajectory_line(risk_value):
     except (TypeError, ValueError):
         return ""
     return (
-        f"About {people} out of 100 similar patients may experience an atherosclerotic event "
-        "over 30 years. This is a longer-term risk trajectory."
+        f"About {people} in 100 similar patients may have a heart attack, stroke, "
+        "or related artery disease event over 30 years."
     )
 
 
@@ -136,7 +130,7 @@ def _context_line(result):
             )
         return "High plaque burden is present, so treatment intensity should not rely on PREVENT alone."
     if discordance.get("type") == "risk_exceeds_plaque_burden":
-        return "CAC 0 suggests low short-term plaque burden despite elevated estimated population risk."
+        return "CAC 0 suggests low plaque burden despite elevated calculated risk."
     if discordance.get("type") == "high_population_risk_plaque_unmeasured":
         return cac_missing_line
 
@@ -398,7 +392,7 @@ def render_prevent_card(result):
                 or bool(getattr(result, "severe_hypercholesterolemia", False))
                 or bool(getattr(result, "possible_fh_pathway", False))
             )
-            else "Complete the missing worksheet inputs to calculate estimated population risk."
+            else "Complete the missing worksheet inputs to calculate risk."
         )
         unavailable_html = build_prevent_missing_reason(result)
 
@@ -670,7 +664,7 @@ def render_prevent_card(result):
 <div>
 <div class="prevent-kicker">PREVENT population model</div>
 <div class="prevent-title rc-card-title">10-Year Cardiovascular Risk</div>
-<div class="prevent-subtitle">Estimated population risk before plaque and treatment context.</div>
+<div class="prevent-subtitle">Calculated risk before plaque and treatment context.</div>
 </div>
 <div class="prevent-primary">
 <div class="prevent-value rc-metric">{escape(value)}</div>

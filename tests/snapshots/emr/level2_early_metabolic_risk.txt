@@ -13,4 +13,9 @@ Assessment:
 Recommendations:
 - Lipid lowering: no escalation based on current LDL-C/ApoB and ASCVD risk profile.
 - Continue lifestyle-based prevention.
+- CAC / plaque: Not measured. Plaque burden unmeasured.
+- Kidney protection: No kidney-risk signal. eGFR/UACR available.
+- Blood pressure: BP needed. No current BP available.
+- Glycemia / metabolic: Prediabetes prevention. A1c 5.8%; weight/activity focus.
 - Aspirin not indicated for routine primary prevention.
+- Data to clarify: Key data available. Complete.

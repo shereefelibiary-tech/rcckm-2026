@@ -600,13 +600,14 @@ def test_level_3b_intermediate_prevent_uacr_missing_prioritizes_uacr_and_specifi
         "Moderate-intensity statin therapy is reasonable given borderline ASCVD risk with risk-enhancing factors."
     )
     assert recommendation_lines[:6] == [
-        "Moderate-intensity statin therapy is reasonable given borderline ASCVD risk with risk-enhancing factors.",
-        "Obtain UACR to complete kidney-risk assessment.",
-        "Treat BP toward goal <130/80.",
+            "Moderate-intensity statin therapy is reasonable given borderline ASCVD risk with risk-enhancing factors.",
             "CAC may clarify plaque burden if treatment intensity remains uncertain.",
+            "Treat BP toward goal <130/80.",
+            "Glycemia / metabolic: Prediabetes prevention. A1c 5.9%; weight/activity focus.",
             "Aspirin not indicated for routine primary prevention.",
-            "Consider hsCRP only if inflammatory risk clarification would change management.",
+            "Obtain UACR to complete kidney-risk assessment.",
         ]
+    assert "Consider hsCRP only if inflammatory risk clarification would change management." in recommendation_lines
     assert "CAC reasonable for risk clarification if treatment decision remains uncertain" not in actions
     assert "subclinical coronary atherosclerosis" not in diagnoses.lower()
 

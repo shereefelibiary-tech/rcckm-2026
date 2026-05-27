@@ -39,9 +39,9 @@ def test_render_prevent_card_shows_value_category_and_patient_language():
     assert "12.4%" in html
     assert PREVENT_CVD_SCOPE_EXPLAINER in html
     assert "Atherosclerotic events include heart attack, stroke, or coronary heart disease death. Cardiovascular events include those plus heart failure." in html
-    assert "About 8 out of 100 similar patients may experience an atherosclerotic event over 10 years." in html
-    assert "near-term estimated risk" in html
-    assert "Estimated population risk is elevated." in html
+    assert "About 8 in 100 similar patients may have a heart attack, stroke, or related artery disease event over 10 years." in html
+    assert "near-term estimated risk" not in html.lower()
+    assert "estimated population risk" not in html.lower()
     assert "Plaque burden is unmeasured." in html
     assert "CAC can clarify structural plaque burden" in html
     assert "10-year PREVENT risk:" in html
@@ -67,7 +67,7 @@ def test_render_prevent_card_context_uses_discordance_when_plaque_exceeds_risk()
 
     html = render_prevent_card(result)
 
-    assert "About 4 out of 100 similar patients may experience an atherosclerotic event over 10 years." in html
+    assert "About 4 in 100 similar patients may have a heart attack, stroke, or related artery disease event over 10 years." in html
     assert "CAC 350 shows high plaque burden, so treatment intensity should not rely on PREVENT alone." in html
 
 
@@ -124,7 +124,8 @@ def test_render_prevent_card_shows_30_year_risk_when_available():
     assert "Cardiovascular event risk" in html
     assert "31.2%" in html
     assert PREVENT_CVD_SCOPE_EXPLAINER in html
-    assert "longer-term risk trajectory" in html
+    assert "About 24 in 100 similar patients may have a heart attack, stroke, or related artery disease event over 30 years." in html
+    assert "longer-term risk trajectory" not in html.lower()
     assert PREVENT_CVD_SCOPE_EXPLAINER in html
 
 

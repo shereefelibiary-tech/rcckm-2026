@@ -70,8 +70,8 @@ def test_patient_roadmap_defines_ascvd_in_plain_language():
             "10-year ASCVD risk",
             "30-year ASCVD risk",
             "heart attack, stroke, or related artery disease event",
-            "About 10 out of 100",
-            "About 31 out of 100",
+            "About 10 in 100",
+            "About 31 in 100",
         ),
     )
     assert_absent(roadmap, ("total cardiovascular risk", "heart failure risk"))

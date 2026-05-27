@@ -3,7 +3,7 @@ from core.diagnosis_workflow import (
     prepare_diagnosis_display_entries,
     split_diagnoses,
 )
-from modules.actions.scaffold import build_action_recommendation_lines
+from modules.actions.scaffold import build_domain_actions, render_domain_actions_for_surface
 from modules.levels.definitions import classify_continuum_position
 from modules.risk_enhancers.breast_arterial_calcification import (
     breast_arterial_calcification_context,
@@ -599,14 +599,13 @@ def render_emr_note(patient, result):
             lines.append("- No diagnosis candidates generated.")
 
     lines.extend(["", "Recommendations:"])
-    recommendations = _young_family_metabolic_recommendations(patient, result)
-    if recommendations is None:
-        recommendations = build_action_recommendation_lines(patient, result)
+    recommendations = render_domain_actions_for_surface(
+        build_domain_actions(patient, result),
+        surface="emr",
+    )
     if recommendations:
         rendered_recommendations = []
         for recommendation in recommendations:
-            if _skip_emr_recommendation(recommendation):
-                continue
             rendered = _short_recommendation_line(recommendation)
             if rendered not in rendered_recommendations:
                 rendered_recommendations.append(rendered)
@@ -632,6 +631,6 @@ def render_emr_note(patient, result):
         for rendered in rendered_recommendations:
             lines.append(f"- {rendered}")
     else:
-        lines.append("- No escalation indicated.")
+        lines.append("- No medication changes based on current risk profile.")
 
     return "\n".join(lines)

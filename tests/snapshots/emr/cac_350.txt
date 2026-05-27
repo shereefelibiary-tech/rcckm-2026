@@ -9,6 +9,9 @@ Assessment:
 
 Recommendations:
 - High-intensity lipid-lowering therapy indicated.
-- Aspirin only if bleeding risk is low after shared decision-making.
+- CAC 350 already measured; no repeat CAC needed for current decision-making.
 - Lp(a) - one-time risk assessment
 - Clarification testing should not delay treatment.
+- Blood pressure: BP needed. No current BP available.
+- Glycemia / metabolic: A1c needed. No current A1c available.
+- Aspirin only if bleeding risk is low after shared decision-making.

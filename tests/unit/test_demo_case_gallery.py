@@ -1,6 +1,8 @@
 import pytest
 
 from core.engine import evaluate_patient
+from modules.actions.scaffold import get_domain_recommendation_lines
+from rcckm.governance import audit_cross_surface_alignment
 from renderers.emr_renderer import render_emr_note
 from renderers.patient_roadmap import render_patient_roadmap_text
 from tools.demo_audit import audit_demo_cases, render_demo_output_snapshot, validate_demo_case
@@ -233,6 +235,60 @@ def test_demo_outputs_do_not_use_vague_lipid_fallback_language():
             assert phrase not in text, f"{case_name} used vague phrase: {phrase}"
 
 
+def _demo_action_and_emr(case_name):
+    patient = build_demo_patient(case_name)
+    result = evaluate_patient(patient)
+    action = "\n".join(get_domain_recommendation_lines(patient, result, surface="action_card"))
+    emr = render_emr_note(patient, result)
+    patient_text = render_patient_roadmap_text(patient, result)
+    return action, emr, patient_text
+
+
+@pytest.mark.parametrize(
+    "case_name,action_terms,emr_terms",
+    [
+        (
+            "high_apob_discordance",
+            ("Discuss moderate-intensity statin", "ApoB 125; target <90"),
+            ("Moderate-intensity statin therapy is reasonable", "elevated ApoB particle burden"),
+        ),
+        (
+            "ckd_albuminuria",
+            ("Discuss moderate-intensity statin", "Monitor albuminuria"),
+            ("Moderate-intensity statin therapy is reasonable", "albuminuria"),
+        ),
+        (
+            "cac_300_high_plaque_burden",
+            ("High-intensity therapy indicated", "CAC 350"),
+            ("High-intensity lipid-lowering therapy indicated", "CAC 350 already measured"),
+        ),
+        (
+            "severe_secondary_prevention",
+            ("Secondary-prevention lipid therapy", "Antiplatelet therapy"),
+            ("secondary-prevention lipid-lowering therapy", "Antiplatelet therapy is indicated for secondary prevention"),
+        ),
+        (
+            "rheumatoid_arthritis_risk_enhancer",
+            ("Inflammatory risk enhancer", "RA is a risk enhancer"),
+            ("RA is a risk enhancer", "no lipid escalation"),
+        ),
+        (
+            "south_asian_ancestry_context",
+            ("Discuss moderate-intensity statin", "ApoB 108; target <90"),
+            ("Discuss moderate-intensity statin therapy", "South Asian ancestry"),
+        ),
+    ],
+)
+def test_demo_action_card_and_emr_recommendations_are_semantically_aligned(case_name, action_terms, emr_terms):
+    action, emr, patient_text = _demo_action_and_emr(case_name)
+
+    for term in action_terms:
+        assert term in action
+    for term in emr_terms:
+        assert term in emr
+    assert audit_cross_surface_alignment(action, emr, patient_text) == []
+
+
 def test_demo_audit_utility_flags_no_errors_and_expected_sparse_warning():
     report = audit_demo_cases()
 
@@ -285,9 +341,9 @@ def test_ckd_albuminuria_demo_is_action_oriented_without_passive_no_escalation()
     assert "No medication escalation today." not in emr
     assert "Moderate-intensity statin therapy is reasonable given borderline/intermediate ASCVD risk with albuminuria and metabolic risk-enhancing factors." in emr
     assert "Confirm persistent albuminuria with repeat UACR if not already confirmed; optimize kidney-protective therapy." in emr
-    assert "Treat BP toward goal <130/80 if tolerated." in emr
+    assert "Treat BP toward goal <130/80." in emr
     assert "Continue or optimize ACEi/ARB therapy if hypertension and persistent albuminuria are present." in emr
-    assert "Consider SGLT2 inhibitor if UACR is >=200 mg/g" in emr
+    assert "Consider SGLT2 inhibitor if UACR is >=200 mg/g" not in emr
     assert "hsCRP - inflammatory biomarker clarification" not in emr
     assert "Consider hsCRP only if inflammatory risk clarification would change management." in emr
 

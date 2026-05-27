@@ -14,23 +14,23 @@ Assessment:
 
 Recommendations:
 - Moderate-intensity statin therapy is reasonable given borderline/intermediate ASCVD risk with albuminuria and metabolic risk-enhancing factors.
+- CAC not performed; plaque burden unmeasured.
 - Confirm persistent albuminuria with repeat UACR if not already confirmed; optimize kidney-protective therapy.
 - Continue or optimize ACEi/ARB therapy if hypertension and persistent albuminuria are present.
-- Treat BP toward goal <130/80 if tolerated.
-- Consider SGLT2 inhibitor if UACR is >=200 mg/g, albuminuria persists at higher range, or CKD progression risk is elevated.
-- CAC not performed; plaque burden unmeasured.
+- Treat BP toward goal <130/80.
+- Glycemia / metabolic: Prediabetes prevention. A1c 5.8%; weight/activity focus.
 - Aspirin not indicated for routine primary prevention.
 - Consider hsCRP only if inflammatory risk clarification would change management.
 
 PATIENT ROADMAP:
 Your Prevention Roadmap
-Your results show where you stand today and the most important steps to lower future heart, kidney, and metabolic risk.
+Your results and next steps.
 
 STEP 1
 Where you stand:
 - 10-year ASCVD risk: 8.28%
 - Your 10-year ASCVD risk is elevated, so prevention and lipid-lowering therapy should be discussed with your clinician.
-- About 8 out of 100 similar patients may have a heart attack, stroke, or related artery disease event over the next 10 years.
+- About 8 in 100 similar patients may have a heart attack, stroke, or related artery disease event over 10 years.
 - Plaque status has not been measured.
 - Care focus: Level 3 (3B) - Actionable early CKM / atherogenic risk
 
@@ -59,18 +59,14 @@ Your next steps:
 2. Protect the kidneys: Review kidney protection options with your clinician.
 3. Additional testing: A calcium scan may help if treatment choices are still uncertain.
 
-This roadmap is for discussion with your clinician. Medication decisions should be individualized.
-
 ACTIONS:
-- Moderate-intensity statin therapy is reasonable given borderline/intermediate ASCVD risk with albuminuria and metabolic risk-enhancing factors.
-- Recheck lipid profile 4-12 weeks after starting or intensifying therapy, then every 6-12 months.
-- Confirm persistent albuminuria with repeat UACR if not already confirmed; optimize kidney-protective therapy.
-- Continue or optimize ACEi/ARB therapy if hypertension and persistent albuminuria are present.
-- Treat BP toward goal <130/80 if tolerated.
-- Consider SGLT2 inhibitor if UACR is >=200 mg/g, albuminuria persists at higher range, or CKD progression risk is elevated.
-- CAC not performed; plaque burden unmeasured.
-- Aspirin not indicated for routine primary prevention.
-- Consider hsCRP only if inflammatory risk clarification would change management.
+- Lipid lowering: Discuss moderate-intensity statin. LDL-C 118; target <100. ApoB 94; target <90.
+- CAC / plaque: Not measured. Plaque burden unmeasured.
+- Kidney protection: Monitor albuminuria. UACR 72; continue/optimize ACEi-ARB.
+- Blood pressure: Treat toward <130/80. Current 138/78.
+- Glycemia / metabolic: Prediabetes prevention. A1c 5.8%; weight/activity focus.
+- Aspirin / antiplatelet: Not routine for primary prevention. Do not start routine aspirin.
+- Data to clarify: Complete key data. hsCRP as relevant.
 
 RSS: 17
 RSS CONTRIBUTORS:

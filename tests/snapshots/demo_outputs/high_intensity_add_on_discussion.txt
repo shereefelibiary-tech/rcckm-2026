@@ -16,20 +16,22 @@ Assessment:
 
 Recommendations:
 - High-intensity lipid-lowering therapy indicated.
-- Aspirin only if bleeding risk is low after shared decision-making.
+- CAC 420 already measured; no repeat CAC needed for current decision-making.
 - Consider hsCRP only if inflammatory risk clarification would change management.
 - Clarification testing should not delay treatment.
+- Blood pressure: At goal. Current 126/74; goal <130/80.
+- Glycemia / metabolic: Prediabetes prevention. A1c 5.9%; weight/activity focus.
+- Aspirin only if bleeding risk is low after shared decision-making.
 
 PATIENT ROADMAP:
 Your Prevention Roadmap
-Your results show where you stand today and the most important steps to lower future heart, kidney, and metabolic risk.
+Your results and next steps.
 
 STEP 1
 Where you stand:
 - 10-year ASCVD risk: 7.86%
-- Coronary plaque is present, so prevention decisions should account for measured plaque burden in addition to risk estimates.
-- About 8 out of 100 similar patients may have a heart attack, stroke, or related artery disease event over the next 10 years.
-- Coronary calcium score: 420, showing a high amount of plaque.
+- About 8 in 100 similar patients may have a heart attack, stroke, or related artery disease event over 10 years.
+- CAC 420: high plaque burden.
 - Care focus: Level 5 - Very high risk
 
 STEP 2
@@ -57,15 +59,14 @@ Your next steps:
 1. Lower plaque-driving cholesterol: Discuss stronger cholesterol-lowering therapy.
 2. Aspirin safety: Do not start aspirin unless your clinician recommends it.
 
-This roadmap is for discussion with your clinician. Medication decisions should be individualized.
-
 ACTIONS:
-- High-intensity lipid-lowering therapy indicated; treat toward high-risk targets.
-- Recheck lipid profile 4-12 weeks after starting or intensifying therapy, then every 6-12 months.
-- CAC 420 already measured; no repeat CAC needed for current decision-making.
-- Aspirin may be considered only if bleeding risk is low after shared decision-making.
-- Consider hsCRP only if inflammatory risk clarification would change management.
-- Clarification testing should not delay treatment.
+- Lipid lowering: High-intensity therapy indicated. LDL-C 104; target <70. ApoB 102; target <80.
+- CAC / plaque: CAC 420.
+- Kidney protection: No kidney-risk signal. eGFR/UACR available.
+- Blood pressure: At goal. Current 126/74; goal <130/80.
+- Glycemia / metabolic: Prediabetes prevention. A1c 5.9%; weight/activity focus.
+- Aspirin / antiplatelet: Consider only if low bleeding risk. Shared decision-making.
+- Data to clarify: Complete key data. hsCRP, Clarification testing should not delay treatment. as relevant.
 
 RSS: 52
 RSS CONTRIBUTORS:

@@ -12,10 +12,11 @@ Assessment:
 
 Recommendations:
 - Short-term ASCVD risk is low, but albuminuria and longer-term risk make lipid-lowering worth discussing.
+- CAC reasonable if treatment decision remains uncertain.
 - Confirm persistent albuminuria with repeat UACR if not already confirmed; optimize kidney-protective therapy.
 - Continue or optimize ACEi/ARB therapy if hypertension and persistent albuminuria are present.
-- Consider SGLT2 inhibitor if UACR is >=200 mg/g, albuminuria persists at higher range, or CKD progression risk is elevated.
-- CAC reasonable if treatment decision remains uncertain.
+- Blood pressure: BP needed. No current BP available.
+- Glycemia / metabolic: Prediabetes prevention. A1c 6.1%; weight/activity focus.
 - Aspirin not indicated for routine primary prevention.
 - Lp(a) - one-time risk assessment
 - Consider hsCRP only if inflammatory risk clarification would change management.

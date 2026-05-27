@@ -1,12 +1,11 @@
 Your Prevention Roadmap
-Your results show where you stand today and the most important steps to lower future heart, kidney, and metabolic risk.
+Your results and next steps.
 
 STEP 1
 Where you stand:
 - 10-year ASCVD risk: 2.5%
-- Near-term estimated risk is low.
-- Known cardiovascular disease is present. The focus is secondary prevention: lowering the chance of future heart attack, stroke, or related artery disease events.
-- About 3 out of 100 similar patients may have a heart attack, stroke, or related artery disease event over the next 10 years.
+- Known cardiovascular disease is present.
+- About 3 in 100 similar patients may have a heart attack, stroke, or related artery disease event over 10 years.
 - Known cardiovascular disease is present.
 - Care focus: Level 5 - Very high risk
 
@@ -22,7 +21,5 @@ Your goals:
 STEP 4
 Your next steps:
 1. Lower plaque-driving cholesterol: Treat toward the cholesterol goals above.
-2. Additional testing: A calcium scan may help if treatment choices are still uncertain.
+2. Artery plaque: CAC already measured; no repeat scan needed for this decision.
 3. Aspirin safety: Do not start aspirin unless your clinician recommends it.
-
-This roadmap is for discussion with your clinician. Medication decisions should be individualized.

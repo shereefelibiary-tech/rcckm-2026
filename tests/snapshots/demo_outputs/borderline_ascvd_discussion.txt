@@ -15,27 +15,27 @@ Assessment:
 Recommendations:
 - Moderate-intensity statin therapy is reasonable given borderline ASCVD risk with risk-enhancing factors.
 - CAC may clarify plaque burden if treatment intensity remains uncertain.
-- Aspirin not indicated for routine primary prevention.
 - Treat BP toward goal <130/80.
+- Glycemia / metabolic: No glycemic action. A1c 5.5.
+- Aspirin not indicated for routine primary prevention.
 - Consider hsCRP only if inflammatory risk clarification would change management.
 
 PATIENT ROADMAP:
 Your Prevention Roadmap
-Your results show where you stand today and the most important steps to lower future heart, kidney, and metabolic risk.
+Your results and next steps.
 
 STEP 1
 Where you stand:
 - 10-year ASCVD risk: 5.8%
 - 30-year ASCVD risk: 18.6%
-- About 19 out of 100 similar patients may have a heart attack, stroke, or related artery disease event over the next 30 years.
-- Your 10-year ASCVD risk is moderate, and your 30-year risk is elevated enough to make prevention worth discussing.
-- About 6 out of 100 similar patients may have a heart attack, stroke, or related artery disease event over the next 10 years.
+- About 19 in 100 similar patients may have a heart attack, stroke, or related artery disease event over 30 years.
+- Longer-term ASCVD risk is elevated.
+- About 6 in 100 similar patients may have a heart attack, stroke, or related artery disease event over 10 years.
 - Plaque status has not been measured.
 - Care focus: Level 3 (3B) - Actionable early CKM / atherogenic risk
 
 STEP 2
 Why your risk is higher:
-- Near-term estimated risk may be low, but 30-year risk is elevated enough to justify prevention discussion.
 - Cholesterol particles: ApoB 102; LDL-C 134. These numbers help show plaque-driving cholesterol in the blood.
 - Blood sugar / diabetes: A1c 5.5%. Improving blood sugar can lower long-term heart, kidney, and metabolic risk.
 - Kidney protection: eGFR 88; UACR 8. Kidney markers also help estimate heart and metabolic risk.
@@ -58,15 +58,14 @@ Your next steps:
 2. Protect the kidneys: Review kidney protection options with your clinician.
 3. Additional testing: A calcium scan may help if treatment choices are still uncertain.
 
-This roadmap is for discussion with your clinician. Medication decisions should be individualized.
-
 ACTIONS:
-- Moderate-intensity statin therapy is reasonable given borderline ASCVD risk with risk-enhancing factors.
-- Recheck lipid profile 4-12 weeks after starting or intensifying therapy, then every 6-12 months.
-- CAC may clarify plaque burden if treatment intensity remains uncertain.
-- Aspirin not indicated for routine primary prevention.
-- Optimize BP to <130/80.
-- Consider hsCRP only if inflammatory risk clarification would change management.
+- Lipid lowering: Discuss moderate-intensity statin. LDL-C 134; target <100. ApoB 102; target <90.
+- CAC / plaque: CAC may clarify risk. Use only if it would change lipid-treatment intensity.
+- Kidney protection: No kidney-risk signal. eGFR/UACR available.
+- Blood pressure: Treat toward <130/80. Current 132/80.
+- Glycemia / metabolic: No glycemic action. A1c 5.5.
+- Aspirin / antiplatelet: Not routine for primary prevention. Do not start routine aspirin.
+- Data to clarify: Complete key data. hsCRP as relevant.
 
 RSS: 8
 RSS CONTRIBUTORS:

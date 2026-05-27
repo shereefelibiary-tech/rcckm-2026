@@ -3,6 +3,8 @@ try:
 except ModuleNotFoundError:
     st = None
 
+import time
+
 from ui.ingest_panel import parse_ingest_text, render_ingest_panel
 from ui.demo_case_gallery import (
     DEMO_CATEGORIES,
@@ -36,6 +38,10 @@ def _init_session_state():
     st.session_state.setdefault("parsed_ingest", {})
     st.session_state.setdefault("parse_report", {"parsed": {}, "meta": {}, "warnings": []})
     st.session_state.setdefault("parsed_needs_review", False)
+    st.session_state.setdefault("interpret_processing", False)
+    st.session_state.setdefault("interpret_started_at", None)
+    st.session_state.setdefault("last_detected_signal_chips", [])
+    st.session_state.setdefault("show_detected_signal_chips", False)
     st.session_state.setdefault("active_patient", None)
     st.session_state.setdefault("active_patient_source", None)
     st.session_state.setdefault("show_raw_renderer_html", False)
@@ -110,6 +116,52 @@ def _render_patient_debug(patient, source=None):
                 "warnings": summary.get("warnings") or [],
             }
         )
+
+
+SIGNAL_CHIP_FIELDS = (
+    ("ApoB", ("apob",)),
+    ("CAC", ("cac", "incidental_cac", "breast_arterial_calcification")),
+    ("UACR", ("uacr",)),
+    ("A1c", ("a1c",)),
+    (
+        "Family history",
+        (
+            "family_history_premature_ascvd",
+            "family_history_relationship",
+            "family_history_age_at_event",
+            "fhx_text",
+        ),
+    ),
+    ("Lp(a)", ("lp_a_value",)),
+    ("eGFR", ("egfr",)),
+    ("LDL-C", ("ldl_c",)),
+)
+
+
+def _detected_signal_chips(parse_report):
+    parsed = (parse_report or {}).get("parsed") or {}
+    chips = []
+    for label, fields in SIGNAL_CHIP_FIELDS:
+        if any(field in parsed and parsed.get(field) not in (None, "", False) for field in fields):
+            chips.append(label)
+    return chips[:6]
+
+
+def _render_signal_extraction_status(st, chips, *, fading=False):
+    if not chips:
+        return
+    chip_html = "".join(f"<span class='parse-chip'>{chip}</span>" for chip in chips)
+    fade_class = " parse-signal-chips-fade" if fading else ""
+    render_html(
+        st,
+        f"""
+        <div class="parse-signal-chips{fade_class}" aria-live="polite">
+          <span class="parse-signal-label">Detected</span>
+          <span class="parse-signal-pulse" aria-hidden="true"></span>
+          <span class="parse-chip-row">{chip_html}</span>
+        </div>
+        """,
+    )
 
 
 def main():
@@ -188,19 +240,46 @@ def main():
         st.session_state, current_worksheet_hash
     )
 
-    if st.button("Interpret reviewed worksheet", type="primary"):
-        st.session_state.parsed_needs_review = False
-        st.session_state.confirmed_diagnosis_names = []
-        patient = build_patient_from_inputs(inputs)
-        result, _rss_total, _rss_contributions = run_patient(patient)
-        store_interpretation(
-            st.session_state,
-            patient=patient,
-            result=result,
-            worksheet_hash=current_worksheet_hash,
-            source="Reviewed worksheet",
+    is_interpreting = bool(st.session_state.get("interpret_processing", False))
+    button_label = "Interpreting..." if is_interpreting else "Interpret risk"
+    if st.button(button_label, type="primary", disabled=is_interpreting):
+        st.session_state.interpret_processing = True
+        st.session_state.interpret_started_at = time.perf_counter()
+        st.session_state.last_detected_signal_chips = _detected_signal_chips(
+            st.session_state.get("parse_report")
         )
+        st.session_state.show_detected_signal_chips = False
+        st.rerun()
+
+    if is_interpreting:
+        detected_chips = st.session_state.get("last_detected_signal_chips", [])
+        _render_signal_extraction_status(st, detected_chips)
+        started = st.session_state.get("interpret_started_at") or time.perf_counter()
+        with st.spinner("Interpreting..."):
+            st.session_state.parsed_needs_review = False
+            st.session_state.confirmed_diagnosis_names = []
+            patient = build_patient_from_inputs(inputs)
+            result, _rss_total, _rss_contributions = run_patient(patient)
+            elapsed = time.perf_counter() - started
+            if elapsed < 0.65:
+                time.sleep(0.65 - elapsed)
+            store_interpretation(
+                st.session_state,
+                patient=patient,
+                result=result,
+                worksheet_hash=current_worksheet_hash,
+                source="Reviewed worksheet",
+            )
+        st.session_state.interpret_processing = False
+        st.session_state.interpret_started_at = None
+        st.session_state.show_detected_signal_chips = bool(detected_chips)
         worksheet_changed = False
+        st.rerun()
+
+    if st.session_state.get("show_detected_signal_chips"):
+        detected_chips = st.session_state.get("last_detected_signal_chips", [])
+        _render_signal_extraction_status(st, detected_chips, fading=True)
+        st.session_state.show_detected_signal_chips = False
 
     if report_can_render(st.session_state, current_worksheet_hash):
         render_report(st, st.session_state.active_patient)
@@ -209,12 +288,12 @@ def main():
             st.session_state.active_patient_source,
         )
     else:
-        message = "Review the worksheet, then click Interpret reviewed worksheet."
+        message = "Review the worksheet, then click Interpret risk."
         if worksheet_changed or (
             st.session_state.get("worksheet_dirty")
             and st.session_state.get("last_interpreted_worksheet_hash")
         ):
-            message = "Worksheet changed. Click Interpret reviewed worksheet to update the report."
+            message = "Worksheet changed. Click Interpret risk to update the report."
         render_html(
             st,
             f"""

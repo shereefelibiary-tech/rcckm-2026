@@ -44,7 +44,7 @@ def test_missing_uacr_triggers_clarifier_for_diabetes_and_bp_treated_contexts():
     assert diabetes_result.clarification["recommend_uacr"] is True
     assert bp_result.clarification["recommend_uacr"] is True
     assert "UACR" in build_clarifier_card_html(diabetes_result)
-    assert "complete kidney-risk assessment" in build_clarifier_card_html(diabetes_result)
+    assert "Additional tests that may help clarify:" in build_clarifier_card_html(diabetes_result)
 
 
 def test_bp_treated_missing_uacr_is_visually_prominent_in_audit_and_kdigo():
@@ -64,7 +64,7 @@ def test_bp_treated_missing_uacr_is_visually_prominent_in_audit_and_kdigo():
     assert "KDIGO incomplete: G2; UACR missing" in ckm_html
     assert "UACR missing; albuminuria not measured" in ckm_html
     assert "UACR" in clarifier_html
-    assert "complete kidney-risk assessment" in clarifier_html
+    assert "Additional tests that may help clarify:" in clarifier_html
     assert "UACR not available; obtain to complete kidney-risk assessment." in note
 
 

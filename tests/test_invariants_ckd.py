@@ -68,7 +68,8 @@ def test_sglt2_strong_soft_and_low_egfr_paths_are_distinct():
     soft = render_case_output(Patient(age=64, sex="male", egfr=55, uacr=80, diabetes=False, ace_arb=True))["outputs"]["actions"]
     low_egfr = render_case_output(Patient(age=64, sex="male", egfr=18, uacr=350, ace_arb=True))["outputs"]["actions"]
     assert "Add an SGLT2 inhibitor" in strong
-    assert "Consider SGLT2 inhibitor" in soft
+    assert "Consider SGLT2 inhibitor" not in soft
+    assert "Continue kidney-protective therapy and monitor UACR/eGFR." in soft
     assert "Add an SGLT2 inhibitor" not in low_egfr
     assert "not routinely recommended at this eGFR" in low_egfr
 

@@ -506,8 +506,6 @@ def _sglt2_action_text(patient, result=None):
         return "Add an SGLT2 inhibitor for kidney and cardiovascular protection if no contraindication, despite ACEi/ARB therapy."
     if _has_diabetes(patient) and uacr_value >= 30:
         return "Consider an SGLT2 inhibitor for kidney and cardiovascular protection given diabetes with albuminuric CKD."
-    if uacr_value >= 30:
-        return "Consider SGLT2 inhibitor if UACR is >=200 mg/g, albuminuria persists at higher range, or CKD progression risk is elevated."
     return None
 
 
@@ -685,6 +683,11 @@ def _lipid_action_text(patient, result):
     if _prevent_ascvd_5_to_7_5(result):
         return _prevent_lipid_recommendation(patient, result).emr_summary
     if _prevent_ascvd_3_to_5(result):
+        if bool(getattr(patient, "south_asian_ancestry", False)):
+            return (
+                "Discuss moderate-intensity statin therapy given South Asian ancestry, elevated ApoB/triglyceride "
+                "burden, and elevated 30-year ASCVD risk despite low 10-year ASCVD risk."
+            )
         return _prevent_lipid_recommendation(patient, result).emr_summary
     if _low_10yr_elevated_30yr_prevent_path(patient, result):
         return _prevent_lipid_recommendation(patient, result).emr_summary
@@ -837,7 +840,7 @@ def _build_treatment_actions(patient, result):
         and _level_3b_intermediate_prevent_path(result)
     ):
         bp_recommendation = (
-            "Treat BP toward goal <130/80 if tolerated."
+            "Treat BP toward goal <130/80."
             if _has_albuminuria(patient, result)
             else "Optimize BP to <130/80."
         )

@@ -15,20 +15,24 @@ Assessment:
 Recommendations:
 - Lipid lowering: no escalation based on current LDL-C/ApoB and ASCVD risk profile.
 - Continue lifestyle-based prevention.
+- CAC / plaque: Not measured. Plaque burden unmeasured.
+- Kidney protection: No kidney-risk signal. eGFR/UACR available.
+- Blood pressure: At goal. Current 108/68; goal <130/80.
+- Glycemia / metabolic: No glycemic action. A1c 5.2.
 - Aspirin not indicated for routine primary prevention.
+- Data to clarify: Key data available. Complete.
 
 PATIENT ROADMAP:
 Your Prevention Roadmap
-Your results show where you stand today and the most important steps to lower future heart, kidney, and metabolic risk.
+Your results and next steps.
 
 STEP 1
 Where you stand:
 - 10-year ASCVD risk: 0.16%
-- Near-term estimated risk is low.
 - 30-year ASCVD risk: 1.23%
-- About 1 out of 100 similar patients may have a heart attack, stroke, or related artery disease event over the next 30 years.
-- Your 10-year ASCVD risk is low, and your 30-year ASCVD risk helps guide prevention planning.
-- About 0 out of 100 similar patients may have a heart attack, stroke, or related artery disease event over the next 10 years.
+- About 1 in 100 similar patients may have a heart attack, stroke, or related artery disease event over 30 years.
+- 10-year ASCVD risk is low.
+- About 0 in 100 similar patients may have a heart attack, stroke, or related artery disease event over 10 years.
 - Plaque status has not been measured.
 - Care focus: Level 1 - Minimal risk signal
 
@@ -54,12 +58,14 @@ STEP 4
 Your next steps:
 1. Lower plaque-driving cholesterol: Treat toward the cholesterol goals above.
 
-This roadmap is for discussion with your clinician. Medication decisions should be individualized.
-
 ACTIONS:
-- Lipid lowering: no escalation based on current LDL-C/ApoB and ASCVD risk profile.
-- Continue lifestyle-based prevention.
-- Aspirin not indicated for routine primary prevention.
+- Lipid lowering: No lipid escalation. LDL-C 88. ApoB 70.
+- CAC / plaque: Not measured. Plaque burden unmeasured.
+- Kidney protection: No kidney-risk signal. eGFR/UACR available.
+- Blood pressure: At goal. Current 108/68; goal <130/80.
+- Glycemia / metabolic: No glycemic action. A1c 5.2.
+- Aspirin / antiplatelet: Not routine for primary prevention. Do not start routine aspirin.
+- Data to clarify: Key data available. Complete.
 
 RSS: 0
 RSS CONTRIBUTORS:

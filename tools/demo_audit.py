@@ -5,7 +5,7 @@ import re
 from dataclasses import dataclass, field
 from typing import Any
 
-from modules.actions.scaffold import build_action_recommendation_lines
+from modules.actions.scaffold import build_domain_actions, render_domain_actions_for_surface
 from renderers.clarifier_renderer import build_clarifier_card_html
 from renderers.emr_renderer import render_emr_note
 from renderers.patient_roadmap import render_patient_roadmap_text
@@ -262,7 +262,8 @@ def _strip_html(text: str) -> str:
 
 
 def _visible_demo_output(patient: Any, result: Any) -> str:
-    action_text = "\n".join(build_action_recommendation_lines(patient, result))
+    domains = build_domain_actions(patient, result)
+    action_text = "\n".join(render_domain_actions_for_surface(domains, surface="action_card"))
     clarifier_text = _strip_html(build_clarifier_card_html(result))
     return "\n".join(
         [
@@ -279,6 +280,7 @@ def render_demo_output_snapshot(case_name: str) -> str:
     label = next((label for label, name in DEMO_CASES if name == case_name), case_name)
     patient = build_demo_patient(case_name)
     result, rss_total, rss_contributions = run_patient(patient)
+    domains = build_domain_actions(patient, result)
     return "\n".join(
         [
             f"DEMO: {label}",
@@ -291,7 +293,7 @@ def render_demo_output_snapshot(case_name: str) -> str:
             render_patient_roadmap_text(patient, result),
             "",
             "ACTIONS:",
-            "\n".join(f"- {line}" for line in build_action_recommendation_lines(patient, result)),
+            "\n".join(f"- {line}" for line in render_domain_actions_for_surface(domains, surface="action_card")),
             "",
             f"RSS: {rss_total:g}",
             "RSS CONTRIBUTORS:",
