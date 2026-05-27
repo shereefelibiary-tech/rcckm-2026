@@ -186,7 +186,7 @@ def test_low_ascvd_without_major_enhancers_does_not_auto_recommend_statin():
             prevent_30y_ascvd=4.0,
         )
     )
-    assert "No medication escalation today" in actions
+    assert "Lipid lowering: no escalation based on current LDL-C/ApoB and ASCVD risk profile" in actions
     assert "statin therapy is generally recommended" not in actions
 
 

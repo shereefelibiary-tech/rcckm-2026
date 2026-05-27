@@ -2,7 +2,7 @@ RCCKM Demo Case Audit
 Cases checked: 32
 Errors: 0
 Warnings: 1
-Suggestions: 4
+Suggestions: 3
 
 Summary table:
 Score  Complete  Coherent  Readable  Showcase  Demo
@@ -30,17 +30,17 @@ Score  Complete  Coherent  Readable  Showcase  Demo
   100       100       100       100       100  Statin intolerance
   100       100       100       100       100  BP treated but above kidney goal
   100       100       100       100       100  ACEi/ARB with persistent albuminuria
+  100       100       100       100       100  Rheumatoid arthritis risk enhancer
   100       100       100       100       100  South Asian ancestry context
   100       100       100       100       100  Active smoker prevention visit
   100       100       100       100       100  Cancer survivor context
    98       100       100       100        94  Low 10-year / elevated 30-year risk
    98       100       100       100        94  High-intensity statin, add-on discussion
    98       100       100       100        94  Severe secondary prevention
-   98       100       100       100        94  Rheumatoid arthritis risk enhancer
    98        92       100       100       100  Multiple enhancers, missing ApoB/Lp(a)
 
 Strongest demos: Low-risk clean prevention, Borderline ASCVD discussion, Younger patient with premature family history
-Weakest demos: Severe secondary prevention, Rheumatoid arthritis risk enhancer, Multiple enhancers, missing ApoB/Lp(a)
+Weakest demos: High-intensity statin, add-on discussion, Severe secondary prevention, Multiple enhancers, missing ApoB/Lp(a)
 Sparse demos: Multiple enhancers, missing ApoB/Lp(a)
 Contradictory demos: none
 Demos needing rewrite: none
@@ -52,4 +52,3 @@ Suggestions:
 - Low 10-year / elevated 30-year risk: showcase concept may be too subtle: prevention opportunity
 - High-intensity statin, add-on discussion: showcase concept may be too subtle: add-on therapy
 - Severe secondary prevention: showcase concept may be too subtle: add-on therapy
-- Rheumatoid arthritis risk enhancer: showcase concept may be too subtle: rheumatoid arthritis

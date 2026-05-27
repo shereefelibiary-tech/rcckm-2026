@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from core.patient import Patient
 from core.engine import evaluate_patient
-from rcckm.governance import audit_result
+from rcckm.governance import audit_result, validate_recommendation_directness
 from rcckm.rule_trace import build_rule_traces
 from tests.helpers import render_all_outputs
 
@@ -130,6 +130,17 @@ def test_governance_flags_unsafe_or_overbroad_wording():
     assert "total cardiovascular risk" in messages
     assert "No medication escalation" in messages
     assert "hsCRP - inflammatory residual risk" in messages
+
+
+def test_governance_directness_validator_flags_vague_recommendations():
+    findings = validate_recommendation_directness(
+        "Treatment is reasonable. Lipid-lowering may be reasonable if risk-enhancing factors support treatment."
+    )
+    messages = " ".join(finding.message for finding in findings)
+
+    assert "treatment is reasonable" in messages.lower()
+    assert "may be reasonable if" in messages.lower()
+    assert "risk-enhancing factors support treatment" in messages.lower()
 
 
 def test_current_representative_outputs_pass_governance_safety():

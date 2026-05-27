@@ -15,7 +15,7 @@ Assessment:
 - Prediabetes (ICD: R73.03)
 
 Recommendations:
-- No medication escalation today.
+- Lipid lowering: no escalation based on current LDL-C/ApoB and ASCVD risk profile.
 - Continue lifestyle-based prevention.
 - CAC may clarify plaque burden if treatment intensity remains uncertain.
 - Aspirin not indicated for routine primary prevention.
@@ -58,13 +58,13 @@ Your goals:
 
 STEP 4
 Your next steps:
-1. Long-term prevention: Focus on weight, blood sugar, triglycerides, and long-term prevention.
+1. Lower plaque-driving cholesterol: Treat toward the cholesterol goals above.
 2. Additional testing: A calcium scan may help if treatment choices are still uncertain.
 
 This roadmap is for discussion with your clinician. Medication decisions should be individualized.
 
 ACTIONS:
-- No medication escalation today.
+- Lipid lowering: no escalation based on current LDL-C/ApoB and ASCVD risk profile.
 - Continue lifestyle-based prevention.
 - CAC may clarify plaque burden if treatment intensity remains uncertain.
 - Aspirin not indicated for routine primary prevention.

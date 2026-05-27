@@ -190,6 +190,49 @@ def test_high_apob_discordance_demo_is_apob_driven_and_actionable():
     )
 
 
+def test_rheumatoid_arthritis_demo_is_inflammatory_context_without_overtreatment():
+    patient = build_demo_patient("rheumatoid_arthritis_risk_enhancer")
+    result = evaluate_patient(patient)
+    text = render_demo_output_snapshot("rheumatoid_arthritis_risk_enhancer")
+
+    assert patient.rheumatoid_arthritis is True
+    assert result.level_classification["label"] == (
+        "Level 3A - low short-term ASCVD risk with inflammatory risk-enhancer context"
+    )
+    assert "Level 3A - low short-term ASCVD risk with inflammatory risk-enhancer context." in text
+    assert "10-year ASCVD risk: 1.54%" in text
+    assert "30-year ASCVD risk: 9.85%" in text
+    assert "Risk context: rheumatoid arthritis; premature family history of ASCVD" in text
+    assert "Existing rheumatoid arthritis; chronic inflammatory disease risk enhancer." in text
+    assert "No new cardiometabolic diagnosis candidates generated." in text
+    assert "Continue lifestyle-focused prevention; no lipid escalation today based on current LDL-C/ApoB and ASCVD risk profile." in text
+    assert "RA is a risk enhancer; ensure inflammation is clinically controlled and avoid undertreating traditional risk factors." in text
+    assert "CAC is not routinely needed at this risk level; use only if results would change lipid-treatment decisions." in text
+    assert "Aspirin not indicated for routine primary prevention." in text
+    assert "Level 3B - actionable early CKM / atherogenic risk" not in text
+    assert "Moderate-intensity statin therapy is reasonable" not in text
+    assert "High-intensity statin" not in text
+    assert "Consider hsCRP" not in text
+    assert "risk-enhancing factors" not in text
+    assert "high near-term risk" not in text.lower()
+
+
+def test_demo_outputs_do_not_use_vague_lipid_fallback_language():
+    forbidden = (
+        "No medication escalation today",
+        "Treatment is reasonable.",
+        "may be reasonable if risk-enhancing factors support treatment",
+        "if risk-enhancing factors or ApoB/LDL-C burden support treatment",
+        "risk-factor control",
+        "management as appropriate",
+        "follow clinically",
+    )
+    for _label, case_name in DEMO_CASES:
+        text = render_demo_output_snapshot(case_name)
+        for phrase in forbidden:
+            assert phrase not in text, f"{case_name} used vague phrase: {phrase}"
+
+
 def test_demo_audit_utility_flags_no_errors_and_expected_sparse_warning():
     report = audit_demo_cases()
 

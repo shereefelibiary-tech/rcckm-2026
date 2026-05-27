@@ -162,6 +162,25 @@ def _inflammatory_signal(patient) -> bool:
     )
 
 
+def _rheumatoid_arthritis_signal(patient) -> bool:
+    return bool(getattr(patient, "rheumatoid_arthritis", False))
+
+
+def _low_short_term_inflammatory_context(patient, result) -> bool:
+    if not (_rheumatoid_arthritis_signal(patient) and _has_premature_family_history(patient)):
+        return False
+    prevent_10y = _num(getattr(result, "prevent_10y_ascvd", None))
+    prevent_30y = _num(getattr(result, "prevent_30y_ascvd", None))
+    return bool(
+        prevent_10y is not None
+        and prevent_10y < 3
+        and (prevent_30y is None or prevent_30y < 15)
+        and not _has_diabetes(patient)
+        and not _kidney_signal(patient)
+        and not _severe_hyperchol(patient)
+    )
+
+
 def _enhancer_burden_count(patient) -> int:
     return sum(
         1
@@ -446,6 +465,17 @@ def classify_rcckm_level(patient, prevent_result=None, rss_result=None, diagnosi
             result,
             patient,
             "treatment discussion",
+        )
+
+    if _low_short_term_inflammatory_context(patient, result):
+        return _classification(
+            "3A",
+            "Level 3A - low short-term ASCVD risk with inflammatory risk-enhancer context",
+            "Rheumatoid arthritis is a chronic inflammatory risk enhancer, but current ASCVD risk and lipid burden do not require medication escalation.",
+            ["rheumatoid arthritis", "premature family history"],
+            result,
+            patient,
+            "lifestyle plus risk-enhancer review",
         )
 
     enhancer_count = _enhancer_burden_count(patient)

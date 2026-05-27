@@ -472,7 +472,7 @@ def _bp_value(patient):
 def _inflammatory_context(patient):
     labels = []
     for field, label in (
-        ("rheumatoid_arthritis", "RA"),
+        ("rheumatoid_arthritis", "rheumatoid arthritis"),
         ("sle", "SLE"),
         ("psoriasis", "psoriasis"),
         ("inflammatory_arthritis", "inflammatory arthritis"),
@@ -933,6 +933,15 @@ def _patient_next_steps(patient, result):
         elif "moderate-intensity statin" in lowered or "moderate-intensity lipid" in lowered:
             label = "Lower plaque-driving cholesterol"
             detail = "Discuss cholesterol-lowering therapy."
+        elif "no medication escalation" in lowered:
+            label = "Medication plan"
+            if "risk discussion" in lowered:
+                detail = "No lipid escalation today; review Lp(a), family history, and long-term prevention options."
+            else:
+                detail = "No lipid escalation based on current cholesterol and risk profile."
+        elif "no lipid escalation" in lowered:
+            label = "Cholesterol plan"
+            detail = "No lipid escalation based on current cholesterol and risk profile."
         elif "lipid" in lowered or "statin" in lowered:
             label = "Lower plaque-driving cholesterol"
             detail = "Treat toward the cholesterol goals above."
@@ -948,12 +957,6 @@ def _patient_next_steps(patient, result):
         elif "aspirin" in lowered or "antiplatelet" in lowered:
             label = "Aspirin safety"
             detail = "Do not start aspirin unless your clinician recommends it."
-        elif "no medication escalation" in lowered:
-            label = "Medication plan"
-            if "risk discussion" in lowered:
-                detail = "No medication escalation required today; review Lp(a), family history, and long-term prevention options."
-            else:
-                detail = "No medication escalation today."
         elif "continue lifestyle" in lowered:
             label = "Long-term prevention"
             detail = "Focus on weight, blood sugar, triglycerides, and long-term prevention."

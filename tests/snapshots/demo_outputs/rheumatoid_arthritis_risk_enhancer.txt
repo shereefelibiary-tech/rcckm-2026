@@ -4,19 +4,21 @@ CASE: rheumatoid_arthritis_risk_enhancer
 EMR:
 RISK CONTINUUM CKM
 
-Level 3B - actionable early CKM / atherogenic risk.
-10-year ASCVD risk: 4.2%.
-30-year ASCVD risk: 18.5%.
-CKM stage 0 with kidney G2A1 and plaque unmeasured / CAC not performed.
+Level 3A - low short-term ASCVD risk with inflammatory risk-enhancer context.
+10-year ASCVD risk: 1.54%.
+30-year ASCVD risk: 9.85%.
+CKM stage 0 with kidney G2A1.
+Risk context: rheumatoid arthritis; premature family history of ASCVD (Father MI age 49).
 
 Assessment:
-- No diagnosis candidates generated.
+- Existing rheumatoid arthritis; chronic inflammatory disease risk enhancer.
+- No new cardiometabolic diagnosis candidates generated.
 
 Recommendations:
-- Continue lifestyle-focused prevention; reassess risk as clinical data evolve.
-- CAC reasonable if treatment decision remains uncertain.
+- Continue lifestyle-focused prevention; no lipid escalation today based on current LDL-C/ApoB and ASCVD risk profile.
+- RA is a risk enhancer; ensure inflammation is clinically controlled and avoid undertreating traditional risk factors.
+- CAC is not routinely needed at this risk level; use only if results would change lipid-treatment decisions.
 - Aspirin not indicated for routine primary prevention.
-- Consider hsCRP only if inflammatory risk clarification would change management.
 
 PATIENT ROADMAP:
 Your Prevention Roadmap
@@ -24,28 +26,28 @@ Your results show where you stand today and the most important steps to lower fu
 
 STEP 1
 Where you stand:
-- 10-year ASCVD risk: 4.2%
-- 30-year ASCVD risk: 18.5%
-- About 19 out of 100 similar patients may have a heart attack, stroke, or related artery disease event over the next 30 years.
-- Your short-term risk is low, but your longer-term risk is higher than expected. This does not mean an event is likely soon. It means prevention now may lower your risk over time.
-- About 4 out of 100 similar patients may have a heart attack, stroke, or related artery disease event over the next 10 years.
+- 10-year ASCVD risk: 1.54%
+- Near-term estimated risk is low.
+- 30-year ASCVD risk: 9.85%
+- About 10 out of 100 similar patients may have a heart attack, stroke, or related artery disease event over the next 30 years.
+- Your 10-year ASCVD risk is low, and your 30-year ASCVD risk helps guide prevention planning.
+- About 2 out of 100 similar patients may have a heart attack, stroke, or related artery disease event over the next 10 years.
 - Plaque status has not been measured.
-- Care focus: Level 3 (3B) - Actionable early CKM / atherogenic risk
+- Care focus: Level 3 (3A) - Elevated long-term risk trajectory
 
 STEP 2
 Why your risk is higher:
-- Near-term risk is borderline, but 30-year risk and multiple early risk markers support prevention discussion.
 - Cholesterol particles: ApoB 94; LDL-C 132. These numbers help show plaque-driving cholesterol in the blood.
 - Blood sugar / diabetes: A1c 5.4%. Improving blood sugar can lower long-term heart, kidney, and metabolic risk.
 - Kidney protection: eGFR 86; UACR 7. Kidney markers also help estimate heart and metabolic risk.
 - Blood pressure: 124/76 mmHg. Keeping blood pressure in a safer range protects the heart, brain, and kidneys.
-- Other factors: Lp(a) 48 nmol/L; RA. These details can shape the prevention plan with your clinician.
-- Other context: Lp(a) 48 nmol/L; BP 124/76; RA.
+- Other factors: Lp(a) 48 nmol/L; Father MI age 49; hsCRP 1.2 mg/L; rheumatoid arthritis. These details can shape the prevention plan with your clinician.
+- Other context: Lp(a) 48 nmol/L; BP 124/76; Father MI age 49; hsCRP 1.2 mg/L; rheumatoid arthritis.
 
 STEP 3
 Your goals:
-- LDL-C: 132 mg/dL to <100 mg/dL
-- ApoB: 94 mg/dL to <90 mg/dL
+- LDL-C: 132 mg/dL to -
+- ApoB: 94 mg/dL to -
 - A1c: 5.4% to individualized
 - BP: 124/76 mmHg to <130/80 when appropriate
 - Kidney / albuminuria: 7 mg/g; G2A1 to reduce albuminuria / preserve eGFR
@@ -54,17 +56,17 @@ Your goals:
 STEP 4
 Your next steps:
 1. Long-term prevention: Focus on weight, blood sugar, triglycerides, and long-term prevention.
-2. Additional testing: A calcium scan may help if treatment choices are still uncertain.
 
 This roadmap is for discussion with your clinician. Medication decisions should be individualized.
 
 ACTIONS:
-- Continue lifestyle-focused prevention; reassess risk as clinical data evolve.
-- CAC reasonable for risk clarification if treatment decision remains uncertain.
+- Continue lifestyle-focused prevention; no lipid escalation today based on current LDL-C/ApoB and ASCVD risk profile.
+- RA is a risk enhancer; ensure inflammation is clinically controlled and avoid undertreating traditional risk factors.
+- CAC is not routinely needed at this risk level; use only if results would change lipid-treatment decisions.
 - Aspirin not indicated for routine primary prevention.
-- Consider hsCRP only if inflammatory risk clarification would change management.
 
-RSS: 6
+RSS: 9
 RSS CONTRIBUTORS:
 - ApoB elevation: 94.0 (+4)
+- Premature family history: Father MI age 49 (+3)
 - RA: True (+2)

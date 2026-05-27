@@ -456,7 +456,7 @@ def test_no_action_result_can_still_build_clear_scaffold():
 
     sections = build_action_scaffold(patient, result)
 
-    assert _section(sections, "Lipid therapy").line == "No medication escalation today."
+    assert _section(sections, "Lipid therapy").line == "Lipid lowering: no escalation based on current LDL-C/ApoB and ASCVD risk profile."
     assert _section(sections, "Lifestyle").line == "Continue lifestyle-based prevention."
     assert _section(sections, "Coronary calcium").line == "Plaque burden unmeasured."
 
@@ -496,12 +496,12 @@ def test_low_risk_complete_data_below_cac_age_threshold_stays_calm_without_cac_r
     recommendations = _recommendations_block(note)
 
     assert result.prevent_risk_category == RiskLevel.LOW
-    assert _section(sections, "Lipid therapy").line == "No medication escalation today."
+    assert _section(sections, "Lipid therapy").line == "Lipid lowering: no escalation based on current LDL-C/ApoB and ASCVD risk profile."
     assert _section(sections, "Lifestyle").line == "Continue lifestyle-based prevention."
     assert _section(sections, "Aspirin").line == "Aspirin not indicated for routine primary prevention."
     assert not any(section.label == "Coronary calcium" for section in sections)
     assert "- No diagnosis candidates generated." in note
-    assert "- No medication escalation today." in recommendations
+    assert "- Lipid lowering: no escalation based on current LDL-C/ApoB and ASCVD risk profile." in recommendations
     assert "- Continue lifestyle-based prevention." in recommendations
     assert "- Aspirin not indicated for routine primary prevention." in recommendations
     assert "CAC reasonable" not in recommendations

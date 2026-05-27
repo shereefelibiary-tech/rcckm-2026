@@ -371,7 +371,7 @@ def lipid_recommendation_from_prevent_band(
                 "none",
                 LOW_10YR_HIGH_30YR_CLINICIAN_SUMMARY,
                 LOW_10YR_HIGH_30YR_PATIENT_SUMMARY,
-                "Short-term ASCVD risk is low, but longer-term risk is elevated. Earlier lipid-lowering may be reasonable if risk-enhancing factors or ApoB/LDL-C burden support treatment.",
+                "Lipid lowering: review longer-term ASCVD risk and named enhancers before medication decisions; do not escalate from 30-year risk alone.",
                 "prevent_lipid_10yr_lt3_30yr_elevated_with_enhancer",
             )
         if in_lifetime_age and thirty_band in {"elevated_15_to_lt_30", "high_30_to_lt_50", "very_high_ge_50"}:

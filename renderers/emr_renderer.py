@@ -423,6 +423,8 @@ def _disease_context_sentence(patient, result):
 
 def _history_context_sentence(patient):
     parts = []
+    if getattr(patient, "rheumatoid_arthritis", False):
+        parts.append("rheumatoid arthritis")
     reproductive_summary = reproductive_history_summary(patient)
     if reproductive_summary:
         parts.append(f"reproductive history: {reproductive_summary}")
@@ -452,7 +454,10 @@ def _history_context_sentence(patient):
     ):
         family_summary = str(getattr(patient, "family_history_summary", "") or "").strip()
         if family_summary and family_summary.lower() != "premature family history of ascvd":
-            parts.append(f"premature family history ({family_summary})")
+            if getattr(patient, "rheumatoid_arthritis", False):
+                parts.append(f"premature family history of ASCVD ({family_summary})")
+            else:
+                parts.append(f"premature family history ({family_summary})")
         else:
             parts.append("premature family history of ASCVD")
     if not parts:
@@ -582,11 +587,16 @@ def render_emr_note(patient, result):
             review_ids=review_state.get("review_ids"),
         )
     confirmed_dx, review_dx = split_diagnoses(diagnosis_entries)
+    if getattr(patient, "rheumatoid_arthritis", False):
+        lines.append("- Existing rheumatoid arthritis; chronic inflammatory disease risk enhancer.")
     if confirmed_dx or review_dx:
         for line in _emr_assessment_lines(confirmed_dx):
             _append_unique(lines, _albuminuria_assessment_display(line, patient, result))
     else:
-        lines.append("- No diagnosis candidates generated.")
+        if getattr(patient, "rheumatoid_arthritis", False):
+            lines.append("- No new cardiometabolic diagnosis candidates generated.")
+        else:
+            lines.append("- No diagnosis candidates generated.")
 
     lines.extend(["", "Recommendations:"])
     recommendations = _young_family_metabolic_recommendations(patient, result)

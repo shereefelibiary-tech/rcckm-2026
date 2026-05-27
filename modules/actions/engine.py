@@ -177,6 +177,33 @@ def _has_premature_family_history(patient):
     )
 
 
+def _has_rheumatoid_arthritis(patient):
+    return bool(getattr(patient, "rheumatoid_arthritis", False))
+
+
+def _ra_low_short_term_context(patient, result):
+    if not (_has_rheumatoid_arthritis(patient) and _has_premature_family_history(patient)):
+        return False
+    risk_10y = _prevent_10y_ascvd_value(result)
+    prevent_30y = getattr(result, "prevent_30y_ascvd", None)
+    try:
+        prevent_30y = float(prevent_30y) if prevent_30y is not None else None
+    except (TypeError, ValueError):
+        prevent_30y = None
+    ldl_c = getattr(patient, "ldl_c", None)
+    apob = getattr(patient, "apob", None)
+    return bool(
+        risk_10y is not None
+        and risk_10y < PREVENT_ASCVD_EARLY_DISCUSSION_THRESHOLD
+        and (prevent_30y is None or prevent_30y < 15)
+        and (ldl_c is None or ldl_c < 160)
+        and (apob is None or apob < 120)
+        and not _has_diabetes(patient)
+        and not _has_ckd_or_albuminuria(patient, result)
+        and _cac_value(patient) is None
+    )
+
+
 def _has_elevated_lpa(patient):
     value = getattr(patient, "lp_a_value", None)
     unit = getattr(patient, "lp_a_unit", None)
@@ -245,7 +272,7 @@ def _prevent_elevated(result):
 def _prevent_high(result):
     return _risk_value(getattr(result, "prevent_risk_category", None)) == "HIGH" or (
         getattr(result, "prevent_10y_ascvd", None) is not None
-        and result.prevent_10y_ascvd >= 10
+        and result.prevent_10y_ascvd >= PREVENT_ASCVD_HIGH_THRESHOLD
     )
 
 
@@ -642,7 +669,7 @@ def _lipid_action_text(patient, result):
     if _has_hiv_pathway(patient):
         return "Statin therapy recommended/reasonable in HIV; review ART-statin interactions."
     if _low_with_lpa_reproductive_context(patient, result):
-        return "No medication escalation required today; clinician-patient risk discussion recommended given high Lp(a) and reproductive risk markers."
+        return "Lipid lowering: no escalation today; document elevated Lp(a) and reproductive risk markers as risk enhancers."
     if _near_level3_lipid_trajectory(patient, result):
         return "Clinician-patient risk discussion reasonable given near-threshold LDL/ApoB burden and 30-year trajectory."
     if _albuminuria_lipid_prevention_path(patient, result):
@@ -718,6 +745,20 @@ def _build_treatment_actions(patient, result):
             domains,
             "fasting_lipids",
             "Recheck fasting lipid profile after treatment changes.",
+        )
+
+    if _ra_low_short_term_context(patient, result):
+        _add_action(
+            recommendations,
+            domains,
+            "lipids",
+            "Continue lifestyle-focused prevention; no lipid escalation today based on current LDL-C/ApoB and ASCVD risk profile.",
+        )
+        _add_action(
+            recommendations,
+            domains,
+            "inflammation",
+            "RA is a risk enhancer; ensure inflammation is clinically controlled and avoid undertreating traditional risk factors.",
         )
 
     if _needs_lipid_action(patient, result):
@@ -1000,7 +1041,7 @@ def build_action_plan(patient, result):
             recommendations,
             domains,
             "none",
-            "No escalation indicated.",
+            "No medication changes based on current risk profile.",
         )
 
     if not _very_severe_tg(patient):

@@ -14,7 +14,7 @@ Assessment:
 - Elevated lipoprotein(a) (ICD: E78.41)
 
 Recommendations:
-- No medication escalation required today; clinician-patient risk discussion recommended given high Lp(a) and reproductive risk markers.
+- Lipid lowering: no escalation today; document elevated Lp(a) and reproductive risk markers as risk enhancers.
 - Continue lifestyle-based prevention.
 - CAC reasonable if treatment decision remains uncertain.
 - Aspirin not indicated for routine primary prevention.
@@ -54,13 +54,13 @@ Your goals:
 
 STEP 4
 Your next steps:
-1. Long-term prevention: Focus on weight, blood sugar, triglycerides, and long-term prevention.
+1. Lower plaque-driving cholesterol: Treat toward the cholesterol goals above.
 2. Additional testing: A calcium scan may help if treatment choices are still uncertain.
 
 This roadmap is for discussion with your clinician. Medication decisions should be individualized.
 
 ACTIONS:
-- No medication escalation required today; clinician-patient risk discussion recommended given high Lp(a) and reproductive risk markers.
+- Lipid lowering: no escalation today; document elevated Lp(a) and reproductive risk markers as risk enhancers.
 - Continue lifestyle-based prevention.
 - CAC reasonable for risk clarification if treatment decision remains uncertain.
 - Aspirin not indicated for routine primary prevention.

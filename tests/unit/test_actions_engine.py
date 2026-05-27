@@ -336,16 +336,16 @@ def test_build_action_plan_uses_clarification_when_no_treatment_escalation():
     )
 
 
-def test_build_action_plan_returns_no_escalation_when_no_signal():
+def test_build_action_plan_returns_domain_specific_neutral_status_when_no_signal():
     plan = build_action_plan(
         Patient(age=60, sex="male", lp_a_value=20, lp_a_unit="nmol/L"),
         RCCKMResult(),
     )
 
     assert plan == {
-        "dominant_action": "No escalation indicated.",
-        "recommendations": ["No escalation indicated."],
-        "domains": {"none": "No escalation indicated."},
+        "dominant_action": "No medication changes based on current risk profile.",
+        "recommendations": ["No medication changes based on current risk profile."],
+        "domains": {"none": "No medication changes based on current risk profile."},
     }
 
 

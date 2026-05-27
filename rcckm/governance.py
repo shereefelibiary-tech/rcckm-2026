@@ -24,6 +24,74 @@ CONTRADICTION_PAIRS = (
     ("aspirin not indicated", "aspirin may be considered"),
 )
 
+VAGUE_RECOMMENDATION_FRAGMENTS = (
+    "may be reasonable if",
+    "risk-enhancing factors support treatment",
+    "apob/ldl-c burden support treatment",
+    "as clinically indicated",
+    "optimize therapy",
+    "risk-factor control",
+    "management as appropriate",
+    "treatment is reasonable",
+    "consider treatment",
+    "address risk factors",
+    "follow clinically",
+)
+
+DIRECT_ACTION_VERBS = (
+    "start",
+    "discuss",
+    "continue",
+    "intensify",
+    "add",
+    "confirm",
+    "obtain",
+    "treat",
+    "review",
+    "avoid",
+    "document",
+    "reassess",
+    "check",
+    "repeat",
+    "lower",
+    "use",
+)
+
+DOMAIN_TERMS = (
+    "lipid",
+    "ldl",
+    "apob",
+    "statin",
+    "cac",
+    "plaque",
+    "kidney",
+    "uacr",
+    "egfr",
+    "bp",
+    "blood pressure",
+    "glyc",
+    "a1c",
+    "diabetes",
+    "aspirin",
+    "antiplatelet",
+    "lp(a)",
+    "hscrp",
+    "triglyceride",
+    "smoking",
+    "ra",
+    "inflammation",
+)
+
+NEUTRAL_STATUS_TERMS = (
+    "not indicated",
+    "not routine",
+    "not routinely",
+    "no escalation",
+    "no medication changes",
+    "key data available",
+    "at goal",
+)
+
 
 @dataclass
 class GovernanceFinding:
@@ -62,6 +130,37 @@ def _lower(text: str) -> str:
     return str(text or "").lower()
 
 
+def _is_allowed_appropriate_context(lowered: str) -> bool:
+    return bool(
+        "if clinically appropriate" in lowered
+        and ("antiplatelet" in lowered or "aspirin" in lowered)
+    )
+
+
+def validate_recommendation_directness(text: str) -> list[GovernanceFinding]:
+    """Flag vague recommendation language before it reaches output surfaces."""
+    findings: list[GovernanceFinding] = []
+    raw = str(text or "").strip()
+    if not raw:
+        return findings
+    lowered = _lower(raw)
+
+    if "no medication escalation today" in lowered:
+        _add(
+            findings,
+            "directness",
+            "Use domain-specific neutral wording instead of 'No medication escalation today'.",
+        )
+
+    for fragment in VAGUE_RECOMMENDATION_FRAGMENTS:
+        if fragment in lowered:
+            if fragment == "as clinically indicated" and _is_allowed_appropriate_context(lowered):
+                continue
+            _add(findings, "directness", f"Vague recommendation fragment present: {fragment}")
+
+    return findings
+
+
 def _has_actionable_therapy(patient: Any, result: Any) -> bool:
     domains = getattr(result, "action_domains", None) or {}
     actionable_domains = {
@@ -98,6 +197,8 @@ def validate_output_safety(patient: Any, result: Any, visible_text: str) -> list
     for fragment in FORBIDDEN_FRAGMENTS:
         if fragment.lower() in lowered:
             _add(findings, "terminology", f"Forbidden fragment present: {fragment}")
+
+    findings.extend(validate_recommendation_directness(text))
 
     if "total cardiovascular risk" in lowered and (
         "10-year ASCVD risk" in text or "30-year ASCVD risk" in text

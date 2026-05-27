@@ -11,6 +11,6 @@ Assessment:
 - Prediabetes (ICD: R73.03)
 
 Recommendations:
-- No medication escalation today.
+- Lipid lowering: no escalation based on current LDL-C/ApoB and ASCVD risk profile.
 - Continue lifestyle-based prevention.
 - Aspirin not indicated for routine primary prevention.

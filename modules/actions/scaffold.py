@@ -176,7 +176,7 @@ def _prevent_high(result: Any) -> bool:
     category = getattr(getattr(result, "prevent_risk_category", None), "value", None)
     category = category or getattr(result, "prevent_risk_category", None)
     risk = _num(getattr(result, "prevent_10y_ascvd", None))
-    return category == "HIGH" or (risk is not None and risk >= 10)
+    return category == "HIGH" or (risk is not None and risk >= 20)
 
 
 def _prevent_low(result: Any) -> bool:
@@ -218,6 +218,27 @@ def _has_premature_family_history(patient: Any) -> bool:
 
 def _low_with_lpa_family_context(patient: Any, result: Any) -> bool:
     return bool(_prevent_low(result) and _has_elevated_lpa(patient) and _has_premature_family_history(patient))
+
+
+def _has_rheumatoid_arthritis(patient: Any) -> bool:
+    return bool(getattr(patient, "rheumatoid_arthritis", False))
+
+
+def _ra_low_short_term_context(patient: Any, result: Any) -> bool:
+    if not (_has_rheumatoid_arthritis(patient) and _has_premature_family_history(patient)):
+        return False
+    risk_10y = _num(getattr(result, "prevent_10y_ascvd", None))
+    prevent_30y = _num(getattr(result, "prevent_30y_ascvd", None))
+    ldl_c = _num(getattr(patient, "ldl_c", None))
+    apob = _num(getattr(patient, "apob", None))
+    return bool(
+        risk_10y is not None
+        and risk_10y < 3
+        and (prevent_30y is None or prevent_30y < 15)
+        and (ldl_c is None or ldl_c < 160)
+        and (apob is None or apob < 120)
+        and _num(getattr(patient, "cac", None)) is None
+    )
 
 
 def _low_with_lpa_reproductive_context(patient: Any, result: Any) -> bool:
@@ -273,6 +294,7 @@ def _lipid_line(patient: Any, result: Any) -> str:
         "Consider hsCRP",
         "Repeat fasting",
         "No escalation",
+        "No medication changes",
         "Treatment is reasonable",
     )
     if dominant and not dominant.startswith(non_lipid_starts):
@@ -282,12 +304,12 @@ def _lipid_line(patient: Any, result: Any) -> str:
     if (ldl is not None and ldl >= 190) or bool(getattr(patient, "suspected_fh_hefh", False)):
         return "High-intensity or maximally tolerated statin therapy indicated."
     if _low_with_lpa_reproductive_context(patient, result):
-        return "No medication escalation required today; clinician-patient risk discussion recommended given high Lp(a) and reproductive risk markers."
+        return "Lipid lowering: no escalation today; document elevated Lp(a) and reproductive risk markers as risk enhancers."
     if _low_with_lpa_family_context(patient, result):
-        return "No medication escalation required today; clinician-patient risk discussion recommended given elevated Lp(a) and premature family history."
+        return "Lipid lowering: no escalation today; document elevated Lp(a) and premature family history as risk enhancers."
     if _prevent_high(result):
         return "Lipid-lowering therapy is indicated; treat toward high-risk targets."
-    return "No medication escalation today."
+    return "Lipid lowering: no escalation based on current LDL-C/ApoB and ASCVD risk profile."
 
 
 def _lipid_monitoring_item(patient: Any, result: Any) -> str | None:
@@ -333,6 +355,9 @@ def _cac_line(patient: Any, result: Any) -> str | None:
         line = "CAC not performed; plaque burden unmeasured."
     else:
         line = "Plaque burden unmeasured."
+
+    if _ra_low_short_term_context(patient, result):
+        return "CAC is not routinely needed at this risk level; use only if results would change lipid-treatment decisions."
 
     if cac_testing and not _clinical_ascvd(patient):
         return _domain_line(result, "cac_testing") or "CAC reasonable for risk clarification if treatment decision remains uncertain."
@@ -452,7 +477,7 @@ def build_action_scaffold(patient: Any, result: Any) -> list[ActionSection]:
 
     lipid_line = _lipid_line(patient, result)
     actionable_non_lipid_without_lipid_escalation = bool(
-        lipid_line.startswith("No medication escalation")
+        "no escalation" in lipid_line.lower()
         and any(
             domain in domains
             for domain in {
@@ -468,8 +493,10 @@ def build_action_scaffold(patient: Any, result: Any) -> list[ActionSection]:
     )
     if not actionable_non_lipid_without_lipid_escalation:
         sections.append(ActionSection("Lipid therapy", lipid_line))
-    if lipid_line.startswith("No medication escalation") and not actionable_non_lipid_without_lipid_escalation:
+    if "no escalation" in lipid_line.lower() and not actionable_non_lipid_without_lipid_escalation:
         sections.append(ActionSection("Lifestyle", "Continue lifestyle-based prevention."))
+    if "inflammation" in domains:
+        sections.append(ActionSection("Inflammation", _domain_line(result, "inflammation")))
     if "statin_intolerance" in domains:
         sections.append(
             ActionSection(
@@ -603,10 +630,10 @@ def _compact_lipid_item(line: str, monitoring: str | None = None) -> CompactActi
     if "lipid-lowering therapy" in lowered or "statin therapy" in lowered:
         subtitle = "Treat toward high-risk targets." if "high-risk targets" in lowered else "Treat toward lipid targets."
         return CompactActionItem("Intensify lipid-lowering", subtitle, detail, "lipids")
-    if lowered.startswith("no medication escalation") or lowered.startswith("no escalation"):
+    if "no escalation" in lowered:
         return CompactActionItem(
             "Continue lifestyle-focused prevention",
-            "No medication escalation today.",
+            "No lipid escalation based on current LDL-C/ApoB and ASCVD risk profile.",
             "",
             "lifestyle",
         )
@@ -807,9 +834,9 @@ def _line_to_lipid_readout(line: str) -> tuple[str, str, str, str]:
     if "low-intensity" in lowered:
         return "Low-intensity statin", "Use clinician-guided context.", "low", "consider"
     if "lifestyle" in lowered:
-        return "Lifestyle-focused", "No routine medication escalation.", "low", "neutral"
-    if "no medication escalation" in lowered or "no escalation" in lowered:
-        return "No medication escalation", "Continue lifestyle-focused prevention.", "none", "neutral"
+        return "Lifestyle-focused", "No routine lipid escalation.", "low", "neutral"
+    if "no escalation" in lowered:
+        return "No lipid escalation", "Current LDL-C/ApoB and risk profile do not support medication change.", "none", "neutral"
     if "lipid-lowering therapy" in lowered or "statin therapy" in lowered:
         return "Intensify lipid-lowering", "Treat toward lipid targets.", "moderate", "action"
     return "Review lipid plan", "Use risk context and targets.", "low", "consider"

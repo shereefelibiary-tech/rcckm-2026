@@ -428,7 +428,7 @@ def test_high_lpa_reproductive_low_prevent_stays_level_2b_with_cac_clarification
     assert "Elevated lipoprotein(a)" in note
     assert "reproductive history: Early menopause 44; Preeclampsia." in note
     assert "CAC reasonable for risk clarification if treatment decision remains uncertain" in actions
-    assert "No medication escalation required today; clinician-patient risk discussion recommended given high Lp(a) and reproductive risk markers" in actions
+    assert "Lipid lowering: no escalation today; document elevated Lp(a) and reproductive risk markers as risk enhancers" in actions
     assert "Aspirin not indicated for routine primary prevention" in note
     assert "kidney-protective" not in actions
     assert "subclinical coronary atherosclerosis" not in diagnoses.lower()
@@ -468,7 +468,7 @@ def test_level_2b_converging_early_signals_low_prevent_uses_formal_taxonomy():
     assert "kidney G1A1" in note
     assert "Atherogenic/metabolic burden:" not in note
     assert "reproductive history: Preeclampsia." in note
-    assert "No medication escalation today" in note
+    assert "Lipid lowering: no escalation based on current LDL-C/ApoB and ASCVD risk profile" in note
     assert "Continue lifestyle-based prevention" in note
 
 

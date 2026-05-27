@@ -8,7 +8,7 @@ Assessment:
 - No diagnosis candidates generated.
 
 Recommendations:
-- No medication escalation today.
+- Lipid lowering: no escalation based on current LDL-C/ApoB and ASCVD risk profile.
 - Continue lifestyle-based prevention.
 - CAC 0 measured; no calcified plaque detected.
 - Aspirin not indicated for routine primary prevention.

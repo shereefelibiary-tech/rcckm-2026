@@ -129,7 +129,7 @@
       "ckm_stage": 2,
       "prevent_category": "LOW",
       "required_diagnosis": "Prediabetes",
-      "required_action": "No escalation"
+      "required_action": "No medication changes based on current risk profile"
     },
     "required_phrases": [
       "Level 2B - converging early risk signals",
@@ -233,7 +233,7 @@
       "Level 3A - elevated long-term risk trajectory",
       "10-year ASCVD risk: 1.2%",
       "30-year ASCVD risk: 10.5%",
-      "No medication escalation today",
+      "Lipid lowering: no escalation based on current LDL-C/ApoB and ASCVD risk profile",
       "CAC may clarify plaque burden if treatment intensity remains uncertain",
       "Near-term estimated risk may be low, but 30-year risk is elevated enough to justify prevention discussion"
     ],
@@ -281,7 +281,7 @@
       "Level 2B - converging early risk signals",
       "Lp(a) 188 nmol/L",
       "premature family history",
-      "No medication escalation required today; clinician-patient risk discussion recommended given elevated Lp(a) and premature family history",
+      "Lipid lowering: no escalation today; document elevated Lp(a) and premature family history as risk enhancers",
       "CAC reasonable for risk clarification if treatment decision remains uncertain",
       "Aspirin not indicated for routine primary prevention",
       "Lp(a) and family history increase long-term risk context"
@@ -354,7 +354,7 @@
     ],
     "forbidden_phrases": [
       "BORDERLINE.",
-      "No medication escalation today",
+      "Lipid lowering: no escalation based on current LDL-C/ApoB and ASCVD risk profile",
       "Subclinical coronary atherosclerosis",
       "<div class=",
       "phenotype",
@@ -940,7 +940,7 @@
     ],
     "forbidden_phrases": [
       "BORDERLINE.",
-      "No medication escalation today",
+      "Lipid lowering: no escalation based on current LDL-C/ApoB and ASCVD risk profile",
       "Subclinical coronary atherosclerosis",
       "<div class=",
       "phenotype",
