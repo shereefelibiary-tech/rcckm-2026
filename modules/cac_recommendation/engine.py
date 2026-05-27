@@ -212,6 +212,16 @@ def build_cac_recommendation(patient, result):
         return "CAC reasonable for risk clarification if treatment decision remains uncertain."
 
     if risk_category == RiskLevel.LOW.value and _has_treatment_relevant_lipid_trajectory(patient, result):
+        apob = getattr(patient, "apob", None)
+        if (
+            apob is not None
+            and apob >= 120
+            and (
+                bool(getattr(patient, "family_history_premature_ascvd", False))
+                or bool(getattr(patient, "premature_fhx_ascvd", False))
+            )
+        ):
+            return "CAC may clarify plaque burden if the patient is hesitant or if treatment intensity remains uncertain."
         return "CAC may clarify plaque burden if treatment intensity remains uncertain."
 
     if risk_category == RiskLevel.LOW.value and _has_elevated_30y_trajectory(patient, result):

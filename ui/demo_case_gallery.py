@@ -202,7 +202,10 @@ DEMO_PATIENTS = {
         "uacr": 8,
         "cac_not_done": True,
         "smoker": False,
-        "family_history_premature_ascvd": False,
+        "family_history_premature_ascvd": True,
+        "family_history_relationship": "father",
+        "family_history_event_type": "MI",
+        "family_history_age_at_event": 49,
         "medications_raw": "none",
     },
     "ldl_high_apob_missing": {
@@ -1079,7 +1082,7 @@ DEMO_CASE_DESCRIPTIONS = {
         "Prediabetes and insulin-resistance pattern with reproductive history context."
     ),
     "high_apob_discordance": (
-        "ApoB is high despite only modest LDL-C, highlighting particle-burden discordance."
+        "Low 10-year risk, but elevated ApoB and premature family history make earlier lipid-lowering reasonable to discuss."
     ),
     "ldl_high_apob_missing": (
         "LDL-C is high while ApoB is missing, showing how RCCKM prompts particle-burden clarification."
@@ -1227,10 +1230,10 @@ DEMO_CASE_METADATA = {
     },
     "high_apob_discordance": {
         "category": "Atherogenic burden",
-        "expected_showcase_points": ("ApoB discordance", "particle burden"),
-        "expected_primary_action": "ApoB-informed lipid discussion.",
+        "expected_showcase_points": ("ApoB discordance", "particle burden", "premature family history"),
+        "expected_primary_action": "Discuss moderate-intensity statin.",
         "expected_level_or_level_range": "Level 3",
-        "expected_risk_framing": "Particle burden exceeds LDL-C impression.",
+        "expected_risk_framing": "Low 10-year risk with elevated ApoB and family-history context.",
     },
     "ldl_high_apob_missing": {
         "category": "Atherogenic burden",

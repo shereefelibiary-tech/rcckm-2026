@@ -396,6 +396,17 @@ def classify_rcckm_level(patient, prevent_result=None, rss_result=None, diagnosi
 
     if elevated_30y:
         if actionable or len(mild) >= 2:
+            apob = _num(getattr(patient, "apob", None))
+            if apob is not None and apob >= 120 and _has_premature_family_history(patient):
+                return _classification(
+                    "3B",
+                    "Level 3B - elevated lifetime ASCVD risk with ApoB-driven atherogenic burden",
+                    "Elevated 30-year trajectory plus ApoB particle burden and premature family history.",
+                    [f"30-year PREVENT ASCVD {prevent_30y:g}%", *actionable, *mild],
+                    result,
+                    patient,
+                    "treatment discussion",
+                )
             return _classification(
                 "3B",
                 "Level 3B - actionable early CKM / atherogenic risk",

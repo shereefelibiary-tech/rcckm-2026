@@ -418,7 +418,6 @@ def _supporting_items(result: Any) -> list[str]:
         "tg_diet": _domain_line(result, "tg_diet"),
         "rdn_referral": _domain_line(result, "rdn_referral"),
         "tg_pharmacotherapy": _domain_line(result, "tg_pharmacotherapy"),
-        "supplements": _domain_line(result, "supplements"),
     }
     domains = _domains(result)
     items = [mapping[key] for key in mapping if key in domains]

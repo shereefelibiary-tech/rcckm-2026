@@ -8,6 +8,7 @@ from modules.family_history.engine import (
     build_family_history_summary,
     compact_family_history_label,
     compact_family_history_payload,
+    compact_family_history_option_values,
     infer_compact_family_history_option,
     is_premature_ascvd_family_history,
 )
@@ -47,6 +48,12 @@ def test_compact_family_history_options_map_to_canonical_values():
     assert compact_family_history_label("father_premature_ascvd") == "Father <55"
     assert compact_family_history_label("mother_premature_ascvd") == "Mother <65"
     assert compact_family_history_label("sibling_premature_ascvd") == "Sibling"
+    assert compact_family_history_label("multiple_first_degree") == "Multiple first-degree relatives"
+    assert compact_family_history_label("other_premature_relative") == "Other premature relative"
+    labels = [compact_family_history_label(value) for value in compact_family_history_option_values()]
+    assert all("MI/stroke" not in label for label in labels)
+    assert all("PCI/CABG" not in label for label in labels)
+    assert all("Father with premature ASCVD" not in label for label in labels)
 
     father = compact_family_history_payload("father_premature_ascvd")
     assert father["family_history_premature_ascvd"] is True
@@ -63,9 +70,17 @@ def test_compact_family_history_selection_outputs_clean_clinical_summary():
 
     payload = build_family_history_payload(patient)
 
-    assert payload["summary"] == "Father before age 55"
+    assert payload["summary"] == "Father with premature ASCVD before age 55"
     assert payload["premature_fhx_ascvd"] is True
-    assert "Father with premature ASCVD" not in payload["summary"]
+
+
+def test_compact_mother_family_history_uses_clean_threshold_summary():
+    patient = Patient(age=50, sex="female", **compact_family_history_payload("mother_premature_ascvd"))
+
+    payload = build_family_history_payload(patient)
+
+    assert payload["summary"] == "Mother with premature ASCVD before age 65"
+    assert payload["premature_fhx_ascvd"] is True
 
 
 def test_compact_none_unknown_does_not_count_as_risk_enhancer():

@@ -164,6 +164,32 @@ def test_younger_premature_family_history_demo_output_uses_lifetime_trajectory_l
     assert "Risk context: premature family history of ASCVD (Father MI age 49)." in emr
 
 
+def test_high_apob_discordance_demo_is_apob_driven_and_actionable():
+    patient = build_demo_patient("high_apob_discordance")
+    result = evaluate_patient(patient)
+    text = render_demo_output_snapshot("high_apob_discordance")
+
+    assert patient.apob == 125
+    assert patient.family_history_premature_ascvd is True
+    assert patient.family_history_relationship == "father"
+    assert result.level_classification["label"] == (
+        "Level 3B - elevated lifetime ASCVD risk with ApoB-driven atherogenic burden"
+    )
+    assert "Level 3B - elevated lifetime ASCVD risk with ApoB-driven atherogenic burden." in text
+    assert "Moderate-intensity statin therapy is reasonable given elevated ApoB particle burden, premature family history, and elevated 30-year ASCVD risk despite low 10-year ASCVD risk." in text
+    assert "elevated ApoB particle burden" in text
+    assert "premature family history" in text
+    assert "low 10-year ASCVD risk" in text
+    assert "CAC may clarify plaque burden if the patient is hesitant or if treatment intensity remains uncertain." in text
+    assert "Aspirin not indicated for routine primary prevention." in text
+    assert "if risk-enhancing factors or ApoB/LDL-C burden support treatment" not in text
+    assert "high near-term risk" not in text.lower()
+    assert "High-intensity statin" not in text
+    assert demo_case_description("high_apob_discordance") == (
+        "Low 10-year risk, but elevated ApoB and premature family history make earlier lipid-lowering reasonable to discuss."
+    )
+
+
 def test_demo_audit_utility_flags_no_errors_and_expected_sparse_warning():
     report = audit_demo_cases()
 

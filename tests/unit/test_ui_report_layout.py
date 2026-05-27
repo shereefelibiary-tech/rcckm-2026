@@ -1,7 +1,20 @@
-from ui.input_worksheet import build_patient_from_inputs, label_with_unit
+import inspect
+
+from ui.input_worksheet import (
+    _parsed_with_bmi_fallback,
+    build_patient_from_inputs,
+    label_with_unit,
+    render_incidental_cac_control,
+    render_manual_worksheet,
+)
 from ui.report_state import hash_worksheet_state, worksheet_payload_from_source
+from ui.theme import apply_global_theme
 from core.patient import Patient
 from core.results import DiagnosisCandidate, RCCKMResult
+from modules.family_history.engine import (
+    PREMATURE_FAMILY_HISTORY_HELP,
+    compact_family_history_label,
+)
 from modules.risk_enhancers.masld import MASLD_SHORT_LABEL, MASLD_TOOLTIP
 from ui.diagnosis_confirm_panel import prioritize_linked_diagnoses
 from ui.report_layout import (
@@ -467,11 +480,15 @@ def test_targets_card_prioritizes_ldl_and_apob_by_default():
     html = _build_targets_html(result, patient)
 
     assert "targets-compact" in html
-    assert "target-line" in html
+    assert "targets-primary-grid" in html
+    assert "grid-template-columns: repeat(2, minmax(120px, 180px))" in html
+    assert "max-width: 420px" in html
     assert "target-item" in html
     assert "target-main" in html
     assert "target-name" in html
     assert "target-goal" in html
+    assert "text-align: right" not in html
+    assert "grid-template-columns: minmax(130px, 1fr) auto" not in html
     assert "target-strip" not in html
     assert "target-cell" not in html
     assert "LDL-C" in html
@@ -485,6 +502,8 @@ def test_targets_card_prioritizes_ldl_and_apob_by_default():
     assert "Calculated from total cholesterol minus HDL-C." not in html
     assert html.count('<span class="target-item">') == 2
     assert html.count('<span class="target-main">') == 2
+    assert html.index("LDL-C") < html.index("&lt;70 mg/dL") < html.index("Current 132")
+    assert html.index("ApoB") < html.index("&lt;80 mg/dL") < html.index("Current 110")
     assert 'content: "•"' not in html
     assert "ApoB is shown as an RCCKM advanced particle target." not in html
     assert "Show target rationale" in html
@@ -791,7 +810,9 @@ def test_ingest_populates_editable_worksheet_fields():
     assert _value_by_label(at.text_input, "A1c") == "7.1"
     assert _value_by_label(at.checkbox, "Smoking") is True
     assert _value_by_label(at.checkbox, "Lipid lowering") is True
-    assert _value_by_label(at.selectbox, "Event type") == "MI"
+    assert _value_by_label(at.selectbox, "Premature family history") == "father_premature_ascvd"
+    assert at.session_state["input_family_history_event_type"] == "MI"
+    assert at.session_state["input_family_history_age_at_event"] == 49
 
     for widget in at.text_input:
         if _label_matches(widget, "LDL-C"):
@@ -799,6 +820,42 @@ def test_ingest_populates_editable_worksheet_fields():
             break
 
     assert _value_by_label(at.text_input, "LDL-C") == "130"
+
+
+def test_premature_family_history_dropdown_uses_short_old_style_labels():
+    from streamlit.testing.v1 import AppTest
+
+    at = AppTest.from_file("app.py")
+    at.run(timeout=10)
+
+    widget = next(item for item in at.selectbox if item.label == "Premature family history")
+    labels = list(widget.options)
+
+    assert labels == [
+        "None / Unknown",
+        "Father <55",
+        "Mother <65",
+        "Sibling",
+        "Multiple first-degree relatives",
+        "Other premature relative",
+    ]
+    assert all("MI/stroke" not in label for label in labels)
+    assert all("PCI/CABG" not in label for label in labels)
+    assert all("Father with premature ASCVD" not in label for label in labels)
+    assert widget.proto.help == PREMATURE_FAMILY_HISTORY_HELP
+
+
+def test_family_history_details_editor_is_not_rendered_in_default_worksheet():
+    from streamlit.testing.v1 import AppTest
+
+    at = AppTest.from_file("app.py")
+    at.run(timeout=10)
+
+    markdown_text = "\n".join(str(message.value) for message in at.markdown)
+    assert "Edit family history details" not in markdown_text
+    assert not any(widget.label == "Event type" for widget in at.selectbox)
+    assert not any(widget.label == "Age at event" for widget in at.text_input)
+    assert any(widget.label == "Premature family history" for widget in at.selectbox)
 
 
 def test_ingest_clear_button_clears_paste_and_parse_state_without_erasing_worksheet():
@@ -897,18 +954,44 @@ def test_worksheet_numeric_labels_include_compact_units():
         label_with_unit("Weight", "lb"),
         label_with_unit("BMI", "kg/m²"),
         label_with_unit("eGFR", "mL/min/1.73m²"),
-        label_with_unit("Creatinine", "mg/dL"),
         label_with_unit("UACR", "mg/g"),
         label_with_unit("CAC score", "Agatston"),
         label_with_unit("hsCRP", "mg/L"),
     }
 
     assert expected_labels.issubset(labels)
+    assert label_with_unit("Creatinine", "mg/dL") not in labels
     assert any(widget.label == "Lp(a) unit" for widget in at.selectbox)
     assert "US lipid units shown; convert mmol/L before entry." in "\n".join(
         caption.value for caption in at.caption
     )
     assert not any("<span" in label or "</span>" in label for label in labels)
+
+
+def test_metabolic_kidney_uses_bmi_as_primary_visible_body_size_field():
+    source = inspect.getsource(render_manual_worksheet)
+
+    metabolic_start = source.index('section_heading(st, "Metabolic / Kidney")')
+    calcification_start = source.index('section_heading(st, "Calcification / plaque imaging")')
+    metabolic_source = source[metabolic_start:calcification_start]
+
+    assert 'inputs["bmi"] = _numeric_input(st, "BMI", bmi_parsed, "bmi"' in metabolic_source
+    assert '"Edit height/weight source"' in metabolic_source
+    assert metabolic_source.index('"BMI"') < metabolic_source.index('"Edit height/weight source"')
+    assert metabolic_source.index('"A1c"') < metabolic_source.index('"Edit height/weight source"')
+    assert metabolic_source.index('"eGFR"') < metabolic_source.index('"Edit height/weight source"')
+    assert metabolic_source.index('"UACR"') < metabolic_source.index('"Edit height/weight source"')
+    assert metabolic_source.index('"Height"') > metabolic_source.index('"Edit height/weight source"')
+    assert metabolic_source.index('"Weight"') > metabolic_source.index('"Edit height/weight source"')
+
+
+def test_bmi_prefills_from_height_weight_when_bmi_missing():
+    parsed = {"height_in": 69, "weight_lb": 210, "bmi": None}
+
+    values = _parsed_with_bmi_fallback(parsed)
+
+    assert values["bmi"] == 31.0
+    assert parsed["bmi"] is None
 
 
 def test_worksheet_masld_checkbox_uses_compact_label_with_tooltip():
@@ -920,7 +1003,367 @@ def test_worksheet_masld_checkbox_uses_compact_label_with_tooltip():
     masld_checkbox = next(widget for widget in at.checkbox if widget.key == "input_masld")
     assert masld_checkbox.label == MASLD_SHORT_LABEL
     assert masld_checkbox.proto.help == MASLD_TOOLTIP
+    assert masld_checkbox.proto.help == "Metabolic dysfunction-associated steatotic liver disease."
+    assert "means" not in masld_checkbox.proto.help
+    assert "often called" not in masld_checkbox.proto.help
     assert all(widget.label != "Metabolic fatty liver disease" for widget in at.checkbox)
+
+
+def test_worksheet_theme_standardizes_field_sizing_and_labels():
+    fake_st = _FakeStreamlit()
+
+    apply_global_theme(fake_st)
+
+    css = "\n".join(message[1] for message in fake_st.messages if message[0] == "markdown")
+    assert "--worksheet-field-height: 40px" in css
+    assert "--worksheet-field-radius: 10px" in css
+    assert "--worksheet-label-font-size: 13px" in css
+    assert "--worksheet-input-font-size: 15px" in css
+    assert "min-height: var(--worksheet-field-height)" in css
+    assert "white-space: nowrap" in css
+    assert "border-radius: var(--worksheet-field-radius)" in css
+    assert 'div[data-testid="stButton"] button {\n    border: 1px solid rgba(11, 31, 58, 0.18) !important;\n    border-radius: var(--worksheet-field-radius)' in css
+    assert "div[data-testid=\"stNumberInput\"] > div" in css
+    assert ".worksheet-control-label-spacer" in css
+    assert ".incidental-cac-control-marker" in css
+    assert ".incidental-cac-severity-label" in css
+    assert 'div[data-testid="stElementContainer"]:has(div[data-testid="stCheckbox"])' in css
+    assert "flex-direction: row" in css
+
+
+def test_worksheet_sections_use_regular_grid_columns():
+    source = inspect.getsource(render_manual_worksheet)
+
+    assert 'metabolic_cols = st.columns([0.9, 0.9, 0.9, 0.9], gap="small")' in source
+    assert '"Edit height/weight source"' in source
+    assert 'st, "Creatinine", parsed, "creatinine"' not in source
+    assert 'section_heading(st, "Calcification / plaque imaging")' in source
+    assert 'section_heading(st, "Family history / lipid genetics")' in source
+    assert 'section_heading(st, "Additional context")' in source
+    assert 'section_heading(st, "Plaque / History / Enhancers")' not in source
+    assert 'cac_cols = st.columns([2.15, 0.72, 0.52, 1.0], gap="small")' in source
+    assert '"No CAC"' in source
+    assert 'calcification_cols = st.columns([3.15, 2.2], gap="small")' in source
+    assert 'family_cols = st.columns([1.35, 3.65], gap="small")' in source
+    assert 'context_cols = st.columns([1.25, 0.62, 0.74], gap="small")' in source
+    assert "render_incidental_cac_control(st, parsed)" in source
+    assert "render_ancestry_context_control(st, parsed)" in source
+    assert "Inflammatory / autoimmune" in source
+    assert "HIV / cancer context" in source
+    assert "More context" in source
+    assert "Edit family history details" not in source
+    family_index = source.index('section_heading(st, "Family history / lipid genetics")')
+    additional_context_index = source.index('section_heading(st, "Additional context")')
+    family_source = source[family_index:additional_context_index]
+    assert '"Event type"' not in family_source
+    assert '"Age at event"' not in family_source
+    assert "incidental_cols" not in source
+    assert "_control_label_spacer(st)" in source
+
+
+def test_clinical_ascvd_lives_with_core_inputs_not_plaque_imaging():
+    source = inspect.getsource(render_manual_worksheet)
+
+    core_index = source.index('section_heading(st, "Core inputs")')
+    clinical_index = source.index('"Clinical ASCVD"')
+    calcification_index = source.index('section_heading(st, "Calcification / plaque imaging")')
+
+    assert core_index < clinical_index < calcification_index
+
+
+def test_incidental_cac_control_is_single_marked_component():
+    source = inspect.getsource(render_incidental_cac_control)
+
+    assert "incidental-cac-control-marker" in source
+    assert "incidental-cac-severity-label" in source
+    assert "_checkbox_input(" in source
+    assert "st.selectbox(" in source
+    assert "st.columns" not in source
+    assert 'label_visibility="collapsed"' in source
+
+
+def test_incidental_cac_severity_is_linked_to_checkbox_state():
+    from streamlit.testing.v1 import AppTest
+
+    at = AppTest.from_file("app.py")
+    at.run(timeout=10)
+
+    severity = next(widget for widget in at.selectbox if widget.key == "input_incidental_cac_severity")
+    assert severity.label == "Severity"
+    assert severity.proto.disabled is True
+    assert list(severity.options) == ["not applicable"]
+    assert severity.value == "not applicable"
+
+    incidental = next(widget for widget in at.checkbox if widget.key == "input_incidental_cac")
+    incidental.set_value(True).run(timeout=10)
+
+    severity = next(widget for widget in at.selectbox if widget.key == "input_incidental_cac_severity")
+    assert severity.proto.disabled is False
+    assert list(severity.options) == ["present", "mild", "moderate", "severe"]
+    assert severity.value == "present"
+
+
+def test_unchecked_incidental_cac_ignores_stale_severity():
+    patient = build_patient_from_inputs(
+        {
+            "age": 55,
+            "sex": "male",
+            "incidental_cac": False,
+            "incidental_cac_severity": "severe",
+        }
+    )
+
+    assert patient.incidental_cac is False
+    assert patient.incidental_cac_severity is None
+
+
+def test_default_medication_panel_does_not_show_lipid_supplements_checkbox():
+    from streamlit.testing.v1 import AppTest
+
+    at = AppTest.from_file("app.py")
+    at.run(timeout=10)
+
+    checkbox_labels = {widget.label for widget in at.checkbox}
+    assert "Lipid lowering" in checkbox_labels
+    assert "BP meds" in checkbox_labels
+    assert "SGLT2" in checkbox_labels
+    assert "GLP1" in checkbox_labels
+    assert "ACE/ARB" in checkbox_labels
+    assert "Lipid supplements" not in checkbox_labels
+
+
+def test_low_actionability_context_fields_are_not_in_default_worksheet():
+    from streamlit.testing.v1 import AppTest
+
+    at = AppTest.from_file("app.py")
+    at.run(timeout=10)
+
+    visible_text = "\n".join(str(message.value) for message in at.markdown)
+    text_input_labels = {widget.label for widget in at.text_input}
+    assert "ZIP / SDOH support" not in text_input_labels
+    assert "Neighborhood context" not in text_input_labels
+    assert "Other ancestry/context" not in text_input_labels
+    assert "ZIP / SDOH support" not in visible_text
+    assert "Neighborhood context" not in visible_text
+    assert "Other ancestry/context" not in visible_text
+    checkbox_labels = {widget.label for widget in at.checkbox}
+    assert "South Asian" in checkbox_labels
+    assert "Filipino" in checkbox_labels
+
+
+def test_low_actionability_context_values_do_not_change_patient_output_state():
+    patient = build_patient_from_inputs(
+        {
+            "age": 55,
+            "sex": "female",
+            "zip_code": "29201",
+            "neighborhood_sdoh_context": "manual note",
+            "higher_risk_ancestry_context": "manual ancestry text",
+        }
+    )
+
+    assert patient.zip_code is None
+    assert patient.neighborhood_sdoh_context is None
+    assert patient.higher_risk_ancestry_context is None
+
+
+def test_generic_inflammatory_disease_is_advanced_and_renamed():
+    from streamlit.testing.v1 import AppTest
+
+    at = AppTest.from_file("app.py")
+    at.run(timeout=10)
+
+    checkbox_labels = {widget.label for widget in at.checkbox}
+    assert "Inflammatory disease" not in checkbox_labels
+    assert "Other chronic inflammatory disease" in checkbox_labels
+    assert "Inflammatory arthritis" in checkbox_labels
+
+    generic = next(
+        widget for widget in at.checkbox if widget.key == "input_inflammatory_disease"
+    )
+    assert generic.label == "Other chronic inflammatory disease"
+    assert (
+        generic.proto.help
+        == "Persistent systemic inflammation can act as an ASCVD risk enhancer."
+    )
+
+
+def test_inflammatory_autoimmune_fields_have_conservative_help_text():
+    from streamlit.testing.v1 import AppTest
+
+    at = AppTest.from_file("app.py")
+    at.run(timeout=10)
+
+    expected = {
+        "input_rheumatoid_arthritis": (
+            "RA",
+            "Rheumatoid arthritis is associated with higher ASCVD risk, especially with active or longstanding disease.",
+            ("higher ASCVD risk",),
+        ),
+        "input_sle": (
+            "SLE",
+            "Lupus is associated with higher premature ASCVD risk, especially with active disease or kidney involvement.",
+            ("premature ASCVD risk",),
+        ),
+        "input_psoriasis": (
+            "Psoriasis",
+            "Psoriasis is associated with higher ASCVD risk, especially when moderate-to-severe or with psoriatic arthritis.",
+            ("higher ASCVD risk",),
+        ),
+        "input_ibd": (
+            "IBD",
+            "Inflammatory bowel disease is associated with higher ASCVD risk, especially during active inflammation.",
+            ("active inflammation",),
+        ),
+        "input_inflammatory_arthritis": (
+            "Inflammatory arthritis",
+            "Chronic inflammatory arthritis can raise ASCVD risk, especially when active or longstanding.",
+            ("raise ASCVD risk",),
+        ),
+        "input_inflammatory_disease": (
+            "Other chronic inflammatory disease",
+            "Persistent systemic inflammation can act as an ASCVD risk enhancer.",
+            ("ASCVD risk enhancer",),
+        ),
+    }
+
+    for key, (label, tooltip, required_phrases) in expected.items():
+        widget = next(item for item in at.checkbox if item.key == key)
+        assert widget.label == label
+        assert widget.proto.help == tooltip
+        assert all(phrase in widget.proto.help for phrase in required_phrases)
+        assert widget.proto.help.count(".") == 1
+        assert "diagnose ASCVD" not in widget.proto.help
+        assert "automatic" not in widget.proto.help.lower()
+
+
+def test_diabetes_specific_enhancers_are_conditional_and_abi_label_is_clear():
+    from streamlit.testing.v1 import AppTest
+
+    source = inspect.getsource(render_manual_worksheet)
+    assert "if diabetes_specific_context:" in source
+    assert '"Edit diabetes-specific risk enhancers"' in source
+
+    at = AppTest.from_file("app.py")
+    at.run(timeout=10)
+
+    diabetes = next(widget for widget in at.checkbox if widget.key == "input_diabetes")
+    if not diabetes.value:
+        diabetes.set_value(True).run(timeout=10)
+
+    checkbox_labels = {widget.label for widget in at.checkbox}
+    text_labels = {widget.label for widget in at.text_input}
+    assert "Retinopathy" in checkbox_labels
+    assert "Neuropathy" in checkbox_labels
+    assert "ABI <0.9 / PAD evidence" in checkbox_labels
+    assert "ABI" in text_labels
+
+    duration = next(
+        widget for widget in at.text_input if widget.key == "input_diabetes_duration_years"
+    )
+    assert duration.label == "Diabetes duration"
+    assert duration.proto.help == (
+        "Longer diabetes duration can increase cardiovascular and kidney risk, especially when complications or other risk enhancers are present."
+    )
+
+    retinopathy = next(
+        widget for widget in at.checkbox if widget.key == "input_diabetic_retinopathy"
+    )
+    assert retinopathy.proto.help == (
+        "Diabetic retinopathy is a microvascular complication and can indicate higher overall diabetes-related vascular risk."
+    )
+
+    neuropathy = next(
+        widget for widget in at.checkbox if widget.key == "input_diabetic_neuropathy"
+    )
+    assert neuropathy.proto.help == (
+        "Diabetic neuropathy is a diabetes complication and can indicate more established metabolic/vascular disease."
+    )
+
+    abi_checkbox = next(widget for widget in at.checkbox if widget.key == "input_abi_lt_0_9")
+    assert abi_checkbox.proto.help == (
+        "ABI <0.9 may indicate peripheral artery disease. If PAD is confirmed, this is clinical ASCVD / secondary prevention."
+    )
+
+
+def test_suspected_fh_hefh_has_clinician_help_text():
+    from streamlit.testing.v1 import AppTest
+
+    at = AppTest.from_file("app.py")
+    at.run(timeout=10)
+
+    suspected_fh = next(
+        widget for widget in at.checkbox if widget.key == "input_suspected_fh_hefh"
+    )
+    assert suspected_fh.label == "Suspected FH / HeFH"
+    assert suspected_fh.proto.help == (
+        "Familial hypercholesterolemia / heterozygous FH. Consider with LDL-C >=190 mg/dL, premature ASCVD, or supportive family history."
+    )
+
+
+def test_life_expectancy_gt_2y_has_contextual_help_text():
+    from streamlit.testing.v1 import AppTest
+
+    at = AppTest.from_file("app.py")
+    at.run(timeout=10)
+
+    life_expectancy = next(
+        widget for widget in at.checkbox if widget.key == "input_cancer_life_expectancy_gt_2y"
+    )
+    assert life_expectancy.label == "Life expectancy >2y"
+    assert life_expectancy.proto.help == (
+        "Helps determine whether preventive treatment is likely to provide meaningful benefit over the patient's expected time horizon."
+    )
+    assert "deny care" not in life_expectancy.proto.help.lower()
+    assert "ration" not in life_expectancy.proto.help.lower()
+
+
+def test_diabetes_specific_microvascular_fields_do_not_create_ascvd():
+    patient = build_patient_from_inputs(
+        {
+            "age": 55,
+            "sex": "female",
+            "diabetes": True,
+            "diabetic_retinopathy": True,
+            "diabetic_neuropathy": True,
+        }
+    )
+    result, _rss_total, _contributions = run_patient(patient)
+
+    assert patient.clinical_ascvd is not True
+    assert result.prevention_context != "secondary_prevention_clinical_ascvd"
+
+
+def test_abi_is_ignored_without_diabetes_or_confirmed_pad_context():
+    patient = build_patient_from_inputs(
+        {
+            "age": 55,
+            "sex": "female",
+            "abi": 0.82,
+            "abi_lt_0_9": True,
+        }
+    )
+
+    assert patient.abi is None
+    assert patient.abi_lt_0_9 is None
+
+
+def test_confirmed_pad_context_remains_secondary_prevention():
+    patient = build_patient_from_inputs(
+        {
+            "age": 62,
+            "sex": "male",
+            "clinical_ascvd": True,
+            "clinical_ascvd_context": "PAD",
+            "abi": 0.82,
+            "abi_lt_0_9": True,
+        }
+    )
+    result, _rss_total, _contributions = run_patient(patient)
+
+    assert patient.abi == 0.82
+    assert patient.abi_lt_0_9 is True
+    assert result.prevention_context == "secondary_prevention_clinical_ascvd"
 
 
 def test_hash_worksheet_state_uses_canonical_fields_only():
@@ -1009,7 +1452,7 @@ def test_no_cac_button_sets_no_cac_state_and_numeric_entry_clears_it():
 
     at = AppTest.from_file("app.py")
     at.run(timeout=10)
-    _click_button_by_label(at, "No CAC performed")
+    _click_button_by_label(at, "No CAC")
 
     assert _value_by_label(at.checkbox, "Show raw renderer HTML") is False
     assert _value_by_label(at.text_input, "CAC score") == ""

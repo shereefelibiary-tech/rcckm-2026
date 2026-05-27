@@ -1043,7 +1043,7 @@
     "expected": {
       "risk_continuum_level": 2,
       "risk_continuum_sublevel": "2B",
-      "required_driver": "Inflammatory disease",
+      "required_driver": "Chronic inflammatory condition",
       "required_clarifier": "Lp(a)"
     },
     "forbidden_phrases": [

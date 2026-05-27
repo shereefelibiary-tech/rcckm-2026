@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from core.patient import Patient
 from modules.prevent.lipid_bands import (
+    LOW_10YR_HIGH_30YR_APOB_PATIENT_SUMMARY,
     LOW_10YR_HIGH_30YR_CLINICIAN_SUMMARY,
     LOW_10YR_HIGH_30YR_PATIENT_SUMMARY,
     PREVENT_ASCVD_10YR_EARLY_DISCUSSION_THRESHOLD,
@@ -90,6 +91,27 @@ def test_low_10_year_high_30_year_summaries_are_standardized():
     assert recommendation.patient_facing_summary == LOW_10YR_HIGH_30YR_PATIENT_SUMMARY
     assert recommendation.rationale == LOW_10YR_HIGH_30YR_CLINICIAN_SUMMARY
     assert "not automatic from 30-year risk alone" in recommendation.rationale
+
+
+def test_low_10_year_elevated_30_year_apob_family_history_is_treatment_supported():
+    patient = Patient(
+        age=55,
+        sex="male",
+        apob=125,
+        triglycerides=170,
+        family_history_premature_ascvd=True,
+    )
+
+    recommendation = lipid_recommendation_from_prevent_band(patient, 2.8, 15.04)
+
+    assert recommendation.recommendation_strength == "reasonable"
+    assert recommendation.intensity == "moderate"
+    assert recommendation.patient_facing_summary == LOW_10YR_HIGH_30YR_APOB_PATIENT_SUMMARY
+    assert "elevated ApoB particle burden" in recommendation.emr_summary
+    assert "premature family history" in recommendation.emr_summary
+    assert "despite low 10-year ASCVD risk" in recommendation.emr_summary
+    assert "if ApoB/LDL-C burden support treatment" not in recommendation.emr_summary
+    assert recommendation.trace_rule_id == "prevent_lipid_10yr_lt3_30yr_elevated_apob_family_history"
 
 
 def test_major_lipid_risk_enhancers_are_grouped_without_missing_as_positive():

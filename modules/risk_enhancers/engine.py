@@ -40,7 +40,7 @@ def identify_risk_enhancers(patient) -> list[str]:
     if inflammatory_contexts:
         enhancers.append("Inflammatory/immune context: " + ", ".join(inflammatory_contexts))
     elif getattr(patient, "inflammatory_disease", False):
-        enhancers.append("Inflammatory disease")
+        enhancers.append("Chronic inflammatory condition")
     if getattr(patient, "hiv", False):
         if getattr(patient, "stable_art", False):
             enhancers.append("HIV on stable ART")
@@ -98,7 +98,7 @@ def identify_risk_enhancers(patient) -> list[str]:
         if getattr(patient, "diabetic_neuropathy", False):
             diabetes_specific.append("neuropathy")
         if getattr(patient, "abi_lt_0_9", False) or (abi is not None and abi < 0.9):
-            diabetes_specific.append("ABI <0.9")
+            diabetes_specific.append("possible PAD / abnormal ABI")
         if diabetes_specific:
             enhancers.append("Diabetes-specific enhancer: " + ", ".join(diabetes_specific))
 

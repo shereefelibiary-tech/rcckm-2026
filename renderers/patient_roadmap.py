@@ -9,7 +9,10 @@ from modules.lipids.non_hdl import format_non_hdl_display, should_show_non_hdl_d
 from modules.lipids.statin_intensity import get_statin_intensity_definition
 from modules.levels.definitions import classify_continuum_position, get_level_definition_payload
 from modules.plaque.engine import format_cac_percentile_context
-from modules.prevent.lipid_bands import LOW_10YR_HIGH_30YR_PATIENT_SUMMARY
+from modules.prevent.lipid_bands import (
+    LOW_10YR_HIGH_30YR_APOB_PATIENT_SUMMARY,
+    LOW_10YR_HIGH_30YR_PATIENT_SUMMARY,
+)
 from modules.risk_enhancers.breast_arterial_calcification import (
     BAC_PATIENT_CONTEXT_TEXT,
     has_breast_arterial_calcification,
@@ -232,6 +235,16 @@ def _primary_prevention_risk_summary_sentence(result, ascvd_30y):
     except (TypeError, ValueError):
         low_short_term = category_word == "low"
     if low_short_term and elevated_30y:
+        apob = getattr(patient, "apob", None)
+        if (
+            apob is not None
+            and apob >= 120
+            and (
+                getattr(patient, "premature_fhx_ascvd", False)
+                or getattr(patient, "family_history_premature_ascvd", False)
+            )
+        ):
+            return LOW_10YR_HIGH_30YR_APOB_PATIENT_SUMMARY
         return LOW_10YR_HIGH_30YR_PATIENT_SUMMARY
     if elevated_30y:
         return (
@@ -303,6 +316,16 @@ def build_patient_risk_summary_sentence(patient, result, ascvd_30y=None):
     except (TypeError, ValueError):
         elevated_30y = False
     if low_short_term and elevated_30y:
+        apob = getattr(patient, "apob", None)
+        if (
+            apob is not None
+            and apob >= 120
+            and (
+                getattr(patient, "premature_fhx_ascvd", False)
+                or getattr(patient, "family_history_premature_ascvd", False)
+            )
+        ):
+            return LOW_10YR_HIGH_30YR_APOB_PATIENT_SUMMARY
         return LOW_10YR_HIGH_30YR_PATIENT_SUMMARY
 
     try:

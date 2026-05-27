@@ -313,6 +313,13 @@ def apply_global_theme(st):
     --rcckm-line: var(--rc-border);
     --rcckm-line-strong: rgba(17, 17, 17, 0.20);
     --rcckm-gold: var(--rc-accent);
+    --worksheet-field-height: 40px;
+    --worksheet-field-radius: 10px;
+    --worksheet-field-gap-x: 18px;
+    --worksheet-field-gap-y: 16px;
+    --worksheet-section-padding: 18px;
+    --worksheet-label-font-size: 13px;
+    --worksheet-input-font-size: 15px;
 }
 
 .stApp {
@@ -644,12 +651,12 @@ div[data-testid="stVerticalBlockBorderWrapper"] {
     border-radius: 12px !important;
     background: rgba(255, 253, 248, 0.72) !important;
     box-shadow: none;
-    padding: 0.42rem 0.58rem !important;
+    padding: var(--worksheet-section-padding) !important;
     margin-bottom: 0.38rem !important;
 }
 
 div[data-testid="stVerticalBlockBorderWrapper"] div[data-testid="stVerticalBlock"] {
-    gap: 0.16rem !important;
+    gap: 0.44rem !important;
 }
 
 div[data-testid="stNumberInput"],
@@ -660,13 +667,102 @@ div[data-testid="stTextArea"] {
     margin-bottom: 0 !important;
 }
 
+div[data-testid="stNumberInput"] > div,
+div[data-testid="stTextInput"] > div,
+div[data-testid="stSelectbox"] > div {
+    width: 100% !important;
+}
+
 div[data-testid="stWidgetLabel"] label,
 div[data-testid="stWidgetLabel"] p {
     color: rgba(7, 26, 47, 0.66) !important;
-    font-size: 0.84rem !important;
+    font-size: var(--worksheet-label-font-size) !important;
     font-weight: 700 !important;
     line-height: 1.14 !important;
     margin-bottom: 0.14rem !important;
+}
+
+.worksheet-control-label-spacer {
+    height: calc(var(--worksheet-label-font-size) * 1.14 + 0.14rem);
+    margin-bottom: 0.14rem;
+}
+
+.worksheet-group-label {
+    color: rgba(7, 26, 47, 0.66) !important;
+    font-size: var(--worksheet-label-font-size);
+    font-weight: 700;
+    line-height: 1.14;
+    margin-bottom: 0.14rem;
+}
+
+div[data-testid="stVerticalBlock"]:has(
+    > div[data-testid="stElementContainer"] .incidental-cac-control-marker
+) {
+    align-items: center !important;
+    column-gap: 12px !important;
+    display: inline-flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    row-gap: 6px !important;
+    white-space: nowrap !important;
+}
+
+div[data-testid="stVerticalBlock"]:has(
+    > div[data-testid="stElementContainer"] .incidental-cac-control-marker
+)
+    > div[data-testid="stElementContainer"]:has(.incidental-cac-control-marker) {
+    display: none !important;
+}
+
+div[data-testid="stVerticalBlock"]:has(
+    > div[data-testid="stElementContainer"] .incidental-cac-control-marker
+)
+    > div[data-testid="stElementContainer"]:has(div[data-testid="stCheckbox"]) {
+    flex: 0 0 auto !important;
+    width: auto !important;
+}
+
+div[data-testid="stVerticalBlock"]:has(
+    > div[data-testid="stElementContainer"] .incidental-cac-control-marker
+)
+    > div[data-testid="stElementContainer"]:has(.incidental-cac-severity-label) {
+    flex: 0 0 auto !important;
+    margin-left: 2px !important;
+    width: auto !important;
+}
+
+.incidental-cac-severity-label {
+    color: rgba(7, 26, 47, 0.66) !important;
+    display: inline-flex;
+    font-size: var(--worksheet-label-font-size);
+    font-weight: 700;
+    line-height: 1;
+}
+
+div[data-testid="stVerticalBlock"]:has(
+    > div[data-testid="stElementContainer"] .incidental-cac-control-marker
+)
+    > div[data-testid="stElementContainer"]:has(div[data-testid="stSelectbox"]) {
+    flex: 0 0 150px !important;
+    width: 150px !important;
+}
+
+@media (max-width: 720px) {
+    div[data-testid="stVerticalBlock"]:has(
+        > div[data-testid="stElementContainer"] .incidental-cac-control-marker
+    ) {
+        align-items: flex-start !important;
+        display: flex !important;
+        flex-direction: column !important;
+        white-space: normal !important;
+    }
+
+    div[data-testid="stVerticalBlock"]:has(
+        > div[data-testid="stElementContainer"] .incidental-cac-control-marker
+    )
+        > div[data-testid="stElementContainer"]:has(div[data-testid="stSelectbox"]) {
+        width: min(100%, 180px) !important;
+    }
 }
 
 div[data-testid="stTextArea"] textarea,
@@ -674,7 +770,7 @@ div[data-testid="stTextInput"] input,
 div[data-testid="stNumberInput"] input,
 div[data-testid="stSelectbox"] div[data-baseweb="select"] > div {
     border-color: rgba(11, 31, 58, 0.18) !important;
-    border-radius: 9px !important;
+    border-radius: var(--worksheet-field-radius) !important;
     background: #fffefa !important;
     color: var(--rcckm-ink) !important;
     box-shadow: none !important;
@@ -682,33 +778,35 @@ div[data-testid="stSelectbox"] div[data-baseweb="select"] > div {
 
 div[data-testid="stTextInput"] input,
 div[data-testid="stNumberInput"] input {
-    font-size: 0.94rem !important;
+    font-size: var(--worksheet-input-font-size) !important;
     font-weight: 720 !important;
-    min-height: 1.86rem !important;
+    min-height: var(--worksheet-field-height) !important;
     padding-bottom: 0.10rem !important;
     padding-top: 0.10rem !important;
 }
 
 div[data-testid="stNumberInput"] button {
-    min-height: 2rem !important;
-    width: 2rem !important;
+    min-height: var(--worksheet-field-height) !important;
+    width: var(--worksheet-field-height) !important;
 }
 
 div[data-testid="stSelectbox"] div[data-baseweb="select"] > div {
-    font-size: 0.94rem !important;
-    min-height: 1.86rem !important;
+    font-size: var(--worksheet-input-font-size) !important;
+    min-height: var(--worksheet-field-height) !important;
 }
 
 div[data-testid="stCheckbox"] label {
-    min-height: 1.16rem !important;
+    align-items: center !important;
+    min-height: var(--worksheet-field-height) !important;
     padding-bottom: 0 !important;
     padding-top: 0 !important;
 }
 
 div[data-testid="stCheckbox"] p {
-    font-size: 0.86rem !important;
+    font-size: 0.91rem !important;
     font-weight: 650 !important;
     line-height: 1.18 !important;
+    white-space: nowrap !important;
 }
 
 div[data-testid="stExpander"] {
@@ -752,14 +850,14 @@ div[data-testid="stCaptionContainer"] p {
 div[data-testid="stButton"] button[kind="secondary"],
 div[data-testid="stButton"] button {
     border: 1px solid rgba(11, 31, 58, 0.18) !important;
-    border-radius: 999px !important;
+    border-radius: var(--worksheet-field-radius) !important;
     background: rgba(255, 253, 248, 0.82) !important;
     color: var(--rcckm-green) !important;
     font-size: 0.78rem !important;
     font-weight: 800 !important;
     line-height: 1 !important;
-    min-height: 1.62rem !important;
-    padding: 0.10rem 0.44rem !important;
+    min-height: var(--worksheet-field-height) !important;
+    padding: 0.10rem 0.70rem !important;
     white-space: nowrap !important;
 }
 
@@ -771,13 +869,13 @@ div[data-testid="stButton"] button p,
 .stButton > button[kind="primary"],
 div[data-testid="stButton"] button[kind="primary"] {
     border: 1px solid var(--rcckm-green) !important;
-    border-radius: 999px !important;
+    border-radius: var(--worksheet-field-radius) !important;
     background: var(--rcckm-green) !important;
     color: #fffdf8 !important;
     font-size: 0.80rem !important;
     font-weight: 850 !important;
     line-height: 1 !important;
-    min-height: 1.78rem !important;
+    min-height: var(--worksheet-field-height) !important;
     padding: 0.20rem 0.72rem !important;
     white-space: nowrap !important;
 }

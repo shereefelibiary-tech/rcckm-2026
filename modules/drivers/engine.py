@@ -135,7 +135,7 @@ def build_top_drivers(patient, result):
         drivers.append("Smoking")
 
     if getattr(patient, "inflammatory_disease", False):
-        drivers.append("Inflammatory disease")
+        drivers.append("Chronic inflammatory condition")
 
     hscrp = getattr(patient, "hscrp", None)
     if (

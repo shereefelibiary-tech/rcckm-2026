@@ -563,11 +563,17 @@ def _add_action(actions, domains, domain, recommendation):
 
 
 def _cac_testing_action_text(cac_recommendation, lipid_treatment_forward=False):
+    if (
+        cac_recommendation
+        == "CAC may clarify plaque burden if the patient is hesitant or if treatment intensity remains uncertain."
+    ):
+        return cac_recommendation
     if lipid_treatment_forward:
         return "CAC may clarify plaque burden if treatment intensity remains uncertain."
     if cac_recommendation in {
         "CAC reasonable if treatment decision remains uncertain.",
         "CAC may clarify plaque burden if treatment intensity remains uncertain.",
+        "CAC may clarify plaque burden if the patient is hesitant or if treatment intensity remains uncertain.",
     }:
         return cac_recommendation
     return "CAC reasonable for risk clarification if treatment decision remains uncertain."
@@ -935,14 +941,6 @@ def _build_testing_actions(patient, result):
             domains,
             "fasting_lipids",
             "Repeat fasting lipid panel to confirm severe hypertriglyceridemia.",
-        )
-
-    if getattr(patient, "lipid_supplements", False):
-        _add_action(
-            recommendations,
-            domains,
-            "supplements",
-            "Dietary supplements are not recommended as a substitute for evidence-based lipid-lowering therapy.",
         )
 
     if _needs_clarification(result):

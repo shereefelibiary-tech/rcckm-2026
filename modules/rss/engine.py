@@ -402,7 +402,7 @@ def build_rss_contributions(patient, result) -> List[SignalContribution]:
         contributions.append(
             SignalContribution(
                 domain="Inflammatory Disease",
-                label="Inflammatory disease",
+                label="Chronic inflammatory condition",
                 actual_value=True,
                 points=2,
                 severity="tiny",

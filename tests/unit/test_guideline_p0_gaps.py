@@ -33,7 +33,7 @@ def test_diabetes_specific_enhancers_upgrade_diabetes_target_pathway():
     assert target.ldl_c_target == 70
     assert target.non_hdl_c_target == 100
     assert any("diabetes duration >=10 years" in item for item in enhancers)
-    assert any("retinopathy" in item and "ABI <0.9" in item for item in enhancers)
+    assert any("retinopathy" in item and "possible PAD / abnormal ABI" in item for item in enhancers)
 
 
 def test_parser_extracts_diabetes_specific_enhancers_and_abi():
@@ -49,7 +49,7 @@ def test_parser_extracts_diabetes_specific_enhancers_and_abi():
     assert report.extracted["abi_lt_0_9"] is True
 
 
-def test_lipid_supplement_parser_warning_and_recommendation():
+def test_lipid_supplement_parser_warning_does_not_drive_action_logic():
     report = parse_smartphrase_report("Taking red yeast rice for cholesterol lowering.")
     patient = Patient(
         age=55,
@@ -63,7 +63,26 @@ def test_lipid_supplement_parser_warning_and_recommendation():
 
     assert report.extracted["lipid_supplements"] is True
     assert any("Dietary supplement mentioned" in warning for warning in report.warnings)
-    assert "Dietary supplements are not recommended as a substitute" in plan["dominant_action"]
+    assert "Dietary supplements are not recommended as a substitute" not in plan["dominant_action"]
+    assert "supplements" not in plan["domains"]
+    assert patient.lipid_lowering is None
+
+
+def test_legacy_lipid_supplement_flag_does_not_suppress_statin_recommendations():
+    patient = Patient(
+        age=55,
+        sex="male",
+        ldl_c=192,
+        lipid_supplements=True,
+        lipid_lowering=False,
+    )
+
+    plan = build_action_plan(patient, RCCKMResult())
+
+    assert "High-intensity" in plan["dominant_action"]
+    assert "statin" in plan["dominant_action"]
+    assert "lipids" in plan["domains"]
+    assert "supplements" not in plan["domains"]
 
 
 def test_lipid_monitoring_line_added_when_lipid_therapy_considered():

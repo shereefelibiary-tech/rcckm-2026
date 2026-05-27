@@ -2,7 +2,7 @@ MALE_RELATIVES = {"father", "brother"}
 FEMALE_RELATIVES = {"mother", "sister"}
 
 PREMATURE_FAMILY_HISTORY_HELP = (
-    "Premature ASCVD includes MI, stroke, PCI, CABG, or PAD occurring before "
+    "Premature ASCVD includes MI, stroke, PCI, CABG, or PAD before "
     "age 55 in men or before age 65 in women."
 )
 
@@ -12,7 +12,7 @@ COMPACT_FAMILY_HISTORY_OPTIONS = {
     "mother_premature_ascvd": "Mother <65",
     "sibling_premature_ascvd": "Sibling",
     "multiple_first_degree": "Multiple first-degree relatives",
-    "other_premature_relative": "Other",
+    "other_premature_relative": "Other premature relative",
 }
 
 _OPTION_PAYLOADS = {
@@ -132,16 +132,16 @@ def is_premature_ascvd_family_history(relationship, age_at_event):
 def _summary_without_exact_age(relationship):
     relationship_value = str(relationship or "").strip().lower()
     if relationship_value == "father":
-        return "Father before age 55"
+        return "Father with premature ASCVD before age 55"
     if relationship_value == "mother":
-        return "Mother before age 65"
+        return "Mother with premature ASCVD before age 65"
     if relationship_value in {"brother", "sister", "sibling"}:
         return "Sibling with premature ASCVD"
     if relationship_value == "multiple first-degree relatives":
         return "Multiple first-degree relatives with premature ASCVD"
     if relationship_value == "other premature relative":
-        return "Other premature relative with ASCVD"
-    return None
+        return "Other premature relative with premature ASCVD"
+    return "Premature family history of ASCVD"
 
 
 def build_family_history_summary(relationship, event_type, age_at_event):

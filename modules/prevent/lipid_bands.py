@@ -33,6 +33,11 @@ LOW_10YR_HIGH_30YR_PATIENT_SUMMARY = (
     "This does not mean an event is likely soon. It means prevention now may lower your risk over time."
 )
 
+LOW_10YR_HIGH_30YR_APOB_PATIENT_SUMMARY = (
+    "Your short-term risk is low, but your longer-term risk and cholesterol particle burden are higher than expected. "
+    "This makes earlier cholesterol-lowering therapy reasonable to discuss."
+)
+
 LOW_10YR_HIGH_30YR_CLINICIAN_SUMMARY = (
     "Low 10-year ASCVD risk with elevated 30-year ASCVD risk. Use longer-term risk to guide "
     "prevention intensity, risk-enhancer review, and shared decision-making. Statin therapy is "
@@ -230,6 +235,10 @@ def lipid_recommendation_from_prevent_band(
         or grouped["supporting_enhancers"]
     )
     has_albuminuria = "albuminuria" in grouped["major_enhancers"] or bool(enhancers and enhancers.get("ckd_albuminuria"))
+    has_apob_particle_burden = "apob_ge_120" in grouped["major_enhancers"] or "apob_ge_100" in grouped["supporting_enhancers"]
+    has_premature_family_history = "premature_family_history" in grouped["major_enhancers"] or bool(
+        enhancers and enhancers.get("premature_family_history")
+    )
     risk_30 = _risk_float(risk_30yr)
     age = _risk_float(getattr(patient, "age", None))
     in_lifetime_age = bool(age is not None and 30 <= age <= 59)
@@ -341,6 +350,20 @@ def lipid_recommendation_from_prevent_band(
                 LOW_10YR_HIGH_30YR_PATIENT_SUMMARY,
                 "Moderate-intensity statin therapy may be reasonable after shared decision-making given low short-term but high longer-term ASCVD risk with risk-enhancing factors.",
                 "prevent_lipid_10yr_lt3_30yr_high_with_enhancer",
+            )
+        if (
+            in_lifetime_age
+            and thirty_band == "elevated_15_to_lt_30"
+            and has_apob_particle_burden
+            and has_premature_family_history
+        ):
+            return _rec(
+                "reasonable",
+                "moderate",
+                "Low 10-year ASCVD risk with elevated 30-year ASCVD risk, ApoB-driven atherogenic burden, and premature family history.",
+                LOW_10YR_HIGH_30YR_APOB_PATIENT_SUMMARY,
+                "Moderate-intensity statin therapy is reasonable given elevated ApoB particle burden, premature family history, and elevated 30-year ASCVD risk despite low 10-year ASCVD risk.",
+                "prevent_lipid_10yr_lt3_30yr_elevated_apob_family_history",
             )
         if in_lifetime_age and thirty_band in {"elevated_15_to_lt_30"} and has_major_enhancer:
             return _rec(

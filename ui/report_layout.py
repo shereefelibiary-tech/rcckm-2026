@@ -519,34 +519,44 @@ def _build_targets_html(result, patient=None, *, clinician_detail_mode=False):
     line-height: 1.15;
     margin-bottom: 8px;
 }}
-.target-line {{
+.targets-primary-grid {{
     color: var(--rc-black);
     display: grid;
-    gap: 7px;
+    grid-template-columns: repeat(2, minmax(120px, 180px));
+    gap: 28px;
+    align-items: start;
+    max-width: 420px;
     font-family: var(--rc-font-body);
-    font-size: 0.94rem;
-    font-weight: 650;
-    line-height: 1.35;
+    line-height: 1.32;
 }}
 .target-item {{
-    align-items: baseline;
-    display: grid;
-    gap: 8px;
-    grid-template-columns: minmax(130px, 1fr) auto;
+    display: block;
+    min-width: 0;
 }}
 .target-main {{
-    display: inline-flex;
-    gap: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
     min-width: 0;
 }}
 .target-name {{
+    color: rgba(7, 26, 47, 0.78);
+    font-size: 0.92rem;
     font-weight: 800;
+}}
+.target-goal {{
+    color: var(--rc-black);
+    font-size: 1.22rem;
+    font-weight: 820;
+    line-height: 1.18;
 }}
 .target-current {{
     color: rgba(7, 26, 47, 0.56);
-    font-size: 0.82rem;
+    display: block;
+    font-size: 0.84rem;
     font-weight: 600;
-    text-align: right;
+    margin-top: 2px;
+    text-align: left;
 }}
 .target-secondary {{
     color: rgba(7, 26, 47, 0.58);
@@ -587,19 +597,16 @@ def _build_targets_html(result, patient=None, *, clinician_detail_mode=False):
     margin-top: 5px;
 }}
 @media(max-width: 520px) {{
-    .target-item {{
-        align-items: start;
+    .targets-primary-grid {{
         grid-template-columns: 1fr;
-        gap: 1px;
-    }}
-    .target-current {{
-        text-align: left;
+        gap: 10px;
+        max-width: none;
     }}
 }}
 </style>
 <div class="targets-compact rc-panel">
 <div class="targets-title rc-card-title">Targets</div>
-<div class="target-line">{primary_targets}</div>
+<div class="targets-primary-grid">{primary_targets}</div>
 {secondary_html}
 {rationale_html}
 </div>

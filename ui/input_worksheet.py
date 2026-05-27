@@ -52,6 +52,43 @@ UNIT_LABEL_BY_KEY = {
     "cac": "Agatston",
 }
 
+OTHER_INFLAMMATORY_DISEASE_HELP = (
+    "Persistent systemic inflammation can act as an ASCVD risk enhancer."
+)
+RHEUMATOID_ARTHRITIS_HELP = (
+    "Rheumatoid arthritis is associated with higher ASCVD risk, especially with active or longstanding disease."
+)
+SLE_HELP = (
+    "Lupus is associated with higher premature ASCVD risk, especially with active disease or kidney involvement."
+)
+PSORIASIS_HELP = (
+    "Psoriasis is associated with higher ASCVD risk, especially when moderate-to-severe or with psoriatic arthritis."
+)
+IBD_HELP = (
+    "Inflammatory bowel disease is associated with higher ASCVD risk, especially during active inflammation."
+)
+INFLAMMATORY_ARTHRITIS_HELP = (
+    "Chronic inflammatory arthritis can raise ASCVD risk, especially when active or longstanding."
+)
+DIABETES_DURATION_HELP = (
+    "Longer diabetes duration can increase cardiovascular and kidney risk, especially when complications or other risk enhancers are present."
+)
+DIABETIC_RETINOPATHY_HELP = (
+    "Diabetic retinopathy is a microvascular complication and can indicate higher overall diabetes-related vascular risk."
+)
+DIABETIC_NEUROPATHY_HELP = (
+    "Diabetic neuropathy is a diabetes complication and can indicate more established metabolic/vascular disease."
+)
+ABI_PAD_EVIDENCE_HELP = (
+    "ABI <0.9 may indicate peripheral artery disease. If PAD is confirmed, this is clinical ASCVD / secondary prevention."
+)
+SUSPECTED_FH_HEFH_HELP = (
+    "Familial hypercholesterolemia / heterozygous FH. Consider with LDL-C >=190 mg/dL, premature ASCVD, or supportive family history."
+)
+LIFE_EXPECTANCY_GT_2Y_HELP = (
+    "Helps determine whether preventive treatment is likely to provide meaningful benefit over the patient's expected time horizon."
+)
+
 
 def label_with_unit(label: str, unit: str | None) -> str:
     if not unit:
@@ -153,7 +190,6 @@ WORKSHEET_KEY_BY_FIELD = {
     "masld": "input_masld",
     "south_asian_ancestry": "input_south_asian_ancestry",
     "filipino_ancestry": "input_filipino_ancestry",
-    "higher_risk_ancestry_context": "input_higher_risk_ancestry_context",
     "active_cancer": "input_active_cancer",
     "cancer_survivor": "input_cancer_survivor",
     "cancer_life_expectancy_gt_2y": "input_cancer_life_expectancy_gt_2y",
@@ -162,10 +198,7 @@ WORKSHEET_KEY_BY_FIELD = {
     "incidental_cac_severity": "input_incidental_cac_severity",
     "breast_arterial_calcification": "input_breast_arterial_calcification",
     "cac_percentile": "input_cac_percentile",
-    "zip_code": "input_zip_code",
-    "neighborhood_sdoh_context": "input_neighborhood_sdoh_context",
     "lipid_lowering": "input_lipid_lowering",
-    "lipid_supplements": "input_lipid_supplements",
     "medications_raw": "input_medications_raw",
     "dm_meds_raw": "input_dm_meds_raw",
     "statin_intensity": "input_statin_intensity",
@@ -228,6 +261,17 @@ def build_patient_from_inputs(inputs):
     height_in = parse_optional_float(values.get("height_in"))
     weight_lb = parse_optional_float(values.get("weight_lb"))
     bmi = parse_optional_float(values.get("bmi"))
+    a1c_value = parse_optional_float(values.get("a1c"))
+    diabetes_value = _optional_bool(values, "diabetes")
+    clinical_ascvd_value = _optional_bool(values, "clinical_ascvd")
+    clinical_ascvd_context = _empty_to_none(values.get("clinical_ascvd_context"))
+    confirmed_pad_context = bool(clinical_ascvd_value) and any(
+        token in str(clinical_ascvd_context or "").lower()
+        for token in ("pad", "peripheral artery", "claudication")
+    )
+    diabetes_specific_context = bool(diabetes_value) or (
+        a1c_value is not None and a1c_value >= 6.5
+    )
     if bmi is None and height_in and weight_lb:
         bmi = round(weight_lb * 703 / (height_in * height_in), 1)
     incidental_cac = _optional_bool(values, "incidental_cac")
@@ -251,25 +295,25 @@ def build_patient_from_inputs(inputs):
         cac_not_done=cac_not_done,
         egfr=parse_optional_float(values.get("egfr")),
         uacr=parse_optional_float(values.get("uacr")),
-        a1c=parse_optional_float(values.get("a1c")),
+        a1c=a1c_value,
         height_in=height_in,
         weight_lb=weight_lb,
         bmi=bmi,
         creatinine=parse_optional_float(values.get("creatinine")),
-        diabetes=_optional_bool(values, "diabetes"),
-        diabetes_duration_years=parse_optional_float(values.get("diabetes_duration_years")),
-        diabetic_retinopathy=_optional_bool(values, "diabetic_retinopathy"),
-        diabetic_neuropathy=_optional_bool(values, "diabetic_neuropathy"),
-        abi=parse_optional_float(values.get("abi")),
-        abi_lt_0_9=_optional_bool(values, "abi_lt_0_9"),
+        diabetes=diabetes_value,
+        diabetes_duration_years=parse_optional_float(values.get("diabetes_duration_years")) if diabetes_specific_context else None,
+        diabetic_retinopathy=_optional_bool(values, "diabetic_retinopathy") if diabetes_specific_context else None,
+        diabetic_neuropathy=_optional_bool(values, "diabetic_neuropathy") if diabetes_specific_context else None,
+        abi=parse_optional_float(values.get("abi")) if (diabetes_specific_context or confirmed_pad_context) else None,
+        abi_lt_0_9=_optional_bool(values, "abi_lt_0_9") if (diabetes_specific_context or confirmed_pad_context) else None,
         hypertension=_optional_bool(values, "hypertension"),
         sbp=parse_optional_float(values.get("sbp")),
         dbp=parse_optional_float(values.get("dbp")),
         bp_treated=_optional_bool(values, "bp_treated"),
         smoker=_optional_bool(values, "smoker"),
         smoking=_optional_bool(values, "smoker"),
-        clinical_ascvd=_optional_bool(values, "clinical_ascvd"),
-        clinical_ascvd_context=_empty_to_none(values.get("clinical_ascvd_context")),
+        clinical_ascvd=clinical_ascvd_value,
+        clinical_ascvd_context=clinical_ascvd_context,
         hscrp=parse_optional_float(values.get("hscrp")),
         inflammatory_disease=_optional_bool(values, "inflammatory_disease"),
         rheumatoid_arthritis=_optional_bool(values, "rheumatoid_arthritis"),
@@ -283,7 +327,7 @@ def build_patient_from_inputs(inputs):
         masld=_optional_bool(values, "masld"),
         south_asian_ancestry=_optional_bool(values, "south_asian_ancestry"),
         filipino_ancestry=_optional_bool(values, "filipino_ancestry"),
-        higher_risk_ancestry_context=_empty_to_none(values.get("higher_risk_ancestry_context")),
+        higher_risk_ancestry_context=None,
         active_cancer=_optional_bool(values, "active_cancer"),
         cancer_survivor=_optional_bool(values, "cancer_survivor"),
         cancer_life_expectancy_gt_2y=_optional_bool(values, "cancer_life_expectancy_gt_2y"),
@@ -294,8 +338,8 @@ def build_patient_from_inputs(inputs):
             values.get("breast_arterial_calcification")
         ),
         cac_percentile=normalize_cac_percentile(parse_optional_float(values.get("cac_percentile"))),
-        zip_code=_empty_to_none(values.get("zip_code")),
-        neighborhood_sdoh_context=_empty_to_none(values.get("neighborhood_sdoh_context")),
+        zip_code=None,
+        neighborhood_sdoh_context=None,
         family_history_premature_ascvd=_optional_bool(
             values, "family_history_premature_ascvd"
         ),
@@ -356,7 +400,7 @@ def build_patient_from_inputs(inputs):
         patient.premature_menopause = patient.menopause_age < 40
     if patient.menarche_age is not None:
         patient.early_menarche = patient.menarche_age < 10
-    if patient.abi is not None:
+    if patient.abi is not None and (diabetes_specific_context or confirmed_pad_context):
         patient.abi_lt_0_9 = patient.abi < 0.9
     return patient
 
@@ -412,7 +456,7 @@ def _format_widget_value(value, *, integer=False, decimals=None):
     return f"{number:g}"
 
 
-def _numeric_input(st, label, parsed, key, step=1, min_value=None, decimals=None):
+def _numeric_input(st, label, parsed, key, step=1, min_value=None, decimals=None, help=None):
     widget_key = f"input_{key}"
     display_label = label_with_unit(label, UNIT_LABEL_BY_KEY.get(key))
     integer = key in INTEGER_INPUT_FIELDS
@@ -429,13 +473,36 @@ def _numeric_input(st, label, parsed, key, step=1, min_value=None, decimals=None
             integer=integer,
             decimals=decimals,
         )
-    raw = st.text_input(display_label, key=widget_key)
+    kwargs = {"key": widget_key}
+    if help:
+        kwargs["help"] = help
+    raw = st.text_input(display_label, **kwargs)
     parsed_value = parse_optional_int(raw) if integer else parse_optional_float(raw)
     if parsed_value is not None and min_value is not None and parsed_value < min_value:
         return min_value
     if decimals is not None and parsed_value is not None:
         return round(float(parsed_value), decimals)
     return parsed_value
+
+
+def _bmi_from_height_weight(height_in, weight_lb):
+    height = parse_optional_float(height_in)
+    weight = parse_optional_float(weight_lb)
+    if not height or not weight:
+        return None
+    return round(weight * 703 / (height * height), 1)
+
+
+def _parsed_with_bmi_fallback(parsed):
+    values = dict(parsed)
+    if parse_optional_float(values.get("bmi")) is None:
+        calculated_bmi = _bmi_from_height_weight(
+            values.get("height_in"),
+            values.get("weight_lb"),
+        )
+        if calculated_bmi is not None:
+            values["bmi"] = calculated_bmi
+    return values
 
 
 def _checkbox_input(st, label, parsed, key, help=None):
@@ -451,6 +518,67 @@ def _checkbox_input(st, label, parsed, key, help=None):
     if value is True:
         st.session_state.pop(f"_unknown_{widget_key}", None)
     return value
+
+
+def _control_label_spacer(st):
+    st.markdown('<div class="worksheet-control-label-spacer"></div>', unsafe_allow_html=True)
+
+
+def render_incidental_cac_control(st, parsed):
+    with st.container():
+        st.markdown(
+            '<span class="incidental-cac-control-marker"></span>',
+            unsafe_allow_html=True,
+        )
+        incidental_cac = _checkbox_input(
+            st, "Incidental CAC on CT", parsed, "incidental_cac"
+        )
+        incidental_checked = bool(incidental_cac)
+        if incidental_checked:
+            severity_options = list(INCIDENTAL_CAC_SEVERITY_OPTIONS)
+            if st.session_state.get("input_incidental_cac_severity") not in severity_options:
+                st.session_state["input_incidental_cac_severity"] = "present"
+            parsed_severity = normalize_incidental_cac_severity(
+                parsed.get("incidental_cac_severity")
+            )
+            severity_kwargs = (
+                {}
+                if "input_incidental_cac_severity" in st.session_state
+                else {"index": severity_options.index(parsed_severity) if parsed_severity in severity_options else 0}
+            )
+        else:
+            severity_options = ["not applicable"]
+            st.session_state["input_incidental_cac_severity"] = "not applicable"
+            severity_kwargs = {}
+
+        st.markdown(
+            '<span class="incidental-cac-severity-label">Severity:</span>',
+            unsafe_allow_html=True,
+        )
+        severity = st.selectbox(
+            "Severity",
+            severity_options,
+            key="input_incidental_cac_severity",
+            disabled=not incidental_checked,
+            label_visibility="collapsed",
+            **severity_kwargs,
+        )
+    return incidental_cac, severity if incidental_checked else None
+
+
+def render_ancestry_context_control(st, parsed):
+    st.markdown(
+        '<div class="worksheet-group-label">Ancestry context</div>',
+        unsafe_allow_html=True,
+    )
+    ancestry_cols = st.columns(2, gap="small")
+    with ancestry_cols[0]:
+        south_asian = _checkbox_input(
+            st, "South Asian", parsed, "south_asian_ancestry"
+        )
+    with ancestry_cols[1]:
+        filipino = _checkbox_input(st, "Filipino", parsed, "filipino_ancestry")
+    return south_asian, filipino
 
 
 def _set_no_cac_state():
@@ -490,7 +618,15 @@ def _family_history_summary_from_state(st, parsed):
     if parsed.get("fhx_text"):
         return str(parsed.get("fhx_text"))
     if bool(st.session_state.get("input_family_history_premature_ascvd", parsed.get("family_history_premature_ascvd", False))):
-        return "Premature family history"
+        patient = Patient(
+            age=parse_optional_int(parsed.get("age")),
+            sex=str(parsed.get("sex") or ""),
+            family_history_premature_ascvd=True,
+            family_history_relationship=relationship,
+            family_history_event_type=event_type,
+            family_history_age_at_event=None,
+        )
+        return build_family_history_payload(patient)["summary"] or "Premature family history of ASCVD"
     return "No premature family history"
 
 
@@ -569,7 +705,7 @@ def render_manual_worksheet(st, parsed):
 
     with st.container(border=True):
         section_heading(st, "Core inputs")
-        core = st.columns([0.8, 1.05, 0.8, 0.8, 1.05, 0.9])
+        core = st.columns([0.72, 0.95, 0.72, 0.72, 0.95, 0.78, 1.18])
         with core[0]:
             inputs["age"] = _numeric_input(st, "Age", parsed, "age", min_value=0)
         with core[1]:
@@ -597,6 +733,14 @@ def render_manual_worksheet(st, parsed):
             inputs["bp_treated"] = _checkbox_input(st, "BP treated", parsed, "bp_treated")
         with core[5]:
             inputs["smoker"] = _checkbox_input(st, "Smoking", parsed, "smoker")
+        with core[6]:
+            inputs["clinical_ascvd"] = _checkbox_input(
+                st, "Clinical ASCVD", parsed, "clinical_ascvd"
+            )
+            inputs["clinical_ascvd_context"] = st.session_state.get(
+                "input_clinical_ascvd_context",
+                parsed.get("clinical_ascvd_context"),
+            )
 
     with st.container(border=True):
         section_heading(st, "Lipids")
@@ -625,80 +769,101 @@ def render_manual_worksheet(st, parsed):
 
     with st.container(border=True):
         section_heading(st, "Metabolic / Kidney")
-        anthro_cols = st.columns([0.76, 0.76, 0.76, 0.76])
-        with anthro_cols[0]:
-            inputs["height_in"] = _numeric_input(st, "Height", parsed, "height_in")
-        with anthro_cols[1]:
-            inputs["weight_lb"] = _numeric_input(st, "Weight", parsed, "weight_lb")
-        with anthro_cols[2]:
-            inputs["bmi"] = _numeric_input(st, "BMI", parsed, "bmi", step=0.1, decimals=1)
-        with anthro_cols[3]:
+        bmi_parsed = _parsed_with_bmi_fallback(parsed)
+        metabolic_cols = st.columns([0.9, 0.9, 0.9, 0.9], gap="small")
+        with metabolic_cols[0]:
+            inputs["bmi"] = _numeric_input(st, "BMI", bmi_parsed, "bmi", step=0.1, decimals=1)
+            if parse_optional_float(parsed.get("bmi")) is None and parse_optional_float(bmi_parsed.get("bmi")) is not None:
+                st.caption("Calculated from height/weight.")
+        with metabolic_cols[1]:
             inputs["a1c"] = _numeric_input(st, "A1c", parsed, "a1c", step=0.1, decimals=1)
-        kidney_cols = st.columns([1.0, 0.8, 0.8, 0.8])
-        with kidney_cols[0]:
-            inputs["diabetes"] = _checkbox_input(st, "Diabetes", parsed, "diabetes")
-        with kidney_cols[1]:
-            inputs["creatinine"] = _numeric_input(
-                st, "Creatinine", parsed, "creatinine", step=0.01, decimals=2
-            )
-        with kidney_cols[2]:
+        with metabolic_cols[2]:
             inputs["egfr"] = _numeric_input(st, "eGFR", parsed, "egfr")
-        with kidney_cols[3]:
+        with metabolic_cols[3]:
             inputs["uacr"] = _numeric_input(st, "UACR", parsed, "uacr")
             if inputs["uacr"] is None:
                 st.caption("UACR missing - needed for kidney risk completion.")
             elif inputs["uacr"] == 0:
                 st.caption("Measured UACR 0 mg/g.")
-        with st.expander("Edit diabetes-specific risk enhancers", expanded=False):
-            d1, d2, d3, d4 = st.columns(4)
-            with d1:
-                inputs["diabetes_duration_years"] = _numeric_input(
-                    st, "Diabetes duration (years)", parsed, "diabetes_duration_years"
-                )
-            with d2:
-                inputs["diabetic_retinopathy"] = _checkbox_input(
-                    st, "Retinopathy", parsed, "diabetic_retinopathy"
-                )
-                inputs["diabetic_neuropathy"] = _checkbox_input(
-                    st, "Neuropathy", parsed, "diabetic_neuropathy"
-                )
-            with d3:
-                inputs["abi"] = _numeric_input(st, "ABI", parsed, "abi", step=0.01, decimals=2)
-            with d4:
-                inputs["abi_lt_0_9"] = _checkbox_input(st, "ABI <0.9", parsed, "abi_lt_0_9")
+        diabetes_cols = st.columns([0.9, 3.0], gap="small")
+        with diabetes_cols[0]:
+            inputs["diabetes"] = _checkbox_input(st, "Diabetes", parsed, "diabetes")
+        with st.expander("Edit height/weight source", expanded=False):
+            source_cols = st.columns(2)
+            with source_cols[0]:
+                inputs["height_in"] = _numeric_input(st, "Height", parsed, "height_in")
+            with source_cols[1]:
+                inputs["weight_lb"] = _numeric_input(st, "Weight", parsed, "weight_lb")
+        diabetes_specific_context = bool(inputs.get("diabetes")) or (
+            inputs.get("a1c") is not None and inputs["a1c"] >= 6.5
+        )
+        if diabetes_specific_context:
+            with st.expander("Edit diabetes-specific risk enhancers", expanded=False):
+                d1, d2, d3, d4 = st.columns(4)
+                with d1:
+                    inputs["diabetes_duration_years"] = _numeric_input(
+                        st,
+                        "Diabetes duration",
+                        parsed,
+                        "diabetes_duration_years",
+                        help=DIABETES_DURATION_HELP,
+                    )
+                with d2:
+                    inputs["diabetic_retinopathy"] = _checkbox_input(
+                        st,
+                        "Retinopathy",
+                        parsed,
+                        "diabetic_retinopathy",
+                        help=DIABETIC_RETINOPATHY_HELP,
+                    )
+                    inputs["diabetic_neuropathy"] = _checkbox_input(
+                        st,
+                        "Neuropathy",
+                        parsed,
+                        "diabetic_neuropathy",
+                        help=DIABETIC_NEUROPATHY_HELP,
+                    )
+                with d3:
+                    inputs["abi"] = _numeric_input(st, "ABI", parsed, "abi", step=0.01, decimals=2)
+                with d4:
+                    inputs["abi_lt_0_9"] = _checkbox_input(
+                        st,
+                        "ABI <0.9 / PAD evidence",
+                        parsed,
+                        "abi_lt_0_9",
+                        help=ABI_PAD_EVIDENCE_HELP,
+                    )
 
     with st.container(border=True):
-        section_heading(st, "Plaque / History / Enhancers")
-        cac_cols = st.columns([1.0, 1.18, 0.62, 1.2])
+        section_heading(st, "Calcification / plaque imaging")
+        cac_cols = st.columns([2.15, 0.72, 0.52, 1.0], gap="small")
         with cac_cols[0]:
             inputs["cac"] = _numeric_input(st, "CAC score", parsed, "cac")
         with cac_cols[1]:
+            _control_label_spacer(st)
             if st.button(
-                "No CAC performed",
+                "No CAC",
                 key="input_no_cac",
                 help="No coronary calcium test has been performed.",
                 on_click=_set_no_cac_state,
                 type="secondary",
-                use_container_width=True,
+                use_container_width=False,
             ):
                 st.rerun()
         with cac_cols[2]:
+            _control_label_spacer(st)
             if st.button(
                 "Clear",
                 key="input_clear_cac",
                 help="Clear CAC state.",
                 on_click=_clear_cac_state,
                 type="secondary",
-                use_container_width=True,
+                use_container_width=False,
             ):
                 st.rerun()
         with cac_cols[3]:
-            inputs["clinical_ascvd"] = _checkbox_input(
-                st, "Clinical ASCVD", parsed, "clinical_ascvd"
-            )
-            inputs["clinical_ascvd_context"] = st.session_state.get(
-                "input_clinical_ascvd_context",
-                parsed.get("clinical_ascvd_context"),
+            inputs["cac_percentile"] = _numeric_input(
+                st, "CAC percentile", parsed, "cac_percentile"
             )
 
         if inputs["cac"] is not None:
@@ -709,8 +874,33 @@ def render_manual_worksheet(st, parsed):
             inputs["cac_not_done"] = bool(st.session_state.get("input_cac_not_done", parsed.get("cac_not_done", False)))
             st.caption("Plaque burden unmeasured." if inputs["cac_not_done"] else "CAC unknown.")
 
-        pe_cols = st.columns([1.35, 1.65, 0.8, 0.75, 0.8, 1.25])
-        with pe_cols[0]:
+        calcification_cols = st.columns([3.15, 2.2], gap="small")
+        with calcification_cols[0]:
+            inputs["incidental_cac"], inputs["incidental_cac_severity"] = (
+                render_incidental_cac_control(st, parsed)
+            )
+        with calcification_cols[1]:
+            bac_options = list(BAC_ALLOWED_VALUES)
+            parsed_bac = normalize_breast_arterial_calcification(
+                parsed.get("breast_arterial_calcification")
+            )
+            inputs["breast_arterial_calcification"] = st.selectbox(
+                "Breast arterial calcification",
+                bac_options,
+                format_func=lambda value: breast_arterial_calcification_display(value).title(),
+                key="input_breast_arterial_calcification",
+                help=BAC_HELP_TEXT,
+                **(
+                    {}
+                    if "input_breast_arterial_calcification" in st.session_state
+                    else {"index": bac_options.index(parsed_bac) if parsed_bac in bac_options else 0}
+                ),
+            )
+
+    with st.container(border=True):
+        section_heading(st, "Family history / lipid genetics")
+        family_cols = st.columns([1.35, 3.65], gap="small")
+        with family_cols[0]:
             family_options = compact_family_history_option_values()
             default_family_option = _current_compact_family_history_option(st, parsed)
             selected_family_option = st.selectbox(
@@ -730,16 +920,36 @@ def render_manual_worksheet(st, parsed):
                 ),
             )
             _apply_compact_family_history_selection(inputs, selected_family_option, st, parsed)
-        with pe_cols[1]:
             if selected_family_option == "none_unknown":
                 st.caption("No premature family history selected.")
             else:
                 st.caption(_family_history_summary_from_state(st, {**parsed, **inputs}))
-        with pe_cols[2]:
+        genetics_cols = st.columns([1.2, 2.0, 2.0], gap="small")
+        with genetics_cols[0]:
+            _control_label_spacer(st)
+            inputs["suspected_fh_hefh"] = _checkbox_input(
+                st,
+                "Suspected FH / HeFH",
+                parsed,
+                "suspected_fh_hefh",
+                help=SUSPECTED_FH_HEFH_HELP,
+            )
+        with genetics_cols[1]:
+            (
+                inputs["south_asian_ancestry"],
+                inputs["filipino_ancestry"],
+            ) = render_ancestry_context_control(st, parsed)
+
+    with st.container(border=True):
+        section_heading(st, "Additional context")
+        context_cols = st.columns([1.25, 0.62, 0.74], gap="small")
+        with context_cols[0]:
             inputs["hscrp"] = _numeric_input(st, "hsCRP", parsed, "hscrp", step=0.1)
-        with pe_cols[3]:
+        with context_cols[1]:
+            _control_label_spacer(st)
             inputs["osa"] = _checkbox_input(st, "OSA", parsed, "osa")
-        with pe_cols[4]:
+        with context_cols[2]:
+            _control_label_spacer(st)
             inputs["masld"] = _checkbox_input(
                 st,
                 MASLD_SHORT_LABEL,
@@ -747,26 +957,6 @@ def render_manual_worksheet(st, parsed):
                 "masld",
                 help=MASLD_TOOLTIP,
             )
-        with pe_cols[5]:
-            inputs["inflammatory_disease"] = _checkbox_input(
-                st, "Inflammatory disease", parsed, "inflammatory_disease"
-            )
-
-        inf1, inf2, inf3, inf4, inf5, inf6 = st.columns(6)
-        with inf1:
-            inputs["hiv"] = _checkbox_input(st, "HIV", parsed, "hiv")
-        with inf2:
-            inputs["stable_art"] = _checkbox_input(st, "Stable ART", parsed, "stable_art")
-        with inf3:
-            inputs["rheumatoid_arthritis"] = _checkbox_input(
-                st, "RA", parsed, "rheumatoid_arthritis"
-            )
-        with inf4:
-            inputs["sle"] = _checkbox_input(st, "SLE", parsed, "sle")
-        with inf5:
-            inputs["psoriasis"] = _checkbox_input(st, "Psoriasis", parsed, "psoriasis")
-        with inf6:
-            inputs["ibd"] = _checkbox_input(st, "IBD", parsed, "ibd")
         inputs["inflammatory_disease"] = bool(inputs.get("inflammatory_disease")) or any(
             [
                 inputs.get("rheumatoid_arthritis"),
@@ -775,102 +965,48 @@ def render_manual_worksheet(st, parsed):
                 inputs.get("ibd"),
             ]
         )
-        with st.expander("Edit additional risk enhancers", expanded=False):
-            enh1, enh2, enh3, enh4 = st.columns(4)
-            with enh1:
+        with st.expander("More context", expanded=False):
+            advanced_cols = st.columns([1.25, 1.15], gap="medium")
+            with advanced_cols[0]:
+                st.markdown("**Inflammatory / autoimmune**")
+                inputs["rheumatoid_arthritis"] = _checkbox_input(
+                    st,
+                    "RA",
+                    parsed,
+                    "rheumatoid_arthritis",
+                    help=RHEUMATOID_ARTHRITIS_HELP,
+                )
+                inputs["sle"] = _checkbox_input(st, "SLE", parsed, "sle", help=SLE_HELP)
+                inputs["psoriasis"] = _checkbox_input(
+                    st, "Psoriasis", parsed, "psoriasis", help=PSORIASIS_HELP
+                )
+                inputs["ibd"] = _checkbox_input(st, "IBD", parsed, "ibd", help=IBD_HELP)
                 inputs["inflammatory_arthritis"] = _checkbox_input(
-                    st, "Inflammatory arthritis", parsed, "inflammatory_arthritis"
+                    st,
+                    "Inflammatory arthritis",
+                    parsed,
+                    "inflammatory_arthritis",
+                    help=INFLAMMATORY_ARTHRITIS_HELP,
                 )
-                inputs["south_asian_ancestry"] = _checkbox_input(
-                    st, "South Asian ancestry", parsed, "south_asian_ancestry"
+                inputs["inflammatory_disease"] = _checkbox_input(
+                    st,
+                    "Other chronic inflammatory disease",
+                    parsed,
+                    "inflammatory_disease",
+                    help=OTHER_INFLAMMATORY_DISEASE_HELP,
                 )
-            with enh2:
-                inputs["filipino_ancestry"] = _checkbox_input(
-                    st, "Filipino ancestry", parsed, "filipino_ancestry"
-                )
-                inputs["suspected_fh_hefh"] = _checkbox_input(
-                    st, "Suspected FH / HeFH", parsed, "suspected_fh_hefh"
-                )
-            with enh3:
+            with advanced_cols[1]:
+                st.markdown("**HIV / cancer context**")
+                inputs["hiv"] = _checkbox_input(st, "HIV", parsed, "hiv")
+                inputs["stable_art"] = _checkbox_input(st, "Stable ART", parsed, "stable_art")
                 inputs["active_cancer"] = _checkbox_input(st, "Active cancer", parsed, "active_cancer")
                 inputs["cancer_survivor"] = _checkbox_input(st, "Cancer survivor", parsed, "cancer_survivor")
-            with enh4:
                 inputs["cancer_life_expectancy_gt_2y"] = _checkbox_input(
-                    st, "Life expectancy >2y", parsed, "cancer_life_expectancy_gt_2y"
-                )
-            extra1, extra2, extra3, extra4, extra5 = st.columns([1, 1.25, 1, 1, 1.25])
-            with extra1:
-                inputs["incidental_cac"] = _checkbox_input(
-                    st, "Incidental CAC on CT", parsed, "incidental_cac"
-                )
-            with extra2:
-                severity_options = list(INCIDENTAL_CAC_SEVERITY_OPTIONS)
-                incidental_checked = bool(inputs.get("incidental_cac"))
-                if not incidental_checked and "input_incidental_cac_severity" in st.session_state:
-                    st.session_state["input_incidental_cac_severity"] = "present"
-                parsed_severity = normalize_incidental_cac_severity(
-                    parsed.get("incidental_cac_severity")
-                )
-                inputs["incidental_cac_severity"] = st.selectbox(
-                    "Severity",
-                    severity_options,
-                    key="input_incidental_cac_severity",
-                    disabled=not incidental_checked,
-                    **(
-                        {}
-                        if "input_incidental_cac_severity" in st.session_state
-                        else {"index": severity_options.index(parsed_severity) if parsed_severity in severity_options else 0}
-                    ),
-                )
-                if not incidental_checked:
-                    inputs["incidental_cac_severity"] = None
-            with extra3:
-                bac_options = list(BAC_ALLOWED_VALUES)
-                parsed_bac = normalize_breast_arterial_calcification(
-                    parsed.get("breast_arterial_calcification")
-                )
-                inputs["breast_arterial_calcification"] = st.selectbox(
-                    "Breast arterial calcification on mammogram",
-                    bac_options,
-                    format_func=lambda value: breast_arterial_calcification_display(value).title(),
-                    key="input_breast_arterial_calcification",
-                    help=BAC_HELP_TEXT,
-                    **(
-                        {}
-                        if "input_breast_arterial_calcification" in st.session_state
-                        else {"index": bac_options.index(parsed_bac) if parsed_bac in bac_options else 0}
-                    ),
-                )
-            with extra4:
-                inputs["cac_percentile"] = _numeric_input(st, "CAC percentile", parsed, "cac_percentile")
-            with extra5:
-                inputs["zip_code"] = st.text_input(
-                    "ZIP / SDOH support",
-                    key="input_zip_code",
-                    **(
-                        {}
-                        if "input_zip_code" in st.session_state
-                        else {"value": parsed.get("zip_code") or ""}
-                    ),
-                )
-                inputs["neighborhood_sdoh_context"] = st.text_input(
-                    "Neighborhood context",
-                    key="input_neighborhood_sdoh_context",
-                    **(
-                        {}
-                        if "input_neighborhood_sdoh_context" in st.session_state
-                        else {"value": parsed.get("neighborhood_sdoh_context") or ""}
-                    ),
-                )
-            with st.container():
-                inputs["higher_risk_ancestry_context"] = st.text_input(
-                    "Other ancestry/context",
-                    key="input_higher_risk_ancestry_context",
-                    **(
-                        {}
-                        if "input_higher_risk_ancestry_context" in st.session_state
-                        else {"value": parsed.get("higher_risk_ancestry_context") or ""}
-                    ),
+                    st,
+                    "Life expectancy >2y",
+                    parsed,
+                    "cancer_life_expectancy_gt_2y",
+                    help=LIFE_EXPECTANCY_GT_2Y_HELP,
                 )
         inputs["inflammatory_disease"] = bool(inputs.get("inflammatory_disease")) or any(
             [
@@ -881,54 +1017,6 @@ def render_manual_worksheet(st, parsed):
                 inputs.get("inflammatory_arthritis"),
             ]
         )
-        if selected_family_option != "none_unknown":
-            with st.expander("Edit family history details", expanded=False):
-                fam1, fam2, fam3 = st.columns([1, 1, 0.8])
-                with fam1:
-                    relationship = inputs.get("family_history_relationship") or parsed.get("family_history_relationship") or "father"
-                    relationship_options = [
-                        "father",
-                        "mother",
-                        "brother",
-                        "sister",
-                        "sibling",
-                        "multiple first-degree relatives",
-                        "other premature relative",
-                    ]
-                    inputs["family_history_relationship"] = st.selectbox(
-                        "Relationship",
-                        relationship_options,
-                        key="input_family_history_relationship",
-                        **(
-                            {}
-                            if "input_family_history_relationship" in st.session_state
-                            else {
-                                "index": relationship_options.index(relationship)
-                                if relationship in relationship_options
-                                else 0
-                            }
-                        ),
-                    )
-                with fam2:
-                    event = inputs.get("family_history_event_type") or parsed.get("family_history_event_type") or "ASCVD"
-                    event_options = ["ASCVD", "MI", "PCI/CABG", "stroke", "PAD", "sudden cardiac death"]
-                    inputs["family_history_event_type"] = st.selectbox(
-                        "Event type",
-                        event_options,
-                        key="input_family_history_event_type",
-                        **(
-                            {}
-                            if "input_family_history_event_type" in st.session_state
-                            else {"index": event_options.index(event) if event in event_options else 0}
-                        ),
-                    )
-                with fam3:
-                    inputs["family_history_age_at_event"] = _numeric_input(
-                        st,
-                        "Age at event",
-                        parsed,
-                        "family_history_age_at_event",
-                    )
 
         show_reproductive = is_reproductive_history_applicable(
             Patient(age=None, sex=str(inputs.get("sex") or parsed.get("sex") or "unknown"))
@@ -958,7 +1046,7 @@ def render_manual_worksheet(st, parsed):
 
     with st.container(border=True):
         section_heading(st, "Medications")
-        col1, col2, col3, col4, col5, col6 = st.columns(6)
+        col1, col2, col3, col4, col5 = st.columns(5)
         with col1:
             inputs["lipid_lowering"] = _checkbox_input(
                 st, "Lipid lowering", parsed, "lipid_lowering"
@@ -985,10 +1073,6 @@ def render_manual_worksheet(st, parsed):
             inputs["glp1"] = _checkbox_input(st, "GLP1", parsed, "glp1")
         with col5:
             inputs["ace_arb"] = _checkbox_input(st, "ACE/ARB", parsed, "ace_arb")
-        with col6:
-            inputs["lipid_supplements"] = _checkbox_input(
-                st, "Lipid supplements", parsed, "lipid_supplements"
-            )
         med_cols = st.columns([1.8, 1.3, 0.9, 0.9])
         with med_cols[0]:
             inputs["medications_raw"] = st.text_input(

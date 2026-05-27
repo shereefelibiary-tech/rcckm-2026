@@ -451,10 +451,10 @@ def _history_context_sentence(patient):
         getattr(patient, "family_history_premature_ascvd", False)
     ):
         family_summary = str(getattr(patient, "family_history_summary", "") or "").strip()
-        if family_summary:
+        if family_summary and family_summary.lower() != "premature family history of ascvd":
             parts.append(f"premature family history ({family_summary})")
         else:
-            parts.append("premature family history")
+            parts.append("premature family history of ASCVD")
     if not parts:
         return None
     return "Risk context: " + "; ".join(parts) + "."
@@ -470,7 +470,7 @@ def _young_family_history_context_sentence(patient):
         if event_age is not None:
             bits.append(f"age {event_age:g}")
         family_summary = " ".join(bits)
-    if family_summary:
+    if family_summary and family_summary.lower() != "premature family history of ascvd":
         return f"Risk context: premature family history of ASCVD ({family_summary})."
     return "Risk context: premature family history of ASCVD."
 

@@ -537,7 +537,7 @@ def _build_grouped_rows(patient, result, *, show_not_active=False):
     value = (
         ", ".join(inflammatory_labels)
         if inflammatory_labels
-        else ("Inflammatory disease reported" if inflammatory else "None reported")
+        else ("Chronic inflammatory condition reported" if inflammatory else "None reported")
     )
     effect = "enhancer context" if inflammatory_labels or inflammatory else "no major signal"
     add_row(
