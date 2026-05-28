@@ -24,20 +24,27 @@ def test_parse_coverage_complete_demo_shows_found_values():
 
     html = render_parse_coverage(report)
 
-    assert "Parse coverage" in html
+    assert "Parsed" in html
+    assert "Smartphrase understood" not in html
+    assert "Core fields recognized:" in html
+    assert "Core essentials" in html
+    assert "Important risk enhancers" in html
+    assert "Advanced/contextual" in html
+    assert html.index("Core essentials") < html.index("Important risk enhancers") < html.index("Advanced/contextual")
     assert "Age" in html
     assert "55" in html
-    assert "Systolic BP" in html
-    assert "132 mmHg" in html
+    assert "BP" in html
+    assert "132/82" in html
     assert "LDL-C" in html
     assert "132 mg/dL" in html
     assert "Lp(a)" in html
     assert "80 nmol/L" in html
     assert "A1c" in html
     assert "7.1%" in html
-    assert "Medication names detected" in html
+    assert "Current medications" in html
     assert "metformin, empagliflozin, losartan" in html
-    assert "parse-chip-found" in html
+    assert "parse-item-found" in html
+    assert "&#10003;" in html
     assert "<div class=" not in html.replace("<div class=\"", "")
 
 
@@ -46,9 +53,12 @@ def test_parse_coverage_missing_fields_are_muted_after_parse():
 
     html = render_parse_coverage(report)
 
-    assert "Triglycerides" in html
+    assert "Core fields recognized:" in html
+    assert "Generic EMR text detected. Some fields may need review." in html
+    assert "TG" in html
     assert "not found" in html
-    assert "parse-chip-missing" in html
+    assert "parse-item-missing" in html
+    assert "&#9675;" in html
 
 
 def test_parse_coverage_conflict_chip_for_conflicting_parser_output():
@@ -56,9 +66,9 @@ def test_parse_coverage_conflict_chip_for_conflicting_parser_output():
 
     html = render_parse_coverage(report)
 
-    assert "Conflict:" in html
     assert "diabetes" in html
-    assert "parse-chip-conflict" in html
+    assert "parse-item-conflict" in html
+    assert "parse-notice-conflict" in html
 
 
 def test_parse_coverage_unavailable_reasons_show_verify_chip():
@@ -68,10 +78,9 @@ def test_parse_coverage_unavailable_reasons_show_verify_chip():
 
     html = render_parse_coverage(report)
 
-    assert "Verify:" in html
     assert "lab interface failure" in html
     assert "no urine sample" in html
-    assert "parse-chip-verify" in html
+    assert "parse-notice-review" in html
 
 
 def test_parse_coverage_medication_detection_appears():
@@ -79,10 +88,9 @@ def test_parse_coverage_medication_detection_appears():
 
     html = render_parse_coverage(report)
 
-    assert "Medication names detected" in html
+    assert "Current medications" in html
     assert "rosuvastatin, semaglutide" in html
-    assert "Lipid-lowering therapy" in html
-    assert "GLP-1/GIP" in html
+    assert "parse-item-found" in html
 
 
 def test_parse_coverage_has_no_raw_json_dump():
@@ -93,3 +101,32 @@ def test_parse_coverage_has_no_raw_json_dump():
     assert '"extracted"' not in html
     assert '"field_meta"' not in html
     assert "Raw parsed JSON" not in html
+
+
+def test_parse_coverage_epic_placeholder_fixture_is_calm_and_ordered():
+    fixture_path = "tests/fixtures/ingest/epic_placeholder_garbage_smartphrase.txt"
+    with open(fixture_path, encoding="utf-8") as fixture:
+        report = parse_ingest_report(fixture.read())
+
+    html = render_parse_coverage(report)
+
+    assert "Parsed" in html
+    assert "Smartphrase understood" not in html
+    assert "BP" in html
+    assert "132/77" in html
+    assert "BMI" in html
+    assert "30.81" in html
+    assert "A1c" in html
+    assert "5.8%" in html
+    assert "LDL-C" in html
+    assert "90 mg/dL" in html
+    assert "ApoB" in html
+    assert "ApoB missing" in html
+    assert "Add ApoB for atherogenic burden interpretation." in html
+    assert "Lp(a)" in html
+    assert "Lp(a) missing" in html
+    assert "Add Lp(a) for inherited lipid-risk context." in html
+    assert "Family history" in html
+    assert "parse-item-review" in html
+    assert "parse-item-missing" in html
+    assert "Core fields recognized: 11/11" in html

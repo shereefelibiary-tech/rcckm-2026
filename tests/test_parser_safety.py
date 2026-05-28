@@ -74,7 +74,7 @@ def test_ra_yes_sets_inflammatory_context():
     parsed = parse_ingest_text("Rheumatoid arthritis: Yes.")
 
     assert parsed["rheumatoid_arthritis"] is True
-    assert parsed["inflammatory_disease"] is True
+    assert parsed["inflammatory_disease"] is False
 
 
 def test_family_history_is_not_clinical_ascvd():

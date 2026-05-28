@@ -837,7 +837,7 @@ def test_ingest_populates_editable_worksheet_fields():
         "Lp(a) 180 nmol/L A1c 7.1 eGFR 55 UACR 45 CAC 350 "
         "BMI 31 Father MI age 49 Current smoker on atorvastatin"
     )
-    _click_button_by_label(at, "Parse")
+    _click_button_by_label(at, "Parse and apply")
 
     assert len(at.exception) == 0
     assert _value_by_label(at.text_input, "LDL-C") == "142"
@@ -902,7 +902,7 @@ def test_ingest_clear_button_clears_paste_and_parse_state_without_erasing_worksh
         "60M BP 132/78 TC 210 LDL 142 HDL 42 TG 180 ApoB 118 "
         "A1c 7.1 eGFR 55 UACR 45 CAC 350"
     )
-    _click_button_by_label(at, "Parse")
+    _click_button_by_label(at, "Parse and apply")
 
     assert len(at.exception) == 0
     assert _value_by_label(at.text_input, "LDL-C") == "142"
@@ -936,7 +936,7 @@ def test_app_loads_with_demo_patient_and_unified_input_flow():
     assert at.session_state["report_generated"] is False
     assert at.session_state["current_result"] is None
     assert at.session_state["active_patient"] is None
-    assert any(button.label == "Parse" for button in at.button)
+    assert any(button.label == "Parse and apply" for button in at.button)
     assert any(button.label == "Clear" for button in at.button)
     assert any(button.label == "Interpret risk" for button in at.button)
     markdown_text = "\n".join(str(message.value) for message in at.markdown)
@@ -944,38 +944,27 @@ def test_app_loads_with_demo_patient_and_unified_input_flow():
     assert "10-Year Cardiovascular Risk" not in markdown_text
 
 
-def test_interpret_button_uses_premium_processing_copy():
+def test_interpret_button_remains_separate_from_parser_recognition():
     source = inspect.getsource(__import__("app"))
 
     assert 'button_label = "Interpreting..." if is_interpreting else "Interpret risk"' in source
     assert 'st.button(button_label, type="primary", disabled=is_interpreting)' in source
     assert 'st.spinner("Interpreting...")' in source
     assert "time.sleep(0.65 - elapsed)" in source
-    assert "_detected_signal_chips" in source
-    assert "show_detected_signal_chips" in source
+    assert "_detected_signal_chips" not in source
+    assert "show_detected_signal_chips" not in source
     assert "Synthesizing risk" not in source
     assert "Interpret reviewed worksheet" not in source
 
 
-def test_detected_signal_chips_only_use_parsed_signals():
-    app_module = __import__("app")
+def test_parser_button_uses_recognition_processing_copy():
+    source = inspect.getsource(__import__("ui.ingest_panel", fromlist=["render_ingest_panel"]))
 
-    report = {
-        "parsed": {
-            "apob": 112,
-            "cac": 350,
-            "uacr": 45,
-            "a1c": 7.1,
-            "family_history_age_at_event": 49,
-            "ldl_c": 132,
-            "egfr": None,
-        }
-    }
-
-    chips = app_module._detected_signal_chips(report)
-
-    assert chips == ["ApoB", "CAC", "UACR", "A1c", "Family history", "LDL-C"]
-    assert app_module._detected_signal_chips({"parsed": {}}) == []
+    assert 'parse_label = "Parsing..." if is_parsing else "Parse and apply"' in source
+    assert 'st.button(parse_label, type="primary", disabled=is_parsing, key="parse_smartphrase")' in source
+    assert "render_parser_recognition_strip(report)" in source
+    assert "time.sleep(0.7 - elapsed)" in source
+    assert "Interpreting..." not in source
 
 
 def test_demo_case_gallery_loads_case_and_clears_report_state():
@@ -1095,11 +1084,11 @@ def test_worksheet_theme_standardizes_field_sizing_and_labels():
     assert 'div[data-testid="stButton"] button[kind="primary"]:active' in css
     assert "translateY(3px) scale(0.985)" in css
     assert "rcckmReportReveal" in css
-    assert ".parse-signal-chips" in css
+    assert ".parser-recognition-strip" in css
+    assert ".parser-recognition-chip" in css
     assert ".parse-chip" in css
-    assert "parseSignalReveal" in css
-    assert "parseSignalPulse" in css
-    assert "parseSignalFade" in css
+    assert "parserRecognitionReveal" in css
+    assert "parserRecognitionChip" in css
     assert "@media (prefers-reduced-motion: reduce)" in css
     assert "div[data-testid=\"stNumberInput\"] > div" in css
     assert ".worksheet-control-label-spacer" in css
@@ -1546,7 +1535,7 @@ def test_parse_new_text_updates_worksheet_but_keeps_report_cleared_until_interpr
     assert at.session_state["report_generated"] is True
 
     at.text_area[0].set_value("60M BP 132/78 TC 210 LDL 142 HDL 42 TG 180")
-    _click_button_by_label(at, "Parse")
+    _click_button_by_label(at, "Parse and apply")
 
     assert len(at.exception) == 0
     assert _value_by_label(at.text_input, "LDL-C") == "142"

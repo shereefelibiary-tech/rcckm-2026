@@ -3,6 +3,7 @@ from __future__ import annotations
 import re
 from typing import Iterable
 
+from smartphrase_ingest.aliases import CAC_ALIASES, UACR_ALIASES
 from smartphrase_ingest.med_vocab import extract_medications_structured
 from smartphrase_ingest.models import ExtractedCandidate
 from smartphrase_ingest.preprocess import is_placeholder_value
@@ -171,13 +172,20 @@ def extract_egfr(sections):
 
 
 def extract_uacr(sections):
-    return _extract_lab_value(sections, "uacr", (r"\b(?:UACR|urine\s+ACR|ALBCREAT|albumin/creatinine)\b",), "kidney", unit="mg/g")
+    return _extract_lab_value(
+        sections,
+        "uacr",
+        tuple(r"\b" + re.escape(alias).replace(r"\ ", r"\s+") + r"\b" for alias in UACR_ALIASES),
+        "kidney",
+        unit="mg/g",
+    )
 
 
 def extract_cac(sections):
     out = []
+    cac_label = r"\b(?:" + "|".join(re.escape(alias).replace(r"\ ", r"\s+") for alias in CAC_ALIASES) + r")(?:\s+\(CAC\))?(?:\s+score)?\b"
     for line in _lines(sections, ("imaging", "all")):
-        if re.search(r"\b(?:CAC|coronary(?:\s+artery)?\s+calcium|calcium score)\b", line, re.IGNORECASE):
+        if re.search(cac_label, line, re.IGNORECASE):
             tail = line.split(":", 1)[-1] if ":" in line else line
             if is_placeholder_value(tail):
                 continue

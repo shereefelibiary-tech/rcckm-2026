@@ -1,6 +1,59 @@
 from ui.ingest_panel import apply_parsed_to_session_state, parse_ingest_report
 
 
+EPIC_PLACEHOLDER_SMARTPHRASE = """
+Age: 73 y.o.
+Sex: male
+
+BP Readings from Last 3 Encounters:
+05/01/26 132/77
+04/24/26 148/82
+
+BMI: @LAST_BMI@
+Estimated body mass index is 30.81 kg/m2.
+
+Smoking status: Former
+Quit date: 1/18/1975
+2.8 pack-years
+
+Family History:
+Premature ASCVD in first-degree relative: ***
+Age at event (if yes): ***
+
+Calcification / plaque
+Coronary artery calcium (CAC) score: ***
+
+Lipids
+TC 198
+TG 323
+HDL 44
+LDL 90
+ApoB: No results found for: "APOB"
+Lp(a): No results found for: "LIPOA"
+hsCRP: No results found for: "CRPHS"
+
+A1c:
+Hemoglobin A1C
+Date    Value    Ref Range    Status
+04/24/2026    5.8 (H)    0 - 5.6 %    Final
+        Comment:
+        Reference Range
+Normal       <5.7%
+Prediabetes  5.7-6.4%
+Diabetes     >6.4%
+
+Kidney
+LABGLOM 71
+eGFR Cre 71
+Creatinine clearance 69
+Urine ACR: No results found for: "ALBCREAT"
+
+Current medications:
+amlodipine 5 mg daily
+lisinopril-HCTZ 20-12.5 mg daily
+"""
+
+
 def test_false_values_apply_to_worksheet_state():
     report = parse_ingest_report(
         """
@@ -175,3 +228,117 @@ def test_family_history_conflict_when_explicit_premature_flag_disagrees_with_age
         "Family history conflict" in conflict
         for conflict in report["conflicts"]
     )
+
+
+def test_epic_placeholder_parse_clears_stale_family_osa_masld_state():
+    state = {
+        "input_family_history_pattern": "father_premature_ascvd",
+        "input_family_history_premature_ascvd": True,
+        "input_family_history_relationship": "father",
+        "input_family_history_event_type": "MI",
+        "input_family_history_age_at_event": 49,
+        "input_osa": True,
+        "input_masld": True,
+        "input_cac": 350,
+        "input_apob": 110,
+        "input_lp_a_value": 80,
+        "input_uacr": 45,
+        "input_hscrp": 2.4,
+    }
+
+    report = parse_ingest_report(EPIC_PLACEHOLDER_SMARTPHRASE)
+    parsed = report["parsed"]
+
+    assert parsed["age"] == 73
+    assert parsed["a1c"] == 5.8
+    assert parsed["egfr"] == 71
+    assert parsed["bmi"] == 30.81
+    assert parsed["smoker"] is False
+    assert parsed["former_smoker"] is True
+    assert parsed["pack_years"] == 2.8
+    assert parsed["family_history_premature_ascvd"] is None
+    assert "family_history_relationship" not in parsed
+    assert "family_history_event_type" not in parsed
+    assert "family_history_age_at_event" not in parsed
+    assert "osa" not in parsed
+    assert "masld" not in parsed
+    assert parsed["cac"] is None
+    assert parsed.get("apob") is None
+    assert parsed.get("lp_a_value") is None
+    assert parsed.get("uacr") is None
+    assert parsed.get("hscrp") is None
+    assert parsed["bp_treated"] is True
+    assert parsed["ace_arb"] is True
+
+    apply_parsed_to_session_state(state, parsed, parse_report=report)
+
+    assert state["input_family_history_pattern"] == "none_unknown"
+    assert state["input_family_history_premature_ascvd"] is False
+    assert state["_unknown_input_family_history_premature_ascvd"] is True
+    assert state["input_family_history_helper"] == "Family history unclear"
+    assert state.get("input_family_history_relationship") is None
+    assert state.get("input_family_history_event_type") is None
+    assert state.get("input_family_history_age_at_event") is None
+    assert state.get("input_osa") in (None, False)
+    assert state.get("input_masld") in (None, False)
+    assert state.get("input_cac") is None
+    assert state.get("input_apob") is None
+    assert state.get("input_lp_a_value") is None
+    assert state.get("input_uacr") is None
+    assert state.get("input_hscrp") is None
+
+
+def test_family_history_positive_applies_compact_positive_option():
+    report = parse_ingest_report("Father MI age 49")
+    state = {}
+
+    apply_parsed_to_session_state(state, report["parsed"], parse_report=report)
+
+    assert state["input_family_history_premature_ascvd"] is True
+    assert state["input_family_history_relationship"] == "father"
+    assert state["input_family_history_event_type"] == "MI"
+    assert state["input_family_history_age_at_event"] == 49
+    assert state.get("input_family_history_pattern") != "none_unknown"
+    assert "input_family_history_helper" not in state
+
+
+def test_family_history_explicit_negative_applies_neutral_negative_state():
+    report = parse_ingest_report("Premature ASCVD in first-degree relative: No")
+    state = {
+        "input_family_history_pattern": "father_premature_ascvd",
+        "input_family_history_premature_ascvd": True,
+        "input_family_history_relationship": "father",
+        "input_family_history_event_type": "ASCVD",
+        "input_family_history_age_at_event": 49,
+    }
+
+    apply_parsed_to_session_state(state, report["parsed"], parse_report=report)
+
+    assert state["input_family_history_pattern"] == "none_unknown"
+    assert state["input_family_history_premature_ascvd"] is False
+    assert "_unknown_input_family_history_premature_ascvd" not in state
+    assert state.get("input_family_history_relationship") is None
+    assert state.get("input_family_history_event_type") is None
+    assert state.get("input_family_history_age_at_event") is None
+    assert "input_family_history_helper" not in state
+
+
+def test_family_history_placeholder_applies_neutral_unclear_state():
+    report = parse_ingest_report("Premature ASCVD in first-degree relative: ***\nAge at event: ***")
+    state = {
+        "input_family_history_pattern": "father_premature_ascvd",
+        "input_family_history_premature_ascvd": True,
+        "input_family_history_relationship": "father",
+        "input_family_history_event_type": "ASCVD",
+        "input_family_history_age_at_event": 49,
+    }
+
+    apply_parsed_to_session_state(state, report["parsed"], parse_report=report)
+
+    assert state["input_family_history_pattern"] == "none_unknown"
+    assert state["input_family_history_premature_ascvd"] is False
+    assert state["_unknown_input_family_history_premature_ascvd"] is True
+    assert state.get("input_family_history_relationship") is None
+    assert state.get("input_family_history_event_type") is None
+    assert state.get("input_family_history_age_at_event") is None
+    assert state["input_family_history_helper"] == "Family history unclear"

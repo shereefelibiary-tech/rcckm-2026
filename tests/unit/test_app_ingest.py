@@ -148,7 +148,7 @@ def test_parse_ingest_text_separates_enhancer_contexts():
     assert parsed["osa"] is True
     assert parsed["masld"] is True
     assert parsed["hscrp"] == 3.2
-    assert parsed["inflammatory_disease"] is True
+    assert parsed["inflammatory_disease"] is False
 
 
 def test_build_patient_from_inputs_accepts_common_aliases():

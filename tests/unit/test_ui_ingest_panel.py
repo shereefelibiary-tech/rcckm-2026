@@ -1,9 +1,12 @@
 from ui.ingest_panel import (
+    EPIC_SMARTPHRASE_TEMPLATE,
     apply_parsed_to_session_state,
+    build_parser_recognition_items,
     build_parse_review_rows,
     contains_phi,
     parse_ingest_report,
     parse_ingest_text,
+    render_parser_recognition_strip,
 )
 
 
@@ -11,6 +14,27 @@ def test_ingest_phi_warning_detects_common_identifiers():
     assert contains_phi("MRN TEST-0000")
     assert contains_phi("patient@example.com")
     assert contains_phi("555-010-0000")
+
+
+def test_recommended_epic_smartphrase_template_contains_core_sections():
+    for section in (
+        "Demographics",
+        "Smoking",
+        "Vitals",
+        "BMI",
+        "Family history",
+        "Lipids",
+        "A1c",
+        "ApoB",
+        "Lp(a)",
+        "hsCRP",
+        "eGFR",
+        "UACR",
+        "CAC",
+        "Medications",
+        "Relevant diagnoses/problem list",
+    ):
+        assert section in EPIC_SMARTPHRASE_TEMPLATE
 
 
 def test_parse_ingest_text_family_history_structured_fields():
@@ -29,6 +53,76 @@ def test_parsed_values_can_be_stringified_for_review_table():
 
     assert all(isinstance(row["Parsed value"], str) for row in rows)
     assert {row["Confidence"] for row in rows} >= {"parsed", "inferred", "not found"}
+
+
+def test_parser_recognition_items_prioritize_real_extracted_signals():
+    report = parse_ingest_report(
+        "Age: 73. Sex: male. Smoking status: Former. BP 132/77 LDL 90 HDL 44 TG 323 "
+        "A1c 5.8 eGFR 71 BMI 30.81 ApoB: No results found for: APOB "
+        "Lp(a): No results found for: LIPOA UACR: No results found for: ALBCREAT\n"
+        "Premature ASCVD in first-degree relative: ***\nMeds: amlodipine and lisinopril-HCTZ"
+    )
+
+    items = build_parser_recognition_items(report)
+    by_field = {item.field_id: item for item in items}
+
+    assert [item.field_id for item in items[:5]] == ["age", "sex", "bp", "ldl_c", "hdl_c"]
+    assert by_field["bp"].status == "extracted"
+    assert by_field["bp"].value == "132/77"
+    assert by_field["smoking"].status == "extracted"
+    assert by_field["smoking"].value == "Former smoker"
+    assert by_field["medications"].status == "extracted"
+    assert by_field["apob"].status == "missing"
+    assert by_field["lp_a_value"].status == "missing"
+    assert by_field["uacr"].status == "missing"
+    assert by_field["family_history"].status == "review"
+
+
+def test_parser_recognition_strip_uses_status_classes_without_fake_success():
+    report = parse_ingest_report(
+        "CAC score: ***\nApoB: No results found for: APOB\nSmoking status: Former. BP 132/77."
+    )
+
+    html = render_parser_recognition_strip(report)
+
+    assert "parser-recognition-strip" in html
+    assert "parser-recognition-chip extracted" in html
+    assert "BP 132/77" in html
+    assert "Former smoker" in html
+    assert "ApoB missing" in html
+    assert "CAC placeholder detected" in html
+    assert "&#10003;</span>CAC" not in html
+    assert "Current smoker" not in html
+
+
+def test_age_label_does_not_concatenate_nearby_digits():
+    report = parse_ingest_report(
+        """
+        Age: 73 y.o.
+        Sex: male
+        Race/Ethnicity: White (non-Hispanic)
+        BMI 30.81
+        BP 132/77
+        """
+    )
+    by_field = {item.field_id: item for item in build_parser_recognition_items(report)}
+
+    assert report["parsed"]["age"] == 73
+    assert report["parsed"]["sex"] == "male"
+    assert report["parsed"]["bmi"] == 30.81
+    assert by_field["age"].status == "extracted"
+    assert by_field["age"].value == "73"
+
+
+def test_invalid_age_is_rejected_and_flagged_for_review():
+    report = parse_ingest_report("Age: 765 y.o.\nSex: male\nBP 132/77")
+    by_field = {item.field_id: item for item in build_parser_recognition_items(report)}
+
+    assert "age" not in report["parsed"]
+    assert report["meta"]["age"]["confidence"] == "uncertain"
+    assert "Age parsed value invalid; review needed." in report["warnings"]
+    assert any("Age parsed value invalid" in conflict for conflict in report["conflicts"])
+    assert by_field["age"].status == "invalid"
 
 
 def test_parse_report_marks_uncertain_family_history():
@@ -137,11 +231,11 @@ def test_parser_inflammatory_no_and_ra_no_stays_false():
     assert parsed["rheumatoid_arthritis"] is False
 
 
-def test_parser_ra_yes_sets_ra_and_inflammatory_group():
+def test_parser_ra_yes_sets_ra_without_generic_inflammatory_bucket():
     parsed = parse_ingest_text("Rheumatoid arthritis: Yes")
 
     assert parsed["rheumatoid_arthritis"] is True
-    assert parsed["inflammatory_disease"] is True
+    assert parsed["inflammatory_disease"] is False
 
 
 def test_parser_hiv_yes_does_not_create_inflammatory_conflict():
@@ -174,14 +268,48 @@ def test_parser_hiv_no_and_inflammatory_no_are_both_false():
     assert report["conflicts"] == []
 
 
-def test_parser_specific_inflammatory_positive_with_generic_no_uses_clear_conflict():
+def test_parser_specific_inflammatory_positive_with_generic_no_keeps_generic_false():
     report = parse_ingest_report("Inflammatory disease: No\nRA: Yes")
 
     assert report["parsed"]["rheumatoid_arthritis"] is True
-    assert report["parsed"]["inflammatory_disease"] is True
-    assert report["conflicts"] == [
-        "Inflammatory disease conflict: specific condition present despite generic inflammatory disease marked No."
-    ]
+    assert report["parsed"]["inflammatory_disease"] is False
+    assert report["conflicts"] == []
+
+
+def test_parser_stress_smartphrase_uses_aliases_sections_and_exclusivity():
+    with open("tests/fixtures/ingest/rcckm_parser_stress_smartphrase.txt", encoding="utf-8") as fixture:
+        report = parse_ingest_report(fixture.read())
+    parsed = report["parsed"]
+    items = {item.field_id: item for item in build_parser_recognition_items(report)}
+
+    assert parsed["family_history_premature_ascvd"] is True
+    assert parsed["family_history_relationship"] == "father"
+    assert parsed["family_history_event_type"] == "mi"
+    assert parsed["family_history_age_at_event"] == 52
+    assert parsed["south_asian_ancestry"] is True
+    assert parsed["uacr"] == 86
+    assert parsed["rheumatoid_arthritis"] is True
+    assert parsed["inflammatory_disease"] is False
+    assert parsed["diabetes"] is False
+    assert parsed["prediabetes_context"] is True
+    assert parsed["cac"] == 125
+    assert parsed["cac_percentile"] == 91
+    assert parsed["osa"] is True
+    assert parsed["masld"] is True
+    assert parsed["bmi"] == 31.9
+    assert parsed["a1c"] == 6.4
+    assert parsed["apob"] == 118
+    assert parsed["lp_a_value"] == 168
+    assert parsed["hscrp"] == 3.1
+    assert items["cac"].status == "extracted"
+    assert items["cac"].value == "125"
+    assert items["uacr"].status == "extracted"
+    assert items["uacr"].value == "86 mg/g"
+    assert items["family_history"].status == "extracted"
+    assert items["ancestry"].value == "South Asian"
+    assert items["inflammatory"].value == "RA"
+    assert items["osa"].status == "extracted"
+    assert items["masld"].status == "extracted"
 
 
 def test_parser_diabetes_no_high_a1c_reports_conflict():
@@ -321,6 +449,78 @@ def test_diabetes_reference_table_does_not_create_false_diabetes():
     assert "diabetes" not in parsed
 
 
+def test_multiline_epic_a1c_table_extracts_result_not_reference_range():
+    report = parse_ingest_report(
+        """
+        A1c:
+        Hemoglobin A1C
+        Date    Value    Ref Range    Status
+        04/24/2026    5.8 (H)    0 - 5.6 %    Final
+                Comment:
+                Reference Range
+        Normal       <5.7%
+        Prediabetes  5.7-6.4%
+        Diabetes     >6.4%
+        """
+    )
+    parsed = report["parsed"]
+    by_field = {item.field_id: item for item in build_parser_recognition_items(report)}
+    strip = render_parser_recognition_strip(report)
+
+    assert parsed["a1c"] == 5.8
+    assert parsed.get("diabetes") is not True
+    assert "A1c section found; result unclear" not in report["warnings"]
+    assert by_field["a1c"].status == "extracted"
+    assert by_field["a1c"].value == "5.8%"
+    assert "A1c 5.8%" in strip
+    assert "A1c missing" not in strip
+
+
+def test_a1c_one_line_and_table_values_parse_without_reference_range_leakage():
+    one_line = parse_ingest_report("A1c: 6.1")
+    table = parse_ingest_report(
+        """
+        Hemoglobin A1C
+        Date Value Ref Range Status
+        5/1/2026 7.2 0 - 5.6 % Final
+        Reference Range
+        Diabetes >6.4%
+        """
+    )
+    reference_only = parse_ingest_report(
+        """
+        Hemoglobin A1C
+        Reference Range
+        Normal <5.7%
+        Prediabetes 5.7-6.4%
+        Diabetes >6.4%
+        """
+    )
+
+    assert one_line["parsed"]["a1c"] == 6.1
+    assert table["parsed"]["a1c"] == 7.2
+    assert "a1c" not in reference_only["parsed"]
+    assert "diabetes" not in reference_only["parsed"]
+    assert reference_only["meta"]["a1c"]["confidence"] == "uncertain"
+
+
+def test_a1c_table_uses_most_recent_dated_row():
+    report = parse_ingest_report(
+        """
+        A1c:
+        Hemoglobin A1C
+        Date Value Ref Range Status
+        04/24/2026 5.8 (H) 0 - 5.6 % Final
+        05/01/2026 6.2 (H) 0 - 5.6 % Final
+        Reference Range
+        Prediabetes 5.7-6.4%
+        Diabetes >6.4%
+        """
+    )
+
+    assert report["parsed"]["a1c"] == 6.2
+
+
 def test_epic_placeholder_garbage_smartphrase_parses_only_real_values():
     text = (
         "Epic cardiovascular SmartPhrase synthetic example\n"
@@ -384,12 +584,40 @@ def test_epic_placeholder_garbage_smartphrase_parses_only_real_values():
     assert parsed["cac"] is None
     assert parsed["cac_not_done"] is True
     assert parsed["family_history_premature_ascvd"] is None
+    assert "family_history_relationship" not in parsed
+    assert "family_history_event_type" not in parsed
+    assert "family_history_age_at_event" not in parsed
+    assert "osa" not in parsed
+    assert "masld" not in parsed
     assert parsed["bp_treated"] is True
     assert parsed["ace_arb"] is True
     assert meta["bmi"]["source"] == "labeled value"
     assert meta["apob"]["confidence"] == "not found"
     assert meta["lp_a_value"]["confidence"] == "not found"
     assert meta["uacr"]["confidence"] == "not found"
+
+    items = {item.field_id: item for item in build_parser_recognition_items(report)}
+    assert items["a1c"].status == "extracted"
+    assert items["a1c"].value == "5.8%"
+    assert items["family_history"].status == "review"
+    assert items["cac"].status == "review"
+    assert items["apob"].status == "missing"
+    assert items["lp_a_value"].status == "missing"
+    assert items["uacr"].status == "missing"
+    assert items["hscrp"].status == "missing"
+    assert "osa" not in items
+    assert "masld" not in items
+
+    recognition_html = render_parser_recognition_strip(report)
+    assert "Family history unclear" in recognition_html
+    assert "CAC placeholder detected" in recognition_html
+    assert "ApoB missing" in recognition_html
+    assert "Lp(a) missing" in recognition_html
+    assert "UACR missing" in recognition_html
+    assert "hsCRP missing" in recognition_html
+    assert "OSA" not in recognition_html
+    assert "MASLD" not in recognition_html
+    assert "Father &lt;55" not in recognition_html
 
 
 def test_unavailable_reasons_are_preserved_in_metadata():

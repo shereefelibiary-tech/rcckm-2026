@@ -61,8 +61,8 @@ def test_inflammatory_conditions_yes_no_unknown_are_specific_and_hiv_separate():
     assert parsed["inflammatory_arthritis"] is True
     assert parsed["ibd"] is False
     assert parsed["hiv"] is True
-    assert parsed["inflammatory_disease"] is True
-    assert any("specific condition present" in conflict for conflict in report.conflicts)
+    assert parsed["inflammatory_disease"] is False
+    assert report.conflicts == []
 
     patient = Patient(age=55, sex="male", hiv=True, inflammatory_disease=False)
     result = evaluate_patient(patient)

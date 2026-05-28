@@ -622,13 +622,16 @@ def _clear_cac_state():
 
 
 def _family_history_summary_from_state(st, parsed):
+    helper = st.session_state.get("input_family_history_helper") or parsed.get("family_history_helper")
+    if helper:
+        return str(helper)
     relationship = st.session_state.get(
         "input_family_history_relationship",
-        parsed.get("family_history_relationship") or "father",
+        parsed.get("family_history_relationship"),
     )
     event_type = st.session_state.get(
         "input_family_history_event_type",
-        parsed.get("family_history_event_type") or "MI",
+        parsed.get("family_history_event_type"),
     )
     age_at_event = st.session_state.get(
         "input_family_history_age_at_event",
@@ -643,7 +646,11 @@ def _family_history_summary_from_state(st, parsed):
         return summary
     if parsed.get("fhx_text"):
         return str(parsed.get("fhx_text"))
-    if bool(st.session_state.get("input_family_history_premature_ascvd", parsed.get("family_history_premature_ascvd", False))):
+    premature_value = st.session_state.get(
+        "input_family_history_premature_ascvd",
+        parsed.get("family_history_premature_ascvd"),
+    )
+    if bool(premature_value):
         patient = Patient(
             age=parse_optional_int(parsed.get("age")),
             sex=str(parsed.get("sex") or ""),
@@ -653,7 +660,9 @@ def _family_history_summary_from_state(st, parsed):
             family_history_age_at_event=None,
         )
         return build_family_history_payload(patient)["summary"] or "Premature family history of ASCVD"
-    return "No premature family history"
+    if premature_value is False:
+        return "No premature family history"
+    return "Family history unknown"
 
 
 def _current_compact_family_history_option(st, parsed):
@@ -947,7 +956,7 @@ def render_manual_worksheet(st, parsed):
             )
             _apply_compact_family_history_selection(inputs, selected_family_option, st, parsed)
             if selected_family_option == "none_unknown":
-                st.caption("No premature family history selected.")
+                st.caption(_family_history_summary_from_state(st, {**parsed, **inputs}))
             else:
                 st.caption(_family_history_summary_from_state(st, {**parsed, **inputs}))
         genetics_cols = st.columns([1.35, 1.35, 2.3], gap="small")

@@ -1,0 +1,57 @@
+Demographics
+Age: 58 y.o.
+Sex: male
+Race/Ethnicity: South Asian
+
+Vitals
+Most recent BP: 128/76
+
+BMI
+Estimated body mass index is 31.9 kg/m²
+
+Family History:
+Premature ASCVD in first-degree relative: Yes
+Relationship: Father
+Event type: MI
+Age at event: 52
+
+Lipids
+Total cholesterol: 205
+LDL-C: 126
+HDL-C: 42
+Triglycerides: 245
+
+A1c:
+Hemoglobin A1C
+Date    Value    Ref Range    Status
+05/18/2026    6.4 (H)    0 - 5.6 %    Final
+Reference Range
+Normal       <5.7%
+Prediabetes  5.7-6.4%
+Diabetes     >6.4%
+
+ApoB
+ApoB: 118 mg/dL
+
+Lp(a)
+Lp(a): 168 nmol/L
+
+hsCRP
+hsCRP: 3.1 mg/L
+
+Kidney
+Albumin/Creatinine Ratio, Urine
+05/18/2026  86 (H)
+eGFR Cre 78
+
+Imaging
+Coronary artery calcium (CAC) score: 125
+CAC percentile: 91
+
+Inflammation / immune context
+Rheumatoid arthritis: Yes
+OSA: Yes
+MASLD: Yes
+
+Medications
+Current medications: amlodipine, lisinopril

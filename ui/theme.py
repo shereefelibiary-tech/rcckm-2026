@@ -646,38 +646,86 @@ label,
     color: var(--rcckm-muted);
 }
 
-.parse-signal-chips {
+.parser-recognition-strip {
     align-items: center;
-    animation: parseSignalReveal 180ms ease-out both;
+    animation: parserRecognitionReveal 160ms ease-out both;
     background: rgba(255, 253, 248, 0.72);
     border: 1px solid rgba(11, 31, 58, 0.10);
-    border-radius: 999px;
+    border-radius: 12px;
     box-shadow: 0 8px 22px rgba(11, 31, 58, 0.055);
     color: rgba(7, 26, 47, 0.72);
-    display: inline-flex;
-    gap: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
     margin: 8px 0 10px;
     max-width: 100%;
-    padding: 6px 9px;
+    padding: 7px 9px;
 }
 
-.parse-signal-chips-fade {
-    animation: parseSignalFade 900ms ease-out forwards;
-}
-
-.parse-signal-label {
+.parser-recognition-label {
     color: rgba(7, 26, 47, 0.56);
     font-size: 0.76rem;
     font-weight: 800;
+    line-height: 1;
+    margin-right: 2px;
 }
 
-.parse-signal-pulse {
-    background: var(--rc-garnet);
+.parser-recognition-chip {
+    align-items: center;
+    animation: parserRecognitionChip 160ms ease-out both;
+    animation-delay: calc(var(--chip-index, 0) * 72ms);
+    border: 1px solid rgba(11, 31, 58, 0.12);
     border-radius: 999px;
-    box-shadow: 0 0 0 0 rgba(115, 0, 10, 0.22);
-    height: 7px;
-    width: 7px;
-    animation: parseSignalPulse 760ms ease-out 1;
+    display: inline-flex;
+    font-size: 0.75rem;
+    font-weight: 780;
+    gap: 4px;
+    line-height: 1;
+    padding: 0.26rem 0.50rem;
+    position: relative;
+    white-space: nowrap;
+}
+
+.parser-recognition-chip.extracted {
+    background: rgba(29, 126, 84, 0.08);
+    border-color: rgba(29, 126, 84, 0.18);
+    color: #155f42;
+}
+
+.parser-recognition-chip.review {
+    background: rgba(217, 119, 6, 0.11);
+    border-color: rgba(217, 119, 6, 0.22);
+    color: #7c3f00;
+}
+
+.parser-recognition-chip.missing {
+    background: rgba(93, 107, 122, 0.07);
+    border-color: rgba(93, 107, 122, 0.14);
+    color: rgba(7, 26, 47, 0.55);
+}
+
+.parser-recognition-chip.invalid {
+    background: rgba(193, 18, 31, 0.09);
+    border-color: rgba(193, 18, 31, 0.22);
+    color: #9f111b;
+}
+
+.parser-recognition-chip[data-detail]:hover::after,
+.parser-recognition-chip[data-detail]:focus::after {
+    background: #111827;
+    border-radius: 8px;
+    bottom: calc(100% + 6px);
+    color: #fff;
+    content: attr(data-detail);
+    font-size: .70rem;
+    font-weight: 650;
+    left: 0;
+    line-height: 1.25;
+    max-width: 260px;
+    min-width: 190px;
+    padding: 7px 8px;
+    position: absolute;
+    z-index: 30;
 }
 
 .parse-chip-row {
@@ -999,7 +1047,7 @@ div[data-testid="stDataFrame"] {
     }
 }
 
-@keyframes parseSignalReveal {
+@keyframes parserRecognitionReveal {
     from {
         opacity: 0;
         transform: translateY(5px);
@@ -1010,24 +1058,9 @@ div[data-testid="stDataFrame"] {
     }
 }
 
-@keyframes parseSignalPulse {
-    0% {
-        box-shadow: 0 0 0 0 rgba(115, 0, 10, 0.24);
-    }
-    100% {
-        box-shadow: 0 0 0 7px rgba(115, 0, 10, 0);
-    }
-}
-
-@keyframes parseSignalFade {
-    0%, 68% {
-        opacity: 1;
-        transform: translateY(0);
-    }
-    100% {
-        opacity: 0;
-        transform: translateY(-3px);
-    }
+@keyframes parserRecognitionChip {
+    from { opacity: 0; transform: translateY(4px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .rc-shell,
@@ -1067,9 +1100,8 @@ div[data-testid="stDataFrame"] {
         transition: none !important;
         transform: none !important;
     }
-    .parse-signal-chips,
-    .parse-signal-chips-fade,
-    .parse-signal-pulse {
+    .parser-recognition-strip,
+    .parser-recognition-chip {
         animation: none !important;
     }
 }

@@ -4,13 +4,14 @@ from smartphrase_ingest.extractors import EXTRACTORS
 from smartphrase_ingest.models import ParsedPatientDraft
 from smartphrase_ingest.parser import detect_source_style
 from smartphrase_ingest.preprocess import normalize_text, raw_text_hash
+from smartphrase_ingest.profiles import ParserProfile, apply_profile_hints
 from smartphrase_ingest.resolver import resolve_candidates
 from smartphrase_ingest.sections import detect_sections
 
 
-def parse_to_draft(raw_text: str) -> ParsedPatientDraft:
+def parse_to_draft(raw_text: str, profile: ParserProfile | None = None) -> ParsedPatientDraft:
     """Run preprocess -> section detection -> extraction -> resolver."""
-    normalized = normalize_text(raw_text)
+    normalized = normalize_text(apply_profile_hints(raw_text, profile))
     draft = ParsedPatientDraft(
         source_system=detect_source_style(normalized),
         raw_text_hash=raw_text_hash(raw_text),
