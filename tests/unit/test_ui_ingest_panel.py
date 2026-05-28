@@ -321,6 +321,77 @@ def test_diabetes_reference_table_does_not_create_false_diabetes():
     assert "diabetes" not in parsed
 
 
+def test_epic_placeholder_garbage_smartphrase_parses_only_real_values():
+    text = (
+        "Epic cardiovascular SmartPhrase synthetic example\n"
+        "73-year-old male\n"
+        "Race/Ethnicity: White / non-Hispanic\n"
+        "BP Readings from Last 3 Encounters:\n"
+        "05/01/26 132/77\n"
+        "04/24/26 148/82\n"
+        "BMI: @LAST_BMI@\n"
+        "Estimated body mass index is 30.81 kg/m2.\n"
+        "Smoking status: Former\n"
+        "Quit date: 1/18/1975\n"
+        "2.8 pack-years\n"
+        "Premature ASCVD in first-degree relative: ***\n"
+        "Coronary artery calcium (CAC) score: ***\n"
+        "TC 198\n"
+        "TG 323\n"
+        "HDL 44\n"
+        "LDL 90\n"
+        "ApoB: No results found for: \"APOB\"\n"
+        "Lp(a): No results found for: \"LIPOA\"\n"
+        "hsCRP: No results found for: \"CRPHS\"\n"
+        "Hemoglobin A1c\n"
+        "04/24/2026 5.8 (H)\n"
+        "Reference range:\n"
+        "Normal <5.7%\n"
+        "Prediabetes 5.7-6.4%\n"
+        "Diabetes >6.4%\n"
+        "LABGLOM 71\n"
+        "eGFR Cre 71\n"
+        "Creatinine clearance 69\n"
+        "Urine ACR: No results found for: \"ALBCREAT\"\n"
+        "Current medications:\n"
+        "amlodipine 5 mg daily\n"
+        "lisinopril-HCTZ 20-12.5 mg daily\n"
+    )
+
+    report = parse_ingest_report(text)
+    parsed = report["parsed"]
+    meta = report["meta"]
+
+    assert parsed["age"] == 73
+    assert parsed["sex"] == "male"
+    assert parsed["smoker"] is False
+    assert parsed["former_smoker"] is True
+    assert parsed["pack_years"] == 2.8
+    assert parsed["sbp"] == 132
+    assert parsed["dbp"] == 77
+    assert parsed["bmi"] == 30.81
+    assert parsed["tc"] == 198
+    assert parsed["triglycerides"] == 323
+    assert parsed["hdl_c"] == 44
+    assert parsed["ldl_c"] == 90
+    assert parsed["a1c"] == 5.8
+    assert parsed.get("diabetes") is not True
+    assert parsed["egfr"] == 71
+    assert parsed.get("uacr") is None
+    assert parsed.get("apob") is None
+    assert parsed.get("lp_a_value") is None
+    assert parsed.get("hscrp") is None
+    assert parsed["cac"] is None
+    assert parsed["cac_not_done"] is True
+    assert parsed["family_history_premature_ascvd"] is None
+    assert parsed["bp_treated"] is True
+    assert parsed["ace_arb"] is True
+    assert meta["bmi"]["source"] == "labeled value"
+    assert meta["apob"]["confidence"] == "not found"
+    assert meta["lp_a_value"]["confidence"] == "not found"
+    assert meta["uacr"]["confidence"] == "not found"
+
+
 def test_unavailable_reasons_are_preserved_in_metadata():
     report = parse_ingest_report(
         "eGFR unavailable due to lab interface failure. UACR not done because no urine sample. CAC not done."

@@ -1,0 +1,50 @@
+Epic cardiovascular SmartPhrase synthetic example
+73-year-old male
+Race/Ethnicity: White / non-Hispanic
+
+Vitals
+BP Readings from Last 3 Encounters:
+05/01/26 132/77
+04/24/26 148/82
+03/10/26 141/79
+
+BMI: @LAST_BMI@
+Estimated body mass index is 30.81 kg/m2.
+
+Smoking status: Former
+Quit date: 1/18/1975
+2.8 pack-years
+
+Family history premature ASCVD:
+Premature ASCVD in first-degree relative: ***
+
+Calcification / plaque
+Coronary artery calcium (CAC) score: ***
+
+Lipids
+TC 198
+TG 323
+HDL 44
+LDL 90
+VLDL 65
+ApoB: No results found for: "APOB"
+Lp(a): No results found for: "LIPOA"
+hsCRP: No results found for: "CRPHS"
+
+Glycemia
+Hemoglobin A1c
+04/24/2026 5.8 (H)
+Reference range:
+Normal <5.7%
+Prediabetes 5.7-6.4%
+Diabetes >6.4%
+
+Kidney
+LABGLOM 71
+eGFR Cre 71
+Creatinine clearance 69
+Urine ACR: No results found for: "ALBCREAT"
+
+Current medications:
+amlodipine 5 mg daily
+lisinopril-HCTZ 20-12.5 mg daily

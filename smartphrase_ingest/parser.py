@@ -48,7 +48,7 @@ NUMERIC_PATTERNS = {
     "egfr": r"\b(?:egfr|e-gfr)\b",
     "uacr": r"\b(?:uacr|acr|urine albumin creatinine ratio)\b",
     "cac": r"\b(?:cac|coronary calcium|calcium score)\b",
-    "bmi": r"\bbmi\b",
+    "bmi": r"\b(?:bmi|body mass index)\b",
     "creatinine": r"\b(?:creatinine|cr)\b",
     "hscrp": r"\b(?:hscrp|hs-crp|high sensitivity crp)\b",
 }
@@ -127,6 +127,9 @@ def _parse_number_after_label(text: str, label_pattern: str) -> float | None:
     window = text[max(0, match.start() - 40): min(len(text), match.end() + 40)].lower()
     if any(term in window for term in ("reference", "threshold", "normal range", "diagnostic")):
         return None
+    label_value_window = text[match.start():match.start(1)]
+    if ":" in label_value_window and PLACEHOLDER_VALUE_RE.search(label_value_window.split(":", 1)[-1]):
+        return None
     try:
         return float(match.group(1).replace(" ", "").lstrip("<>"))
     except ValueError:
@@ -178,7 +181,13 @@ def _label_regex(labels: list[str]) -> str:
 
 UNKNOWN_VALUE_RE = (
     r"(?:unknown|not\s+documented|unavailable|not\s+available|not\s+found|"
-    r"not\s+assessed|unclear|unable\s+to\s+determine|not\s+reported|missing)"
+    r"no\s+results\s+found|not\s+assessed|unclear|unable\s+to\s+determine|"
+    r"not\s+reported|missing|\*{2,}|@[A-Z0-9_]+@)"
+)
+
+PLACEHOLDER_VALUE_RE = re.compile(
+    r"^\s*(?:\*{2,}|@[A-Z0-9_]+@|no\s+results\s+found(?:\s+for:?.*)?)\s*$",
+    re.IGNORECASE,
 )
 
 
@@ -413,17 +422,35 @@ def _extract_unavailable_reason(text: str, label: str) -> str | None:
         re.IGNORECASE,
     ):
         return f"{label} unavailable or not done"
-    unavailable_terms = r"not available|unavailable|not done|deferred|unable to calculate|not reported|not performed|unknown|no [a-z ]{0,30}available"
+    unavailable_terms = (
+        r"not available|unavailable|not done|deferred|unable to calculate|"
+        r"not reported|not performed|unknown|no results found(?:\s+for:?)?|"
+        r"no [a-z ]{0,30}available|\*{2,}|@[A-Z0-9_]+@"
+    )
     if label == "CAC":
-        label_pattern = r"(?:CAC|coronary calcium|calcium score)"
+        label_pattern = r"(?:CAC|coronary(?:\s+artery)?\s+calcium(?:\s+\(CAC\))?|coronary calcium|calcium score)"
     elif label == "LDL-C":
         label_pattern = r"(?:LDL-C|LDL|low density lipoprotein)"
+    elif label == "UACR":
+        label_pattern = r"(?:UACR|urine\s+ACR|urine\s+albumin(?:/|\s+)creatinine|albumin/creatinine|ALBCREAT)"
+    elif label == "ApoB":
+        label_pattern = r"(?:ApoB|Apo\s*B|apolipoprotein\s*B|APOB)"
+    elif label == "Lp(a)":
+        label_pattern = r"(?:Lp\(a\)|Lp\s*a|LIPOA|lipoprotein\s*\(a\))"
+    elif label == "hsCRP":
+        label_pattern = r"(?:hsCRP|hs-CRP|CRPHS|high sensitivity CRP)"
     else:
         label_pattern = re.escape(label)
-    pattern = rf"\b{label_pattern}\b[^\n.;:]*?\b(?:{unavailable_terms})\b(?:\s*(?:because|due to|reason:?)\s*([^.;\n]+))?"
+    if re.search(
+        rf"\b{label_pattern}[^\n]*:\s*(?:\*{{2,}}|@[A-Z0-9_]+@)\s*$",
+        text,
+        re.IGNORECASE | re.MULTILINE,
+    ):
+        return f"{label} unavailable or not done"
+    pattern = rf"\b{label_pattern}[^\n.;]*?\b(?:{unavailable_terms})\b(?:\s*(?:because|due to|reason:?)\s*([^.;\n]+))?"
     match = re.search(pattern, text, re.IGNORECASE)
     if not match:
-        pattern = rf"\b(?:{unavailable_terms})\b[^\n.;:]*?\b{label_pattern}\b(?:\s*(?:because|due to|reason:?)\s*([^.;\n]+))?"
+        pattern = rf"\b(?:{unavailable_terms})\b[^\n.;]*?\b{label_pattern}(?:\s*(?:because|due to|reason:?)\s*([^.;\n]+))?"
         match = re.search(pattern, text, re.IGNORECASE)
     if not match:
         return None
@@ -431,6 +458,103 @@ def _extract_unavailable_reason(text: str, label: str) -> str | None:
     if detail:
         return f"{label} unavailable: {detail}"
     return f"{label} unavailable or not done"
+
+
+def _parse_epic_table_labs(report: ParseReport, text: str) -> None:
+    """Extract common Epic result-table values while ignoring reference ranges."""
+    table_patterns = (
+        ("tc", r"\b(?:TC|CHOL(?:ESTEROL)?|TOTAL\s+CHOLESTEROL)\b", "Epic lipid table"),
+        ("tg", r"\b(?:TG|TRIG(?:LYCERIDES)?)\b", "Epic lipid table"),
+        ("hdl", r"\bHDL\b", "Epic lipid table"),
+        ("ldl", r"\bLDL\b", "Epic lipid table"),
+        ("a1c", r"\b(?:A1C|HBA1C|HEMOGLOBIN\s+A1C)\b", "Epic A1c table"),
+        ("egfr", r"\b(?:LABGLOM|eGFR\s+Cre|eGFR(?:\s+CREATININE)?)\b", "Epic kidney table"),
+    )
+    pending: tuple[str, str] | None = None
+    for line in (text or "").splitlines():
+        clean = line.strip()
+        if not clean or re.search(
+            r"\b(?:reference|normal|prediabetes|diabetes\s*[>=]|unavailable|not done|no results found|not available)\b",
+            clean,
+            re.IGNORECASE,
+        ):
+            continue
+        if PLACEHOLDER_VALUE_RE.search(clean):
+            continue
+        matched = None
+        for field, label_pattern, source in table_patterns:
+            if field not in report.extracted and re.search(label_pattern, clean, re.IGNORECASE):
+                matched = (field, source)
+                break
+        if pending and not matched and not re.match(
+            r"^\s*(?:\d{1,2}/\d{1,2}/\d{2,4}\s+)?[<>]?\d+(?:\.\d+)?(?:\s|\(|$)",
+            clean,
+        ):
+            pending = None
+            continue
+        active = matched or pending
+        if not active:
+            continue
+        field, source = active
+        if field == "egfr" and re.search(r"\b(?:crcl|creatinine\s+clearance)\b", clean, re.IGNORECASE):
+            pending = None
+            continue
+        clean_for_values = re.sub(r"\b\d{1,2}/\d{1,2}/\d{2,4}\b", " ", clean)
+        numbers = re.findall(r"(?<!/)\b\d+(?:\.\d+)?\b(?!/)", clean_for_values)
+        value = None
+        for number in numbers:
+            try:
+                candidate = float(number)
+            except ValueError:
+                continue
+            if candidate > 1900:
+                continue
+            value = candidate
+            break
+        if value is not None and field not in report.extracted:
+            _record(report, field, value, "parsed", source)
+            pending = None
+        elif matched:
+            pending = matched
+        else:
+            pending = None
+
+
+def _parse_smoking_details(report: ParseReport, text: str) -> None:
+    """Parse current/former smoking fields without treating former use as active use."""
+    status = re.search(r"\bsmoking\s+status\s*(?:=|:)?\s*(current|former|never|none|not current)\b", text, re.IGNORECASE)
+    if status:
+        value = status.group(1).lower()
+        if value == "current":
+            _record(report, "smoker", True, "parsed", "smoking status")
+        else:
+            _record(report, "smoker", False, "parsed", "smoking status")
+            if value == "former":
+                _record(report, "former_smoker", True, "parsed", "smoking status")
+    pack_years = re.search(r"\b(\d+(?:\.\d+)?)\s*pack[-\s]?years?\b", text, re.IGNORECASE)
+    if pack_years:
+        _record(report, "pack_years", float(pack_years.group(1)), "parsed", "tobacco history")
+
+
+def _parse_bp_readings_table(report: ParseReport, text: str) -> None:
+    """Use the first BP pair after a BP readings heading as the most recent BP."""
+    in_bp_table = False
+    for line in (text or "").splitlines():
+        clean = line.strip()
+        if re.search(r"\bBP\s+Readings?\b|\bBlood Pressure Readings?\b", clean, re.IGNORECASE):
+            in_bp_table = True
+            continue
+        if not in_bp_table:
+            continue
+        if not clean:
+            continue
+        match = re.search(r"\b\d{1,2}/\d{1,2}/\d{2,4}\s+(\d{2,3})\s*/\s*(\d{2,3})\b", clean)
+        if match:
+            _record(report, "sbp", float(match.group(1)), "parsed", "most recent BP readings table")
+            _record(report, "dbp", float(match.group(2)), "parsed", "most recent BP readings table")
+            return
+        if re.search(r"^[A-Za-z].*:", clean) and not re.search(r"\b(?:BP|blood pressure)\b", clean, re.IGNORECASE):
+            in_bp_table = False
 
 
 def _parse_height_weight_bmi(report: ParseReport, text: str) -> None:
@@ -641,12 +765,17 @@ def parse_smartphrase_report(text: str) -> ParseReport:
                 _record(report, "sbp", float(bp_match.group(1)), "parsed", "blood pressure pair")
                 _record(report, "dbp", float(bp_match.group(2)), "parsed", "blood pressure pair")
 
+    if "sbp" not in report.extracted or "dbp" not in report.extracted:
+        _parse_bp_readings_table(report, text)
+
     for field, label_pattern in NUMERIC_PATTERNS.items():
         if field in report.extracted:
             continue
         value = _parse_number_after_label(text, label_pattern)
         if value is not None:
             _record(report, field, value, "parsed", "labeled value")
+
+    _parse_epic_table_labs(report, text)
 
     actual_a1c = re.search(r"\bactual\s+(?:a1c|hba1c)\s*(?:=|:)?\s*(\d+(?:\.\d+)?)\b", text, re.IGNORECASE)
     if actual_a1c:
@@ -677,7 +806,15 @@ def parse_smartphrase_report(text: str) -> ParseReport:
             }
             report.warnings.append("Lp(a) value parsed without units; please review nmol/L vs mg/dL.")
 
-    for field, label in (("egfr", "eGFR"), ("uacr", "UACR"), ("cac", "CAC"), ("ldl", "LDL-C")):
+    for field, label in (
+        ("egfr", "eGFR"),
+        ("uacr", "UACR"),
+        ("cac", "CAC"),
+        ("ldl", "LDL-C"),
+        ("apob", "ApoB"),
+        ("lpa", "Lp(a)"),
+        ("hscrp", "hsCRP"),
+    ):
         if field not in report.extracted:
             reason = _extract_unavailable_reason(text, label)
             if reason:
@@ -724,6 +861,12 @@ def parse_smartphrase_report(text: str) -> ParseReport:
         _record(report, "family_history_age_at_event", event_age, "parsed", "family history")
     elif explicit_premature_fhx_found:
         _record(report, "fhx", explicit_premature_fhx, "parsed", "explicit premature family history")
+    elif re.search(
+        r"\b(?:premature\s+family\s+history|premature\s+ascvd\s+in\s+first[-\s]?degree\s+relative|family\s+history)\b[^\n.;]*:\s*(?:\*{2,}|@[A-Z0-9_]+@)\s*$",
+        text,
+        re.IGNORECASE | re.MULTILINE,
+    ):
+        _record(report, "fhx", None, "parsed", "placeholder family history")
     elif re.search(r"\bfamily history\b|\bfhx\b", text, re.IGNORECASE):
         report.field_meta["fhx"] = {
             "confidence": "uncertain",
@@ -877,6 +1020,8 @@ def parse_smartphrase_report(text: str) -> ParseReport:
                 context = _clinical_ascvd_context(text)
                 if context:
                     _record(report, "clinical_ascvd_context", context, "parsed", "clinical ASCVD event/procedure")
+
+    _parse_smoking_details(report, text)
 
     cac_percentile = re.search(
         r"\b(?:cac\s+percentile|coronary\s+calcium\s+percentile)\s*(?:=|:|is)?\s*(\d{1,3})(?:th|st|nd|rd)?\b",

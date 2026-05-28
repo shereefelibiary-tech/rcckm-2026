@@ -1,0 +1,24 @@
+{
+  "source_style": "epic",
+  "extracted": {
+    "age": 73,
+    "sex": "male",
+    "sbp": 132,
+    "dbp": 77,
+    "bmi": 30.81,
+    "smoker": false,
+    "former_smoker": true,
+    "pack_years": 2.8,
+    "fhx": null,
+    "cac": null,
+    "cac_not_done": true,
+    "tc": 198,
+    "tg": 323,
+    "hdl": 44,
+    "ldl": 90,
+    "a1c": 5.8,
+    "egfr": 71,
+    "bpTreated": true,
+    "ace_arb": true
+  }
+}
