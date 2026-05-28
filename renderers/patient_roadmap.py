@@ -1,3 +1,4 @@
+from datetime import date
 from html import escape
 from textwrap import dedent
 
@@ -1272,6 +1273,254 @@ def _text_lines(patient, result):
 
 def render_patient_roadmap_text(patient, result):
     return "\n".join(_text_lines(patient, result))
+
+
+def _print_list_html(items, *, class_name="print-roadmap-list", empty_text="No major items."):
+    if not items:
+        return f'<div class="print-roadmap-muted">{escape(empty_text)}</div>'
+    return (
+        f'<ul class="{escape(class_name)}">'
+        + "".join(f"<li>{escape(str(item))}</li>" for item in items if str(item).strip())
+        + "</ul>"
+    )
+
+
+def _print_targets_html(patient, result):
+    rows = [
+        row
+        for row in _target_rows(patient, result)
+        if row[2] and row[2] != "-" and row[0] in {"LDL-C", "ApoB", "BP", "A1c"}
+    ]
+    if not rows:
+        return '<div class="print-roadmap-muted">No specific numeric goals assigned yet.</div>'
+    parts = []
+    for area, current, goal in rows:
+        current_text = str(current or "-").replace(" mmHg; treated", "").replace("; treated", "")
+        goal_text = str(goal or "-")
+        parts.append(
+            '<div class="print-roadmap-target">'
+            f'<div class="print-roadmap-target-label">{escape(str(area))}</div>'
+            f'<div class="print-roadmap-target-goal">{escape(goal_text)}</div>'
+            f'<div class="print-roadmap-target-current">Current {escape(current_text)}</div>'
+            "</div>"
+        )
+    return '<div class="print-roadmap-target-grid">' + "".join(parts) + "</div>"
+
+
+def render_printable_patient_roadmap(patient, result, *, generated_on=None, compact=True):
+    """Return print-ready patient roadmap HTML with dedicated Letter-size CSS.
+
+    The printable version reuses patient-roadmap data but suppresses app chrome,
+    hover-only details, and transparency/debug content so browser-native print
+    output stays text-based, compact, and patient-friendly.
+    """
+    generated = generated_on or date.today().isoformat()
+    risk = getattr(result, "prevent_10y_ascvd", None)
+    ascvd_30y = _ascvd_30y_value(result)
+    level, level_detail = _continuum_label(patient, result)
+    summary_sentence = build_patient_risk_summary_sentence(patient, result, ascvd_30y)
+
+    where_items = [
+        f"10-year ASCVD risk: {_fmt(risk, '%') or 'unavailable'}",
+        _prevent_explanation(risk),
+    ]
+    if ascvd_30y is not None:
+        where_items.insert(1, f"30-year ASCVD risk: {_fmt(ascvd_30y, '%')}")
+        prevent_30y_text = _prevent_30y_explanation(ascvd_30y)
+        if prevent_30y_text:
+            where_items.insert(2, prevent_30y_text)
+    if summary_sentence:
+        where_items.append(summary_sentence)
+    where_items.append(_patient_plaque_status(patient, result))
+    care_focus = f"Care focus: {level}" + (f" - {level_detail}" if level_detail else "")
+    where_items.append(care_focus)
+
+    priority_drivers, context_items = _patient_driver_sections(patient, result)
+    why_items = [f"{label}: {detail}" for label, detail, _tone in priority_drivers]
+    if context_items:
+        why_items.append("Other context: " + "; ".join(context_items[:8]) + ".")
+    if not why_items:
+        why_items = [
+            f"{label}: {finding}. {note}"
+            for label, finding, note, _tone in _patient_contributor_groups(patient, result)[:5]
+        ]
+
+    next_items = [
+        f"{label}: {detail}"
+        for label, detail in _patient_next_steps(patient, result)[:6]
+        if str(detail).strip()
+    ]
+    compact_class = " print-roadmap-compact" if compact else ""
+    css = dedent(
+        """
+        <style>
+        @page {
+            size: Letter;
+            margin: 0.45in;
+        }
+        .print-roadmap-page {
+            background: #ffffff;
+            color: #111111;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 11pt;
+            line-height: 1.34;
+            margin: 0 auto;
+            max-width: 7.6in;
+            padding: 0;
+        }
+        .print-roadmap-header {
+            border-bottom: 1px solid #c9d2dc;
+            display: flex;
+            justify-content: space-between;
+            gap: 18px;
+            margin-bottom: 12px;
+            padding-bottom: 9px;
+        }
+        .print-roadmap-title {
+            font-size: 18pt;
+            font-weight: 800;
+            line-height: 1.1;
+            margin: 0;
+        }
+        .print-roadmap-subtitle {
+            color: #31485f;
+            font-size: 10.5pt;
+            font-weight: 600;
+            margin-top: 3px;
+        }
+        .print-roadmap-date {
+            color: #475569;
+            font-size: 9.5pt;
+            font-weight: 700;
+            text-align: right;
+            white-space: nowrap;
+        }
+        .print-roadmap-section {
+            break-inside: avoid;
+            page-break-inside: avoid;
+            margin-top: 11px;
+        }
+        .print-roadmap-section h2 {
+            color: #0b1f3a;
+            font-size: 13.5pt;
+            line-height: 1.15;
+            margin: 0 0 5px;
+        }
+        .print-roadmap-list,
+        .print-roadmap-next-list {
+            margin: 0;
+            padding-left: 17px;
+        }
+        .print-roadmap-list li,
+        .print-roadmap-next-list li {
+            margin: 2px 0;
+        }
+        .print-roadmap-target-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 8px;
+        }
+        .print-roadmap-target {
+            border: 1px solid #d6dde5;
+            border-radius: 7px;
+            padding: 7px 8px;
+        }
+        .print-roadmap-target-label {
+            color: #334155;
+            font-size: 9.5pt;
+            font-weight: 800;
+        }
+        .print-roadmap-target-goal {
+            color: #111111;
+            font-size: 12.5pt;
+            font-weight: 850;
+            margin-top: 1px;
+        }
+        .print-roadmap-target-current {
+            color: #475569;
+            font-size: 9.5pt;
+            margin-top: 1px;
+        }
+        .print-roadmap-disclaimer {
+            border-top: 1px solid #d6dde5;
+            color: #475569;
+            font-size: 8.8pt;
+            line-height: 1.28;
+            margin-top: 13px;
+            padding-top: 7px;
+        }
+        .print-roadmap-muted {
+            color: #64748b;
+            font-style: italic;
+        }
+        .print-roadmap-compact .print-roadmap-section {
+            margin-top: 9px;
+        }
+        @media print {
+            html, body {
+                background: #ffffff !important;
+            }
+            .stApp, header, footer, [data-testid="stToolbar"], [data-testid="stSidebar"],
+            .export-copy-grid, .export-message, button {
+                display: none !important;
+            }
+            .print-roadmap-page {
+                box-shadow: none !important;
+                margin: 0 !important;
+                max-width: none !important;
+                width: 100% !important;
+            }
+            .print-roadmap-section {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+        }
+        @media (max-width: 760px) {
+            .print-roadmap-header {
+                display: block;
+            }
+            .print-roadmap-date {
+                margin-top: 6px;
+                text-align: left;
+            }
+            .print-roadmap-target-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+        </style>
+        """
+    ).strip()
+    return f"""
+{css}
+<main class="print-roadmap-page{compact_class}" aria-label="Printable patient roadmap">
+  <header class="print-roadmap-header">
+    <div>
+      <h1 class="print-roadmap-title">Patient prevention roadmap</h1>
+      <div class="print-roadmap-subtitle">Concise plan to review with your clinician.</div>
+    </div>
+    <div class="print-roadmap-date">Date: {escape(str(generated))}</div>
+  </header>
+  <section class="print-roadmap-section">
+    <h2>Where you stand</h2>
+    {_print_list_html(where_items)}
+  </section>
+  <section class="print-roadmap-section">
+    <h2>Why risk is elevated</h2>
+    {_print_list_html(why_items, empty_text="No major measured factors identified.")}
+  </section>
+  <section class="print-roadmap-section">
+    <h2>Targets</h2>
+    {_print_targets_html(patient, result)}
+  </section>
+  <section class="print-roadmap-section">
+    <h2>Next steps</h2>
+    {_print_list_html(next_items, class_name="print-roadmap-next-list")}
+  </section>
+  <div class="print-roadmap-disclaimer">
+    Clinician review required. This roadmap supports discussion and does not replace medical judgment.
+  </div>
+</main>
+""".strip()
 
 
 def _editorial_rows_html(rows, *, empty_text="No major measured contributors identified.", class_name="roadmap-rows"):

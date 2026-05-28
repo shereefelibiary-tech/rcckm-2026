@@ -1002,6 +1002,13 @@ def _render_patient_roadmap_text(patient, result):
     return renderer(patient, result)
 
 
+def _build_printable_patient_roadmap_html(patient, result):
+    renderer = _load_renderer_function(
+        "renderers.patient_roadmap", "render_printable_patient_roadmap"
+    )
+    return renderer(patient, result)
+
+
 def render_report(st, patient):
     result, rss_total, rss_contributions = run_patient(patient)
 
@@ -1065,6 +1072,7 @@ def render_report(st, patient):
 
     emr_note_text = _render_emr_note_text(patient, result)
     patient_roadmap_text = _render_patient_roadmap_text(patient, result)
+    printable_roadmap_html = _build_printable_patient_roadmap_html(patient, result)
 
     render_html(st, _detail_section_header_html("EMR note", "Copy-ready clinical text"))
     _safe_panel(
@@ -1094,6 +1102,7 @@ def render_report(st, patient):
         st,
         emr_text=emr_note_text,
         roadmap_text=patient_roadmap_text,
+        printable_roadmap_html=printable_roadmap_html,
     )
 
     return result

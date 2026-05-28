@@ -6,6 +6,7 @@ from renderers.patient_roadmap import (
     build_patient_risk_summary_sentence,
     render_patient_roadmap,
     render_patient_roadmap_text,
+    render_printable_patient_roadmap,
 )
 
 
@@ -268,6 +269,41 @@ def test_render_patient_roadmap_text_is_copy_ready_plain_text():
         "3. Protect the kidneys"
     ) < text.index("6. Aspirin safety")
     assert "<div" not in text
+
+
+def test_render_printable_patient_roadmap_uses_dedicated_print_html():
+    html = render_printable_patient_roadmap(
+        _patient(),
+        _result(),
+        generated_on="2026-05-27",
+    )
+
+    assert "print-roadmap-page" in html
+    assert "Printable patient roadmap" in html
+    assert "@page" in html
+    assert "size: Letter" in html
+    assert "margin: 0.45in" in html
+    assert "@media print" in html
+    assert "break-inside: avoid" in html
+    assert "page-break-inside: avoid" in html
+    assert "Date: 2026-05-27" in html
+    assert "Where you stand" in html
+    assert "Why risk is elevated" in html
+    assert "Targets" in html
+    assert "Next steps" in html
+    assert "CAC 350: high plaque burden." in html
+    assert "LDL-C" in html
+    assert "ApoB" in html
+    assert "BP" in html
+    assert "A1c" in html
+    assert "Clinician review required" in html
+    assert "<pre" not in html
+    assert "<canvas" not in html
+    assert "<img" not in html
+    assert "screenshot" not in html.lower()
+    assert "roadmap-risk-card" not in html
+    assert "RSS" not in html
+    assert "tooltip" not in html.lower()
 
 
 def test_patient_risk_summary_is_secondary_prevention_aware():

@@ -320,7 +320,13 @@ def test_export_print_section_uses_plain_text_outputs_and_downloads():
     assert "Copy the EMR note for clinical documentation" in combined
     assert "Copy EMR note" in combined
     assert "Copy patient roadmap" in combined
-    assert "Print patient roadmap" in combined
+    assert "Print roadmap" in combined
+    assert "Print patient roadmap" not in combined
+    assert "print-roadmap-page" in combined
+    assert "printableRoadmapHtml" in combined
+    assert "window.print()" in combined
+    assert "@media print" in combined
+    assert "<pre" not in combined
     assert "Review all copied or printed output before use." in combined
 
     downloads = [message for message in fake_st.messages if message[0] == "download_button"]

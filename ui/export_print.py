@@ -21,10 +21,54 @@ def contains_html_tags(text: str | None) -> bool:
     return bool(_HTML_TAG_RE.search(str(text or "")))
 
 
-def _copy_print_component_html(emr_text: str, roadmap_text: str) -> str:
+def _fallback_printable_roadmap_html(roadmap_text: str) -> str:
+    lines = "".join(
+        f"<p>{html.escape(line) or '&nbsp;'}</p>"
+        for line in normalize_export_text(roadmap_text).splitlines()
+    )
+    return f"""
+<style>
+@page {{
+  size: Letter;
+  margin: 0.45in;
+}}
+.print-roadmap-page {{
+  background: #ffffff;
+  color: #111111;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 11pt;
+  line-height: 1.34;
+}}
+.print-roadmap-page h1 {{
+  font-size: 18pt;
+  margin: 0 0 12px;
+}}
+.print-roadmap-page p {{
+  margin: 2px 0;
+}}
+@media print {{
+  .print-roadmap-page {{
+    box-shadow: none !important;
+  }}
+}}
+</style>
+<main class="print-roadmap-page" aria-label="Printable patient roadmap">
+  <h1>Patient prevention roadmap</h1>
+  {lines}
+  <div class="print-roadmap-disclaimer">Clinician review required. This roadmap supports discussion and does not replace medical judgment.</div>
+</main>
+""".strip()
+
+
+def _copy_print_component_html(
+    emr_text: str,
+    roadmap_text: str,
+    printable_roadmap_html: str | None = None,
+) -> str:
     emr_json = json.dumps(emr_text)
     roadmap_json = json.dumps(roadmap_text)
-    printable_roadmap = html.escape(roadmap_text)
+    printable_html = printable_roadmap_html or _fallback_printable_roadmap_html(roadmap_text)
+    printable_json = json.dumps(printable_html)
     return f"""
 <style>
 {component_theme_css()}
@@ -56,7 +100,7 @@ def _copy_print_component_html(emr_text: str, roadmap_text: str) -> str:
   min-height: 18px;
   margin-top: 8px;
 }}
-.print-roadmap-document {{
+.print-roadmap-host {{
   display: none;
 }}
 @media (max-width: 680px) {{
@@ -68,21 +112,17 @@ def _copy_print_component_html(emr_text: str, roadmap_text: str) -> str:
   body * {{
     visibility: hidden !important;
   }}
-  .print-roadmap-document, .print-roadmap-document * {{
+  .print-roadmap-host, .print-roadmap-host * {{
     visibility: visible !important;
   }}
-  .print-roadmap-document {{
+  .print-roadmap-host {{
     background: #ffffff !important;
     color: #111111 !important;
     display: block !important;
-    font-family: Georgia, 'Times New Roman', serif !important;
     font-size: 11pt !important;
     left: 0 !important;
-    line-height: 1.42 !important;
-    padding: 0.6in !important;
     position: absolute !important;
     top: 0 !important;
-    white-space: pre-wrap !important;
     width: 100% !important;
   }}
 }}
@@ -90,18 +130,15 @@ def _copy_print_component_html(emr_text: str, roadmap_text: str) -> str:
 <div class="export-copy-grid">
   <button class="export-button" id="copyEmr">Copy EMR note</button>
   <button class="export-button" id="copyRoadmap">Copy patient roadmap</button>
-  <button class="export-button" id="printRoadmap">Print patient roadmap</button>
+  <button class="export-button" id="printRoadmap">Print roadmap</button>
 </div>
 <div class="export-message" id="exportMessage"></div>
-<pre class="print-roadmap-document" id="printRoadmapDocument">RCCKM / Risk Continuum CKM
-
-{printable_roadmap}
-
-Clinician review required. Public/demo use should not include patient-identifiable information.</pre>
+<div class="print-roadmap-host" id="printRoadmapDocument">{printable_html}</div>
 <script>
 (function() {{
   const emrText = {emr_json};
   const roadmapText = {roadmap_json};
+  const printableRoadmapHtml = {printable_json};
   const msg = document.getElementById("exportMessage");
 
   function setMessage(text) {{
@@ -138,42 +175,9 @@ Clinician review required. Public/demo use should not include patient-identifiab
 <html>
 <head>
 <title>RCCKM patient roadmap</title>
-<style>
-  body {{
-    background: #ffffff;
-    color: #111111;
-    font-family: Georgia, "Times New Roman", serif;
-    font-size: 11pt;
-    line-height: 1.42;
-    margin: 0;
-    padding: 0.6in;
-  }}
-  h1 {{
-    font-family: Arial, sans-serif;
-    font-size: 17pt;
-    margin: 0 0 16px;
-  }}
-  pre {{
-    font-family: Georgia, "Times New Roman", serif;
-    white-space: pre-wrap;
-  }}
-  .disclaimer {{
-    border-top: 1px solid #d7d7d7;
-    color: #444444;
-    font-family: Arial, sans-serif;
-    font-size: 9pt;
-    margin-top: 20px;
-    padding-top: 8px;
-  }}
-</style>
 </head>
-<body>
-<h1>RCCKM / Risk Continuum CKM</h1>
-<pre></pre>
-<div class="disclaimer">Clinician review required. Public/demo use should not include patient-identifiable information.</div>
-</body>
+<body>${{printableRoadmapHtml}}</body>
 </html>`);
-    printWindow.document.querySelector("pre").textContent = roadmapText;
     printWindow.document.close();
     printWindow.focus();
     printWindow.print();
@@ -191,7 +195,13 @@ Clinician review required. Public/demo use should not include patient-identifiab
 """.strip()
 
 
-def render_export_print_section(st, *, emr_text: str, roadmap_text: str) -> None:
+def render_export_print_section(
+    st,
+    *,
+    emr_text: str,
+    roadmap_text: str,
+    printable_roadmap_html: str | None = None,
+) -> None:
     """Render compact copy, print, and download controls for report text."""
     clean_emr = normalize_export_text(emr_text)
     clean_roadmap = normalize_export_text(roadmap_text)
@@ -236,7 +246,7 @@ def render_export_print_section(st, *, emr_text: str, roadmap_text: str) -> None
 """,
     )
     st.components.v1.html(
-        _copy_print_component_html(clean_emr, clean_roadmap),
+        _copy_print_component_html(clean_emr, clean_roadmap, printable_roadmap_html),
         height=100,
         scrolling=False,
     )
