@@ -4,21 +4,21 @@ CASE: borderline_ascvd_discussion
 EMR:
 RISK CONTINUUM CKM
 
-Level 3B - actionable early CKM / atherogenic risk.
-10-year ASCVD risk: 5.8%.
-30-year ASCVD risk: 18.6%.
-CKM stage 0 with kidney G2A1 and plaque unmeasured / CAC not performed.
+Level: 3B - actionable early CKM / atherogenic risk.
+PREVENT: ASCVD 10y 5.8% (Intermediate); 30y 18.6%.
+CKM/Kidney/Plaque: CKM 0; kidney G2A1; CAC not measured.
 
 Assessment:
 - No diagnosis candidates generated.
 
 Recommendations:
-- Moderate-intensity statin therapy is reasonable given borderline ASCVD risk with risk-enhancing factors.
-- CAC may clarify plaque burden if treatment intensity remains uncertain.
-- Treat BP toward goal <130/80.
-- Glycemia / metabolic: No glycemic action. A1c 5.5.
-- Aspirin not indicated for routine primary prevention.
-- Consider hsCRP only if inflammatory risk clarification would change management.
+1. Lipids: Discuss moderate-intensity statin; LDL-C <100, ApoB <90, non-HDL-C <130.
+2. Plaque: CAC may clarify risk.
+3. Kidney: No kidney-risk signal.
+4. BP: Treat toward <130/80.
+5. Glycemia: No glycemic action; A1c 5.5.
+6. Aspirin: Not routine for primary prevention.
+7. Clarify: hsCRP.
 
 PATIENT ROADMAP:
 Your Prevention Roadmap

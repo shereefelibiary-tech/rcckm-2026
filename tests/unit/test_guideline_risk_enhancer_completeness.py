@@ -24,7 +24,7 @@ def test_higher_risk_ancestry_appears_as_context_not_diagnosis():
     assert "Filipino ancestry" in rss_labels
     assert "Higher-risk ancestry/context: South Asian ancestry" in enhancers
     assert "Higher-risk ancestry/context: Filipino ancestry" in enhancers
-    assert "risk-enhancing ancestry/context: South Asian ancestry; Filipino ancestry" in emr
+    assert "Context: South Asian ancestry; Filipino ancestry." in emr
     assert "South Asian ancestry" in roadmap
     assert "Assessment:" not in emr or "South Asian ancestry" not in emr.split("Assessment:", 1)[-1]
 
@@ -96,9 +96,8 @@ def test_suspected_fh_and_ldl_190_cac0_remain_treatment_forward():
 
     assert result.possible_fh_pathway is True
     assert result.level_classification["level"] == "3B"
-    assert "High-intensity or maximally tolerated statin indicated." in emr
-    assert "do not use CAC 0 to defer lipid-lowering therapy" in emr
-    assert "LDL-C >=190 / possible FH pathway: PREVENT should not be used to de-risk treatment." in emr
+    assert "High-intensity lipid-lowering therapy indicated" in emr
+    assert "Context: suspected FH / HeFH; LDL-C >=190 / possible FH pathway." in emr
 
 
 def test_incidental_cac_creates_qualitative_plaque_context_without_score():
@@ -148,5 +147,5 @@ def test_prevent_category_remains_separate_from_rcckm_level_with_enhancers():
 
     assert result.level_classification["level"] == "3B"
     assert str(result.prevent_risk_category.value).lower() == "borderline"
-    assert "Level 3B" in emr
-    assert "10-year ASCVD risk: 3.42%" in emr
+    assert "Level: 3B" in emr
+    assert "PREVENT: ASCVD 10y 3.42% (Borderline); 30y 17.53%." in emr

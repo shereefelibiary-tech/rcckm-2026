@@ -132,13 +132,12 @@
       "required_action": "No active domain changes from current risk profile"
     },
     "required_phrases": [
-      "Level 2B - converging early risk signals",
-      "Early metabolic signals are present",
-      "Hypertriglyceridemia",
+      "Level: 2B - converging early risk signals.",
+      "Context: Gestational diabetes.",
       "Prediabetes",
-      "reproductive history: Gestational diabetes",
-      "Continue lifestyle-based prevention",
-      "Aspirin not indicated for routine primary prevention"
+      "Hypertriglyceridemia",
+      "1. Lipids: No lipid escalation.",
+      "6. Aspirin: Not routine for primary prevention."
     ],
     "forbidden_phrases": [
       "CAC reasonable",
@@ -183,14 +182,12 @@
       "forbidden_diagnosis": "subclinical"
     },
     "required_phrases": [
-      "Level 3B - elevated lifetime cardiometabolic risk despite low short-term event risk",
-      "10-year ASCVD risk: 1.37%",
-      "30-year ASCVD risk: 9.09%",
-      "Moderate-intensity statin therapy reasonable",
-      "CAC not routinely recommended at this age; consider only if results would change management",
-      "Aspirin not indicated for routine primary prevention",
+      "Level: 3B - elevated lifetime cardiometabolic risk despite low short-term event risk.",
+      "PREVENT: ASCVD 10y 1.37% (Low); 30y 9.09%.",
+      "1. Lipids: Discuss moderate-intensity statin",
+      "2. Plaque: CAC not routinely recommended.",
+      "6. Aspirin: Not routine for primary prevention.",
       "premature family history",
-      "Hypertriglyceridemia",
       "Prediabetes"
     ],
     "forbidden_phrases": [
@@ -229,11 +226,10 @@
       "forbidden_diagnosis": "subclinical"
     },
     "required_phrases": [
-      "Level 3A - elevated long-term risk trajectory",
-      "10-year ASCVD risk: 1.2%",
-      "30-year ASCVD risk: 10.5%",
-      "Lipid lowering: no escalation based on current LDL-C/ApoB and ASCVD risk profile",
-      "CAC may clarify plaque burden if treatment intensity remains uncertain"
+      "Level: 3A - elevated long-term risk trajectory.",
+      "PREVENT: ASCVD 10y 1.2% (Low); 30y 10.5%.",
+      "1. Lipids: No lipid escalation.",
+      "2. Plaque: CAC may clarify risk."
     ],
     "forbidden_phrases": [
       "Subclinical coronary atherosclerosis",
@@ -276,13 +272,12 @@
       "forbidden_diagnosis": "subclinical"
     },
     "required_phrases": [
-      "Level 2B - converging early risk signals",
+      "Level: 2B - converging early risk signals.",
       "Lp(a) 188 nmol/L",
       "premature family history",
-      "Lipid lowering: no escalation today; document elevated Lp(a) and premature family history as risk enhancers",
-      "CAC reasonable for risk clarification if treatment decision remains uncertain",
-      "Aspirin not indicated for routine primary prevention",
-      "Lp(a) and family history increase long-term risk context"
+      "1. Lipids: No lipid escalation.",
+      "2. Plaque: CAC may clarify risk.",
+      "6. Aspirin: Not routine for primary prevention."
     ],
     "forbidden_phrases": [
       "LOW\n",
@@ -336,18 +331,13 @@
       "forbidden_diagnosis": "subclinical"
     },
     "required_phrases": [
-      "Level 3B - actionable early CKM / atherogenic risk",
-      "10-year ASCVD risk: 3.42%",
-      "30-year ASCVD risk: 17.53%",
-      "plaque unmeasured / CAC not performed",
-      "kidney G2; albuminuria not measured",
-      "UACR not available; obtain to complete kidney-risk assessment",
-      "Short-term ASCVD risk is low, but longer-term risk and risk-enhancing factors may make lipid-lowering worth discussing",
-      "CAC reasonable for risk clarification if treatment decision remains uncertain",
-      "Obtain UACR to complete kidney-risk assessment",
-      "Aspirin not indicated for routine primary prevention",
-      "Lp(a) 132 nmol/L",
-      "reproductive history: Early menopause 43; Gestational hypertension; Gestational diabetes"
+      "Level: 3B - actionable early CKM / atherogenic risk.",
+      "PREVENT: ASCVD 10y 3.42% (Borderline); 30y 17.53%.",
+      "CKM/Kidney/Plaque: CKM 2; kidney G2; UACR missing; CAC not measured.",
+      "Early menopause 43; Gestational hypertension; Gestational diabetes.",
+      "1. Lipids: Discuss moderate-intensity statin",
+      "3. Kidney: UACR missing; obtain UACR.",
+      "6. Aspirin: Not routine for primary prevention."
     ],
     "forbidden_phrases": [
       "BORDERLINE.",
@@ -386,13 +376,11 @@
       "forbidden_diagnosis": "subclinical"
     },
     "required_phrases": [
-      "Level 3B - actionable early CKM / atherogenic risk",
-      "10-year ASCVD risk: 1.73%",
-      "30-year ASCVD risk: 11.85%",
-      "plaque unmeasured / CAC not performed",
-      "Moderate-intensity statin therapy reasonable",
-      "CAC may clarify plaque burden if treatment intensity remains uncertain",
-      "Aspirin not indicated for routine primary prevention"
+      "Level: 3B - actionable early CKM / atherogenic risk.",
+      "PREVENT: ASCVD 10y 1.73% (Low); 30y 11.85%.",
+      "1. Lipids: Discuss moderate-intensity statin",
+      "2. Plaque: CAC may clarify risk.",
+      "6. Aspirin: Not routine for primary prevention."
     ],
     "forbidden_phrases": [
       "CAC reasonable for risk clarification if treatment decision remains uncertain",
@@ -922,18 +910,15 @@
       "forbidden_diagnosis": "subclinical"
     },
     "required_phrases": [
-      "Level 3B - CKM stage 3 with albuminuria-mediated kidney and ASCVD risk",
-      "10-year ASCVD risk: 3.74%",
-      "30-year ASCVD risk: 18.8%",
-      "plaque unmeasured / CAC not performed",
-      "kidney G2A2",
+      "Level: 3B - CKM stage 3 with albuminuria-mediated kidney and ASCVD risk.",
+      "PREVENT: ASCVD 10y 3.74% (Borderline); 30y 18.8%.",
+      "CKM/Kidney/Plaque: CKM 3; kidney G2A2; CAC not measured.",
       "Albuminuria",
       "Prediabetes",
       "Hypertriglyceridemia",
-      "Confirm persistent albuminuria with repeat UACR if not already confirmed; optimize kidney-protective therapy",
-      "Short-term ASCVD risk is low, but albuminuria and longer-term risk make lipid-lowering worth discussing",
-      "CAC reasonable for risk clarification if treatment decision remains uncertain",
-      "Aspirin not indicated for routine primary prevention"
+      "3. Kidney: UACR 34; optimize ACEi-ARB.",
+      "2. Plaque: CAC may clarify risk.",
+      "6. Aspirin: Not routine for primary prevention."
     ],
     "forbidden_phrases": [
       "BORDERLINE.",
@@ -1268,13 +1253,12 @@
       "forbidden_diagnosis": "Subclinical coronary atherosclerosis"
     },
     "required_phrases": [
-      "Level 3B",
-      "10-year ASCVD risk: 5.41%",
-      "30-year ASCVD risk: 22.55%",
-      "UACR not available; obtain to complete kidney-risk assessment",
-      "Moderate-intensity statin therapy is reasonable given borderline ASCVD risk with risk-enhancing factors",
-      "CAC may clarify plaque burden if treatment intensity remains uncertain",
-      "Aspirin not indicated for routine primary prevention"
+      "Level: 3B",
+      "PREVENT: ASCVD 10y 5.41% (Intermediate); 30y 22.55%.",
+      "UACR missing; obtain UACR",
+      "1. Lipids: Discuss moderate-intensity statin",
+      "2. Plaque: CAC may clarify risk.",
+      "6. Aspirin: Not routine for primary prevention."
     ],
     "forbidden_phrases": [
       "CAC reasonable for risk clarification if treatment decision remains uncertain",

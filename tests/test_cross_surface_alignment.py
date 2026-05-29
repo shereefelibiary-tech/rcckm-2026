@@ -66,37 +66,37 @@ def test_all_demo_surfaces_share_structured_domain_actions(label, case_name):
         (
             "high_apob_discordance",
             ("Discuss moderate-intensity statin", "ApoB 125; target <90"),
-            ("Moderate-intensity statin therapy is reasonable", "elevated ApoB particle burden"),
+            ("Discuss moderate-intensity statin", "ApoB <90"),
             ("cholesterol",),
         ),
         (
             "south_asian_ancestry_context",
             ("Discuss moderate-intensity statin", "ApoB 108; target <90"),
-            ("Discuss moderate-intensity statin therapy", "South Asian ancestry"),
+            ("Discuss moderate-intensity statin", "South Asian ancestry"),
             ("cholesterol",),
         ),
         (
             "rheumatoid_arthritis_risk_enhancer",
             ("Inflammatory risk enhancer", "RA is a risk enhancer"),
-            ("RA is a risk enhancer", "no lipid escalation"),
+            ("Context: RA", "No lipid escalation"),
             ("rheumatoid arthritis",),
         ),
         (
             "ckd_albuminuria",
             ("Discuss moderate-intensity statin", "Monitor albuminuria"),
-            ("Moderate-intensity statin therapy is reasonable", "albuminuria"),
+            ("Discuss moderate-intensity statin", "UACR"),
             ("kidney",),
         ),
         (
             "cac_300_high_plaque_burden",
             ("High-intensity therapy indicated", "CAC 350"),
-            ("High-intensity lipid-lowering therapy indicated", "CAC 350; no repeat CAC needed"),
+            ("High-intensity lipid-lowering therapy indicated", "CAC 350."),
             ("calcium score",),
         ),
         (
             "severe_secondary_prevention",
             ("Secondary-prevention lipid therapy", "Antiplatelet therapy"),
-            ("secondary-prevention lipid-lowering therapy", "Antiplatelet therapy is indicated for secondary prevention"),
+            ("Secondary-prevention lipid-lowering therapy", "Secondary-prevention antiplatelet therapy"),
             ("known cardiovascular disease",),
         ),
         (
@@ -108,7 +108,7 @@ def test_all_demo_surfaces_share_structured_domain_actions(label, case_name):
         (
             "healthy_low_risk_prevention",
             ("No lipid escalation", "Key data available"),
-            ("no escalation", "No kidney-risk signal"),
+            ("No lipid escalation", "No kidney-risk signal"),
             ("cholesterol",),
         ),
     ],

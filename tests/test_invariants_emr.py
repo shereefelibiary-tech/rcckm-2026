@@ -43,14 +43,14 @@ def test_emr_is_plain_text_concise_and_copy_paste_ready():
     )
     emr = bundle["outputs"]["emr"]
     assert emr.startswith("RISK CONTINUUM CKM\n\nLevel")
-    assert_present(emr, ("Assessment:", "Recommendations:", "10-year ASCVD risk", "30-year ASCVD risk"))
+    assert_present(emr, ("Assessment:", "Recommendations:", "PREVENT: ASCVD 10y", "30y"))
     assert_absent(emr, EMR_FORBIDDEN)
     assert_no_contradictions(emr)
 
 
 def test_emr_does_not_include_long_statin_example_lists_by_default():
     emr = render_case_output(Patient(age=50, sex="male", ldl_c=204, tc=280, hdl_c=45, triglycerides=150))["outputs"]["emr"]
-    assert "High-intensity or maximally tolerated statin" in emr
+    assert "High-intensity lipid-lowering therapy indicated" in emr
     assert "Atorvastatin 40-80" not in emr
     assert "Rosuvastatin 20-40" not in emr
 

@@ -4,22 +4,21 @@ CASE: cancer_survivor_context
 EMR:
 RISK CONTINUUM CKM
 
-Level 3B - actionable early CKM / atherogenic risk.
-10-year ASCVD risk: 5.2%.
-30-year ASCVD risk: 19%.
-CKM stage 0 with kidney G2A1 and plaque unmeasured / CAC not performed.
-Risk context: cancer survivor context with life expectancy >2 years.
+Level: 3B - actionable early CKM / atherogenic risk.
+PREVENT: ASCVD 10y 5.2% (Intermediate); 30y 19%.
+CKM/Kidney/Plaque: CKM 0; kidney G2A1; CAC not measured.
+Context: cancer survivor context with life expectancy >2 years.
 
 Assessment:
 - No diagnosis candidates generated.
 
 Recommendations:
-- Moderate-intensity statin therapy is reasonable given borderline ASCVD risk with risk-enhancing factors.
-- CAC may clarify plaque burden if treatment intensity remains uncertain.
-- Kidney protection: No kidney-risk signal. eGFR/UACR available.
-- Blood pressure: At goal. Current 128/78; goal <130/80.
-- Glycemia / metabolic: No glycemic action. A1c 5.6.
-- Aspirin not indicated for routine primary prevention.
+1. Lipids: Discuss moderate-intensity statin; LDL-C <100, ApoB <90, non-HDL-C <130.
+2. Plaque: CAC may clarify risk.
+3. Kidney: No kidney-risk signal.
+4. BP: At goal.
+5. Glycemia: No glycemic action; A1c 5.6.
+6. Aspirin: Not routine for primary prevention.
 
 PATIENT ROADMAP:
 Your Prevention Roadmap

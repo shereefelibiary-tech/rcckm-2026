@@ -4,10 +4,10 @@ CASE: severe_secondary_prevention
 EMR:
 RISK CONTINUUM CKM
 
-Level 5 - clinical ASCVD / secondary prevention.
-Known cardiovascular disease is present, so treatment decisions are based on secondary-prevention goals rather than risk estimates alone.
-CKM stage 4 with diabetic kidney involvement and plaque established ASCVD; CAC 5000 is context only.
-Risk context: suspected FH / HeFH pathway; premature family history (Father MI age 48). LDL-C >=190 / possible FH pathway: PREVENT should not be used to de-risk treatment.
+Level: 5 - clinical ASCVD / secondary prevention.
+PREVENT: ASCVD 10y 31.42% (High).
+CKM/Kidney/Plaque: CKM 4; kidney G3aA2; CAC 5000.
+Context: elevated Lp(a); suspected FH / HeFH; LDL-C >=190 / possible FH pathway; father MI age 48.
 
 Assessment:
 - Type 2 diabetes mellitus with CKD G3aA2 and albuminuria (ICD: E11.22; CKD stage 3a ICD: N18.31)
@@ -18,14 +18,12 @@ Assessment:
 - Elevated lipoprotein(a) (ICD: E78.41)
 
 Recommendations:
-- Intensify secondary-prevention lipid-lowering therapy; treat toward very-high-risk ASCVD targets: LDL-C <55 mg/dL, non-HDL-C <85 mg/dL, and ApoB <65 mg/dL if available. LDL-C <70 mg/dL remains the minimum secondary-prevention threshold.
-- Evaluate secondary causes and consider FH/cascade screening when appropriate.
-- CAC 5000 may be documented as plaque context; secondary-prevention management is driven by clinical ASCVD.
-- Confirm persistent albuminuria with repeat UACR if not already confirmed; optimize kidney-protective therapy.
-- Continue or optimize ACEi/ARB therapy if hypertension and persistent albuminuria are present.
-- Blood pressure: Treat toward <130/80. Current 138/82.
-- Glycemia / metabolic: Optimize diabetes care. A1c 7.8%; goal <7.0.
-- Antiplatelet therapy is indicated for secondary prevention if clinically appropriate and no contraindication is present.
+1. Lipids: Intensify secondary-prevention lipid-lowering therapy; LDL-C <55, ApoB <65, non-HDL-C <85.
+2. Plaque: CAC 5000.
+3. Kidney: UACR 86; continue ACEi-ARB. Consider SGLT2 for diabetic CKD.
+4. BP: Treat toward <130/80.
+5. Glycemia: Optimize diabetes care; A1c 7.8%; goal <7.0.
+6. Aspirin: Secondary-prevention antiplatelet therapy.
 
 PATIENT ROADMAP:
 Your Prevention Roadmap

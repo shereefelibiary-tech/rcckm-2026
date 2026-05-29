@@ -149,12 +149,12 @@ def test_cac_100_299_on_treatment_above_target_uses_intensification_wording():
         "CAC 145 already measured; no repeat CAC needed for current decision-making."
     )
     assert _section(sections, "Aspirin").line == (
-        "Aspirin not routine for primary prevention; consider only if bleeding risk is low and shared decision-making supports it."
+        "Aspirin not routine for primary prevention."
     )
     assert "Lipid-lowering therapy is reasonable" not in recommendations
-    assert "Intensify lipid-lowering therapy" in recommendations
-    assert "maximally tolerated statin strategy and nonstatin intensification" in recommendations
-    assert "CAC 145; no repeat CAC needed" in recommendations
+    assert "Intensify lipid-lowering" in recommendations
+    assert "ApoB <80" in recommendations
+    assert "2. Plaque: CAC 145." in recommendations
     assert "CAC reasonable" not in recommendations
     assert "Subclinical coronary atherosclerosis" in note
     assert "Severe subclinical coronary atherosclerosis" not in note
@@ -174,7 +174,7 @@ def test_aspirin_consideration_only_for_rcckm_high_risk_context():
     result = evaluate_patient(patient)
 
     assert _section(build_action_scaffold(patient, result), "Aspirin").line == (
-        "Aspirin not routine for primary prevention; consider only if bleeding risk is low and shared decision-making supports it."
+        "Aspirin not routine for primary prevention."
     )
 
 
@@ -227,9 +227,9 @@ def test_clinical_ascvd_with_cac_zero_uses_secondary_prevention_not_derisking():
     assert _section(sections, "Aspirin").line == (
         "Antiplatelet therapy is indicated for secondary prevention if clinically appropriate and no contraindication is present."
     )
-    assert "Known cardiovascular disease is present, so treatment decisions are based on secondary-prevention goals rather than risk estimates alone." in note
+    assert "Level: 5 - clinical ASCVD / secondary prevention" in note
     assert "PREVENT 10-year ASCVD risk" not in note
-    assert "CAC 0 does not de-risk secondary prevention" in note
+    assert "2. Plaque: CAC 0." in note
     assert "Clinical ASCVD / coronary artery disease with prior NSTEMI and PCI/stent" in diagnosis_text
     assert "Subclinical coronary atherosclerosis" not in diagnosis_text
 
@@ -251,8 +251,7 @@ def test_action_html_renders_structured_sections_without_loose_duplicate_list():
 
     lipid_lead = "High-intensity therapy indicated"
     lipid_detail = "LDL-C"
-    aspirin_lead = "Consider only if low bleeding risk"
-    aspirin_detail = "Shared decision-making."
+    aspirin_lead = "Aspirin not routine for primary prevention"
     kidney_line = "Kidney protection"
     kidney_detail = "UACR 45"
     glycemia_line = "Optimize diabetes care"
@@ -283,7 +282,7 @@ def test_action_html_renders_structured_sections_without_loose_duplicate_list():
     assert lipid_lead in html
     assert lipid_detail in html
     assert aspirin_lead in html
-    assert aspirin_detail in html
+    assert "Consider only if low bleeding risk and shared decision-making supports it." in html
     assert kidney_line in html
     assert kidney_detail in html
     assert glycemia_line in html
@@ -360,7 +359,8 @@ def test_action_instrument_panel_groups_kidney_cac_aspirin_and_clarifiers():
     assert "SGLT2 benefit is strongest" in panel["kidney_protection"].hover_detail
     assert "SGLT2" not in panel["blood_pressure"].status + panel["blood_pressure"].detail
     assert panel["blood_pressure"].status == "BP needed"
-    assert panel["aspirin_antiplatelet"].status == "Consider only if low bleeding risk"
+    assert panel["aspirin_antiplatelet"].status == "Aspirin not routine for primary prevention"
+    assert "low bleeding risk" in panel["aspirin_antiplatelet"].hover_detail
     assert panel["data_to_clarify"].label == "Data to clarify"
 
 
@@ -452,7 +452,7 @@ def test_compact_action_items_group_priorities_and_preserve_details():
         "Optimize glycemia",
     ]
     assert "Monitor UACR; optimize ACEi-ARB." in subtitles
-    assert "Aspirin: only if low bleeding risk" in titles
+    assert "Aspirin: only if low bleeding risk" not in titles
     assert all("Recheck lipid profile 4-12 weeks" not in item.title + item.subtitle for item in items)
     assert all("CAC 350 already measured" not in item.title + item.subtitle for item in items)
     assert "CAC 350 already measured; no repeat CAC needed for current decision-making." not in details
@@ -485,9 +485,9 @@ def test_emr_recommendations_use_action_scaffold():
 
     note = render_emr_note(patient, result)
 
-    lipid_line = "- High-intensity lipid-lowering therapy indicated."
-    cac_line = "- CAC 350; no repeat CAC needed for current decision-making."
-    aspirin_line = "- Aspirin only if bleeding risk is low after shared decision-making."
+    lipid_line = "1. Lipids: High-intensity lipid-lowering therapy indicated; LDL-C <70, non-HDL-C <100."
+    cac_line = "2. Plaque: CAC 350."
+    aspirin_line = "6. Aspirin: Not routine for primary prevention."
     assert lipid_line in note
     assert "Recheck lipids in 4-12 weeks" not in note
     assert cac_line in note
@@ -514,7 +514,7 @@ def test_flat_recommendation_lines_keep_order_without_visible_scaffold_labels():
     assert any("optimize kidney-protective therapy" in line for line in lines)
     assert "Optimize diabetes care." in lines
     assert "CAC 350 already measured; no repeat CAC needed for current decision-making." in lines
-    assert "Aspirin may be considered only if bleeding risk is low after shared decision-making." in lines
+    assert "Aspirin not routine for primary prevention." in lines
     assert not any(line.startswith(("Lipid therapy:", "Coronary calcium:", "Aspirin:", "Supporting actions:")) for line in lines)
     assert "lipid" not in lines[2].lower()
 
@@ -537,14 +537,10 @@ def test_emr_very_severe_hypertriglyceridemia_uses_pancreatitis_pathway():
 
     assert patient.non_hdl_c == 254
     assert "Atherogenic/metabolic burden:" not in note
-    assert "- Very severe hypertriglyceridemia: lower TG to reduce pancreatitis risk." in note
-    assert "Very-low-fat diet; eliminate alcohol and added sugars/refined carbohydrates." in note
-    assert "Refer to registered dietitian nutritionist." in note
-    assert "Consider fibrate or prescription omega-3 therapy to lower TG." in note
-    assert "Address ASCVD risk with lipid-lowering therapy guided by non-HDL-C/ApoB." in note
-    assert "- Optimize diabetes care." in note
-    assert "- Recheck fasting lipid profile after treatment changes." in note
-    assert note.index("lower TG to reduce pancreatitis risk") < note.index("guided by non-HDL-C/ApoB")
+    assert "Severe hypertriglyceridemia" in note
+    assert "Lower triglycerides urgently" in note
+    assert "1. Lipids:" in note
+    assert "5. Glycemia: Optimize diabetes care; A1c 8.2%; goal <7.0." in note
 
 
 def test_no_action_result_can_still_build_clear_scaffold():
@@ -598,8 +594,8 @@ def test_low_risk_complete_data_below_cac_age_threshold_stays_calm_without_cac_r
     assert _section(sections, "Aspirin").line == "Aspirin not indicated for routine primary prevention."
     assert not any(section.label == "Coronary calcium" for section in sections)
     assert "- No diagnosis candidates generated." in note
-    assert "- Lipid lowering: no escalation based on current LDL-C/ApoB and ASCVD risk profile." in recommendations
-    assert "- Aspirin not indicated for routine primary prevention." in recommendations
+    assert "1. Lipids: No lipid escalation." in recommendations
+    assert "6. Aspirin: Not routine for primary prevention." in recommendations
     assert "CAC reasonable" not in recommendations
     assert "CAC not performed" not in recommendations
     assert "Plaque: unmeasured / CAC not performed" not in note

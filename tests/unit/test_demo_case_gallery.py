@@ -154,16 +154,15 @@ def test_younger_premature_family_history_demo_output_uses_lifetime_trajectory_l
     combined = f"{emr}\n{roadmap}"
 
     assert result.level_classification["level"] == "3B"
-    assert "Level 3B - elevated lifetime cardiometabolic risk despite low short-term event risk" in combined
-    assert "10-year ASCVD risk:" in emr
-    assert "30-year ASCVD risk:" in emr
+    assert "3B - elevated lifetime cardiometabolic risk despite low short-term event risk" in combined
+    assert "PREVENT: ASCVD 10y 1.03% (Low); 30y 7.53%." in emr
     assert "- 10-year ASCVD risk:" in roadmap
     assert "- 30-year ASCVD risk:" in roadmap
     assert "total cardiovascular risk" not in combined.lower()
-    assert "CAC not routinely recommended at this age; consider only if results would change management." in emr
+    assert "2. Plaque: CAC not routinely recommended." in emr
     assert "hsCRP - inflammatory residual risk" not in combined
-    assert "Aspirin not indicated for routine primary prevention." in emr
-    assert "Risk context: premature family history of ASCVD (Father MI age 49)." in emr
+    assert "6. Aspirin: Not routine for primary prevention." in emr
+    assert "Context: father MI age 49." in emr
 
 
 def test_high_apob_discordance_demo_is_apob_driven_and_actionable():
@@ -177,13 +176,13 @@ def test_high_apob_discordance_demo_is_apob_driven_and_actionable():
     assert result.level_classification["label"] == (
         "Level 3B - elevated lifetime ASCVD risk with ApoB-driven atherogenic burden"
     )
-    assert "Level 3B - elevated lifetime ASCVD risk with ApoB-driven atherogenic burden." in text
-    assert "Moderate-intensity statin therapy is reasonable given elevated ApoB particle burden, premature family history, and elevated 30-year ASCVD risk despite low 10-year ASCVD risk." in text
-    assert "elevated ApoB particle burden" in text
-    assert "premature family history" in text
-    assert "low 10-year ASCVD risk" in text
-    assert "CAC may clarify plaque burden if the patient is hesitant or if treatment intensity remains uncertain." in text
-    assert "Aspirin not indicated for routine primary prevention." in text
+    assert "Level: 3B - elevated lifetime ASCVD risk with ApoB-driven atherogenic burden." in text
+    assert "1. Lipids: Discuss moderate-intensity statin; LDL-C <100, ApoB <90, non-HDL-C <130." in text
+    assert "Elevated ApoB / atherogenic particle burden" in text
+    assert "Premature family history" in text
+    assert "PREVENT: ASCVD 10y 2.8% (Low); 30y 15.04%." in text
+    assert "2. Plaque: CAC may clarify risk." in text
+    assert "6. Aspirin: Not routine for primary prevention." in text
     assert "if risk-enhancing factors or ApoB/LDL-C burden support treatment" not in text
     assert "high near-term risk" not in text.lower()
     assert "High-intensity statin" not in text
@@ -201,16 +200,14 @@ def test_rheumatoid_arthritis_demo_is_inflammatory_context_without_overtreatment
     assert result.level_classification["label"] == (
         "Level 3A - low short-term ASCVD risk with inflammatory risk-enhancer context"
     )
-    assert "Level 3A - low short-term ASCVD risk with inflammatory risk-enhancer context." in text
-    assert "10-year ASCVD risk: 1.54%" in text
-    assert "30-year ASCVD risk: 9.85%" in text
-    assert "Risk context: rheumatoid arthritis; premature family history of ASCVD" in text
-    assert "Existing rheumatoid arthritis; chronic inflammatory disease risk enhancer." in text
+    assert "Level: 3A - low short-term ASCVD risk with inflammatory risk-enhancer context." in text
+    assert "PREVENT: ASCVD 10y 1.54% (Low); 30y 9.85%." in text
+    assert "Context: RA; father MI age 49." in text
+    assert "Existing rheumatoid arthritis; chronic inflammatory disease risk enhancer." not in text
     assert "No new cardiometabolic diagnosis candidates generated." in text
-    assert "Continue lifestyle-focused prevention; no lipid escalation today based on current LDL-C/ApoB and ASCVD risk profile." in text
-    assert "RA is a risk enhancer; ensure inflammation is clinically controlled and avoid undertreating traditional risk factors." in text
-    assert "CAC is not routinely needed at this risk level; use only if results would change lipid-treatment decisions." in text
-    assert "Aspirin not indicated for routine primary prevention." in text
+    assert "1. Lipids: No lipid escalation." in text
+    assert "2. Plaque: CAC not measured." in text
+    assert "6. Aspirin: Not routine for primary prevention." in text
     assert "Level 3B - actionable early CKM / atherogenic risk" not in text
     assert "Moderate-intensity statin therapy is reasonable" not in text
     assert "High-intensity statin" not in text
@@ -250,32 +247,32 @@ def _demo_action_and_emr(case_name):
         (
             "high_apob_discordance",
             ("Discuss moderate-intensity statin", "ApoB 125; target <90"),
-            ("Moderate-intensity statin therapy is reasonable", "elevated ApoB particle burden"),
+            ("Discuss moderate-intensity statin", "ApoB <90"),
         ),
         (
             "ckd_albuminuria",
             ("Discuss moderate-intensity statin", "Monitor albuminuria"),
-            ("Moderate-intensity statin therapy is reasonable", "albuminuria"),
+            ("Discuss moderate-intensity statin", "UACR 48"),
         ),
         (
             "cac_300_high_plaque_burden",
             ("High-intensity therapy indicated", "CAC 350"),
-            ("High-intensity lipid-lowering therapy indicated", "CAC 350; no repeat CAC needed"),
+            ("High-intensity lipid-lowering therapy indicated", "Plaque: CAC 350."),
         ),
         (
             "severe_secondary_prevention",
             ("Secondary-prevention lipid therapy", "Antiplatelet therapy"),
-            ("secondary-prevention lipid-lowering therapy", "Antiplatelet therapy is indicated for secondary prevention"),
+            ("Intensify secondary-prevention lipid-lowering therapy", "Secondary-prevention antiplatelet therapy"),
         ),
         (
             "rheumatoid_arthritis_risk_enhancer",
             ("Inflammatory risk enhancer", "RA is a risk enhancer"),
-            ("RA is a risk enhancer", "no lipid escalation"),
+            ("Context: RA", "No lipid escalation"),
         ),
         (
             "south_asian_ancestry_context",
             ("Discuss moderate-intensity statin", "ApoB 108; target <90"),
-            ("Discuss moderate-intensity statin therapy", "South Asian ancestry"),
+            ("Discuss moderate-intensity statin", "South Asian ancestry"),
         ),
     ],
 )
@@ -319,8 +316,8 @@ def test_demo_output_snapshot_text_uses_safe_patient_and_emr_wording():
     text = render_demo_output_snapshot("younger_strong_family_history")
 
     assert "DEMO: Younger patient with premature family history" in text
-    assert "10-year ASCVD risk:" in text
-    assert "30-year ASCVD risk:" in text
+    assert "PREVENT: ASCVD 10y" in text
+    assert "30y" in text
     assert "total cardiovascular risk" not in text.lower()
     assert "heart failure" not in text.lower()
     assert "inflammatory residual risk" not in text.lower()
@@ -334,18 +331,16 @@ def test_ckd_albuminuria_demo_is_action_oriented_without_passive_no_escalation()
     assert result.level_classification["label"] == (
         "Level 3B - CKM stage 3 with albuminuria-mediated kidney and ASCVD risk"
     )
-    assert "Level 3B - CKM stage 3 with albuminuria-mediated kidney and ASCVD risk." in emr
-    assert "10-year ASCVD risk:" in emr
-    assert "30-year ASCVD risk:" in emr
-    assert "CKM stage 3 with kidney G2A2 and plaque unmeasured / CAC not performed." in emr
+    assert "Level: 3B - CKM stage 3 with albuminuria-mediated kidney and ASCVD risk." in emr
+    assert "PREVENT: ASCVD 10y 6.65% (Intermediate); 30y 26.07%." in emr
+    assert "CKM/Kidney/Plaque: CKM 3; kidney G2A2; CAC not measured." in emr
     assert "No medication escalation today." not in emr
-    assert "Moderate-intensity statin therapy is reasonable given borderline/intermediate ASCVD risk with albuminuria and metabolic risk-enhancing factors." in emr
-    assert "Confirm persistent albuminuria with repeat UACR if not already confirmed; optimize kidney-protective therapy." in emr
-    assert "Treat BP toward goal <130/80." in emr
-    assert "Continue or optimize ACEi/ARB therapy if hypertension and persistent albuminuria are present." in emr
+    assert "1. Lipids: Discuss moderate-intensity statin; LDL-C <100, ApoB <90, non-HDL-C <130." in emr
+    assert "3. Kidney: UACR 48; continue/optimize ACEi-ARB." in emr
+    assert "4. BP: Treat toward <130/80." in emr
     assert "Consider SGLT2 inhibitor if UACR is >=200 mg/g" not in emr
     assert "hsCRP - inflammatory biomarker clarification" not in emr
-    assert "Consider hsCRP only if inflammatory risk clarification would change management." in emr
+    assert "7. Clarify: hsCRP." in emr
 
 
 def test_severe_secondary_prevention_demo_uses_very_high_risk_ascvd_targets():
@@ -360,10 +355,9 @@ def test_severe_secondary_prevention_demo_uses_very_high_risk_ascvd_targets():
     assert target.ldl_c_target == 55
     assert target.non_hdl_c_target == 85
     assert target.apob_target == 65
-    assert "established ASCVD; CAC 5000 is context only" in emr
-    assert "Known cardiovascular disease is present, so treatment decisions are based on secondary-prevention goals rather than risk estimates alone." in emr
-    assert "very-high-risk ASCVD targets" in emr
-    assert "LDL-C <70 mg/dL remains the minimum secondary-prevention threshold" in emr
+    assert "CKM/Kidney/Plaque: CKM 4; kidney G3aA2; CAC 5000." in emr
+    assert "1. Lipids: Intensify secondary-prevention lipid-lowering therapy; LDL-C <55, ApoB <65, non-HDL-C <85." in emr
+    assert "6. Aspirin: Secondary-prevention antiplatelet therapy." in emr
     assert "PREVENT-informed primary-prevention target" not in emr
     assert "Known cardiovascular disease is present" in roadmap
 

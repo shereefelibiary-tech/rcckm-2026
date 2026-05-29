@@ -65,7 +65,7 @@ def test_bp_treated_missing_uacr_is_visually_prominent_in_audit_and_kdigo():
     assert "UACR missing; albuminuria not measured" in ckm_html
     assert "UACR" in clarifier_html
     assert "Additional tests that may help clarify:" in clarifier_html
-    assert "UACR not available; obtain to complete kidney-risk assessment." in note
+    assert "UACR missing; obtain UACR." in note
 
 
 def test_uacr_present_a2_does_not_trigger_missing_clarifier():
@@ -144,8 +144,8 @@ def test_emr_note_includes_uacr_completion_only_when_relevant():
     relevant_note = render_emr_note(relevant_patient, evaluate_patient(relevant_patient))
     low_context_note = render_emr_note(low_context_patient, evaluate_patient(low_context_patient))
 
-    assert "UACR not available; obtain to complete kidney-risk assessment." in relevant_note
-    assert "UACR not available" not in low_context_note
+    assert "UACR missing; obtain UACR." in relevant_note
+    assert "UACR missing; obtain UACR" not in low_context_note
 
 
 def test_diabetes_ckd_missing_uacr_does_not_render_albuminuria_diagnosis():
@@ -157,11 +157,11 @@ def test_diabetes_ckd_missing_uacr_does_not_render_albuminuria_diagnosis():
     assert patient.uacr is None
     assert result.albuminuria_stage is None
     assert result.kdigo_stage == "G3a"
-    assert "kidney G3a; albuminuria not measured" in note
+    assert "kidney G3a; UACR missing" in note
     assert "Type 2 diabetes mellitus with CKD G3a" in assessment
     assert "albuminuria" not in assessment.lower()
     assert "CKD stage 3a ICD: N18.31" in assessment
-    assert "UACR not available; obtain to complete kidney-risk assessment." in note
+    assert "UACR missing; obtain UACR." in note
 
 
 def test_diabetes_ckd_uacr_zero_is_measured_a1_without_albuminuria_diagnosis():

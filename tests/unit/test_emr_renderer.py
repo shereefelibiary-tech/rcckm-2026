@@ -1,7 +1,12 @@
+from pathlib import Path
+
+from core.engine import evaluate_patient
 from core.enums import PlaqueCategory, RiskLevel
 from core.patient import Patient
 from core.results import DiagnosisCandidate, RCCKMResult
 from renderers.emr_renderer import render_emr_note
+from ui.ingest_panel import parse_ingest_report
+from ui.input_worksheet import build_patient_from_inputs
 
 
 def test_render_emr_note_outputs_plain_text_sections_in_order():
@@ -38,24 +43,23 @@ def test_render_emr_note_outputs_plain_text_sections_in_order():
 
     note = render_emr_note(patient, result)
 
-    assert note.startswith("RISK CONTINUUM CKM\n\nHIGH.")
+    assert note.startswith("RISK CONTINUUM CKM\n\nLevel: HIGH.")
     assert "Impression:" not in note
     assert "Assessment:" in note
     assert "Assessment/coding:" not in note
     assert "Recommendations:" in note
     assert "Risk Summary:" not in note
     assert "Context:" not in note
-    assert note.index("HIGH.") < note.index("Assessment:") < note.index("Recommendations:")
-    assert "HIGH." in note
-    assert "10-year ASCVD risk: 8.2%." in note
-    assert "30-year ASCVD risk: 24.5%." in note
-    assert "CKM stage 3 with kidney G3aA2; albuminuria not measured and CAC 350." in note
+    assert note.index("Level: HIGH.") < note.index("Assessment:") < note.index("Recommendations:")
+    assert "Level: HIGH." in note
+    assert "PREVENT: ASCVD 10y 8.2% (Intermediate); 30y 24.5%." in note
+    assert "CKM/Kidney/Plaque: CKM 3; kidney G3aA2; UACR missing; CAC 350." in note
     assert "- Clinical ASCVD (ICD: I25.10)" in note
     assert "- Type 2 diabetes mellitus (ICD: E11.9)" in note
 
-    lipid_line = "- High-intensity lipid-lowering therapy indicated."
-    cac_line = "- CAC 350; no repeat CAC needed for current decision-making."
-    aspirin_line = "- Aspirin only if bleeding risk is low after shared decision-making."
+    lipid_line = "1. Lipids: High-intensity lipid-lowering therapy indicated."
+    cac_line = "2. Plaque: CAC 350."
+    aspirin_line = "6. Aspirin: Not routine for primary prevention."
     assert lipid_line in note
     assert "Recheck lipids in 4-12 weeks" not in note
     assert cac_line in note
@@ -65,6 +69,30 @@ def test_render_emr_note_outputs_plain_text_sections_in_order():
     assert "- Supporting actions:" not in note
     assert "Aspirin: Aspirin" not in note
     assert note.index(lipid_line) < note.index(aspirin_line)
+
+
+def test_stress_smartphrase_emr_uses_extracted_uacr_and_concise_surface_lines():
+    fixture = Path("tests/fixtures/ingest/rcckm_parser_stress_smartphrase.txt")
+    report = parse_ingest_report(fixture.read_text(encoding="utf-8"))
+    patient = build_patient_from_inputs(report["parsed"])
+    result = evaluate_patient(patient)
+
+    note = render_emr_note(patient, result)
+    assessment = note.split("Assessment:", 1)[1].split("Recommendations:", 1)[0]
+
+    assert patient.uacr == 86
+    assert result.kdigo_stage == "G3aA2"
+    assert "CKM/Kidney/Plaque: CKM 3; kidney G3aA2; CAC 125." in note
+    assert "UACR not available" not in note
+    assert "albuminuria not measured" not in note
+    assert "Obtain UACR" not in note
+    assert "obtain to complete kidney-risk assessment" not in note
+    assert "Context: RA" in note
+    assert "Existing rheumatoid arthritis" not in assessment
+    assert "2. Plaque: CAC 125." in note
+    assert "no repeat CAC needed" not in note
+    assert "ApoB <80" in note
+    assert "6. Aspirin: Not routine for primary prevention." in note
 
 
 def test_render_emr_note_marks_hcc_supported_diagnosis_subtly():
@@ -114,7 +142,7 @@ def test_render_emr_note_avoids_duplicate_recommendations_and_generic_action():
 
     assert "Treatment is reasonable." not in note
     assert "Supporting actions:" not in note
-    assert note.count("- Treat BP toward goal <130/80.") == 1
+    assert note.count("4. BP: Treat toward <130/80.") == 1
     assert "No active domain changes" not in note
 
 
@@ -140,11 +168,11 @@ def test_demo_emr_note_prioritizes_composite_diagnoses_and_decisive_actions():
     assert "- Albuminuria (ICD:" not in assessment
     assert "data-derived" not in assessment
 
-    assert "High-intensity lipid-lowering therapy indicated." in note
-    assert "premature family history" in note
+    assert "1. Lipids: High-intensity lipid-lowering therapy indicated; LDL-C <70, ApoB <80, non-HDL-C <100." in note
+    assert "father MI age" in note
     assert "Lipid-lowering therapy is reasonable." not in note
-    assert "Confirm persistent albuminuria" in note
-    assert "Optimize diabetes care." in note
+    assert "UACR 45" in note
+    assert "Optimize diabetes care" in note
     assert "Supporting actions:" not in note
 
 
@@ -228,4 +256,4 @@ def test_emr_note_excludes_workflow_and_metadata_noise():
 
     lines = note.splitlines()
     assert lines[0] == "RISK CONTINUUM CKM"
-    assert lines[2].startswith("Level 5 -")
+    assert lines[2].startswith("Level: 5 -")

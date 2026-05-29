@@ -4,22 +4,21 @@ CASE: statin_intolerance_demo
 EMR:
 RISK CONTINUUM CKM
 
-Level 4 - subclinical atherosclerosis present.
-10-year ASCVD risk: 3.96%.
-CKM stage 3 with kidney G2A1 and CAC 90.
+Level: 4 - subclinical atherosclerosis.
+PREVENT: ASCVD 10y 3.96% (Borderline).
+CKM/Kidney/Plaque: CKM 3; kidney G2A1; CAC 90.
 
 Assessment:
 - Subclinical coronary atherosclerosis (ICD: I25.10)
 - Prediabetes (ICD: R73.03)
 
 Recommendations:
-- Lipid-lowering therapy is favored because coronary plaque is already present despite low short-term ASCVD risk.
-- Given prior high-intensity statin intolerance, consider maximally tolerated statin strategy and nonstatin intensification.
-- CAC 90 measured; plaque present.
-- Kidney protection: No kidney-risk signal. eGFR/UACR available.
-- Blood pressure: At goal. Current 128/76; goal <130/80.
-- Glycemia / metabolic: Prediabetes prevention. A1c 5.7%; weight/activity focus.
-- Aspirin not indicated for routine primary prevention.
+1. Lipids: Intensify lipid-lowering; LDL-C <100, ApoB <90, non-HDL-C <130.
+2. Plaque: CAC 90.
+3. Kidney: No kidney-risk signal.
+4. BP: At goal.
+5. Glycemia: Prediabetes prevention; A1c 5.7%.
+6. Aspirin: Not routine for primary prevention.
 
 PATIENT ROADMAP:
 Your Prevention Roadmap

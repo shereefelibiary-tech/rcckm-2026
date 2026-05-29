@@ -28,7 +28,7 @@ def test_clinical_ascvd_overrides_prevent_and_cac():
     assert any("Clinical ASCVD" in name for name in names)
     assert not any("Subclinical coronary atherosclerosis" in name for name in names)
     assert "PREVENT not used for treatment decisions in established ASCVD." in text
-    assert "does not de-risk secondary prevention" in text
+    assert "Level: 5 - clinical ASCVD / secondary prevention" in render_emr_note(patient, result)
     assert any("Secondary-prevention lipid-lowering therapy" in action for action in action_lines(result))
 
 
@@ -40,7 +40,7 @@ def test_cac_missing_never_generates_plaque_diagnosis_or_cac_zero_language():
     emr = render_emr_note(patient, result)
 
     assert not any("Subclinical coronary atherosclerosis" in name for name in diagnosis_names(result))
-    assert "plaque unmeasured" in text.lower() or "CAC not performed" in text
+    assert "CAC not measured" in emr
     assert "Plaque: CAC 0" not in emr
 
 
@@ -82,7 +82,7 @@ def test_prevent_category_does_not_overwrite_rcckm_level_when_albuminuria_is_act
 
     assert str(getattr(result.prevent_risk_category, "value", result.prevent_risk_category)) == "BORDERLINE"
     assert classify_continuum_position(patient, result) == {"level": 3, "sublevel": "3B"}
-    assert "Level 3B - CKM stage 3 with albuminuria-mediated kidney and ASCVD risk." in render_emr_note(patient, result)
+    assert "Level: 3B - CKM stage 3 with albuminuria-mediated kidney and ASCVD risk." in render_emr_note(patient, result)
 
 
 def test_elevated_30_year_prevent_trajectory_sets_at_least_level_3_without_plaque():
@@ -103,7 +103,7 @@ def test_elevated_30_year_prevent_trajectory_sets_at_least_level_3_without_plaqu
     assert position["level"] >= 3
     assert position["level"] < 4
     assert not any("Subclinical coronary atherosclerosis" in name for name in names)
-    assert "plaque unmeasured / CAC not performed" in render_emr_note(patient, result)
+    assert "CAC not measured" in render_emr_note(patient, result)
     assert "30-year ASCVD risk: 10.5%" in text
 
 
@@ -130,14 +130,11 @@ def test_lpa_80_and_single_hscrp_are_not_major_diagnoses():
 
 def test_aspirin_not_routinely_recommended_and_cac_not_repeated_when_measured():
     patient, result = evaluate_dict({"age": 55, "sex": "male", "cac": 350})
-    text = clinical_visible_text(patient, result)
+    text = clinical_visible_text(patient, result) + "\n" + render_emr_note(patient, result)
 
-    assert (
-        "Aspirin may be considered only if bleeding risk is low after shared decision-making." in text
-        or "Aspirin only if bleeding risk is low after shared decision-making." in text
-    )
+    assert "Aspirin: Not routine for primary prevention." in text
     assert "CAC 350" in text
-    assert "no repeat CAC needed" in text
+    assert "no repeat CAC needed" not in text
     assert "Coronary calcium reasonable for plaque clarification" not in "\n".join(action_lines(result))
 
 

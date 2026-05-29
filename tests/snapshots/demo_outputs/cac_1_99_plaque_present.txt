@@ -4,21 +4,22 @@ CASE: cac_1_99_plaque_present
 EMR:
 RISK CONTINUUM CKM
 
-Level 4 - subclinical atherosclerosis present.
-10-year ASCVD risk: 4.44%.
-CKM stage 3 with kidney G2A1 and CAC 38.
+Level: 4 - subclinical atherosclerosis.
+PREVENT: ASCVD 10y 4.44% (Borderline).
+CKM/Kidney/Plaque: CKM 3; kidney G2A1; CAC 38.
 
 Assessment:
 - Subclinical coronary atherosclerosis (ICD: I25.10)
 - Prediabetes (ICD: R73.03)
 
 Recommendations:
-- Lipid-lowering therapy is favored because coronary plaque is already present despite low short-term ASCVD risk.
-- CAC 38 measured; plaque present.
-- Treat BP toward goal <130/80.
-- Glycemia / metabolic: Prediabetes prevention. A1c 5.8%; weight/activity focus.
-- Aspirin not indicated for routine primary prevention.
-- Consider hsCRP only if inflammatory risk clarification would change management.
+1. Lipids: Intensify lipid-lowering; LDL-C <100, ApoB <90, non-HDL-C <130.
+2. Plaque: CAC 38.
+3. Kidney: No kidney-risk signal.
+4. BP: Treat toward <130/80.
+5. Glycemia: Prediabetes prevention; A1c 5.8%.
+6. Aspirin: Not routine for primary prevention.
+7. Clarify: hsCRP.
 
 PATIENT ROADMAP:
 Your Prevention Roadmap

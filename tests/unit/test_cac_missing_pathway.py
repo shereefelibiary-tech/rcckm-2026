@@ -36,7 +36,7 @@ def test_cac_missing_high_prevent_shows_plaque_unmeasured_without_plaque_diagnos
     assert "subclinical coronary atherosclerosis" not in " ".join(_diagnosis_names(result)).lower()
     assert "Plaque burden is unmeasured" in prevent_html
     assert "Plaque status has not been measured." in roadmap_html
-    assert "plaque unmeasured" in emr_note
+    assert "CAC not measured" in emr_note
     assert "Plaque unmeasured" in wpf_html
     assert "wpf-chip-missing" in wpf_html
     assert all(contribution.label != "CAC plaque burden" for contribution in rss_contributions)

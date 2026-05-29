@@ -39,7 +39,7 @@ def test_bac_present_appears_as_context_not_coronary_diagnosis_or_cac_score():
 
     assert has_breast_arterial_calcification(patient)
     assert "Breast arterial calcification on mammogram" in enhancer_text
-    assert "non-coronary vascular calcification marker" in emr
+    assert "Context: BAC." in emr
     assert "Breast arterial calcification" in falls
     assert BAC_PATIENT_CONTEXT_TEXT in roadmap
     assert "Subclinical coronary atherosclerosis" not in diagnoses

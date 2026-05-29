@@ -1,20 +1,18 @@
 RISK CONTINUUM CKM
 
-Level 2B - converging early risk signals.
-10-year ASCVD risk: 0.74%.
-30-year ASCVD risk: 5.38%.
-CKM stage 2 with kidney G1A1.
-Risk context: reproductive history: Gestational diabetes.
+Level: 2B - converging early risk signals.
+PREVENT: ASCVD 10y 0.74% (Low); 30y 5.38%.
+CKM/Kidney/Plaque: CKM 2; kidney G1A1; CAC not measured.
+Context: Gestational diabetes.
 
 Assessment:
 - Hypertriglyceridemia (ICD: E78.1)
 - Prediabetes (ICD: R73.03)
 
 Recommendations:
-- Lipid lowering: no escalation based on current LDL-C/ApoB and ASCVD risk profile.
-- Continue lifestyle-based prevention.
-- CAC / plaque: Not measured. Plaque burden unmeasured.
-- Kidney protection: No kidney-risk signal. eGFR/UACR available.
-- Blood pressure: BP needed. No current BP available.
-- Glycemia / metabolic: Prediabetes prevention. A1c 5.8%; weight/activity focus.
-- Aspirin not indicated for routine primary prevention.
+1. Lipids: No lipid escalation.
+2. Plaque: CAC not measured.
+3. Kidney: No kidney-risk signal.
+4. BP: BP needed.
+5. Glycemia: Prediabetes prevention; A1c 5.8%.
+6. Aspirin: Not routine for primary prevention.

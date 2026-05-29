@@ -4,25 +4,23 @@ CASE: ldl_severe_hypercholesterolemia_demo
 EMR:
 RISK CONTINUUM CKM
 
-Level 3B - actionable early CKM / atherogenic risk.
-10-year ASCVD risk: 2.8%.
-30-year ASCVD risk: 22%.
-CKM stage 2 with kidney G1A1 and CAC 0 measured; do not use CAC 0 to defer lipid-lowering therapy in LDL-C >=190 / possible FH pathway.
-Risk context: suspected FH / HeFH pathway; premature family history (Father MI age 52). LDL-C >=190 / possible FH pathway: PREVENT should not be used to de-risk treatment.
+Level: 3B - actionable early CKM / atherogenic risk.
+PREVENT: ASCVD 10y 2.8% (Low); 30y 22%.
+CKM/Kidney/Plaque: CKM 2; kidney G1A1; CAC 0.
+Context: suspected FH / HeFH; LDL-C >=190 / possible FH pathway; father MI age 52.
 
 Assessment:
 - Severe hypercholesterolemia (ICD: E78.00)
 - Hypertriglyceridemia (ICD: E78.1)
 
 Recommendations:
-- High-intensity or maximally tolerated statin indicated.
-- Evaluate secondary causes and consider FH/cascade screening when appropriate.
-- CAC 0 measured; do not use CAC 0 to defer lipid-lowering therapy in LDL-C >=190 / possible FH pathway.
-- ApoB - particle burden clarification
-- Clarification testing should not delay treatment.
-- Blood pressure: At goal. Current 122/74; goal <130/80.
-- Glycemia / metabolic: No glycemic action. A1c 5.4.
-- Aspirin not indicated for routine primary prevention.
+1. Lipids: High-intensity lipid-lowering therapy indicated; LDL-C <70, non-HDL-C <100.
+2. Plaque: CAC 0.
+3. Kidney: No kidney-risk signal.
+4. BP: At goal.
+5. Glycemia: No glycemic action; A1c 5.4.
+6. Aspirin: Not routine for primary prevention.
+7. Clarify: ApoB.
 
 PATIENT ROADMAP:
 Your Prevention Roadmap

@@ -4,23 +4,23 @@ CASE: younger_strong_family_history
 EMR:
 RISK CONTINUUM CKM
 
-Level 3B - elevated lifetime cardiometabolic risk despite low short-term event risk.
-10-year ASCVD risk: 1.03%.
-30-year ASCVD risk: 7.53%.
-CKM stage 2 with kidney G1A1.
-Risk context: premature family history of ASCVD (Father MI age 49).
+Level: 3B - elevated lifetime cardiometabolic risk despite low short-term event risk.
+PREVENT: ASCVD 10y 1.03% (Low); 30y 7.53%.
+CKM/Kidney/Plaque: CKM 2; kidney G1A1; CAC not measured.
+Context: father MI age 49.
 
 Assessment:
 - Hypertriglyceridemia (ICD: E78.1)
 - Prediabetes (ICD: R73.03)
 
 Recommendations:
-- Moderate-intensity statin therapy reasonable.
-- CAC not routinely recommended at this age; consider only if results would change management.
-- Consider hsCRP only if inflammatory risk clarification would change management.
-- Blood pressure: At goal. Current 124/78; goal <130/80.
-- Glycemia / metabolic: Prediabetes prevention. A1c 5.9%; weight/activity focus.
-- Aspirin not indicated for routine primary prevention.
+1. Lipids: Discuss moderate-intensity statin; LDL-C <100, ApoB <90, non-HDL-C <130.
+2. Plaque: CAC not routinely recommended.
+3. Kidney: No kidney-risk signal.
+4. BP: At goal.
+5. Glycemia: Prediabetes prevention; A1c 5.9%.
+6. Aspirin: Not routine for primary prevention.
+7. Clarify: hsCRP.
 
 PATIENT ROADMAP:
 Your Prevention Roadmap

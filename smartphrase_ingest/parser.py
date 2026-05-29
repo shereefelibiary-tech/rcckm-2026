@@ -9,6 +9,7 @@ from smartphrase_ingest.aliases import (
     A1C_ALIASES,
     ANCESTRY_ALIASES,
     CAC_ALIASES,
+    HSCRP_ALIASES,
     INFLAMMATORY_DISEASE_ALIASES,
     MASLD_ALIASES,
     OSA_ALIASES,
@@ -60,7 +61,7 @@ NUMERIC_PATTERNS = {
     "cac": r"\b(?:cac|coronary artery calcium|coronary calcium|coronary calcium score|ct calcium score|calcium score)\b",
     "bmi": r"\b(?:bmi|body mass index)\b",
     "creatinine": r"\b(?:creatinine|cr)\b",
-    "hscrp": r"\b(?:hscrp|hs-crp|high sensitivity crp)\b",
+    "hscrp": r"\b(?:hscrp|hs-crp|high sensitivity crp|high-sensitivity crp|c-reactive protein,\s*high sensitivity|crp high sensitivity|crphs)\b",
 }
 
 MEDICATION_TERMS = (
@@ -139,6 +140,43 @@ def _record_age(report: ParseReport, value: Any, confidence: str, source: str) -
     if "Age parsed value invalid; review needed." not in report.warnings:
         report.warnings.append("Age parsed value invalid; review needed.")
     report.conflicts.append("age: Age parsed value invalid; review needed.")
+
+
+def extract_demographics_age(text: str) -> tuple[float | None, str, str]:
+    """Extract patient age with demographic labels outranking family-history ages."""
+    candidates: list[tuple[int, float, str, str]] = []
+    lines = (text or "").splitlines()
+    excluded_context = re.compile(
+        r"\b(?:age\s+at\s+event|father|mother|sibling|brother|sister|relative|family\s+history)\b",
+        re.IGNORECASE,
+    )
+
+    for index, line in enumerate(lines):
+        clean = line.strip()
+        if not clean or excluded_context.search(clean):
+            continue
+        section_bonus = 20 if any(
+            re.search(r"\bdemographics\b", prior, re.IGNORECASE)
+            for prior in lines[max(0, index - 4): index + 1]
+        ) else 0
+        explicit = re.match(r"^\s*age\s*:?\s*(\d{1,3})\s*(?:y\.?o\.?|years?|yrs?|yr)?\b", clean, re.IGNORECASE)
+        if explicit:
+            candidates.append((100 + section_bonus, float(explicit.group(1)), "parsed", "explicit demographic age"))
+            continue
+        narrative = re.search(r"\b(\d{1,3})\s*(?:-?\s*year-old|y\.?o\.?|y/o)\b", clean, re.IGNORECASE)
+        if narrative:
+            candidates.append((80 + section_bonus, float(narrative.group(1)), "parsed", "age/sex prose"))
+            continue
+        compact = re.search(r"\b(\d{1,3})\s*[/\s-]*([mf])\b", clean, re.IGNORECASE)
+        if compact:
+            candidates.append((60 + section_bonus, float(compact.group(1)), "inferred", "compact age/sex token"))
+
+    plausible = [candidate for candidate in candidates if 0 <= candidate[1] <= 120]
+    if not plausible:
+        return None, "", ""
+    plausible.sort(key=lambda item: item[0], reverse=True)
+    _priority, value, confidence, source = plausible[0]
+    return value, confidence, source
 
 
 def _mark_unavailable(report: ParseReport, field: str, reason: str, source: str) -> None:
@@ -300,6 +338,41 @@ def _keyword_present_without_explicit_negation(raw: str, labels: list[str]) -> b
         if any(re.search(pattern, segment, re.IGNORECASE) for pattern in negative_patterns):
             return False
         return True
+    return None
+
+
+def parse_yes_no_context(raw: str, labels: list[str]) -> bool | None:
+    """Parse split-line yes/no fields where the value may sit below the label."""
+    if not raw or not labels:
+        return None
+    label = _label_regex(labels)
+    lines = (raw or "").splitlines()
+    negative = re.compile(r"^(?:no|n|false|absent|negative|none|denies|denied|not present)\b", re.IGNORECASE)
+    positive = re.compile(r"^(?:yes|y|true|present|positive|active|current)\b", re.IGNORECASE)
+    unknown = re.compile(UNKNOWN_VALUE_RE, re.IGNORECASE)
+
+    for index, line in enumerate(lines):
+        match = re.search(rf"\b{label}\b", line, re.IGNORECASE)
+        if not match:
+            continue
+        prefix = line[: match.start()]
+        if re.search(r"\b(?:no|denies|denied|without|negative for|absent|not present)\b", prefix, re.IGNORECASE):
+            return False
+        tail = re.sub(r"^\s*(?:=|:|-|is|was)\s*", "", line[match.end():].strip(), flags=re.IGNORECASE)
+        candidates = [tail] if tail else []
+        for lookahead in lines[index + 1: min(len(lines), index + 3)]:
+            clean = lookahead.strip()
+            if clean:
+                candidates.append(clean)
+        for candidate in candidates:
+            if not candidate:
+                continue
+            if unknown.search(candidate):
+                return None
+            if negative.search(candidate):
+                return False
+            if positive.search(candidate):
+                return True
     return None
 
 
@@ -478,6 +551,45 @@ def _normalize_family_history_event(value: str | None) -> str | None:
     if token in {"ascvd", "cvd"}:
         return "ascvd"
     return token
+
+
+def _family_history_event_pattern() -> str:
+    return r"(?:MI|myocardial\s+infarction|heart\s+attack|PCI/CABG|PCI|CABG|stroke|sudden\s+cardiac\s+death|SCD|ASCVD|PAD)"
+
+
+def _find_family_history_event_detail(text: str) -> dict[str, Any] | None:
+    """Extract relationship/event/age detail from compact family-history prose."""
+    relation = r"(father|mother|brother|sister|sibling)"
+    event = _family_history_event_pattern()
+    patterns = (
+        rf"\b{relation}\b\s+(?:with\s+)?(?P<event>{event})\s+(?:at\s+)?(?:age\s+)?(?P<age>\d{{1,3}})\b",
+        rf"\b{relation}\b[^\n.;]{{0,35}}\b(?P<event>{event})\b[^\n.;]{{0,20}}\b(?:at|age)\s*(?P<age>\d{{1,3}})\b",
+    )
+    for pattern in patterns:
+        match = re.search(pattern, text or "", re.IGNORECASE)
+        if not match:
+            continue
+        relationship = normalize_family_history_relationship(match.group(1))
+        event_value = _normalize_family_history_event(match.group("event"))
+        age_value = float(match.group("age"))
+        if relationship and event_value and 0 <= age_value <= 120:
+            return {
+                "relationship": relationship,
+                "event_type": event_value,
+                "age_at_event": age_value,
+                "premature_fhx_ascvd": _premature_family_history_from_event(relationship, age_value),
+                "source_text": match.group(0),
+            }
+    sibling_premature = re.search(r"\b(?:sibling|brother|sister)\b[^\n.;]{0,40}\bpremature\s+ASCVD\b", text or "", re.IGNORECASE)
+    if sibling_premature:
+        return {
+            "relationship": "sibling",
+            "event_type": "ascvd",
+            "age_at_event": None,
+            "premature_fhx_ascvd": True,
+            "source_text": sibling_premature.group(0),
+        }
+    return None
 
 
 def _family_history_block(text: str) -> str:
@@ -766,6 +878,110 @@ def _parse_a1c_section_table(report: ParseReport, text: str) -> None:
             report.warnings.append("A1c section found; result unclear")
 
 
+def extract_uacr(report: ParseReport, text: str) -> None:
+    """Extract UACR from aliases with nearby dated rows or Result lines."""
+    if "uacr" in report.extracted:
+        return
+    lines = (text or "").splitlines()
+    alias_pattern = re.compile(r"\b" + _alias_pattern(UACR_ALIASES) + r"\b", re.IGNORECASE)
+    dated_result = re.compile(
+        r"\b(?:\d{4}-\d{1,2}-\d{1,2}|\d{1,2}/\d{1,2}/\d{2,4})\b\s+(?P<value>\d+(?:\.\d+)?)\b"
+    )
+    result_line = re.compile(r"\bresult\s*(?:=|:|-)?\s*(?P<value>\d+(?:\.\d+)?)\b", re.IGNORECASE)
+    skip_line = re.compile(r"\b(?:reference|normal range|comment|units?)\b", re.IGNORECASE)
+
+    for index, line in enumerate(lines):
+        label_match = alias_pattern.search(line)
+        if not label_match:
+            continue
+        block = lines[index : min(len(lines), index + 15)]
+        candidates: list[tuple[int, float, str]] = []
+        pending_result = False
+        for offset, block_line in enumerate(block):
+            clean = block_line.strip()
+            if not clean or PLACEHOLDER_VALUE_RE.search(clean) or skip_line.search(clean):
+                continue
+            if re.search(r"\b(?:not done|no results found|unavailable|unknown)\b", clean, re.IGNORECASE):
+                continue
+            match = dated_result.search(clean)
+            if match:
+                value = float(match.group("value"))
+                if 0 <= value <= 10000:
+                    candidates.append((100 - offset, value, clean))
+                continue
+            match = result_line.search(clean)
+            if match:
+                value = float(match.group("value"))
+                if 0 <= value <= 10000:
+                    candidates.append((90 - offset, value, clean))
+                continue
+            if pending_result:
+                value_match = re.search(r"^(\d+(?:\.\d+)?)\b", clean)
+                if value_match:
+                    value = float(value_match.group(1))
+                    if 0 <= value <= 10000:
+                        candidates.append((88 - offset, value, clean))
+                        pending_result = False
+                        continue
+            if re.match(r"^result\s*:?\s*$", clean, re.IGNORECASE):
+                pending_result = True
+                continue
+            if offset == 0:
+                tail = clean[label_match.end():]
+                value_match = re.search(r"(?:=|:|-|\|)?\s*(\d+(?:\.\d+)?)\b", tail)
+                if value_match:
+                    value = float(value_match.group(1))
+                    if 0 <= value <= 10000:
+                        candidates.append((80, value, clean))
+        if candidates:
+            candidates.sort(key=lambda item: item[0], reverse=True)
+            _record(report, "uacr", candidates[0][1], "parsed", candidates[0][2])
+            return
+
+
+def extract_hscrp(report: ParseReport, text: str) -> None:
+    """Extract hsCRP from labeled lines or short multiline blocks."""
+    if "hscrp" in report.extracted:
+        return
+    lines = (text or "").splitlines()
+    alias_pattern = re.compile(r"\b" + _alias_pattern(HSCRP_ALIASES) + r"\b", re.IGNORECASE)
+    skip_line = re.compile(r"\b(?:reference|ref\s+range|normal|comment|units?)\b", re.IGNORECASE)
+    no_results = re.compile(r"\b(?:no\s+results\s+found|not\s+done|unavailable|unknown)\b", re.IGNORECASE)
+
+    for index, line in enumerate(lines):
+        alias_match = alias_pattern.search(line)
+        if not alias_match:
+            continue
+        candidates: list[tuple[int, float, str]] = []
+        block = lines[index : min(len(lines), index + 8)]
+        for offset, block_line in enumerate(block):
+            clean = block_line.strip()
+            if not clean or PLACEHOLDER_VALUE_RE.search(clean):
+                continue
+            if no_results.search(clean):
+                if offset == 0:
+                    break
+                continue
+            if skip_line.search(clean):
+                continue
+            if offset > 0 and re.search(r"\b(?:\d{4}-\d{1,2}-\d{1,2}|\d{1,2}/\d{1,2}/\d{2,4})\b", clean):
+                continue
+            value_area = clean[alias_match.end():] if offset == 0 else clean
+            if re.match(r"^\s*<\s*\d", value_area):
+                continue
+            value_match = re.search(r"(?<![<>=])\b(\d+(?:\.\d+)?)\b", value_area)
+            if not value_match:
+                continue
+            value = float(value_match.group(1))
+            if 0 <= value <= 100:
+                priority = 100 - offset
+                candidates.append((priority, value, clean))
+        if candidates:
+            candidates.sort(key=lambda item: item[0], reverse=True)
+            _record(report, "hscrp", candidates[0][1], "parsed", candidates[0][2])
+            return
+
+
 def _parse_smoking_details(report: ParseReport, text: str) -> None:
     """Parse current/former smoking fields without treating former use as active use."""
     status = re.search(r"\bsmoking\s+status\s*(?:=|:)?\s*(current|former|never|none|not current)\b", text, re.IGNORECASE)
@@ -968,21 +1184,17 @@ def parse_smartphrase_report(text: str) -> ParseReport:
     report.source_style = detect_source_style(text)
     lowered = text.lower()
 
-    age_explicit = re.search(
-        r"^\s*age\s*:\s*(\d{1,3})\s*(?:y\.?o\.?|years?|yrs?|yr)?\b",
-        text,
-        re.IGNORECASE | re.MULTILINE,
-    )
-    if not age_explicit:
-        age_explicit = re.search(
-            r"^\s*age\s+(\d{1,3})\s*(?:y\.?o\.?|years?|yrs?|yr)?\b",
+    patient_age, age_confidence, age_source = extract_demographics_age(text)
+    if patient_age is not None:
+        _record_age(report, patient_age, age_confidence, age_source)
+    else:
+        invalid_age = re.search(
+            r"^\s*age\s*:?\s*(\d{1,4})\s*(?:y\.?o\.?|years?|yrs?|yr)?\b",
             text,
             re.IGNORECASE | re.MULTILINE,
         )
-    if age_explicit:
-        age_context = text[max(0, age_explicit.start() - 24): age_explicit.start()].lower()
-        if not re.search(r"\b(?:menopause|menopausal|menarche)\b", age_context):
-            _record_age(report, age_explicit.group(1), "parsed", "explicit age")
+        if invalid_age and not re.search(r"\bage\s+at\s+event\b", invalid_age.group(0), re.IGNORECASE):
+            _record_age(report, invalid_age.group(1), "parsed", "explicit demographic age")
 
     age_year_old = re.search(
         r"\b(\d{1,3})\s*(?:-?\s*year-old|y\.?o\.?|y/o)\b(?:\s*(male|female|man|woman|m|f))?",
@@ -997,16 +1209,19 @@ def parse_smartphrase_report(text: str) -> ParseReport:
             _record(report, "sex", "male" if sex_value in {"m", "male", "man"} else "female", "parsed", "age/sex prose")
 
     age_sex_match = re.search(r"\b(\d{1,3})\s*[/\s-]*([mf])\b", text, re.IGNORECASE)
-    if age_sex_match and "age" not in report.extracted:
-        _record_age(report, age_sex_match.group(1), "inferred", "compact age/sex token")
-        if "age" in report.extracted:
-            _record(
-                report,
-                "sex",
-                "male" if age_sex_match.group(2).lower() == "m" else "female",
-                "inferred",
-                "compact age/sex token",
-            )
+    if age_sex_match:
+        context = text[max(0, age_sex_match.start() - 45): age_sex_match.start()].lower()
+        if not re.search(r"\b(?:father|mother|brother|sister|sibling|relative|family history|age at event)\b", context):
+            if "age" not in report.extracted:
+                _record_age(report, age_sex_match.group(1), "inferred", "compact age/sex token")
+            if "sex" not in report.extracted:
+                _record(
+                    report,
+                    "sex",
+                    "male" if age_sex_match.group(2).lower() == "m" else "female",
+                    "inferred",
+                    "compact age/sex token",
+                )
 
     sex_match = re.search(r"\b(?:sex|gender)\s*(?:=|:|is)?\s*(male|female|m|f)\b", text, re.IGNORECASE)
     if sex_match:
@@ -1038,6 +1253,8 @@ def parse_smartphrase_report(text: str) -> ParseReport:
 
     _parse_epic_table_labs(report, text)
     _parse_a1c_section_table(report, text)
+    extract_uacr(report, text)
+    extract_hscrp(report, text)
 
     actual_a1c = re.search(r"\bactual\s+(?:a1c|hba1c)\s*(?:=|:)?\s*(\d+(?:\.\d+)?)\b", text, re.IGNORECASE)
     if actual_a1c and "a1c" not in report.extracted:
@@ -1094,13 +1311,7 @@ def parse_smartphrase_report(text: str) -> ParseReport:
     _parse_height_weight_bmi(report, text)
 
     family_section = extract_family_history(_family_history_block(text))
-    fhx_match = re.search(
-        r"\b(father|mother|brother|sister)\s+"
-        r"(MI|PCI/CABG|PCI|CABG|stroke|sudden cardiac death|SCD)"
-        r"\s+(?:at\s+)?(?:age\s+)?(\d{2,3})\b",
-        text,
-        re.IGNORECASE,
-    )
+    fhx_detail = _find_family_history_event_detail(text)
     explicit_premature_fhx_found, explicit_premature_fhx = _parse_explicit_bool_line_status(
         text,
         [
@@ -1111,19 +1322,18 @@ def parse_smartphrase_report(text: str) -> ParseReport:
         ],
     )
     if family_section:
-        if fhx_match:
-            relationship = fhx_match.group(1).lower()
-            event_age = float(fhx_match.group(3))
-            premature = _premature_family_history_from_event(relationship, event_age)
+        if fhx_detail:
+            premature = fhx_detail["premature_fhx_ascvd"]
             if family_section.get("premature_fhx_ascvd") is not None and family_section["premature_fhx_ascvd"] != premature:
                 report.conflicts.append(
                     "Family history conflict: explicit premature flag differs from event age."
                 )
             family_section["premature_fhx_ascvd"] = premature
-            family_section["relationship"] = normalize_family_history_relationship(relationship)
-            family_section["event_type"] = _normalize_family_history_event(fhx_match.group(2))
-            family_section["age_at_event"] = event_age
+            family_section["relationship"] = fhx_detail["relationship"]
+            family_section["event_type"] = fhx_detail["event_type"]
+            family_section["age_at_event"] = fhx_detail["age_at_event"]
             family_section["source"] = "structured family history"
+            family_section["source_text"] = fhx_detail["source_text"]
         if "premature_fhx_ascvd" in family_section:
             _record(report, "fhx", family_section["premature_fhx_ascvd"], "parsed", family_section["source"])
         if family_section.get("relationship"):
@@ -1133,25 +1343,21 @@ def parse_smartphrase_report(text: str) -> ParseReport:
         if family_section.get("age_at_event") is not None:
             _record(report, "family_history_age_at_event", family_section["age_at_event"], "parsed", "family history")
         if family_section.get("relationship") or family_section.get("event_type") or family_section.get("age_at_event") is not None:
-            _record(report, "fhx_text", _family_history_block(text), "parsed", "family history")
-    elif fhx_match:
-        relationship = fhx_match.group(1).lower()
-        event_age = float(fhx_match.group(3))
-        premature = _premature_family_history_from_event(relationship, event_age)
+            _record(report, "fhx_text", family_section.get("source_text") or _family_history_block(text), "parsed", "family history")
+    elif fhx_detail:
+        relationship = fhx_detail["relationship"]
+        event_age = fhx_detail["age_at_event"]
+        premature = fhx_detail["premature_fhx_ascvd"]
         if explicit_premature_fhx is not None and explicit_premature_fhx != premature:
             report.conflicts.append(
                 "Family history conflict: explicit premature flag differs from event age."
             )
         _record(report, "fhx", premature, "inferred", "structured family history")
-        _record(report, "fhx_text", fhx_match.group(0), "parsed", "family history")
+        _record(report, "fhx_text", fhx_detail["source_text"], "parsed", "family history")
         _record(report, "family_history_relationship", relationship, "parsed", "family history")
-        event = fhx_match.group(2).lower()
-        if event in {"pci", "cabg"}:
-            event = "PCI/CABG"
-        elif event == "scd":
-            event = "sudden cardiac death"
-        _record(report, "family_history_event_type", event, "parsed", "family history")
-        _record(report, "family_history_age_at_event", event_age, "parsed", "family history")
+        _record(report, "family_history_event_type", fhx_detail["event_type"], "parsed", "family history")
+        if event_age is not None:
+            _record(report, "family_history_age_at_event", event_age, "parsed", "family history")
     elif explicit_premature_fhx_found:
         _record(report, "fhx", explicit_premature_fhx, "parsed", "explicit premature family history")
     elif re.search(
@@ -1262,6 +1468,16 @@ def parse_smartphrase_report(text: str) -> ParseReport:
         if found:
             confidence = "inferred" if field in {"bpTreated", "lipidLowering", "sglt2", "glp1", "ace_arb"} else "parsed"
             _record(report, field, value, confidence, "explicit boolean line")
+
+    for field, labels in {
+        "south_asian_ancestry": [r"south\s+asian\s+ancestry", r"indian\s+ancestry", r"pakistani\s+ancestry", r"bangladeshi\s+ancestry"],
+        "filipino_ancestry": [r"filipino\s+ancestry"],
+    }.items():
+        if field in report.extracted:
+            continue
+        value = parse_yes_no_context(text, labels)
+        if value is not None:
+            _record(report, field, value, "parsed", "explicit ancestry field")
 
     bac_direct = re.search(
         r"\b(?:breast\s+arterial\s+calcification|mammary\s+artery\s+calcification|breast\s+artery\s+calcification|vascular\s+calcification\s+on\s+mammogram|arterial\s+calcifications?\s+on\s+mammogram)\s*(?:=|:|is|noted)?\s*(unknown|absent|present|mild|moderate|severe|yes|no)?\b",

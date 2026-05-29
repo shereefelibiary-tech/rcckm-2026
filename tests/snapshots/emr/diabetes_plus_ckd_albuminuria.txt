@@ -1,19 +1,17 @@
 RISK CONTINUUM CKM
 
-Level 3B - CKM stage 3 with albuminuria-mediated kidney and ASCVD risk.
-PREVENT unavailable or incomplete; interpretation is based on reviewed worksheet data.
-CKM stage 3 with diabetic kidney involvement.
+Level: 3B - CKM stage 3 with albuminuria-mediated kidney and ASCVD risk.
+PREVENT: unavailable.
+CKM/Kidney/Plaque: CKM 3; kidney G3aA2; CAC not measured.
 
 Assessment:
 - Type 2 diabetes mellitus with CKD G3aA2 and albuminuria (ICD: E11.22; CKD stage 3a ICD: N18.31)
 
 Recommendations:
-- Lipid lowering: no escalation based on current LDL-C/ApoB and ASCVD risk profile.
-- Plaque burden unmeasured.
-- Confirm persistent albuminuria with repeat UACR if not already confirmed; optimize kidney-protective therapy.
-- Optimize diabetes care.
-- Add an SGLT2 inhibitor for kidney and cardiovascular protection if no contraindication, despite ACEi/ARB therapy.
-- Blood pressure: BP needed. No current BP available.
-- Aspirin not indicated for routine primary prevention.
-- Lp(a) - one-time risk assessment
-- Consider hsCRP only if inflammatory risk clarification would change management.
+1. Lipids: No lipid escalation.
+2. Plaque: CAC not measured.
+3. Kidney: UACR 210; eGFR 52.
+4. BP: BP needed.
+5. Glycemia: Optimize diabetes care; A1c 7.4%; goal <7.0.
+6. Aspirin: Not routine for primary prevention.
+7. Clarify: Lp(a); hsCRP.

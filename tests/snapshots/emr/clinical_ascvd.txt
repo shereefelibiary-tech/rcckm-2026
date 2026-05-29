@@ -1,17 +1,17 @@
 RISK CONTINUUM CKM
 
-Level 5 - clinical ASCVD / secondary prevention.
-Known cardiovascular disease is present, so treatment decisions are based on secondary-prevention goals rather than risk estimates alone.
-CKM stage 4 with plaque established clinically.
+Level: 5 - clinical ASCVD / secondary prevention.
+PREVENT: unavailable.
+CKM/Kidney/Plaque: CKM 4; CAC not measured.
 
 Assessment:
 - Clinical ASCVD
 
 Recommendations:
-- Secondary-prevention lipid-lowering therapy indicated; treat toward ASCVD targets.
-- Plaque is established clinically; CAC is not needed for current decision-making.
-- Lp(a) - one-time risk assessment
-- Clarification testing should not delay treatment.
-- Blood pressure: BP needed. No current BP available.
-- Glycemia / metabolic: A1c needed. No current A1c available.
-- Antiplatelet therapy is indicated for secondary prevention if clinically appropriate and no contraindication is present.
+1. Lipids: Intensify secondary-prevention lipid-lowering therapy; LDL-C <70, non-HDL-C <100.
+2. Plaque: Clinical ASCVD present.
+3. Kidney: eGFR/UACR can clarify risk.
+4. BP: BP needed.
+5. Glycemia: A1c needed; No current A1c available.
+6. Aspirin: Secondary-prevention antiplatelet therapy.
+7. Clarify: Lp(a).

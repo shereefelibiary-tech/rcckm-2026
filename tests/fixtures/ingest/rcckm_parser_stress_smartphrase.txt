@@ -1,10 +1,10 @@
 Demographics
 Age: 58 y.o.
-Sex: male
+Sex: female
 Race/Ethnicity: South Asian
 
 Vitals
-Most recent BP: 128/76
+Most recent BP: 138/84
 
 BMI
 Estimated body mass index is 31.9 kg/m²
@@ -17,9 +17,9 @@ Age at event: 52
 
 Lipids
 Total cholesterol: 205
-LDL-C: 126
-HDL-C: 42
-Triglycerides: 245
+LDL-C: 141
+HDL-C: 41
+Triglycerides: 212
 
 A1c:
 Hemoglobin A1C
@@ -41,8 +41,11 @@ hsCRP: 3.1 mg/L
 
 Kidney
 Albumin/Creatinine Ratio, Urine
-05/18/2026  86 (H)
-eGFR Cre 78
+Date:
+05/18/2026
+Result:
+86
+eGFR Cre 52
 
 Imaging
 Coronary artery calcium (CAC) score: 125

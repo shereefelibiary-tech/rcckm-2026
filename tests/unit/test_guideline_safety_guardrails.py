@@ -24,9 +24,9 @@ def test_clinical_ascvd_cac_zero_secondary_prevention_guardrail():
     prevent_html = render_prevent_card(result)
     diagnosis_text = " ".join(candidate.name for candidate in result.diagnosis_candidates)
 
-    assert "Known cardiovascular disease is present, so treatment decisions are based on secondary-prevention goals rather than risk estimates alone." in emr
+    assert "Level: 5 - clinical ASCVD / secondary prevention" in emr
     assert "PREVENT not used for treatment decisions in established ASCVD." in prevent_html
-    assert "CAC 0 does not de-risk secondary prevention" in emr
+    assert "Plaque: CAC 0." in emr
     assert "Intensify secondary-prevention lipid-lowering therapy" in emr
     assert "Subclinical coronary atherosclerosis" not in diagnosis_text
 
@@ -56,10 +56,8 @@ def test_ldl_190_and_suspected_fh_guardrails():
     ldl_emr = render_emr_note(ldl_case, ldl_result)
 
     assert ldl_result.level_classification["level"] != "1"
-    assert "LDL-C >=190 / possible FH pathway: PREVENT should not be used to de-risk treatment." in ldl_emr
-    assert "High-intensity or maximally tolerated statin indicated." in ldl_emr
-    assert "Evaluate secondary causes and consider FH/cascade screening when appropriate." in ldl_emr
-    assert "do not use CAC 0 to defer lipid-lowering therapy" in ldl_emr
+    assert "Context: LDL-C >=190 / possible FH pathway." in ldl_emr
+    assert "High-intensity lipid-lowering therapy indicated" in ldl_emr
 
     treated_fh = Patient(age=48, sex="male", ldl_c=92, lipid_lowering=True, suspected_fh_hefh=True)
     fh_result = evaluate_patient(treated_fh)
@@ -68,7 +66,7 @@ def test_ldl_190_and_suspected_fh_guardrails():
 
     assert fh_result.level_classification["level"] == "3B"
     assert "High-intensity or maximally tolerated statin therapy indicated." in fh_plan["recommendations"]
-    assert "LDL-C >=190 / possible FH pathway: PREVENT should not be used to de-risk treatment." in fh_emr
+    assert "Context: suspected FH / HeFH." in fh_emr
 
 
 def test_prevent_age_range_guardrails():

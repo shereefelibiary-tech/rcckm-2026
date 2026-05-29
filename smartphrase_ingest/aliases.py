@@ -60,3 +60,13 @@ MASLD_ALIASES = (
     "hepatic steatosis",
     "steatotic liver disease",
 )
+
+HSCRP_ALIASES = (
+    "hscrp",
+    "hs-crp",
+    "high sensitivity crp",
+    "high-sensitivity crp",
+    "c-reactive protein, high sensitivity",
+    "crp high sensitivity",
+    "crphs",
+)

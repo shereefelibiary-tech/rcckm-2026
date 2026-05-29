@@ -4,22 +4,21 @@ CASE: ldl_high_apob_missing
 EMR:
 RISK CONTINUUM CKM
 
-Level 3B - actionable early CKM / atherogenic risk.
-10-year ASCVD risk: 4.6%.
-30-year ASCVD risk: 28%.
-CKM stage 2 with kidney G1A1 and plaque unmeasured / CAC not performed.
+Level: 3B - actionable early CKM / atherogenic risk.
+PREVENT: ASCVD 10y 4.6% (Borderline); 30y 28%.
+CKM/Kidney/Plaque: CKM 2; kidney G1A1; CAC not measured.
 
 Assessment:
 - Hypertriglyceridemia (ICD: E78.1)
 
 Recommendations:
-- Short-term ASCVD risk is low, but longer-term risk and risk-enhancing factors may make lipid-lowering worth discussing. Moderate-intensity statin therapy may be reasonable after shared decision-making.
-- CAC reasonable if treatment decision remains uncertain.
-- ApoB - particle burden clarification
-- Lp(a) - one-time risk assessment
-- Blood pressure: Treat toward <130/80. Current 130/78.
-- Glycemia / metabolic: No glycemic action. A1c 5.6.
-- Aspirin not indicated for routine primary prevention.
+1. Lipids: Discuss moderate-intensity statin; LDL-C <100, non-HDL-C <130.
+2. Plaque: CAC may clarify risk.
+3. Kidney: No kidney-risk signal.
+4. BP: Treat toward <130/80.
+5. Glycemia: No glycemic action; A1c 5.6.
+6. Aspirin: Not routine for primary prevention.
+7. Clarify: ApoB; Lp(a).
 
 PATIENT ROADMAP:
 Your Prevention Roadmap

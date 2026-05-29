@@ -1,22 +1,19 @@
 RISK CONTINUUM CKM
 
-Level 3B - CKM stage 3 with albuminuria-mediated kidney and ASCVD risk.
-10-year ASCVD risk: 3.74%.
-30-year ASCVD risk: 18.8%.
-CKM stage 3 with kidney G2A2 and plaque unmeasured / CAC not performed.
+Level: 3B - CKM stage 3 with albuminuria-mediated kidney and ASCVD risk.
+PREVENT: ASCVD 10y 3.74% (Borderline); 30y 18.8%.
+CKM/Kidney/Plaque: CKM 3; kidney G2A2; CAC not measured.
 
 Assessment:
-- CKD stage G2A2 / albuminuria, confirm persistence if not already confirmed (ICD: R80.9)
+- CKD stage G2A2 / albuminuria (ICD: R80.9)
 - Hypertriglyceridemia (ICD: E78.1)
 - Prediabetes (ICD: R73.03)
 
 Recommendations:
-- Short-term ASCVD risk is low, but albuminuria and longer-term risk make lipid-lowering worth discussing.
-- CAC reasonable if treatment decision remains uncertain.
-- Confirm persistent albuminuria with repeat UACR if not already confirmed; optimize kidney-protective therapy.
-- Continue or optimize ACEi/ARB therapy if hypertension and persistent albuminuria are present.
-- Blood pressure: BP needed. No current BP available.
-- Glycemia / metabolic: Prediabetes prevention. A1c 6.1%; weight/activity focus.
-- Aspirin not indicated for routine primary prevention.
-- Lp(a) - one-time risk assessment
-- Consider hsCRP only if inflammatory risk clarification would change management.
+1. Lipids: Review lipid plan; LDL-C <100, ApoB <90, non-HDL-C <130.
+2. Plaque: CAC may clarify risk.
+3. Kidney: UACR 34; optimize ACEi-ARB.
+4. BP: BP needed.
+5. Glycemia: Prediabetes prevention; A1c 6.1%.
+6. Aspirin: Not routine for primary prevention.
+7. Clarify: Lp(a); hsCRP.

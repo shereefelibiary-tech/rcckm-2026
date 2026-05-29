@@ -207,6 +207,12 @@ def _field_value(field_id: str, keys: tuple[str, ...], parsed: dict[str, Any], u
     if field_id == "family_history":
         value = parsed.get("family_history_premature_ascvd")
         if value is True:
+            relationship = str(parsed.get("family_history_relationship") or "").strip().lower()
+            event = str(parsed.get("family_history_event_type") or "").strip()
+            age = parsed.get("family_history_age_at_event")
+            if relationship and event and age not in (None, ""):
+                event_label = "MI" if event.lower() == "mi" else event.upper() if len(event) <= 4 else event
+                return f"{relationship.title()} {event_label} age {_compact(age)}"
             return "Present"
         if value is False:
             return "Not reported"

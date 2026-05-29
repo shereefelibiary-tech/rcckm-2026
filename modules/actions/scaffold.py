@@ -431,9 +431,9 @@ def _aspirin_line(patient: Any, result: Any) -> str:
     if cac is None:
         return "Aspirin not indicated for routine primary prevention."
     if age is not None and 40 <= age <= 69 and 100 <= cac <= 299:
-        return "Aspirin not routine for primary prevention; consider only if bleeding risk is low and shared decision-making supports it."
+        return "Aspirin not routine for primary prevention."
     if age is not None and 40 <= age <= 69 and (cac >= 100 or _prevent_high(result)):
-        return "Aspirin may be considered only if bleeding risk is low after shared decision-making."
+        return "Aspirin not routine for primary prevention."
     return "Aspirin not indicated for routine primary prevention."
 
 
@@ -879,7 +879,15 @@ def _line_to_lipid_readout(line: str) -> tuple[str, str, str, str]:
     return "Review lipid plan", "Use risk context and targets.", "low", "consider"
 
 
-def _lipid_emr_line(line: str) -> str:
+def _join_target_parts(parts: list[str]) -> str:
+    if len(parts) <= 1:
+        return "".join(parts)
+    if len(parts) == 2:
+        return " and ".join(parts)
+    return ", ".join(parts[:-1]) + f", and {parts[-1]}"
+
+
+def _lipid_emr_line(line: str, patient: Any | None = None, result: Any | None = None) -> str:
     text = _clean_readout_text(line)
     replacements = {
         "Intensify secondary-prevention lipid-lowering therapy; treat toward very-high-risk ASCVD targets.": (
@@ -892,7 +900,37 @@ def _lipid_emr_line(line: str) -> str:
             "if available. LDL-C <70 mg/dL remains the minimum secondary-prevention threshold."
         ),
     }
-    return replacements.get(text, text)
+    if text in replacements:
+        return replacements[text]
+    if patient is not None and result is not None and any(
+        phrase in text.lower()
+        for phrase in (
+            "lipid-lowering therapy recommended",
+            "intensify lipid-lowering",
+            "high-intensity lipid-lowering",
+            "lipid-lowering therapy indicated",
+        )
+    ):
+        target = _first_target(result)
+        ldl_target = _num(getattr(target, "ldl_c_target", None)) if target else None
+        apob_target = _num(getattr(target, "apob_target", None)) if target else None
+        non_hdl_target = _num(getattr(target, "non_hdl_c_target", None)) if target else None
+        has_apob = _num(getattr(patient, "apob", None)) is not None
+        target_parts: list[str] = []
+        if ldl_target is not None:
+            target_parts.append(f"LDL-C <{ldl_target:g}")
+        if has_apob and apob_target is not None:
+            target_parts.append(f"ApoB <{apob_target:g}")
+        if non_hdl_target is not None:
+            target_parts.append(f"non-HDL-C <{non_hdl_target:g}")
+        if target_parts:
+            verb = (
+                "High-intensity lipid-lowering therapy indicated"
+                if "high-intensity" in text.lower()
+                else "Intensify lipid-lowering therapy"
+            )
+            return f"{verb}; treat toward {_join_target_parts(target_parts)}."
+    return text
 
 
 def _lipid_patient_line(status: str, detail: str, source_line: str) -> str:
@@ -1187,6 +1225,22 @@ def _aspirin_readout(patient: Any, result: Any, section: ActionSection | None) -
         return _make_readout("aspirin_antiplatelet", "Aspirin / antiplatelet", "Antiplatelet therapy", "Use if no contraindication.", priority="high", state="action")
     if "bleeding risk" in lowered or "consider" in lowered:
         return _make_readout("aspirin_antiplatelet", "Aspirin / antiplatelet", "Consider only if low bleeding risk", "Shared decision-making.", priority="low", state="consider")
+    cac = _num(getattr(patient, "cac", None))
+    age = _num(getattr(patient, "age", None))
+    hover = (
+        "Consider only if low bleeding risk and shared decision-making supports it."
+        if age is not None and 40 <= age <= 69 and cac is not None and cac >= 100
+        else ""
+    )
+    if line == "Aspirin not routine for primary prevention.":
+        return _make_readout(
+            "aspirin_antiplatelet",
+            "Aspirin / antiplatelet",
+            "Aspirin not routine for primary prevention",
+            "",
+            state="neutral",
+            hover_detail=hover,
+        )
     return _make_readout("aspirin_antiplatelet", "Aspirin / antiplatelet", "Not routine for primary prevention", "Do not start routine aspirin.", state="neutral")
 
 
@@ -1243,7 +1297,7 @@ def _attach_surface_lines(
         if item.domain_id == "lipid_lowering":
             lipid_parts = []
             lipid_parts.extend(section_text.get("Triglycerides") or [])
-            lipid_parts.append(_lipid_emr_line(lipid_line))
+            lipid_parts.append(_lipid_emr_line(lipid_line, patient, result))
             lipid_parts.extend(section_text.get("Lifestyle") or [])
             lipid_parts.extend(section_text.get("Statin intolerance") or [])
             lipid_parts.extend(section_text.get("Secondary causes") or [])
@@ -1254,9 +1308,13 @@ def _attach_surface_lines(
             item.patient_line = _lipid_patient_line(item.status, item.detail, lipid_line)
         elif item.domain_id == "plaque_cac":
             line = _line_or_none(getattr(by_label.get("Coronary calcium"), "line", ""))
-            if line and "already measured" in line.lower():
-                line = line.replace(" already measured", "")
-            item.emr_line = line or _readout_sentence(item)
+            cac = _num(getattr(patient, "cac", None))
+            if cac is not None and not _clinical_ascvd(patient):
+                item.emr_line = f"CAC {cac:g}."
+            else:
+                if line and "already measured" in line.lower():
+                    line = line.replace(" already measured", "")
+                item.emr_line = line or _readout_sentence(item)
             if "not routinely" in item.status.lower() or "may clarify" in item.status.lower():
                 item.patient_line = "A calcium scan may help only if treatment choices are still uncertain."
             elif "cac 0" in item.status.lower():
@@ -1296,6 +1354,8 @@ def _attach_surface_lines(
             item.patient_line = "Chronic inflammation can shape the prevention plan with your clinician."
         elif item.domain_id == "aspirin_antiplatelet":
             item.emr_line = _aspirin_line(patient, result)
+            if item.state == "consider" and item.emr_line == "Aspirin not routine for primary prevention.":
+                item.hover_detail = "Consider only if low bleeding risk and shared decision-making supports it."
             item.patient_line = (
                 "Do not start aspirin unless your clinician recommends it."
                 if item.state != "action"

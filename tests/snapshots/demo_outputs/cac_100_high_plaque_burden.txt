@@ -4,10 +4,10 @@ CASE: cac_100_high_plaque_burden
 EMR:
 RISK CONTINUUM CKM
 
-Level 4 - subclinical atherosclerosis present.
-10-year ASCVD risk: 4.67%.
-CKM stage 3 with kidney G2A1 and CAC 145.
-Risk context: premature family history (Father MI age 54).
+Level: 4 - subclinical atherosclerosis.
+PREVENT: ASCVD 10y 4.67% (Borderline).
+CKM/Kidney/Plaque: CKM 3; kidney G2A1; CAC 145.
+Context: elevated Lp(a); father MI age 54.
 
 Assessment:
 - Subclinical coronary atherosclerosis (ICD: I25.10)
@@ -16,12 +16,13 @@ Assessment:
 - Elevated lipoprotein(a) (ICD: E78.41)
 
 Recommendations:
-- Lipid-lowering therapy recommended; treat toward LDL-C <70 and non-HDL-C <100.
-- CAC 145; no repeat CAC needed for current decision-making.
-- Treat BP toward goal <130/80.
-- Glycemia / metabolic: Prediabetes prevention. A1c 5.9%; weight/activity focus.
-- Aspirin not routine for primary prevention; consider only if bleeding risk is low and shared decision-making supports it.
-- Consider hsCRP only if inflammatory risk clarification would change management.
+1. Lipids: Intensify lipid-lowering; LDL-C <70, ApoB <80, non-HDL-C <100.
+2. Plaque: CAC 145.
+3. Kidney: No kidney-risk signal.
+4. BP: Treat toward <130/80.
+5. Glycemia: Prediabetes prevention; A1c 5.9%.
+6. Aspirin: Not routine for primary prevention.
+7. Clarify: hsCRP.
 
 PATIENT ROADMAP:
 Your Prevention Roadmap
@@ -70,7 +71,7 @@ ACTIONS:
 - Kidney protection: No kidney-risk signal. eGFR/UACR available.
 - Blood pressure: Treat toward <130/80. Current 138/84.
 - Glycemia / metabolic: Prediabetes prevention. A1c 5.9%; weight/activity focus.
-- Aspirin / antiplatelet: Consider only if low bleeding risk. Shared decision-making.
+- Aspirin / antiplatelet: Aspirin not routine for primary prevention.
 - Data to clarify: Complete key data. hsCRP.
 
 RSS: 45

@@ -65,9 +65,7 @@ CONTRADICTIONS = (
     ("aspirin not indicated", "aspirin may be considered"),
 )
 
-AGE_AWARE_CAC_LINE = (
-    "CAC not routinely recommended at this age; consider only if results would change management."
-)
+AGE_AWARE_CAC_LINE = "Plaque: CAC not routinely recommended."
 
 EXPECTED_SHOWCASE = {
     "healthy_low_risk_prevention": ("low-risk complete data", "lifestyle prevention"),
@@ -106,7 +104,7 @@ SHOWCASE_TERMS = {
     "active smoking": ("smoking", "current smoking"),
     "cancer survivor": ("cancer survivor", "cancer survivorship"),
     "multiple enhancers": ("risk context", "preeclampsia", "family history", "osa", "masld"),
-    "low-risk complete data": ("low", "no medication escalation", "complete"),
+    "low-risk complete data": ("low", "no lipid escalation", "complete"),
     "lifestyle prevention": ("lifestyle", "continue lifestyle"),
     "metabolic risk": ("metabolic", "triglycerides", "bmi", "osa", "masld"),
     "missing-data clarification": ("clarification", "obtain", "check lp(a)", "apob", "uacr"),
@@ -505,8 +503,8 @@ def audit_demo_case(label: str, case_name: str) -> DemoCaseAudit:
             finding.errors.append("younger family-history demo is not low short-term ASCVD risk")
             finding.coherence_score -= 25
         required = (
-            "Level 3B - elevated lifetime cardiometabolic risk despite low short-term event risk",
-            "Risk context: premature family history of ASCVD (Father MI age 49).",
+            "Level: 3B - elevated lifetime cardiometabolic risk despite low short-term event risk",
+            "Context: father MI age 49.",
             AGE_AWARE_CAC_LINE,
         )
         for phrase in required:

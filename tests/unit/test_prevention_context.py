@@ -84,7 +84,7 @@ def test_subclinical_plaque_uses_primary_prevention_aspirin_logic():
 
     assert "secondary prevention" not in aspirin.lower()
     assert "antiplatelet therapy is indicated" not in aspirin.lower()
-    assert "bleeding risk" in aspirin.lower() or "routine primary prevention" in aspirin.lower()
+    assert "bleeding risk" in aspirin.lower() or "not routine for primary prevention" in aspirin.lower()
 
 
 def test_secondary_prevention_uses_antiplatelet_language_not_primary_aspirin():
@@ -113,5 +113,5 @@ def test_secondary_prevention_emr_wording_uses_goals_not_risk_derisking():
     result = evaluate_patient(patient)
     note = render_emr_note(patient, result)
 
-    assert "Known cardiovascular disease is present" in note
-    assert "secondary-prevention goals rather than risk estimates alone" in note
+    assert "Level: 5 - clinical ASCVD / secondary prevention" in note
+    assert "Secondary-prevention antiplatelet therapy" in note

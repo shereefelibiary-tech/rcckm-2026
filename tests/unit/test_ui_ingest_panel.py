@@ -46,6 +46,62 @@ def test_parse_ingest_text_family_history_structured_fields():
     assert parsed["apob"] == 110
 
 
+def test_parser_preserves_compact_family_history_detail():
+    report = parse_ingest_report("Family History:\nFather MI age 49")
+    parsed = report["parsed"]
+    by_field = {item.field_id: item for item in build_parser_recognition_items(report)}
+
+    assert parsed["family_history_premature_ascvd"] is True
+    assert parsed["family_history_relationship"] == "father"
+    assert parsed["family_history_event_type"] == "mi"
+    assert parsed["family_history_age_at_event"] == 49
+    assert by_field["family_history"].value == "Father MI age 49"
+
+
+def test_parser_nonpremature_family_history_age_does_not_create_premature_flag():
+    parsed = parse_ingest_text("Mother stroke age 73")
+
+    assert parsed["family_history_relationship"] == "mother"
+    assert parsed["family_history_event_type"] == "stroke"
+    assert parsed["family_history_age_at_event"] == 73
+    assert parsed["family_history_premature_ascvd"] is False
+
+
+def test_parser_ancestry_explicit_no_overrides_keyword_presence():
+    report = parse_ingest_report("South Asian ancestry:\nNo\nFilipino ancestry:\nNo")
+    parsed = report["parsed"]
+    html = render_parser_recognition_strip(report)
+
+    assert parsed["south_asian_ancestry"] is False
+    assert parsed["filipino_ancestry"] is False
+    assert "South Asian" not in html
+    assert "Filipino" not in html
+
+
+def test_parser_race_ethnicity_south_asian_still_counts_positive():
+    parsed = parse_ingest_text("Race/Ethnicity: South Asian")
+
+    assert parsed["south_asian_ancestry"] is True
+
+
+def test_parser_multiline_hscrp_value_preserved_over_later_no_results():
+    report = parse_ingest_report(
+        """
+        hsCRP
+        4.8
+        Reference:
+        <2.0
+        hsCRP: No results found for: "CRPHS"
+        """
+    )
+    parsed = report["parsed"]
+    by_field = {item.field_id: item for item in build_parser_recognition_items(report)}
+
+    assert parsed["hscrp"] == 4.8
+    assert by_field["hscrp"].status == "extracted"
+    assert by_field["hscrp"].value == "4.8 mg/L"
+
+
 def test_parsed_values_can_be_stringified_for_review_table():
     report = parse_ingest_report("60M Father MI age 49")
 
@@ -282,12 +338,20 @@ def test_parser_stress_smartphrase_uses_aliases_sections_and_exclusivity():
     parsed = report["parsed"]
     items = {item.field_id: item for item in build_parser_recognition_items(report)}
 
+    assert parsed["age"] == 58
+    assert parsed["sex"] == "female"
+    assert parsed["sbp"] == 138
+    assert parsed["dbp"] == 84
+    assert parsed["ldl_c"] == 141
+    assert parsed["hdl_c"] == 41
+    assert parsed["triglycerides"] == 212
     assert parsed["family_history_premature_ascvd"] is True
     assert parsed["family_history_relationship"] == "father"
     assert parsed["family_history_event_type"] == "mi"
     assert parsed["family_history_age_at_event"] == 52
     assert parsed["south_asian_ancestry"] is True
     assert parsed["uacr"] == 86
+    assert parsed["egfr"] == 52
     assert parsed["rheumatoid_arthritis"] is True
     assert parsed["inflammatory_disease"] is False
     assert parsed["diabetes"] is False
@@ -301,6 +365,8 @@ def test_parser_stress_smartphrase_uses_aliases_sections_and_exclusivity():
     assert parsed["apob"] == 118
     assert parsed["lp_a_value"] == 168
     assert parsed["hscrp"] == 3.1
+    assert items["age"].status == "extracted"
+    assert items["age"].value == "58"
     assert items["cac"].status == "extracted"
     assert items["cac"].value == "125"
     assert items["uacr"].status == "extracted"

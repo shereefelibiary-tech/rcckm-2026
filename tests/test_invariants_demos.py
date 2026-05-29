@@ -88,6 +88,6 @@ def test_younger_family_history_demo_uses_low_short_term_prevention_framing():
     assert "30-year ascvd risk" in lowered
     assert "father mi age 49" in lowered
     assert "low short-term" in lowered or "prevention opportunity" in lowered
-    assert "cac not routinely recommended at this age" in lowered
+    assert "plaque: cac not routinely recommended" in lowered
     assert "very high risk" not in lowered
     assert "total cardiovascular risk" not in lowered

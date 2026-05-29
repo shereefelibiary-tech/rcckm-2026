@@ -4,25 +4,22 @@ CASE: ace_arb_persistent_albuminuria
 EMR:
 RISK CONTINUUM CKM
 
-Level 3B - CKM stage 3 with albuminuria-mediated kidney and ASCVD risk.
-10-year ASCVD risk: 11.98%.
-30-year ASCVD risk: 33.44%.
-CKM stage 3 with diabetic kidney involvement.
+Level: 3B - CKM stage 3 with albuminuria-mediated kidney and ASCVD risk.
+PREVENT: ASCVD 10y 11.98% (High); 30y 33.44%.
+CKM/Kidney/Plaque: CKM 3; kidney G3aA2; CAC not measured.
 
 Assessment:
 - Type 2 diabetes mellitus with CKD G3aA2 and albuminuria (ICD: E11.22; CKD stage 3a ICD: N18.31)
 - Hypertriglyceridemia (ICD: E78.1)
 
 Recommendations:
-- Moderate-intensity statin therapy is reasonable given borderline/intermediate ASCVD risk with albuminuria and metabolic risk-enhancing factors.
-- CAC not performed; plaque burden unmeasured.
-- Confirm persistent albuminuria with repeat UACR if not already confirmed; optimize kidney-protective therapy.
-- Continue or optimize ACEi/ARB therapy if hypertension and persistent albuminuria are present.
-- Treat BP toward goal <130/80.
-- Consider an SGLT2 inhibitor for kidney and cardiovascular protection given diabetes with albuminuric CKD.
-- Glycemia / metabolic: Optimize diabetes care. A1c 6.6%; goal <7.0.
-- Aspirin not indicated for routine primary prevention.
-- Consider hsCRP only if inflammatory risk clarification would change management.
+1. Lipids: Discuss moderate-intensity statin; LDL-C <70, ApoB <80, non-HDL-C <100.
+2. Plaque: CAC not measured.
+3. Kidney: UACR 180; continue ACEi-ARB. Consider SGLT2 for diabetic CKD.
+4. BP: Treat toward <130/80.
+5. Glycemia: Optimize diabetes care; A1c 6.6%; goal <7.0.
+6. Aspirin: Not routine for primary prevention.
+7. Clarify: hsCRP.
 
 PATIENT ROADMAP:
 Your Prevention Roadmap

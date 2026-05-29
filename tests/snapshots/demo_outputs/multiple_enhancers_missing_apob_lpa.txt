@@ -4,24 +4,23 @@ CASE: multiple_enhancers_missing_apob_lpa
 EMR:
 RISK CONTINUUM CKM
 
-Level 3B - actionable early CKM / atherogenic risk.
-10-year ASCVD risk: 4.9%.
-30-year ASCVD risk: 27%.
-CKM stage 2 with kidney G2; albuminuria not measured.
-UACR not available; obtain to complete kidney-risk assessment. Risk context: reproductive history: Preeclampsia; premature family history (Mother stroke age 62).
+Level: 3B - actionable early CKM / atherogenic risk.
+PREVENT: ASCVD 10y 4.9% (Borderline); 30y 27%.
+CKM/Kidney/Plaque: CKM 2; kidney G2; UACR missing; CAC not measured.
+Context: OSA; MASLD; Preeclampsia; mother stroke age 62.
 
 Assessment:
 - Hypertriglyceridemia (ICD: E78.1)
 - Prediabetes (ICD: R73.03)
 
 Recommendations:
-- Short-term ASCVD risk is low, but longer-term risk and risk-enhancing factors may make lipid-lowering worth discussing. Moderate-intensity statin therapy may be reasonable after shared decision-making.
-- CAC not performed; plaque burden unmeasured.
-- Treat BP toward goal <130/80.
-- Glycemia / metabolic: Prediabetes prevention. A1c 6%; weight/activity focus.
-- Aspirin not indicated for routine primary prevention.
-- ApoB - particle burden clarification
-- Lp(a) - one-time risk assessment
+1. Lipids: Discuss moderate-intensity statin; LDL-C <100, non-HDL-C <130.
+2. Plaque: CAC not measured.
+3. Kidney: No kidney-risk signal.
+4. BP: Treat toward <130/80.
+5. Glycemia: Prediabetes prevention; A1c 6%.
+6. Aspirin: Not routine for primary prevention.
+7. Clarify: ApoB; Lp(a).
 
 PATIENT ROADMAP:
 Your Prevention Roadmap

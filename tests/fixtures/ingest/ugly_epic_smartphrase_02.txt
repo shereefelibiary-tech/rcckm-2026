@@ -1,0 +1,64 @@
+Epic RCCKM stress-test SmartPhrase synthetic example
+Age: 67 y.o.
+Sex: male
+
+Vitals
+BP Readings from Last 3 Encounters:
+05/20/26 142/84
+05/01/26 136/82
+
+BMI:
+Estimated body mass index is 34.6 kg/m2.
+
+Smoking status: Former
+
+Family History:
+Premature ASCVD in first-degree relative: Yes
+Father MI age 49
+
+Ancestry context
+South Asian ancestry:
+No
+Filipino ancestry:
+No
+
+Lipids
+TC 244
+TG 418
+HDL 38
+LDL-C unable to calculate because triglycerides high
+ApoB 142
+Lp(a) 235
+
+Inflammation / immune context
+hsCRP
+4.8
+Reference:
+<2.0
+Rheumatoid arthritis: Yes
+Psoriasis: Yes
+OSA: Yes
+MASLD: Yes
+
+Glycemia
+Hemoglobin A1C
+Date    Value    Ref Range    Status
+05/18/2026    6.6 (H)    0 - 5.6 %    Final
+Reference Range
+Normal       <5.7%
+Prediabetes  5.7-6.4%
+Diabetes     >6.4%
+
+Kidney
+eGFR Cre 58
+Albumin/Creatinine Ratio, Urine
+Result:
+146
+
+Calcification / plaque
+Coronary artery calcium (CAC) score: 412
+
+Autopopulated missing blocks
+ApoB: No results found for: "APOB"
+Lp(a): No results found for: "LIPOA"
+hsCRP: No results found for: "CRPHS"

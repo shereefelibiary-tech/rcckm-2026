@@ -1,20 +1,18 @@
 RISK CONTINUUM CKM
 
-Level 3B - actionable early CKM / atherogenic risk.
-10-year ASCVD risk: 5.41%.
-30-year ASCVD risk: 22.55%.
-CKM stage 2 with kidney G2; albuminuria not measured and plaque unmeasured / CAC not performed.
-UACR not available; obtain to complete kidney-risk assessment.
+Level: 3B - actionable early CKM / atherogenic risk.
+PREVENT: ASCVD 10y 5.41% (Intermediate); 30y 22.55%.
+CKM/Kidney/Plaque: CKM 2; kidney G2; UACR missing; CAC not measured.
 
 Assessment:
 - Hypertriglyceridemia (ICD: E78.1)
 - Prediabetes (ICD: R73.03)
 
 Recommendations:
-- Moderate-intensity statin therapy is reasonable given borderline ASCVD risk with risk-enhancing factors.
-- CAC may clarify plaque burden if treatment intensity remains uncertain.
-- Treat BP toward goal <130/80.
-- Glycemia / metabolic: Prediabetes prevention. A1c 5.9%; weight/activity focus.
-- Aspirin not indicated for routine primary prevention.
-- Obtain UACR to complete kidney-risk assessment.
-- Consider hsCRP only if inflammatory risk clarification would change management.
+1. Lipids: Discuss moderate-intensity statin; LDL-C <100, ApoB <90, non-HDL-C <130.
+2. Plaque: CAC may clarify risk.
+3. Kidney: UACR missing; obtain UACR.
+4. BP: Treat toward <130/80.
+5. Glycemia: Prediabetes prevention; A1c 5.9%.
+6. Aspirin: Not routine for primary prevention.
+7. Clarify: UACR; hsCRP.

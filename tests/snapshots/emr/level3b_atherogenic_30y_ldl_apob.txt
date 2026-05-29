@@ -1,19 +1,18 @@
 RISK CONTINUUM CKM
 
-Level 3B - actionable early CKM / atherogenic risk.
-10-year ASCVD risk: 1.73%.
-30-year ASCVD risk: 11.85%.
-CKM stage 2 with kidney A1 and plaque unmeasured / CAC not performed.
+Level: 3B - actionable early CKM / atherogenic risk.
+PREVENT: ASCVD 10y 1.73% (Low); 30y 11.85%.
+CKM/Kidney/Plaque: CKM 2; kidney A1; CAC not measured.
 
 Assessment:
 - Elevated ApoB / atherogenic particle burden (ICD: E78.89)
 - Hypertriglyceridemia (ICD: E78.1)
 
 Recommendations:
-- Moderate-intensity statin therapy reasonable.
-- CAC may clarify plaque burden if treatment intensity remains uncertain.
-- Lp(a) - one-time risk assessment
-- Consider hsCRP only if inflammatory risk clarification would change management.
-- Blood pressure: BP needed. No current BP available.
-- Glycemia / metabolic: A1c needed. No current A1c available.
-- Aspirin not indicated for routine primary prevention.
+1. Lipids: Discuss moderate-intensity statin; LDL-C <100, ApoB <90, non-HDL-C <130.
+2. Plaque: CAC may clarify risk.
+3. Kidney: No kidney-risk signal.
+4. BP: BP needed.
+5. Glycemia: A1c needed; No current A1c available.
+6. Aspirin: Not routine for primary prevention.
+7. Clarify: Lp(a); hsCRP.

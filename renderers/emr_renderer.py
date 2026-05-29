@@ -3,13 +3,21 @@ from core.diagnosis_workflow import (
     prepare_diagnosis_display_entries,
     split_diagnoses,
 )
-from modules.actions.scaffold import build_domain_actions, render_domain_actions_for_surface
+from modules.actions.scaffold import build_domain_actions
 from modules.levels.definitions import classify_continuum_position
 from modules.risk_enhancers.breast_arterial_calcification import (
     breast_arterial_calcification_context,
 )
 from modules.risk_enhancers.incidental_cac import incidental_cac_context
 from modules.risk_enhancers.reproductive import reproductive_history_summary
+from renderers.emr_constants import (
+    EMR_ASSESSMENT_TITLE,
+    EMR_HEADER,
+    EMR_RECOMMENDATION_DOMAIN_LABELS,
+    EMR_RECOMMENDATION_DOMAIN_ORDER,
+    EMR_RECOMMENDATIONS_TITLE,
+    EMR_SUMMARY_LABELS,
+)
 
 
 def _display_value(value):
@@ -563,20 +571,329 @@ def _albuminuria_assessment_display(line, patient, result):
     suffix = ""
     if "(ICD:" in line:
         suffix = " " + line.split(" ", 2)[-1] if line.startswith("- Albuminuria ") else ""
-    return f"- CKD stage {kdigo_stage} / albuminuria, confirm persistence if not already confirmed{suffix}"
+    return f"- CKD stage {kdigo_stage} / albuminuria{suffix}"
+
+
+def _emr_float(value):
+    try:
+        if value is None:
+            return None
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _emr_fmt(value):
+    num = _emr_float(value)
+    if num is None:
+        return None
+    return f"{num:g}"
+
+
+def _emr_level_line(patient, result):
+    level = _risk_level_summary(patient, result)
+    if not level:
+        return None
+    level = str(level).strip()
+    if level.lower().startswith("level "):
+        level = level[6:].strip()
+    if " / " in level and " - " not in level:
+        first, rest = level.split(" / ", 1)
+        if first in {"1", "2A", "2B", "3A", "3B", "4", "5"}:
+            level = f"{first} - {rest}"
+    level = level.replace("subclinical atherosclerosis present", "subclinical atherosclerosis")
+    return f"{EMR_SUMMARY_LABELS['level']}: {level}."
+
+
+def _emr_risk_line(result):
+    ten = _emr_fmt(getattr(result, "prevent_10y_ascvd", None))
+    thirty = _emr_fmt(getattr(result, "prevent_30y_ascvd", None))
+    category = _display_value(getattr(result, "prevent_risk_category", None))
+    category_text = str(category).replace("_", " ").title() if category else None
+    if category_text is None and ten is not None:
+        ten_value = _emr_float(ten)
+        if ten_value is not None:
+            if ten_value >= 20:
+                category_text = "High"
+            elif ten_value >= 7.5:
+                category_text = "Intermediate"
+            elif ten_value >= 5:
+                category_text = "Borderline"
+            else:
+                category_text = "Low"
+    category_text = category_text or "Unavailable"
+    if ten and thirty:
+        return f"{EMR_SUMMARY_LABELS['prevent']}: ASCVD 10y {ten}% ({category_text}); 30y {thirty}%."
+    if ten:
+        return f"{EMR_SUMMARY_LABELS['prevent']}: ASCVD 10y {ten}% ({category_text})."
+    return f"{EMR_SUMMARY_LABELS['prevent']}: unavailable."
+
+
+def _emr_ckm_line(patient, result):
+    parts = []
+    ckm_stage = getattr(result, "ckm_stage", None) or {}
+    stage = ckm_stage.get("stage")
+    if stage is not None:
+        parts.append(f"CKM {stage}")
+    kdigo = getattr(result, "kdigo_stage", None)
+    if kdigo:
+        parts.append(f"kidney {kdigo}")
+        if getattr(patient, "uacr", None) is None and _uacr_completion_relevant(patient, result):
+            parts.append("UACR missing")
+    elif _uacr_completion_relevant(patient, result):
+        parts.append("UACR missing")
+    cac = _emr_fmt(getattr(patient, "cac", None))
+    if cac is not None:
+        parts.append(f"CAC {cac}")
+    elif getattr(patient, "cac_not_done", False):
+        parts.append("CAC not measured")
+    else:
+        incidental = incidental_cac_context(patient)
+        if incidental:
+            parts.append(incidental)
+        else:
+            plaque_category = _display_value(getattr(result, "plaque_category", None))
+            if plaque_category and str(plaque_category).upper() != "UNKNOWN":
+                parts.append(f"plaque {plaque_category}")
+            else:
+                parts.append("CAC not measured")
+    if not parts:
+        return None
+    return f"{EMR_SUMMARY_LABELS['ckm']}: {'; '.join(parts)}."
+
+
+def _compact_family_history_context(patient):
+    if not _has_premature_family_history(patient):
+        return None
+    summary = str(getattr(patient, "family_history_summary", "") or "").strip()
+    if summary and summary.lower() != "premature family history of ascvd":
+        return summary[:1].lower() + summary[1:]
+    return "premature family history"
+
+
+def _emr_context_line(patient):
+    parts = []
+    if getattr(patient, "rheumatoid_arthritis", False):
+        parts.append("RA")
+    if getattr(patient, "sle", False):
+        parts.append("SLE")
+    if getattr(patient, "psoriasis", False):
+        parts.append("psoriasis")
+    if getattr(patient, "ibd", False):
+        parts.append("IBD")
+    if getattr(patient, "inflammatory_arthritis", False):
+        parts.append("inflammatory arthritis")
+    if getattr(patient, "hiv", False):
+        parts.append("HIV on ART" if getattr(patient, "stable_art", False) else "HIV")
+    if getattr(patient, "osa", False):
+        parts.append("OSA")
+    if getattr(patient, "masld", False):
+        parts.append("MASLD")
+    lpa = getattr(patient, "lp_a_value", None)
+    lpa_unit = str(getattr(patient, "lp_a_unit", "") or "").strip()
+    if (lpa_unit == "nmol/L" and lpa is not None and lpa >= 125) or (
+        lpa_unit == "mg/dL" and lpa is not None and lpa >= 50
+    ):
+        parts.append("elevated Lp(a)")
+    if getattr(patient, "smoker", False):
+        parts.append("smoking")
+    if getattr(patient, "south_asian_ancestry", False):
+        parts.append("South Asian ancestry")
+    if getattr(patient, "filipino_ancestry", False):
+        parts.append("Filipino ancestry")
+    if getattr(patient, "suspected_fh_hefh", False):
+        parts.append("suspected FH / HeFH")
+    ldl_c = getattr(patient, "ldl_c", None)
+    if ldl_c is not None and ldl_c >= 190:
+        parts.append("LDL-C >=190 / possible FH pathway")
+    reproductive_summary = reproductive_history_summary(patient)
+    if reproductive_summary:
+        if reproductive_summary.lower().startswith("reproductive history"):
+            parts.append(reproductive_summary)
+        else:
+            parts.append(reproductive_summary)
+    if getattr(patient, "active_cancer", False):
+        parts.append("active cancer")
+    if getattr(patient, "cancer_survivor", False):
+        if getattr(patient, "cancer_life_expectancy_gt_2y", False):
+            parts.append("cancer survivor context with life expectancy >2 years")
+        else:
+            parts.append("cancer survivor context")
+    bac_context = breast_arterial_calcification_context(patient)
+    if bac_context:
+        parts.append("BAC")
+    family = _compact_family_history_context(patient)
+    if family:
+        parts.append(family)
+    if not parts:
+        return None
+    return f"{EMR_SUMMARY_LABELS['context']}: {'; '.join(parts)}."
+
+
+def _emr_summary_lines(patient, result):
+    return [
+        line
+        for line in (
+            _emr_level_line(patient, result),
+            _emr_risk_line(result),
+            _emr_ckm_line(patient, result),
+            _emr_context_line(patient),
+        )
+        if line
+    ]
+
+
+def _lipid_target_phrase(patient, result):
+    target = (getattr(result, "targets", None) or [None])[0]
+    if not target:
+        return ""
+    parts = []
+    ldl_target = _emr_fmt(getattr(target, "ldl_c_target", None))
+    apob_target = _emr_fmt(getattr(target, "apob_target", None))
+    non_hdl_target = _emr_fmt(getattr(target, "non_hdl_c_target", None))
+    if ldl_target:
+        parts.append(f"LDL-C <{ldl_target}")
+    if apob_target and getattr(patient, "apob", None) is not None:
+        parts.append(f"ApoB <{apob_target}")
+    if non_hdl_target:
+        parts.append(f"non-HDL-C <{non_hdl_target}")
+    return ", ".join(parts)
+
+
+def _short_lipid_action(item, patient, result):
+    status = str(getattr(item, "status", "") or "")
+    lowered = status.lower()
+    if "secondary-prevention" in lowered:
+        action = "Intensify secondary-prevention lipid-lowering therapy"
+    elif "high-intensity" in lowered:
+        action = "High-intensity lipid-lowering therapy indicated"
+    elif "intensify" in lowered:
+        action = "Intensify lipid-lowering"
+    elif "moderate-intensity" in lowered:
+        action = "Discuss moderate-intensity statin"
+    elif "no lipid escalation" in lowered or "lifestyle" in lowered:
+        action = "No lipid escalation"
+    else:
+        action = status.rstrip(".") or "Review lipids"
+    targets = _lipid_target_phrase(patient, result)
+    return f"{action}; {targets}" if targets and "no lipid escalation" not in action.lower() else action
+
+
+def _short_plaque_action(item, patient):
+    cac = _emr_fmt(getattr(patient, "cac", None))
+    if cac is not None:
+        return f"CAC {cac}"
+    status = str(getattr(item, "status", "") or "").strip().rstrip(".")
+    lowered = status.lower()
+    if lowered in {"not measured", "plaque burden unmeasured"}:
+        return "CAC not measured"
+    return status or "CAC not measured"
+
+
+def _short_kidney_action(item, patient):
+    uacr = _emr_fmt(getattr(patient, "uacr", None))
+    detail = str(getattr(item, "detail", "") or "").strip().rstrip(".")
+    status = str(getattr(item, "status", "") or "").strip().rstrip(".")
+    if status == "No kidney-risk signal":
+        return status
+    if uacr is None and "obtain uacr" in status.lower():
+        return "UACR missing; obtain UACR"
+    if detail:
+        detail = detail.replace("Consider SGLT2 for diabetic CKD.", "consider SGLT2 for diabetic CKD")
+        return detail
+    if status:
+        return status
+    return "No kidney-risk signal"
+
+
+def _short_bp_action(item):
+    status = str(getattr(item, "status", "") or "").strip().rstrip(".")
+    if status == "Treat toward <130/80":
+        return "Treat toward <130/80"
+    if status == "At goal":
+        return "At goal"
+    return status or "BP needed"
+
+
+def _short_glycemia_action(item):
+    status = str(getattr(item, "status", "") or "").strip().rstrip(".")
+    detail = str(getattr(item, "detail", "") or "").strip().rstrip(".")
+    if detail:
+        detail = detail.replace("; weight/activity focus", "")
+        return f"{status}; {detail}"
+    return status
+
+
+def _short_aspirin_action(item):
+    status = str(getattr(item, "status", "") or "").strip().rstrip(".")
+    lowered = status.lower()
+    if "antiplatelet" in lowered:
+        return "Secondary-prevention antiplatelet therapy"
+    if "consider" in lowered:
+        return "Consider only if low bleeding risk"
+    return "Not routine for primary prevention"
+
+
+def _short_clarifier_action(item):
+    lines = list(getattr(item, "detail_lines", None) or getattr(item, "emr_lines", None) or [])
+    labels = []
+    for line in lines:
+        text = str(line or "")
+        if "apob" in text.lower():
+            labels.append("ApoB")
+        elif "lp(a)" in text.lower():
+            labels.append("Lp(a)")
+        elif "uacr" in text.lower():
+            labels.append("UACR")
+        elif "cac" in text.lower():
+            labels.append("CAC")
+        elif "hscrp" in text.lower():
+            labels.append("hsCRP")
+    return "; ".join(dict.fromkeys(labels))
+
+
+def _emr_recommendation_text(item, patient, result):
+    if item.domain_id == "lipid_lowering":
+        return _short_lipid_action(item, patient, result)
+    if item.domain_id == "plaque_cac":
+        return _short_plaque_action(item, patient)
+    if item.domain_id == "kidney_protection":
+        return _short_kidney_action(item, patient)
+    if item.domain_id == "blood_pressure":
+        return _short_bp_action(item)
+    if item.domain_id == "glycemia_metabolic":
+        return _short_glycemia_action(item)
+    if item.domain_id == "aspirin_antiplatelet":
+        return _short_aspirin_action(item)
+    if item.domain_id == "data_to_clarify":
+        return _short_clarifier_action(item)
+    return ""
+
+
+def _emr_recommendation_lines(patient, result):
+    domains = {item.domain_id: item for item in build_domain_actions(patient, result)}
+    lines = []
+    number = 1
+    for domain_id in EMR_RECOMMENDATION_DOMAIN_ORDER:
+        item = domains.get(domain_id)
+        if not item:
+            continue
+        text = _emr_recommendation_text(item, patient, result)
+        if not text:
+            continue
+        if domain_id == "data_to_clarify" and not text:
+            continue
+        label = EMR_RECOMMENDATION_DOMAIN_LABELS[domain_id]
+        lines.append(f"{number}. {label}: {text}.")
+        number += 1
+    return lines
 
 
 def render_emr_note(patient, result):
     """Render the clinician-facing EMR note as compact plain text."""
-    lines = ["RISK CONTINUUM CKM", ""]
-
-    impression = _impression_paragraphs(patient, result)
-    if impression:
-        lines.extend(impression)
-    else:
-        lines.append("Interpretation limited by available worksheet data.")
-
-    lines.extend(["", "Assessment:"])
+    lines = [EMR_HEADER, ""]
+    lines.extend(_emr_summary_lines(patient, result))
+    lines.extend(["", EMR_ASSESSMENT_TITLE])
     diagnosis_entries = prepare_diagnosis_display_entries(result)
     review_state = getattr(result, "diagnosis_review_state", None) or {}
     if review_state:
@@ -587,8 +904,6 @@ def render_emr_note(patient, result):
             review_ids=review_state.get("review_ids"),
         )
     confirmed_dx, review_dx = split_diagnoses(diagnosis_entries)
-    if getattr(patient, "rheumatoid_arthritis", False):
-        lines.append("- Existing rheumatoid arthritis; chronic inflammatory disease risk enhancer.")
     if confirmed_dx or review_dx:
         for line in _emr_assessment_lines(confirmed_dx):
             _append_unique(lines, _albuminuria_assessment_display(line, patient, result))
@@ -598,39 +913,11 @@ def render_emr_note(patient, result):
         else:
             lines.append("- No diagnosis candidates generated.")
 
-    lines.extend(["", "Recommendations:"])
-    recommendations = render_domain_actions_for_surface(
-        build_domain_actions(patient, result),
-        surface="emr",
-    )
+    lines.extend(["", EMR_RECOMMENDATIONS_TITLE])
+    recommendations = _emr_recommendation_lines(patient, result)
     if recommendations:
-        rendered_recommendations = []
-        for recommendation in recommendations:
-            rendered = _short_recommendation_line(recommendation)
-            if rendered not in rendered_recommendations:
-                rendered_recommendations.append(rendered)
-
-        has_kidney = any("kidney-protective" in line for line in rendered_recommendations)
-        has_glycemic = any("glycemic" in line for line in rendered_recommendations)
-        if has_kidney and has_glycemic:
-            combined_index = min(
-                index
-                for index, line in enumerate(rendered_recommendations)
-                if "kidney-protective" in line or "glycemic" in line
-            )
-            rendered_recommendations = [
-                line
-                for line in rendered_recommendations
-                if "kidney-protective" not in line and "glycemic" not in line
-            ]
-            rendered_recommendations.insert(
-                min(combined_index, len(rendered_recommendations)),
-                "Optimize kidney protection and diabetes care.",
-            )
-
-        for rendered in rendered_recommendations:
-            lines.append(f"- {rendered}")
+        lines.extend(recommendations)
     else:
-        lines.append("- No active domain changes from current risk profile.")
+        lines.append("1. Clarify: No active domain changes.")
 
     return "\n".join(lines)

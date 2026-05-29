@@ -1,23 +1,17 @@
 RISK CONTINUUM CKM
 
-Level 2A - early isolated risk signal.
-PREVENT unavailable or incomplete; interpretation is based on reviewed worksheet data.
-CKM stage 2.
-UACR not available; obtain to complete kidney-risk assessment.
+Level: 2A - early isolated risk signal.
+PREVENT: unavailable.
+CKM/Kidney/Plaque: CKM 2; UACR missing; CAC not measured.
 
 Assessment:
 - Severe hypertriglyceridemia (ICD: E78.1)
 
 Recommendations:
-- Very severe hypertriglyceridemia: lower TG to reduce pancreatitis risk.
-- Very-low-fat diet; eliminate alcohol and added sugars/refined carbohydrates.
-- Refer to registered dietitian nutritionist.
-- Consider fibrate or prescription omega-3 therapy to lower TG.
-- Plaque burden unmeasured.
-- Lp(a) - one-time risk assessment
-- Obtain UACR to complete kidney-risk assessment.
-- Consider hsCRP only if inflammatory risk clarification would change management.
-- Recheck fasting lipid profile after treatment changes.
-- Blood pressure: BP needed. No current BP available.
-- Glycemia / metabolic: A1c needed. No current A1c available.
-- Aspirin not indicated for routine primary prevention.
+1. Lipids: Lower triglycerides urgently.
+2. Plaque: CAC not measured.
+3. Kidney: UACR missing; obtain UACR.
+4. BP: BP needed.
+5. Glycemia: A1c needed; No current A1c available.
+6. Aspirin: Not routine for primary prevention.
+7. Clarify: Lp(a); UACR; hsCRP.
