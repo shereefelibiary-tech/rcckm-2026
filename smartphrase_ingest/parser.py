@@ -124,6 +124,23 @@ def _record(report: ParseReport, field: str, value: Any, confidence: str = "pars
     report.field_meta[field] = {"confidence": confidence, "source": source}
 
 
+def _record_source_meta(
+    report: ParseReport,
+    field: str,
+    value: Any,
+    confidence: str,
+    source: str,
+    *,
+    source_text: str = "",
+    review_required: bool = False,
+) -> None:
+    _record(report, field, value, confidence, source)
+    if source_text:
+        report.field_meta[field]["source_text"] = source_text
+    if review_required:
+        report.field_meta[field]["review_required"] = "true"
+
+
 def _record_age(report: ParseReport, value: Any, confidence: str, source: str) -> None:
     """Record age only when it is a plausible single age value."""
     try:
@@ -374,6 +391,198 @@ def parse_yes_no_context(raw: str, labels: list[str]) -> bool | None:
             if positive.search(candidate):
                 return True
     return None
+
+
+ASCVD_CALCULATOR_REVIEW_RE = re.compile(
+    r"\b(?:ascvd\s+risk\s+score\s+failed\s+to\s+calculate|risk\s+calculator[^\n.;]*ascvd|"
+    r"history\s+suggesting\s+prior/existing\s+ascvd|prior/existing\s+ascvd)\b",
+    re.IGNORECASE,
+)
+
+
+def _has_ascvd_calculator_review_text(raw: str) -> bool:
+    """Detect calculator disclaimer text that requires review, not diagnosis."""
+    return bool(ASCVD_CALCULATOR_REVIEW_RE.search(raw or ""))
+
+
+def _strip_ascvd_calculator_review_text(raw: str) -> str:
+    """Remove ASCVD calculator-disclaimer segments before clinical ASCVD parsing."""
+    safe_segments = []
+    for segment in _bool_segments(raw):
+        if ASCVD_CALCULATOR_REVIEW_RE.search(segment):
+            continue
+        safe_segments.append(segment)
+    return "\n".join(safe_segments)
+
+
+PROBLEM_LIST_HEADER_RE = re.compile(
+    r"\b(?:problem\s+list|diagnoses|diagnosis|past\s+medical\s+history|pmh|relevant\s+diagnoses/problem\s+list)\b",
+    re.IGNORECASE,
+)
+
+SECTION_HEADER_RE = re.compile(
+    r"^\s*(?:Demographics|Smoking|Vitals|BMI|Family history|Lipids|A1c|ApoB|Lp\(a\)|hsCRP|eGFR|UACR|Kidney|Imaging|Medications|Calcification|Plaque|Assessment|Plan)\s*:?\s*$",
+    re.IGNORECASE,
+)
+
+
+def _problem_list_block(text: str) -> str:
+    """Return the diagnosis/problem-list block without pulling in later sections."""
+    lines = (text or "").splitlines()
+    for index, line in enumerate(lines):
+        if not PROBLEM_LIST_HEADER_RE.search(line):
+            continue
+        block = []
+        for item in lines[index : min(len(lines), index + 40)]:
+            clean = item.strip()
+            if not clean:
+                continue
+            if block and SECTION_HEADER_RE.match(clean):
+                break
+            block.append(clean)
+        return "\n".join(block)
+    return ""
+
+
+def _strip_problem_list_block(text: str) -> str:
+    """Remove problem-list sections so review-only diagnoses do not become confirmed fields."""
+    lines = (text or "").splitlines()
+    output: list[str] = []
+    skipping = False
+    for line in lines:
+        clean = line.strip()
+        if not skipping and PROBLEM_LIST_HEADER_RE.search(clean):
+            skipping = True
+            continue
+        if skipping and clean and SECTION_HEADER_RE.match(clean):
+            skipping = False
+        if not skipping:
+            output.append(line)
+    return "\n".join(output)
+
+
+def _problem_list_evidence(block: str, patterns: tuple[str, ...]) -> str:
+    for line in (block or "").splitlines():
+        if any(re.search(pattern, line, re.IGNORECASE) for pattern in patterns):
+            return line.strip(" -\t")
+    return ""
+
+
+def _record_problem_list_bool(report: ParseReport, field: str, evidence: str) -> None:
+    if not evidence:
+        return
+    current = report.extracted.get(field)
+    if current is True:
+        return
+    if current is False:
+        report.conflicts.append(f"{field}: explicit false vs problem list diagnosis ({evidence})")
+        return
+    report.extracted[field] = True
+    report.field_meta[field] = {
+        "confidence": "parsed",
+        "source": "problem list diagnosis",
+        "source_text": evidence,
+    }
+
+
+def apply_problem_list_diagnoses(report: ParseReport, text: str) -> None:
+    """Extract high-confidence conditions from the problem list using review-safe rules."""
+    block = _problem_list_block(text)
+    if not block:
+        return
+
+    ascvd_evidence = _problem_list_evidence(
+        block,
+        (
+            r"\bcoronary\s+artery\s+disease\b",
+            r"\bCAD\b",
+            r"\bmyocardial\s+infarction\b",
+            r"\bMI\b",
+            r"\bNSTEMI\b",
+            r"\bSTEMI\b",
+            r"\bPCI\b",
+            r"\bCABG\b",
+            r"\bcoronary\s+stent\b",
+            r"\bischemic\s+stroke\b",
+            r"\blacunar\s+infarction\b",
+            r"\bTIA\b",
+            r"\bPAD\b",
+            r"\bperipheral\s+arter(?:y|ial)\s+disease\b",
+        ),
+    )
+    if ascvd_evidence:
+        _record_source_meta(
+            report,
+            "clinical_ascvd_review",
+            True,
+            "uncertain",
+            "Clinical ASCVD found in problem list; confirm.",
+            source_text=ascvd_evidence,
+            review_required=True,
+        )
+        warning = "Clinical ASCVD found in problem list; confirm."
+        if warning not in report.warnings:
+            report.warnings.append(warning)
+        if report.extracted.get("ascvd_clinical") is not True:
+            report.extracted["ascvd_clinical"] = False
+            report.field_meta["ascvd_clinical"] = {
+                "confidence": "parsed",
+                "source": "problem list ASCVD review-only text",
+                "source_text": ascvd_evidence,
+                "review_required": "true",
+            }
+
+    _record_problem_list_bool(
+        report,
+        "osa",
+        _problem_list_evidence(
+            block,
+            (
+                r"\bOSA\b",
+                r"\bobstructive\s+sleep\s+apnea\b",
+                r"\bcomplex\s+sleep\s+apnea\b",
+                r"\bsleep\s+apnea\b",
+            ),
+        ),
+    )
+    _record_problem_list_bool(
+        report,
+        "diabetes",
+        _problem_list_evidence(
+            block,
+            (
+                r"\btype\s+2\s+diabetes\s+mellitus\b",
+                r"\bT2DM\b",
+                r"\bDM2\b",
+                r"\bdiabetes\s+mellitus\b",
+            ),
+        ),
+    )
+    _record_problem_list_bool(
+        report,
+        "masld",
+        _problem_list_evidence(
+            block,
+            (
+                r"\bMASLD\b",
+                r"\bNAFLD\b",
+                r"\bfatty\s+liver\b",
+                r"\bhepatic\s+steatosis\b",
+                r"\bsteatotic\s+liver\s+disease\b",
+            ),
+        ),
+    )
+    _record_problem_list_bool(
+        report,
+        "ckd",
+        _problem_list_evidence(
+            block,
+            (
+                r"\bchronic\s+kidney\s+disease\b",
+                r"\bCKD\b",
+            ),
+        ),
+    )
 
 
 def _without_gestational_diabetes_context(raw: str) -> str:
@@ -1183,6 +1392,20 @@ def parse_smartphrase_report(text: str) -> ParseReport:
 
     report.source_style = detect_source_style(text)
     lowered = text.lower()
+    text_without_problem_list = _strip_problem_list_block(text)
+    clinical_text = _strip_ascvd_calculator_review_text(text_without_problem_list)
+    clinical_lowered = clinical_text.lower()
+    ascvd_calculator_review = _has_ascvd_calculator_review_text(text)
+    if ascvd_calculator_review:
+        _record_source_meta(
+            report,
+            "clinical_ascvd_review",
+            True,
+            "uncertain",
+            "Possible ASCVD history referenced by risk calculator; confirm clinical ASCVD.",
+            source_text="ASCVD Risk score failed to calculate",
+            review_required=True,
+        )
 
     patient_age, age_confidence, age_source = extract_demographics_age(text)
     if patient_age is not None:
@@ -1373,7 +1596,7 @@ def parse_smartphrase_report(text: str) -> ParseReport:
         }
         report.warnings.append("Family history mentioned but relationship, event, or age was incomplete.")
 
-    diabetes_text = _without_gestational_diabetes_context(text)
+    diabetes_text = _without_gestational_diabetes_context(text_without_problem_list)
     diabetes_lowered = diabetes_text.lower()
     diabetes_found, diabetes_explicit = _parse_explicit_bool_line_status(
         diabetes_text,
@@ -1466,8 +1689,16 @@ def parse_smartphrase_report(text: str) -> ParseReport:
     for field, labels in explicit_bool_labels.items():
         found, value = _parse_explicit_bool_line_status(text, labels)
         if found:
+            if (
+                value is None
+                and report.extracted.get(field) is True
+                and (report.field_meta.get(field) or {}).get("source") == "problem list diagnosis"
+            ):
+                continue
             confidence = "inferred" if field in {"bpTreated", "lipidLowering", "sglt2", "glp1", "ace_arb"} else "parsed"
             _record(report, field, value, confidence, "explicit boolean line")
+
+    apply_problem_list_diagnoses(report, text)
 
     for field, labels in {
         "south_asian_ancestry": [r"south\s+asian\s+ancestry", r"indian\s+ancestry", r"pakistani\s+ancestry", r"bangladeshi\s+ancestry"],
@@ -1493,15 +1724,18 @@ def parse_smartphrase_report(text: str) -> ParseReport:
         _record(report, "breast_arterial_calcification", value, "parsed", "breast arterial calcification context")
 
     clinical_found, clinical_ascvd_value = _parse_explicit_bool_line_status(
-        text,
+        clinical_text,
         [r"clinical\s+ascvd", r"personal\s+ascvd", r"known\s+ascvd", r"ascvd"],
     )
     if not clinical_found:
-        clinical_ascvd_value = _clinical_ascvd_explicit_bool(text)
+        clinical_ascvd_value = _clinical_ascvd_explicit_bool(clinical_text)
     if clinical_found or clinical_ascvd_value is not None:
-        _record(report, "ascvd_clinical", clinical_ascvd_value, "parsed", "explicit clinical ASCVD line")
+        if clinical_ascvd_value is None and report.extracted.get("clinical_ascvd_review") is True:
+            _record(report, "ascvd_clinical", False, "parsed", "clinical ASCVD review-only text")
+        else:
+            _record(report, "ascvd_clinical", clinical_ascvd_value, "parsed", "explicit clinical ASCVD line")
         if clinical_ascvd_value is True:
-            context = _clinical_ascvd_context(text)
+            context = _clinical_ascvd_context(clinical_text)
             if context:
                 _record(report, "clinical_ascvd_context", context, "parsed", "clinical ASCVD event/procedure")
 
@@ -1533,12 +1767,13 @@ def parse_smartphrase_report(text: str) -> ParseReport:
     for field, (positive, negative) in fallback_boolean_patterns.items():
         if field in report.extracted:
             continue
-        value = _bool_from_text(lowered, positive, negative)
+        bool_source_text = clinical_lowered if field == "ascvd_clinical" else lowered
+        value = _bool_from_text(bool_source_text, positive, negative)
         if value is not None:
             confidence = "inferred" if field in {"bpTreated", "lipidLowering", "sglt2", "glp1", "ace_arb"} else "parsed"
             _record(report, field, value, confidence, "text pattern")
             if field == "ascvd_clinical" and value is True:
-                context = _clinical_ascvd_context(text)
+                context = _clinical_ascvd_context(clinical_text)
                 if context:
                     _record(report, "clinical_ascvd_context", context, "parsed", "clinical ASCVD event/procedure")
 
@@ -1567,11 +1802,16 @@ def parse_smartphrase_report(text: str) -> ParseReport:
                 break
         _record(report, "breast_arterial_calcification", bac_severity, "parsed", "breast arterial calcification context")
 
-    ascvd_events = extract_ascvd_events(text)
+    ascvd_events = extract_ascvd_events(clinical_text)
     if "ascvd_clinical" not in report.extracted and ascvd_events["clinical_ascvd"] is not None:
         _record(report, "ascvd_clinical", ascvd_events["clinical_ascvd"], "parsed", "structured ASCVD event extraction")
     if ascvd_events["event_summary"] and "clinical_ascvd_context" not in report.extracted:
         _record(report, "clinical_ascvd_context", ascvd_events["event_summary"], "parsed", "structured ASCVD event extraction")
+    if ascvd_calculator_review and "ascvd_clinical" not in report.extracted:
+        _record(report, "ascvd_clinical", False, "parsed", "ASCVD calculator review-only text")
+        warning = "Possible ASCVD history referenced by risk calculator; confirm clinical ASCVD."
+        if warning not in report.warnings:
+            report.warnings.append(warning)
 
     for field in (
         "rheumatoid_arthritis",

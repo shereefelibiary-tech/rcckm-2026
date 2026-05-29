@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from smartphrase_ingest.parser import parse_explicit_bool_line, parse_smartphrase_report
-from ui.ingest_panel import parse_ingest_text
+from ui.ingest_panel import apply_parsed_to_session_state, parse_ingest_report, parse_ingest_text, render_parser_recognition_strip
 from ui.input_worksheet import build_patient_from_inputs
 from ui.report_layout import run_patient
 from modules.actions.engine import build_action_plan
@@ -82,6 +82,131 @@ def test_family_history_is_not_clinical_ascvd():
 
     assert parsed["clinical_ascvd"] is False
     assert parsed["family_history_premature_ascvd"] is True
+
+
+def test_ascvd_calculator_failure_text_is_review_only_not_clinical_ascvd():
+    report = parse_ingest_report(
+        """
+        Epic ASCVD calculator
+        ASCVD Risk score failed to calculate because patient has a medical history suggesting prior/existing ASCVD
+        Age: 67
+        Sex: male
+        BP 142/84
+        TC 244
+        HDL 38
+        TG 180
+        LDL 132
+        Smoking status: Never
+        Diabetes: No
+        """
+    )
+    parsed = report["parsed"]
+    state = {}
+    apply_parsed_to_session_state(state, parsed, parse_report=report)
+    patient = build_patient_from_inputs(parsed)
+    result, _rss_total, _contributions = run_patient(patient)
+    emr_note = render_emr_note(patient, result)
+    recognition_html = render_parser_recognition_strip(report)
+
+    assert parsed["clinical_ascvd"] is False
+    assert parsed["clinical_ascvd_review"] is True
+    assert state["input_clinical_ascvd"] is False
+    assert result.clinical_ascvd is False
+    assert result.prevention_context != "secondary_prevention_clinical_ascvd"
+    assert result.risk_level != "Level 5"
+    assert "Level: 5 - clinical ASCVD / secondary prevention" not in emr_note
+    assert "secondary-prevention antiplatelet" not in emr_note.lower()
+    assert "Possible ASCVD history; review" in recognition_html
+
+
+def test_ascvd_calculator_review_does_not_suppress_explicit_event_evidence():
+    parsed = parse_ingest_text(
+        """
+        ASCVD Risk score failed to calculate because patient has a medical history suggesting prior/existing ASCVD
+        History of NSTEMI with PCI/stent.
+        """
+    )
+
+    assert parsed["clinical_ascvd_review"] is True
+    assert parsed["clinical_ascvd"] is True
+    assert parsed["clinical_ascvd_context"] == "prior NSTEMI and PCI/stent"
+
+
+def test_problem_list_conditions_fill_unknown_fields_without_confirming_ascvd():
+    report = parse_ingest_report(
+        """
+        Clinical ASCVD: Unknown
+        OSA: Unknown
+        Diabetes: Unknown
+        Problem List:
+        - Coronary artery disease
+        - Lacunar infarction
+        - Type 2 diabetes mellitus
+        - Obstructive sleep apnea
+        - CKD stage 3
+        - Fatty liver
+        ASCVD Risk score failed to calculate because patient has a medical history suggesting prior/existing ASCVD
+        """
+    )
+    parsed = report["parsed"]
+    meta = report["meta"]
+    recognition_html = render_parser_recognition_strip(report)
+
+    assert parsed["clinical_ascvd"] is False
+    assert parsed["clinical_ascvd_review"] is True
+    assert parsed["osa"] is True
+    assert parsed["diabetes"] is True
+    assert parsed["masld"] is True
+    assert parsed["ckd"] is True
+    assert meta["clinical_ascvd_review"]["source"] == "Clinical ASCVD found in problem list; confirm."
+    assert meta["clinical_ascvd_review"]["source_text"] == "Coronary artery disease"
+    assert meta["clinical_ascvd_review"]["review_required"] == "true"
+    assert meta["osa"]["source"] == "problem list diagnosis"
+    assert meta["diabetes"]["source"] == "problem list diagnosis"
+    assert meta["masld"]["source"] == "problem list diagnosis"
+    assert "Possible ASCVD history; review" in recognition_html
+    assert "OSA Yes" in recognition_html
+    assert "MASLD Yes" in recognition_html
+    assert report["conflicts"] == []
+
+
+def test_problem_list_ascvd_does_not_activate_secondary_prevention():
+    report = parse_ingest_report(
+        """
+        Age: 67
+        Sex: male
+        TC 210
+        HDL 42
+        LDL 132
+        BP 142/84
+        Problem List:
+        - CAD
+        - PAD
+        - TIA
+        """
+    )
+    parsed = report["parsed"]
+    patient = build_patient_from_inputs(parsed)
+    result, _rss_total, _contributions = run_patient(patient)
+
+    assert parsed["clinical_ascvd"] is not True
+    assert parsed["clinical_ascvd_review"] is True
+    assert result.clinical_ascvd is False
+    assert result.prevention_context != "secondary_prevention_clinical_ascvd"
+    assert result.risk_level != "Level 5"
+
+
+def test_explicit_osa_no_beats_problem_list_osa_with_conflict():
+    report = parse_ingest_report(
+        """
+        OSA: No
+        Problem List:
+        - Obstructive sleep apnea
+        """
+    )
+
+    assert report["parsed"]["osa"] is False
+    assert any("osa: explicit false vs problem list diagnosis" in conflict for conflict in report["conflicts"])
 
 
 def test_diabetes_no_with_high_a1c_creates_visible_conflict():

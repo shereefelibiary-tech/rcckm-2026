@@ -1,4 +1,10 @@
-from ui.ingest_panel import apply_parsed_to_session_state, parse_ingest_report
+from pathlib import Path
+
+from ui.ingest_panel import (
+    apply_parsed_to_session_state,
+    build_parser_recognition_items,
+    parse_ingest_report,
+)
 
 
 EPIC_PLACEHOLDER_SMARTPHRASE = """
@@ -286,6 +292,32 @@ def test_epic_placeholder_parse_clears_stale_family_osa_masld_state():
     assert state.get("input_lp_a_value") is None
     assert state.get("input_uacr") is None
     assert state.get("input_hscrp") is None
+
+
+def test_new_parse_without_osa_masld_unchecks_prior_parser_values():
+    state = {}
+    stress_report = parse_ingest_report(
+        Path("tests/fixtures/ingest/ugly_epic_smartphrase_02.txt").read_text(encoding="utf-8")
+    )
+    no_osa_masld_report = parse_ingest_report(EPIC_PLACEHOLDER_SMARTPHRASE)
+
+    apply_parsed_to_session_state(state, stress_report["parsed"], parse_report=stress_report)
+    assert state["input_osa"] is True
+    assert state["input_masld"] is True
+
+    apply_parsed_to_session_state(
+        state,
+        no_osa_masld_report["parsed"],
+        parse_report=no_osa_masld_report,
+    )
+    fields = {item.field_id for item in build_parser_recognition_items(no_osa_masld_report)}
+
+    assert "osa" not in no_osa_masld_report["parsed"]
+    assert "masld" not in no_osa_masld_report["parsed"]
+    assert "osa" not in fields
+    assert "masld" not in fields
+    assert state["input_osa"] is False
+    assert state["input_masld"] is False
 
 
 def test_family_history_positive_applies_compact_positive_option():

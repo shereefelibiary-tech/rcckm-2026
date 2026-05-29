@@ -51,6 +51,7 @@ WORKSHEET_KEY_BY_FIELD = {
     "cac_not_done": "input_cac_not_done",
     "clinical_ascvd": "input_clinical_ascvd",
     "clinical_ascvd_context": "input_clinical_ascvd_context",
+    "clinical_ascvd_review": "input_clinical_ascvd_review",
     "smoker": "input_smoker",
     "family_history_premature_ascvd": "input_family_history_premature_ascvd",
     "family_history_relationship": "input_family_history_relationship",
@@ -175,12 +176,17 @@ BOOLEAN_WORKSHEET_FIELDS = {
     "cancer_life_expectancy_gt_2y",
     "suspected_fh_hefh",
     "incidental_cac",
+    "cac_not_done",
+    "clinical_ascvd_review",
     "lipid_lowering",
     "bp_treated",
     "sglt2",
     "glp1",
     "ace_arb",
+    "statin_intolerance",
 }
+
+PARSER_CONTROLLED_BOOLEAN_FIELDS = tuple(sorted(BOOLEAN_WORKSHEET_FIELDS))
 
 REVIEW_FIELDS = [
     "age",
@@ -207,6 +213,7 @@ REVIEW_FIELDS = [
     "cac",
     "clinical_ascvd",
     "clinical_ascvd_context",
+    "clinical_ascvd_review",
     "smoker",
     "family_history_premature_ascvd",
     "family_history_relationship",
@@ -308,6 +315,7 @@ RECOGNITION_FIELD_ORDER = (
     ("uacr", "UACR", ("uacr",), "mg/g"),
     ("cac", "CAC", ("cac", "cac_not_done"), None),
     ("family_history", "Family history", ("family_history_premature_ascvd",), None),
+    ("clinical_ascvd_review", "Clinical ASCVD", ("clinical_ascvd_review",), None),
     ("hscrp", "hsCRP", ("hscrp",), "mg/L"),
     ("osa", "OSA", ("osa",), None),
     ("masld", "MASLD", ("masld",), None),
@@ -647,6 +655,8 @@ def _recognition_field_value(field_id, keys, parsed, unit):
         if value is False:
             return "Not reported"
         return ""
+    if field_id == "clinical_ascvd_review":
+        return "Possible ASCVD history; review" if parsed.get("clinical_ascvd_review") is True else ""
     if field_id == "inflammatory":
         labels = []
         for label, key in (
@@ -770,6 +780,8 @@ def render_parser_recognition_strip(report) -> str:
         if item.status == "review":
             if item.field_id == "family_history":
                 label = "Family history unclear"
+            elif item.field_id == "clinical_ascvd_review":
+                label = "Possible ASCVD history; review"
             elif item.field_id == "cac":
                 label = "CAC placeholder detected" if "placeholder" in item.source_text.lower() else "CAC review"
             else:
@@ -889,10 +901,32 @@ def _apply_neutral_family_history_state(state, parse_id, *, helper=None, unknown
         _mark_parsed_source(state, key, parse_id)
 
 
+def _initialize_absent_parser_booleans(state, parsed, parse_id):
+    parsed = parsed or {}
+    for field in PARSER_CONTROLLED_BOOLEAN_FIELDS:
+        if field in parsed:
+            continue
+        widget_key = WORKSHEET_KEY_BY_FIELD.get(field) or EXTRA_SESSION_KEY_BY_FIELD.get(field)
+        if not widget_key:
+            continue
+        state[widget_key] = False
+        state.pop(f"_unknown_{widget_key}", None)
+        _mark_parsed_source(state, widget_key, parse_id)
+    if "bp_treated" not in parsed:
+        state["input_bp_meds"] = False
+        state.pop("_unknown_input_bp_meds", None)
+        _mark_parsed_source(state, "input_bp_meds", parse_id)
+    if "south_asian_ancestry" not in parsed and "filipino_ancestry" not in parsed:
+        state["input_ancestry_context"] = "None / not specified"
+        _mark_parsed_source(state, "input_ancestry_context", parse_id)
+
+
 def apply_parsed_to_session_state(state, parsed, *, clear_existing=True, parse_report=None):
     if clear_existing:
         clear_parser_controlled_session_state(state)
     parse_id = _next_parse_id(state)
+    if clear_existing:
+        _initialize_absent_parser_booleans(state, parsed, parse_id)
     family_history_status = _family_history_recognition_status(parse_report)
     for field, value in (parsed or {}).items():
         widget_key = WORKSHEET_KEY_BY_FIELD.get(field)

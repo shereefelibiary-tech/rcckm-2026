@@ -74,6 +74,7 @@ IMPORTANT_ADD_ON_FIELDS: tuple[tuple[str, str, tuple[str, ...], str | None], ...
     ("uacr", "UACR", ("uacr",), "mg/g"),
     ("cac", "CAC", ("cac", "cac_not_done"), None),
     ("family_history", "Family history", ("family_history_premature_ascvd",), None),
+    ("clinical_ascvd_review", "Clinical ASCVD", ("clinical_ascvd_review",), None),
 )
 
 ADVANCED_CONTEXT_FIELDS: tuple[tuple[str, str, tuple[str, ...], str | None], ...] = (
@@ -217,6 +218,8 @@ def _field_value(field_id: str, keys: tuple[str, ...], parsed: dict[str, Any], u
         if value is False:
             return "Not reported"
         return ""
+    if field_id == "clinical_ascvd_review":
+        return "Possible ASCVD history; review" if parsed.get("clinical_ascvd_review") is True else ""
     if field_id == "inflammatory":
         labels = [
             label
