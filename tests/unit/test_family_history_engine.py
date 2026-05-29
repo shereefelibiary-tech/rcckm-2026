@@ -138,7 +138,9 @@ def test_family_history_supports_level_drivers_clarification_snapshot_without_di
 
     clarification = build_clarification_ladder(patient, result)
     assert clarification["recommend_cac"] is False
-    assert clarification["tier"] == 1
+    assert clarification["tier"] == 2
+    assert clarification["recommend_apob"] is True
+    assert clarification["recommend_lpa"] is True
 
     result.top_drivers = ["Father MI age 49"]
     result.clarification = clarification

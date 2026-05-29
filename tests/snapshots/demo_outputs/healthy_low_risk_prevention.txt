@@ -67,7 +67,6 @@ ACTIONS:
 - Blood pressure: At goal. Current 108/68; goal <130/80.
 - Glycemia / metabolic: No glycemic action. A1c 5.2.
 - Aspirin / antiplatelet: Not routine for primary prevention. Do not start routine aspirin.
-- Data to clarify: Key data available. Complete.
 
 RSS: 0
 RSS CONTRIBUTORS:

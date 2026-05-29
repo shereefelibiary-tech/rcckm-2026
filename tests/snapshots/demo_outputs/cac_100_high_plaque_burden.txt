@@ -6,7 +6,7 @@ RISK CONTINUUM CKM
 
 Level: 4 - subclinical atherosclerosis.
 PREVENT: ASCVD 10y 4.67% (Borderline).
-CKM/Kidney/Plaque: CKM 3; kidney G2A1; CAC 145.
+CKM/Kidney/Plaque: CKM 3 by subclinical atherosclerosis; kidney G2A1; CAC 145.
 Context: elevated Lp(a); father MI age 54.
 
 Assessment:

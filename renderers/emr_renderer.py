@@ -633,9 +633,21 @@ def _emr_ckm_line(patient, result):
     parts = []
     ckm_stage = getattr(result, "ckm_stage", None) or {}
     stage = ckm_stage.get("stage")
-    if stage is not None:
-        parts.append(f"CKM {stage}")
     kdigo = getattr(result, "kdigo_stage", None)
+    kdigo_text = str(kdigo or "")
+    kdigo_ckd_signal = bool(
+        kdigo_text.startswith(("G3a", "G3b", "G4", "G5"))
+        or "A2" in kdigo_text
+        or "A3" in kdigo_text
+    )
+    if stage is not None:
+        drivers = [str(driver).lower() for driver in ckm_stage.get("drivers", []) or []]
+        cac_driven = any(driver.startswith("cac ") for driver in drivers)
+        ckd_driven = any(driver.startswith("ckd ") for driver in drivers)
+        if stage == 3 and cac_driven and not ckd_driven and not kdigo_ckd_signal:
+            parts.append("CKM 3 by subclinical atherosclerosis")
+        else:
+            parts.append(f"CKM {stage}")
     if kdigo:
         parts.append(f"kidney {kdigo}")
         if getattr(patient, "uacr", None) is None and _uacr_completion_relevant(patient, result):

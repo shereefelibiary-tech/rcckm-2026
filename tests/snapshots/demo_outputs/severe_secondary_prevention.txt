@@ -74,7 +74,6 @@ ACTIONS:
 - Blood pressure: Treat toward <130/80. Current 138/82.
 - Glycemia / metabolic: Optimize diabetes care. A1c 7.8%; goal <7.0.
 - Aspirin / antiplatelet: Antiplatelet therapy. Use if no contraindication.
-- Data to clarify: Key data available. Complete.
 
 RSS: 94
 RSS CONTRIBUTORS:

@@ -1244,10 +1244,10 @@ def _aspirin_readout(patient: Any, result: Any, section: ActionSection | None) -
     return _make_readout("aspirin_antiplatelet", "Aspirin / antiplatelet", "Not routine for primary prevention", "Do not start routine aspirin.", state="neutral")
 
 
-def _clarifier_readout(result: Any) -> ActionDomainReadout:
+def _clarifier_readout(result: Any) -> ActionDomainReadout | None:
     clarifiers = _clarifier_items(result)
     if not clarifiers:
-        return _make_readout("data_to_clarify", "Data to clarify", "Key data available", "Complete.", state="complete")
+        return None
     labels = []
     for item in clarifiers:
         label = item.split(" - ", 1)[0].replace("Obtain ", "").replace(" to complete kidney-risk assessment.", "")
@@ -1429,12 +1429,10 @@ def build_action_instrument_panel(patient: Any, result: Any) -> list[ActionDomai
     inflammation = _inflammation_readout(result)
     if inflammation:
         panel.append(inflammation)
-    panel.extend(
-        [
-            _aspirin_readout(patient, result, by_label.get("Aspirin")),
-            _clarifier_readout(result),
-        ]
-    )
+    panel.append(_aspirin_readout(patient, result, by_label.get("Aspirin")))
+    clarifier = _clarifier_readout(result)
+    if clarifier:
+        panel.append(clarifier)
     order = {domain_id: index for index, domain_id in enumerate(ACTION_PANEL_DOMAIN_ORDER)}
     panel = _attach_surface_lines(patient, result, panel, sections, lipid_line)
     return sorted(panel, key=lambda item: order[item.domain_id])

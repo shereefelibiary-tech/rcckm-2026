@@ -14,4 +14,3 @@ Recommendations:
 4. BP: BP needed.
 5. Glycemia: No glycemic action; A1c 5.2.
 6. Aspirin: Not routine for primary prevention.
-7. Clarify: Lp(a).

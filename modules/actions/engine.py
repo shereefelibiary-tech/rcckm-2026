@@ -1,4 +1,8 @@
 from modules.cac_recommendation.engine import build_cac_recommendation
+from modules.clarification.engine import (
+    should_recommend_apob,
+    should_recommend_lpa,
+)
 from modules.prevent.lipid_bands import (
     PREVENT_ASCVD_EARLY_DISCUSSION_THRESHOLD,
     PREVENT_ASCVD_HIGH_THRESHOLD,
@@ -896,7 +900,7 @@ def _build_testing_actions(patient, result):
     cac = getattr(patient, "cac", None)
     severe_ldl = ldl_c is not None and ldl_c >= 190
 
-    if ldl_c is not None and getattr(patient, "apob", None) is None:
+    if should_recommend_apob(patient, result):
         _add_action(
             recommendations,
             domains,
@@ -921,7 +925,7 @@ def _build_testing_actions(patient, result):
             "Obtain UACR to complete kidney-risk assessment.",
         )
 
-    if getattr(patient, "lp_a_value", None) is None:
+    if should_recommend_lpa(patient, result):
         _add_action(
             recommendations,
             domains,

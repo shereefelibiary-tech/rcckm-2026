@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from ui.ingest_panel import (
     EPIC_SMARTPHRASE_TEMPLATE,
     apply_parsed_to_session_state,
@@ -8,6 +10,9 @@ from ui.ingest_panel import (
     parse_ingest_text,
     render_parser_recognition_strip,
 )
+
+
+FIXTURES_DIR = Path(__file__).resolve().parents[1] / "fixtures"
 
 
 def test_ingest_phi_warning_detects_common_identifiers():
@@ -100,6 +105,68 @@ def test_parser_multiline_hscrp_value_preserved_over_later_no_results():
     assert parsed["hscrp"] == 4.8
     assert by_field["hscrp"].status == "extracted"
     assert by_field["hscrp"].value == "4.8 mg/L"
+
+
+def test_epic_case_problem_list_hierarchy_and_review_states():
+    text = (FIXTURES_DIR / "epic_case_61f_black_female.txt").read_text(encoding="utf-8")
+
+    report = parse_ingest_report(text)
+    parsed = report["parsed"]
+    items = {item.field_id: item for item in build_parser_recognition_items(report)}
+    recognition_html = render_parser_recognition_strip(report)
+
+    assert parsed["age"] == 61
+    assert parsed["sex"] == "female"
+    assert "Black" in parsed["race_ethnicity"]
+    assert parsed["smoker"] is False
+    assert parsed["sbp"] == 134
+    assert parsed["dbp"] == 81
+    assert parsed["bmi"] == 35.04
+    assert parsed["ldl_c"] == 187
+    assert parsed["hdl_c"] == 67
+    assert parsed["triglycerides"] == 57
+    assert parsed["a1c"] == 6.1
+    assert parsed["diabetes"] is True
+    assert parsed["diabetes_source"] == "problem_list"
+    assert parsed["apob"] == 134
+    assert parsed["lp_a_value"] == 346.7
+    assert parsed["lp_a_review"] is True
+    assert parsed.get("hscrp") is None
+    assert parsed["egfr"] == 79
+    assert parsed.get("uacr") is None
+    assert parsed["uacr_status"] == "indeterminate"
+    assert parsed["masld"] is True
+    assert parsed.get("osa") is not True
+    assert parsed["sleep_apnea_review"] is True
+    assert parsed["rheumatoid_arthritis"] is False
+    assert parsed["inflammatory_arthritis_review"] is True
+    assert parsed.get("clinical_ascvd") is not True
+    assert parsed.get("clinical_ascvd_review") is not True
+
+    assert items["age"].value == "61"
+    assert items["bp"].value == "134/81"
+    assert items["ldl_c"].value == "187 mg/dL"
+    assert items["apob"].value == "134 mg/dL"
+    assert items["lp_a_value"].status == "extracted"
+    assert items["lp_a_value"].value == "346.7"
+    assert items["lp_a_review"].status == "review"
+    assert items["diabetes"].value == "Diabetes detected"
+    assert items["masld"].status == "extracted"
+    assert items["uacr"].status == "review"
+    assert items["osa"].status == "review"
+    assert items["inflammatory"].status == "review"
+    assert items["hscrp"].status == "missing"
+
+    assert "Diabetes detected" in recognition_html
+    assert "MASLD" in recognition_html
+    assert "UACR not calculable" in recognition_html
+    assert "Confirm Lp(a) units" in recognition_html
+    assert "Possible sleep apnea" in recognition_html
+    assert "Inflammatory arthritis review" in recognition_html
+    assert "hsCRP missing" in recognition_html
+    assert "OSA Yes" not in recognition_html
+    assert "Rheumatoid arthritis" not in recognition_html
+    assert "Clinical ASCVD" not in recognition_html
 
 
 def test_parsed_values_can_be_stringified_for_review_table():

@@ -2,7 +2,7 @@ RISK CONTINUUM CKM
 
 Level: 5 - very high plaque burden.
 PREVENT: unavailable.
-CKM/Kidney/Plaque: CKM 3; CAC 350.
+CKM/Kidney/Plaque: CKM 3 by subclinical atherosclerosis; CAC 350.
 
 Assessment:
 - Severe subclinical coronary atherosclerosis / high CAC burden (ICD: I25.10)
@@ -14,4 +14,4 @@ Recommendations:
 4. BP: BP needed.
 5. Glycemia: A1c needed; No current A1c available.
 6. Aspirin: Not routine for primary prevention.
-7. Clarify: Lp(a).
+7. Clarify: ApoB; Lp(a).

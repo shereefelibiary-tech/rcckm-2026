@@ -95,6 +95,73 @@ def test_stress_smartphrase_emr_uses_extracted_uacr_and_concise_surface_lines():
     assert "6. Aspirin: Not routine for primary prevention." in note
 
 
+def test_cac_only_level4_emr_names_subclinical_atherosclerosis_driver():
+    patient = Patient(
+        age=55,
+        sex="male",
+        tc=175,
+        ldl_c=98,
+        hdl_c=62,
+        triglycerides=90,
+        sbp=118,
+        dbp=72,
+        smoker=False,
+        diabetes=False,
+        clinical_ascvd=False,
+        a1c=4.9,
+        egfr=68,
+        uacr=8,
+        cac=12,
+        prevent_10y_ascvd=2.43,
+    )
+    result = evaluate_patient(patient)
+
+    note = render_emr_note(patient, result)
+
+    assert result.ckm_stage["stage"] == 3
+    assert result.ckm_stage["drivers"] == ["CAC 12"]
+    assert "Level: 4 - subclinical atherosclerosis." in note
+    assert (
+        "CKM/Kidney/Plaque: CKM 3 by subclinical atherosclerosis; kidney G2A1; CAC 12."
+        in note
+    )
+    assert "CKM/Kidney/Plaque: CKM 3; kidney G2A1; CAC 12." not in note
+    assert "3. Kidney: No kidney-risk signal." in note
+    assert "5. Glycemia: No glycemic action; A1c 4.9." in note
+    assert "6. Aspirin: Not routine for primary prevention." in note
+    assert "7. Clarify: ApoB." in note
+
+
+def test_low_cac_ldl_at_goal_emr_hides_non_decision_relevant_clarifiers():
+    patient = Patient(
+        age=55,
+        sex="male",
+        tc=149,
+        ldl_c=69,
+        hdl_c=64,
+        triglycerides=80,
+        sbp=118,
+        dbp=72,
+        smoker=False,
+        diabetes=False,
+        clinical_ascvd=False,
+        a1c=4.9,
+        egfr=68,
+        uacr=8,
+        cac=12,
+        prevent_10y_ascvd=2.43,
+    )
+    result = evaluate_patient(patient)
+
+    note = render_emr_note(patient, result)
+
+    assert result.clarification["recommend_apob"] is False
+    assert result.clarification["recommend_lpa"] is False
+    assert "Clarify:" not in note
+    assert "ApoB" not in note
+    assert "Lp(a)" not in note
+
+
 def test_render_emr_note_marks_hcc_supported_diagnosis_subtly():
     patient = Patient(age=60, sex="male")
     result = RCCKMResult(

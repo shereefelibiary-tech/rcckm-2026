@@ -12,9 +12,7 @@
     "expected": {
       "risk_continuum_level": 1,
       "ckm_stage": 0,
-      "rss_category": "Low",
-      "required_action": "Check Lp(a)",
-      "required_clarifier": "Lp(a)"
+      "rss_category": "Low"
     },
     "forbidden_phrases": [
       "<div class=",
@@ -42,8 +40,7 @@
         null,
         "2A"
       ],
-      "ckm_stage": 0,
-      "required_clarifier": "Lp(a)"
+      "ckm_stage": 0
     },
     "forbidden_phrases": [
       "<div class=",
@@ -64,8 +61,7 @@
     },
     "expected": {
       "risk_continuum_level": 2,
-      "risk_continuum_sublevel": "2A",
-      "required_clarifier": "Lp(a)"
+      "risk_continuum_sublevel": "2A"
     },
     "forbidden_phrases": [
       "<div class=",
@@ -580,8 +576,7 @@
         2
       ],
       "ckm_stage": 1,
-      "required_diagnosis": "Prediabetes",
-      "required_action": "Check Lp(a)"
+      "required_diagnosis": "Prediabetes"
     },
     "forbidden_phrases": [
       "<div class=",
@@ -1025,8 +1020,7 @@
     "expected": {
       "risk_continuum_level": 2,
       "risk_continuum_sublevel": "2B",
-      "required_driver": "Chronic inflammatory condition",
-      "required_clarifier": "Lp(a)"
+      "required_driver": "Chronic inflammatory condition"
     },
     "forbidden_phrases": [
       "<div class=",
@@ -1048,8 +1042,7 @@
       "risk_continuum_level": [
         1,
         2
-      ],
-      "required_action": "Check Lp(a)"
+      ]
     },
     "forbidden_phrases": [
       "phenotype",

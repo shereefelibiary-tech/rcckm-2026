@@ -69,7 +69,6 @@ ACTIONS:
 - Glycemia / metabolic: No glycemic action. A1c 5.4.
 - Inflammation: Inflammatory risk enhancer. RA is a risk enhancer; ensure inflammation is clinically controlled and avoid undertreating traditional risk factors.
 - Aspirin / antiplatelet: Not routine for primary prevention. Do not start routine aspirin.
-- Data to clarify: Key data available. Complete.
 
 RSS: 9
 RSS CONTRIBUTORS:

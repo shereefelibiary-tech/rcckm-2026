@@ -21,7 +21,6 @@ REQUIRED_DOMAIN_ORDER = [
     "blood_pressure",
     "glycemia_metabolic",
     "aspirin_antiplatelet",
-    "data_to_clarify",
 ]
 
 
@@ -107,7 +106,7 @@ def test_all_demo_surfaces_share_structured_domain_actions(label, case_name):
         ),
         (
             "healthy_low_risk_prevention",
-            ("No lipid escalation", "Key data available"),
+            ("No lipid escalation",),
             ("No lipid escalation", "No kidney-risk signal"),
             ("cholesterol",),
         ),

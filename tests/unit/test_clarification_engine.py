@@ -52,14 +52,67 @@ def test_build_clarification_ladder_recommends_apob_when_ldl_present():
     assert ladder["recommend_apob"] is True
 
 
-def test_build_clarification_ladder_recommends_lpa_when_missing():
+def test_build_clarification_ladder_suppresses_lpa_when_missing_but_not_decision_relevant():
     patient = Patient(age=60, sex="male")
     result = RCCKMResult(prevent_risk_category=RiskLevel.LOW)
 
     ladder = build_clarification_ladder(patient, result)
 
-    assert ladder["tier"] == 1
+    assert ladder["tier"] == 0
+    assert ladder["recommend_lpa"] is False
+
+
+def test_build_clarification_ladder_recommends_lpa_for_premature_family_history():
+    patient = Patient(
+        age=60,
+        sex="male",
+        family_history_premature_ascvd=True,
+        family_history_relationship="father",
+        family_history_event_type="MI",
+        family_history_age_at_event=49,
+    )
+    result = RCCKMResult(prevent_risk_category=RiskLevel.LOW)
+
+    ladder = build_clarification_ladder(patient, result)
+
+    assert ladder["tier"] >= 1
     assert ladder["recommend_lpa"] is True
+
+
+def test_build_clarification_ladder_suppresses_apob_and_lpa_for_low_friction_cac_case():
+    patient = Patient(
+        age=55,
+        sex="male",
+        cac=12,
+        ldl_c=69,
+        triglycerides=80,
+        a1c=4.9,
+        apob=None,
+        lp_a_value=None,
+    )
+    result = RCCKMResult(prevent_risk_category=RiskLevel.LOW, prevent_10y_ascvd=2.43)
+
+    ladder = build_clarification_ladder(patient, result)
+
+    assert ladder["recommend_apob"] is False
+    assert ladder["recommend_lpa"] is False
+    assert ladder["tier"] == 0
+
+
+def test_build_clarification_ladder_recommends_apob_for_elevated_tg():
+    patient = Patient(
+        age=55,
+        sex="male",
+        ldl_c=90,
+        triglycerides=250,
+        apob=None,
+        lp_a_value=20,
+    )
+    result = RCCKMResult(prevent_risk_category=RiskLevel.LOW)
+
+    ladder = build_clarification_ladder(patient, result)
+
+    assert ladder["recommend_apob"] is True
 
 
 def test_build_clarification_ladder_recommends_uacr_in_diabetes_context():

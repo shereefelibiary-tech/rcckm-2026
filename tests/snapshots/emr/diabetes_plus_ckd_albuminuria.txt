@@ -14,4 +14,4 @@ Recommendations:
 4. BP: BP needed.
 5. Glycemia: Optimize diabetes care; A1c 7.4%; goal <7.0.
 6. Aspirin: Not routine for primary prevention.
-7. Clarify: Lp(a); hsCRP.
+7. Clarify: ApoB; hsCRP.

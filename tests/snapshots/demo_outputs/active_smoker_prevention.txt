@@ -68,7 +68,6 @@ ACTIONS:
 - Blood pressure: Treat toward <130/80. Current 130/78.
 - Glycemia / metabolic: No glycemic action. A1c 5.5.
 - Aspirin / antiplatelet: Not routine for primary prevention. Do not start routine aspirin.
-- Data to clarify: Key data available. Complete.
 
 RSS: 12
 RSS CONTRIBUTORS:

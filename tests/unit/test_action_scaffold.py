@@ -261,10 +261,10 @@ def test_action_html_renders_structured_sections_without_loose_duplicate_list():
     assert "Supporting actions:" not in html
     assert "Aspirin: Aspirin" not in html
     assert "Lipid therapy: Lipid" not in html
-    assert html.count('class="action-domain ') == 7
+    assert html.count('class="action-domain ') == 6
     assert "action-number" in html
     assert '<div class="action-number" aria-hidden="true">1</div>' in html
-    assert '<div class="action-number" aria-hidden="true">7</div>' in html
+    assert '<div class="action-number" aria-hidden="true">6</div>' in html
     assert "<ol" not in html
     assert "<li>High-intensity lipid-lowering therapy indicated" not in html
     assert "action-readout" in html
@@ -278,7 +278,7 @@ def test_action_html_renders_structured_sections_without_loose_duplicate_list():
     assert "Lipid lowering" in html
     assert "CAC / plaque" in html
     assert "Blood pressure" in html
-    assert "Data to clarify" in html
+    assert "Data to clarify" not in html
     assert lipid_lead in html
     assert lipid_detail in html
     assert aspirin_lead in html
@@ -308,7 +308,7 @@ def test_action_html_renders_structured_sections_without_loose_duplicate_list():
     assert "\n            <div" not in html
 
 
-def test_action_instrument_panel_has_fixed_domain_order_and_neutral_slots():
+def test_action_instrument_panel_has_fixed_domain_order_without_empty_clarifier_slot():
     patient = Patient(age=55, sex="male", cac=0, sbp=118, dbp=72, tc=180, hdl_c=55)
     result = evaluate_patient(patient)
 
@@ -321,7 +321,6 @@ def test_action_instrument_panel_has_fixed_domain_order_and_neutral_slots():
         "blood_pressure",
         "glycemia_metabolic",
         "aspirin_antiplatelet",
-        "data_to_clarify",
     ]
     assert [item.label for item in panel] == [
         "Lipid lowering",
@@ -330,7 +329,6 @@ def test_action_instrument_panel_has_fixed_domain_order_and_neutral_slots():
         "Blood pressure",
         "Glycemia / metabolic",
         "Aspirin / antiplatelet",
-        "Data to clarify",
     ]
     assert all(item.status for item in panel)
     assert all("None" not in item.status + item.detail for item in panel)
@@ -342,7 +340,7 @@ def test_action_instrument_panel_has_fixed_domain_order_and_neutral_slots():
     assert next(item for item in panel if item.domain_id == "aspirin_antiplatelet").status == "Not routine for primary prevention"
 
 
-def test_action_instrument_panel_groups_kidney_cac_aspirin_and_clarifiers():
+def test_action_instrument_panel_groups_kidney_cac_and_aspirin_without_empty_clarifier():
     patient = Patient(age=55, sex="male", cac=350, diabetes=True, a1c=7.1, egfr=55, uacr=45, ldl_c=132, apob=110)
     result = evaluate_patient(patient)
     panel = {item.domain_id: item for item in build_action_instrument_panel(patient, result)}
@@ -361,7 +359,16 @@ def test_action_instrument_panel_groups_kidney_cac_aspirin_and_clarifiers():
     assert panel["blood_pressure"].status == "BP needed"
     assert panel["aspirin_antiplatelet"].status == "Aspirin not routine for primary prevention"
     assert "low bleeding risk" in panel["aspirin_antiplatelet"].hover_detail
+    assert "data_to_clarify" not in panel
+
+
+def test_action_instrument_panel_shows_decision_relevant_clarifiers():
+    patient = Patient(age=55, sex="male", ldl_c=90, triglycerides=250, lp_a_value=20)
+    result = evaluate_patient(patient)
+    panel = {item.domain_id: item for item in build_action_instrument_panel(patient, result)}
+
     assert panel["data_to_clarify"].label == "Data to clarify"
+    assert "ApoB" in panel["data_to_clarify"].detail
 
 
 def test_action_instrument_panel_keeps_kidney_and_bp_messages_separate():

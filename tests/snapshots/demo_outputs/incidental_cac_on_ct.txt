@@ -66,7 +66,6 @@ ACTIONS:
 - Blood pressure: Treat toward <130/80. Current 130/76.
 - Glycemia / metabolic: Prediabetes prevention. A1c 5.7%; weight/activity focus.
 - Aspirin / antiplatelet: Not routine for primary prevention. Do not start routine aspirin.
-- Data to clarify: Key data available. Complete.
 
 RSS: 16
 RSS CONTRIBUTORS:

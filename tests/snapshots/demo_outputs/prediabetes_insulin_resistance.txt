@@ -71,7 +71,6 @@ ACTIONS:
 - Blood pressure: At goal. Current 128/78; goal <130/80.
 - Glycemia / metabolic: Prediabetes prevention. A1c 6.1%; weight/activity focus.
 - Aspirin / antiplatelet: Not routine for primary prevention. Do not start routine aspirin.
-- Data to clarify: Key data available. Complete.
 
 RSS: 12
 RSS CONTRIBUTORS:

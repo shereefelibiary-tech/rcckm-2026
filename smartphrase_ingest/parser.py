@@ -468,13 +468,19 @@ def _problem_list_evidence(block: str, patterns: tuple[str, ...]) -> str:
     return ""
 
 
-def _record_problem_list_bool(report: ParseReport, field: str, evidence: str) -> None:
+def _record_problem_list_bool(
+    report: ParseReport,
+    field: str,
+    evidence: str,
+    *,
+    override_false: bool = False,
+) -> None:
     if not evidence:
         return
     current = report.extracted.get(field)
     if current is True:
         return
-    if current is False:
+    if current is False and not override_false:
         report.conflicts.append(f"{field}: explicit false vs problem list diagnosis ({evidence})")
         return
     report.extracted[field] = True
@@ -483,6 +489,26 @@ def _record_problem_list_bool(report: ParseReport, field: str, evidence: str) ->
         "source": "problem list diagnosis",
         "source_text": evidence,
     }
+    if field == "diabetes":
+        report.extracted["diabetes_source"] = "problem_list"
+        report.field_meta["diabetes_source"] = {
+            "confidence": "parsed",
+            "source": "problem list diagnosis",
+            "source_text": evidence,
+        }
+
+
+def _problem_list_positive_evidence(
+    block: str,
+    patterns: tuple[str, ...],
+    exclude_patterns: tuple[str, ...] = (),
+) -> str:
+    for line in (block or "").splitlines():
+        if any(re.search(pattern, line, re.IGNORECASE) for pattern in exclude_patterns):
+            continue
+        if any(re.search(pattern, line, re.IGNORECASE) for pattern in patterns):
+            return line.strip(" -\t")
+    return ""
 
 
 def apply_problem_list_diagnoses(report: ParseReport, text: str) -> None:
@@ -532,19 +558,44 @@ def apply_problem_list_diagnoses(report: ParseReport, text: str) -> None:
                 "review_required": "true",
             }
 
-    _record_problem_list_bool(
-        report,
-        "osa",
-        _problem_list_evidence(
-            block,
-            (
-                r"\bOSA\b",
-                r"\bobstructive\s+sleep\s+apnea\b",
-                r"\bcomplex\s+sleep\s+apnea\b",
-                r"\bsleep\s+apnea\b",
-            ),
+    sleep_apnea_review = _problem_list_evidence(
+        block,
+        (
+            r"\bsuspected\s+sleep\s+apnea\b",
+            r"\bpossible\s+(?:OSA|obstructive\s+sleep\s+apnea|sleep\s+apnea)\b",
+            r"\brule\s+out\s+(?:OSA|obstructive\s+sleep\s+apnea|sleep\s+apnea)\b",
+            r"\bsnoring\b",
+            r"\bhypersomnia\b",
+            r"\bnon[-\s]?restorative\s+sleep\b",
         ),
     )
+    if sleep_apnea_review:
+        _record_source_meta(
+            report,
+            "sleep_apnea_review",
+            True,
+            "uncertain",
+            "Possible sleep apnea.",
+            source_text=sleep_apnea_review,
+            review_required=True,
+        )
+        if "Possible sleep apnea; confirm diagnosis." not in report.warnings:
+            report.warnings.append("Possible sleep apnea; confirm diagnosis.")
+    else:
+        _record_problem_list_bool(
+            report,
+            "osa",
+            _problem_list_positive_evidence(
+                block,
+                (
+                    r"\bOSA\b",
+                    r"\bobstructive\s+sleep\s+apnea\b",
+                    r"\bcomplex\s+sleep\s+apnea\b",
+                    r"\bsleep\s+apnea\b",
+                ),
+                (r"\bsuspected\b", r"\bpossible\b", r"\brule\s+out\b"),
+            ),
+        )
     _record_problem_list_bool(
         report,
         "diabetes",
@@ -555,8 +606,10 @@ def apply_problem_list_diagnoses(report: ParseReport, text: str) -> None:
                 r"\bT2DM\b",
                 r"\bDM2\b",
                 r"\bdiabetes\s+mellitus\b",
+                r"\bE11(?:\.|$)",
             ),
         ),
+        override_false=True,
     )
     _record_problem_list_bool(
         report,
@@ -583,6 +636,34 @@ def apply_problem_list_diagnoses(report: ParseReport, text: str) -> None:
             ),
         ),
     )
+
+    inflammatory_review = _problem_list_evidence(
+        block,
+        (
+            r"\bpolyarthritis\b[^\n]*\b(?:positive\s+rheumatoid\s+factor|positive\s+RF|RF\s+positive)\b",
+            r"\b(?:positive\s+rheumatoid\s+factor|positive\s+RF|RF\s+positive)\b[^\n]*\bpolyarthritis\b",
+        ),
+    )
+    if inflammatory_review:
+        _record_source_meta(
+            report,
+            "inflammatory_arthritis_review",
+            True,
+            "uncertain",
+            "Inflammatory arthritis review.",
+            source_text=inflammatory_review,
+            review_required=True,
+        )
+        if report.extracted.get("rheumatoid_arthritis") is not True:
+            report.extracted["rheumatoid_arthritis"] = False
+            report.field_meta["rheumatoid_arthritis"] = {
+                "confidence": "uncertain",
+                "source": "polyarthritis with RF is review-only for RA",
+                "source_text": inflammatory_review,
+                "review_required": "true",
+            }
+        if "Polyarthritis with positive rheumatoid factor requires inflammatory arthritis review." not in report.warnings:
+            report.warnings.append("Polyarthritis with positive rheumatoid factor requires inflammatory arthritis review.")
 
 
 def _without_gestational_diabetes_context(raw: str) -> str:
@@ -914,9 +995,9 @@ def _extract_unavailable_reason(text: str, label: str) -> str | None:
     ):
         return f"{label} unavailable or not done"
     unavailable_terms = (
-        r"not available|unavailable|not done|deferred|unable to calculate|"
+        r"not available|unavailable|not done|deferred|unable to calculate|cannot calculate|"
         r"not reported|not performed|unknown|no results found(?:\s+for:?)?|"
-        r"no [a-z ]{0,30}available|\*{2,}|@[A-Z0-9_]+@"
+        r"outside reportable range|no [a-z ]{0,30}available|\*{2,}|@[A-Z0-9_]+@"
     )
     if label == "CAC":
         label_pattern = r"(?:CAC|coronary(?:\s+artery)?\s+calcium(?:\s+\(CAC\))?|coronary calcium|calcium score)"
@@ -1104,6 +1185,20 @@ def extract_uacr(report: ParseReport, text: str) -> None:
         if not label_match:
             continue
         block = lines[index : min(len(lines), index + 15)]
+        block_text = "\n".join(block)
+        if re.search(r"\b(?:cannot|unable\s+to)\s+calculate\b|\boutside\s+reportable\s+range\b", block_text, re.IGNORECASE):
+            _record_source_meta(
+                report,
+                "uacr_status",
+                "indeterminate",
+                "uncertain",
+                "UACR not calculable.",
+                source_text=line.strip(),
+                review_required=True,
+            )
+            if "UACR not calculable." not in report.warnings:
+                report.warnings.append("UACR not calculable.")
+            return
         candidates: list[tuple[int, float, str]] = []
         pending_result = False
         for offset, block_line in enumerate(block):
@@ -1165,11 +1260,13 @@ def extract_hscrp(report: ParseReport, text: str) -> None:
         block = lines[index : min(len(lines), index + 8)]
         for offset, block_line in enumerate(block):
             clean = block_line.strip()
-            if not clean or PLACEHOLDER_VALUE_RE.search(clean):
+            if not clean:
                 continue
             if no_results.search(clean):
-                if offset == 0:
+                if not candidates:
                     break
+                continue
+            if PLACEHOLDER_VALUE_RE.search(clean):
                 continue
             if skip_line.search(clean):
                 continue
@@ -1450,6 +1547,11 @@ def parse_smartphrase_report(text: str) -> ParseReport:
     if sex_match:
         sex = sex_match.group(1).lower()
         _record(report, "sex", "male" if sex == "m" else "female" if sex == "f" else sex, "parsed", "explicit sex")
+    race_match = re.search(r"\b(?:race(?:/ethnicity)?|ethnicity)\s*(?:=|:|is)?\s*([^\n]+)", text, re.IGNORECASE)
+    if race_match:
+        race = race_match.group(1).strip().strip(".")
+        if race and not PLACEHOLDER_VALUE_RE.fullmatch(race):
+            _record(report, "race_ethnicity", race, "parsed", "explicit race/ethnicity")
 
     bp_match = re.search(r"\b(?:bp|blood pressure)\s*(?:=|:)?\s*(\d{2,3})\s*/\s*(\d{2,3})", text, re.IGNORECASE)
     if bp_match:
@@ -1469,6 +1571,8 @@ def parse_smartphrase_report(text: str) -> ParseReport:
 
     for field, label_pattern in NUMERIC_PATTERNS.items():
         if field in report.extracted:
+            continue
+        if field == "hscrp":
             continue
         value = _parse_number_after_label(text, label_pattern)
         if value is not None:
@@ -1508,6 +1612,15 @@ def parse_smartphrase_report(text: str) -> ParseReport:
             unit = lpa_match.group(2).lower()
             _record(report, "lpa_unit", "nmol/L" if unit == "nmol/l" else "mg/dL", "parsed", "Lp(a) unit")
         else:
+            _record_source_meta(
+                report,
+                "lp_a_review",
+                True,
+                "uncertain",
+                "Confirm Lp(a) units.",
+                source_text=lpa_match.group(0),
+                review_required=True,
+            )
             report.field_meta["lpa_unit"] = {
                 "confidence": "uncertain",
                 "source": "Lp(a) value present but unit missing",
@@ -1527,6 +1640,16 @@ def parse_smartphrase_report(text: str) -> ParseReport:
             reason = _extract_unavailable_reason(text, label)
             if reason:
                 _mark_unavailable(report, field, reason, label)
+                if field == "uacr":
+                    if "calculate" in reason.lower() or "reportable" in reason.lower():
+                        _record_source_meta(
+                            report,
+                            "uacr_status",
+                            "indeterminate",
+                            "uncertain",
+                            "UACR not calculable.",
+                            review_required=True,
+                        )
                 if field == "cac":
                     report.extracted["cac"] = None
                     _record(report, "cac_not_done", True, "parsed", reason)
@@ -1826,6 +1949,8 @@ def parse_smartphrase_report(text: str) -> ParseReport:
         "filipino_ancestry",
     ):
         if field in report.extracted:
+            continue
+        if field == "osa" and report.extracted.get("sleep_apnea_review") is True:
             continue
         value = _keyword_present_without_explicit_negation(text, explicit_bool_labels[field])
         if value is True:

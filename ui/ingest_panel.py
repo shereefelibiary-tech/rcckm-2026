@@ -303,6 +303,7 @@ RECOGNITION_FIELD_ORDER = (
     ("a1c", "A1c", ("a1c",), "%"),
     ("egfr", "eGFR", ("egfr",), None),
     ("bmi", "BMI", ("bmi",), None),
+    ("diabetes", "Diabetes", ("diabetes", "diabetes_source"), None),
     ("smoking", "Smoking", ("smoker", "former_smoker", "pack_years"), None),
     (
         "medications",
@@ -312,12 +313,13 @@ RECOGNITION_FIELD_ORDER = (
     ),
     ("apob", "ApoB", ("apob",), "mg/dL"),
     ("lp_a_value", "Lp(a)", ("lp_a_value",), None),
-    ("uacr", "UACR", ("uacr",), "mg/g"),
+    ("lp_a_review", "Lp(a) units", ("lp_a_review",), None),
+    ("uacr", "UACR", ("uacr", "uacr_status"), "mg/g"),
     ("cac", "CAC", ("cac", "cac_not_done"), None),
     ("family_history", "Family history", ("family_history_premature_ascvd",), None),
     ("clinical_ascvd_review", "Clinical ASCVD", ("clinical_ascvd_review",), None),
     ("hscrp", "hsCRP", ("hscrp",), "mg/L"),
-    ("osa", "OSA", ("osa",), None),
+    ("osa", "OSA", ("osa", "sleep_apnea_review"), None),
     ("masld", "MASLD", ("masld",), None),
     (
         "inflammatory",
@@ -328,6 +330,7 @@ RECOGNITION_FIELD_ORDER = (
             "sle",
             "psoriasis",
             "inflammatory_arthritis",
+            "inflammatory_arthritis_review",
             "ibd",
         ),
         None,
@@ -637,11 +640,23 @@ def _recognition_field_value(field_id, keys, parsed, unit):
             if parsed.get(key) is True:
                 labels.append(label)
         return ", ".join(labels)
+    if field_id == "diabetes":
+        if parsed.get("diabetes") is True:
+            return "Diabetes detected" if parsed.get("diabetes_source") == "problem_list" else "Diabetes"
+        if parsed.get("diabetes") is False:
+            return "No diabetes"
+        return ""
     if field_id == "cac":
         if parsed.get("cac") is not None:
             return compact(parsed.get("cac"))
         if parsed.get("cac_not_done") is True:
             return ""
+    if field_id == "uacr":
+        if parsed.get("uacr") is not None:
+            return f"{compact(parsed.get('uacr'))} {unit}" if unit else compact(parsed.get("uacr"))
+        if parsed.get("uacr_status") == "indeterminate":
+            return "not calculable"
+        return ""
     if field_id == "family_history":
         value = parsed.get("family_history_premature_ascvd")
         if value is True:
@@ -657,8 +672,16 @@ def _recognition_field_value(field_id, keys, parsed, unit):
         return ""
     if field_id == "clinical_ascvd_review":
         return "Possible ASCVD history; review" if parsed.get("clinical_ascvd_review") is True else ""
+    if field_id == "osa":
+        if parsed.get("osa") is True:
+            return "Yes"
+        if parsed.get("sleep_apnea_review") is True:
+            return "Possible sleep apnea"
+        return ""
     if field_id == "inflammatory":
         labels = []
+        if parsed.get("inflammatory_arthritis_review") is True:
+            return "Inflammatory arthritis review"
         for label, key in (
             ("RA", "rheumatoid_arthritis"),
             ("SLE", "sle"),
@@ -679,6 +702,8 @@ def _recognition_field_value(field_id, keys, parsed, unit):
         return ", ".join(labels)
     if field_id == "reproductive":
         return "Present" if any(parsed.get(key) is True for key in keys) else ""
+    if field_id == "lp_a_review":
+        return "Confirm Lp(a) units" if parsed.get("lp_a_review") is True else ""
 
     for key in keys:
         value = parsed.get(key)
@@ -740,6 +765,8 @@ def build_parser_recognition_items(report) -> list[ParserRecognitionItem]:
     }
     items = []
     for priority, (field_id, label, keys, unit) in enumerate(RECOGNITION_FIELD_ORDER):
+        if field_id == "diabetes" and parsed.get("diabetes") is not True:
+            continue
         value = _recognition_field_value(field_id, keys, parsed, unit)
         status = _recognition_status(field_id, keys, parsed, meta, conflict_fields, value)
         if status == "missing" and not any(key in meta for key in keys):
@@ -784,6 +811,14 @@ def render_parser_recognition_strip(report) -> str:
                 label = "Possible ASCVD history; review"
             elif item.field_id == "cac":
                 label = "CAC placeholder detected" if "placeholder" in item.source_text.lower() else "CAC review"
+            elif item.field_id == "lp_a_review":
+                label = "Confirm Lp(a) units"
+            elif item.field_id == "uacr" and "calculable" in item.value.lower():
+                label = "UACR not calculable"
+            elif item.field_id == "osa":
+                label = "Possible sleep apnea"
+            elif item.field_id == "inflammatory":
+                label = "Inflammatory arthritis review"
             else:
                 label = f"{item.label} review"
         detail_attr = f' data-detail="{html.escape(item.source_text)}"' if item.source_text else ""

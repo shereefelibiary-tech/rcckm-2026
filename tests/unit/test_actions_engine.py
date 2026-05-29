@@ -403,6 +403,7 @@ def test_build_action_plan_adds_cac_for_borderline_risk_with_premature_family_hi
         sex="male",
         lp_a_value=20,
         lp_a_unit="nmol/L",
+        apob=80,
         premature_fhx_ascvd=True,
     )
 
