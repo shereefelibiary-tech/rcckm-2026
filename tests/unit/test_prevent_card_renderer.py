@@ -83,8 +83,8 @@ def test_render_prevent_card_handles_unavailable_prevent_risk():
     assert "--" in html
     assert "unavailable" in html
     assert "PREVENT estimate unavailable" in html
-    assert "PREVENT unavailable: missing systolic BP, smoking status." in html
-    assert "Missing inputs:" in html
+    assert "PREVENT unavailable: systolic BP, smoking status not available." in html
+    assert "Not available:" in html
     assert "systolic BP" in html
     assert "smoking status" in html
     assert "Model used provided" not in html
@@ -100,7 +100,7 @@ def test_render_prevent_card_missing_inputs_can_also_show_30_year_age_note():
 
     html = render_prevent_card(result)
 
-    assert "Missing inputs:" in html
+    assert "Not available:" in html
     assert "systolic BP" in html
     assert "30-year PREVENT is only available for ages 30-59." in html
 
@@ -247,12 +247,12 @@ def test_render_prevent_card_translates_uacr_model_warning():
         prevent_10y_ascvd=5.4,
         prevent_risk_category=RiskLevel.INTERMEDIATE,
         prevent_model_used="base",
-        prevent_warnings=["UACR missing; base PREVENT model used."],
+        prevent_warnings=["UACR not available; base PREVENT model used."],
     )
 
     html = render_prevent_card(result)
 
-    assert "UACR missing; PREVENT calculated without UACR." in html
+    assert "UACR not available; PREVENT calculated without UACR." in html
     assert "base PREVENT model used" not in html
     assert "Model used" not in html
 
@@ -298,7 +298,7 @@ def test_build_prevent_missing_reason_lists_missing_fields():
 
     html = build_prevent_missing_reason(result)
 
-    assert "Missing inputs:" in html
+    assert "Not available:" in html
     assert "<li>systolic BP</li>" in html
     assert "<li>HDL-C</li>" in html
 

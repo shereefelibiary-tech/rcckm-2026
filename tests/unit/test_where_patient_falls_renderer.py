@@ -38,7 +38,7 @@ def test_where_patient_falls_displays_measured_values_and_effects():
     html = build_where_patient_falls_html(patient, result, show_not_active=True)
 
     assert "WHERE THIS PATIENT FALLS" in html
-    assert "Inputs, missing data, and level-driving findings." in html
+    assert "Inputs, available data, and level-driving findings." in html
     assert "Risk impact: Major = changes level/action" in html
     assert "Contributes = supports risk" in html
     assert "Context = background" in html
@@ -100,9 +100,9 @@ def test_where_patient_falls_surfaces_missing_clarifiers():
 
     html = build_where_patient_falls_html(patient, result)
 
-    assert "ApoB missing" in html
+    assert "ApoB not available" in html
     assert "Plaque unmeasured" in html
-    assert "missing" in html
+    assert "not available" in html
 
 
 def test_where_patient_falls_shows_cac_percentile_as_clinician_detail_when_useful():
@@ -258,9 +258,9 @@ def test_where_patient_falls_keeps_missing_clarifiers_visible_by_default():
     patient = Patient(age=60, sex="male", ldl_c=140, prevent_10y_ascvd=8.2)
     html = build_where_patient_falls_html(patient, run_patient(patient)[0])
 
-    assert "ApoB missing" in html
-    assert "Lp(a) missing" in html
-    assert "UACR missing" in html
+    assert "ApoB not available" in html
+    assert "Lp(a) not available" in html
+    assert "UACR not available" in html
     assert "Plaque unmeasured" in html
     assert "Context only" in html
 
@@ -323,7 +323,7 @@ def test_where_patient_falls_lpa_missing_shows_clarifier_and_thresholds():
     html = build_where_patient_falls_html(patient, result)
     row = _row_snippet(html, "Lp(a)")
 
-    assert "Lp(a) missing" in row
+    assert "Lp(a) not available" in row
     assert ">Context only<" in row
     assert "nmol/L: &lt;75 reference; 75-124 mild; &gt;=125 elevated; &gt;=250 high; &gt;=430 very high" in row
     assert "mg/dL: &lt;30 reference; 30-49 mild; &gt;=50 elevated; &gt;=100 high; &gt;=180 very high" in row

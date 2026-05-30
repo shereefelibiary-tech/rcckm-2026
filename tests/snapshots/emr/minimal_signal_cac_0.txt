@@ -10,7 +10,7 @@ Assessment:
 Recommendations:
 1. Lipids: No lipid escalation.
 2. Plaque: CAC 0.
-3. Kidney: eGFR/UACR can clarify risk.
+3. Kidney: eGFR/UACR not available.
 4. BP: BP needed.
 5. Glycemia: No glycemic action; A1c 5.2.
 6. Aspirin: Not routine for primary prevention.

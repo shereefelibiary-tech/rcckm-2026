@@ -828,16 +828,16 @@ def _build_ckm_kdigo_summary_html(result, patient=None):
     if uacr is not None:
         kidney_values.append(f"UACR {float(uacr):g} mg/g")
     elif egfr is not None:
-        kidney_values.append("UACR missing; albuminuria not measured")
+        kidney_values.append("UACR not available")
         egfr_stage = getattr(result, "egfr_stage", None) or kdigo_raw or "eGFR"
-        kdigo = f"KDIGO incomplete: {egfr_stage}; UACR missing"
+        kdigo = f"KDIGO partial: {egfr_stage}; UACR not available"
     if not kidney_values:
         if getattr(result, "egfr_stage", None):
             kidney_values.append(str(result.egfr_stage))
         if getattr(result, "albuminuria_stage", None):
             kidney_values.append(str(result.albuminuria_stage))
         if getattr(result, "egfr_stage", None) and not getattr(result, "albuminuria_stage", None):
-            kdigo = f"KDIGO incomplete: {result.egfr_stage}; UACR missing"
+            kdigo = f"KDIGO partial: {result.egfr_stage}; UACR not available"
     kidney_desc = "; ".join(kidney_values) if kidney_values else "Kidney staging not available."
 
     plaque_context = ""

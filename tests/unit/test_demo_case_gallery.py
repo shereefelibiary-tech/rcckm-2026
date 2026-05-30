@@ -42,7 +42,7 @@ def test_demo_case_gallery_exposes_curated_realistic_cases():
     assert len(options) == len(DEMO_CASES)
     labels = [label for label, _case_name in options]
     assert "Low-risk clean prevention" in labels
-    assert "Multiple enhancers, missing ApoB/Lp(a)" in labels
+    assert "Multiple enhancers, ApoB/Lp(a) not available" in labels
     assert "Younger patient with premature family history" in labels
     assert "Younger strong family history" not in labels
     assert "ACEi/ARB with persistent albuminuria" in labels
@@ -187,7 +187,7 @@ def test_high_apob_discordance_demo_is_apob_driven_and_actionable():
     assert "high near-term risk" not in text.lower()
     assert "High-intensity statin" not in text
     assert demo_case_description("high_apob_discordance") == (
-        "Low 10-year risk, but elevated ApoB and premature family history make earlier lipid-lowering reasonable to discuss."
+        "Low 10-year risk, but elevated ApoB and premature family history support discussion of earlier lipid-lowering."
     )
 
 
@@ -336,11 +336,11 @@ def test_ckd_albuminuria_demo_is_action_oriented_without_passive_no_escalation()
     assert "CKM/Kidney/Plaque: CKM 3; kidney G2A2; CAC not measured." in emr
     assert "No medication escalation today." not in emr
     assert "1. Lipids: Discuss moderate-intensity statin; LDL-C <100, ApoB <90, non-HDL-C <130." in emr
-    assert "3. Kidney: UACR 48; continue/optimize ACEi-ARB." in emr
+    assert "3. Kidney: UACR 48; ACEi/ARB active." in emr
     assert "4. BP: Treat toward <130/80." in emr
     assert "Consider SGLT2 inhibitor if UACR is >=200 mg/g" not in emr
     assert "hsCRP - inflammatory biomarker clarification" not in emr
-    assert "7. Clarify: hsCRP." in emr
+    assert "7. Additional information: hsCRP." not in emr
 
 
 def test_severe_secondary_prevention_demo_uses_very_high_risk_ascvd_targets():

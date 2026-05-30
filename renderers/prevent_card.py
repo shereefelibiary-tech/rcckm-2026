@@ -96,8 +96,8 @@ def build_prevent_missing_reason(result):
         )
         return (
             "<div class=\"prevent-missing\">"
-            f"<strong>PREVENT unavailable: missing {escape(missing_summary)}.</strong>"
-            "<div class=\"prevent-missing-subhead\">Missing inputs:</div>"
+            f"<strong>PREVENT unavailable: {escape(missing_summary)} not available.</strong>"
+            "<div class=\"prevent-missing-subhead\">Not available:</div>"
             f"<ul>{items}</ul>{warnings_block}</div>"
         )
 
@@ -105,7 +105,7 @@ def build_prevent_missing_reason(result):
         return f"<div class=\"prevent-missing\">{escape(unsupported)}{warnings_block}</div>"
 
     return (
-        "<div class=\"prevent-missing\">Enter the required PREVENT inputs to "
+        "<div class=\"prevent-missing\">Add PREVENT inputs to "
         f"show the estimate.{warnings_block}</div>"
     )
 
@@ -364,10 +364,12 @@ def render_prevent_card(result):
     model_note_items = []
     for item in (getattr(result, "prevent_warnings", None) or []):
         text = str(item).strip()
-        if "UACR missing" not in text:
+        if "UACR missing" not in text and "UACR not available" not in text:
             continue
         if "PREVENT model used" in text:
-            text = "UACR missing; PREVENT calculated without UACR."
+            text = "UACR not available; PREVENT calculated without UACR."
+        else:
+            text = text.replace("UACR missing", "UACR not available")
         model_note_items.append(text)
     model_note_html = (
         f'<div class="prevent-line prevent-model-note">{escape(model_note_items[0])}</div>'

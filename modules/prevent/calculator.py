@@ -105,7 +105,7 @@ def _merge_official_missing_values(patient, explicit: dict) -> dict:
             merged["unsupported_reason"] = reason
     if official.get("missing_inputs"):
         merged["warnings"].append(
-            "Official PREVENT calculation incomplete for missing fields: "
+            "Official PREVENT calculation unavailable for fields: "
             + ", ".join(official["missing_inputs"])
         )
     return merged

@@ -10,7 +10,7 @@ Score  Complete  Coherent  Readable  Showcase  Demo
   100       100       100       100       100  Younger patient with premature family history
   100       100       100       100       100  Prediabetes / insulin resistance
   100       100       100       100       100  High ApoB discordance
-  100       100       100       100       100  LDL-C high, ApoB missing
+  100       100       100       100       100  LDL-C high, ApoB not available
   100       100       100       100       100  LDL-C >=190 severe hypercholesterolemia
   100       100       100       100       100  Elevated Lp(a)
   100       100       100       100       100  Hypertriglyceridemia / insulin resistance
@@ -36,17 +36,17 @@ Score  Complete  Coherent  Readable  Showcase  Demo
    98       100       100       100        94  On-treatment above-target lipids
    98       100       100       100        94  High-intensity statin, add-on discussion
    98       100       100       100        94  Statin intolerance
-   98        92       100       100       100  Multiple enhancers, missing ApoB/Lp(a)
+   98        92       100       100       100  Multiple enhancers, ApoB/Lp(a) not available
    97       100       100       100        88  Severe secondary prevention
 
 Strongest demos: Borderline ASCVD discussion, Younger patient with premature family history, Prediabetes / insulin resistance
-Weakest demos: Statin intolerance, Multiple enhancers, missing ApoB/Lp(a), Severe secondary prevention
-Sparse demos: Multiple enhancers, missing ApoB/Lp(a)
+Weakest demos: Statin intolerance, Multiple enhancers, ApoB/Lp(a) not available, Severe secondary prevention
+Sparse demos: Multiple enhancers, ApoB/Lp(a) not available
 Contradictory demos: none
 Demos needing rewrite: none
 
 Warnings:
-- Multiple enhancers, missing ApoB/Lp(a): sparse advanced prevention data: apob, lp_a_value, uacr, hscrp
+- Multiple enhancers, ApoB/Lp(a) not available: sparse advanced prevention data: apob, lp_a_value, uacr, hscrp
 
 Suggestions:
 - Low-risk clean prevention: showcase concept may be too subtle: lifestyle prevention

@@ -236,10 +236,10 @@ def test_empty_patient_inputs_preserve_missing_numeric_values():
     assert calculate_rss_total(contributions) == 0
 
     wpf_html = build_where_patient_falls_html(patient, result, show_not_active=True)
-    assert "UACR missing" in wpf_html
-    assert "ApoB missing" in wpf_html
-    assert "Lp(a) missing" in wpf_html
-    assert "hsCRP missing" in wpf_html
+    assert "UACR not available" in wpf_html
+    assert "ApoB not available" in wpf_html
+    assert "Lp(a) not available" in wpf_html
+    assert "hsCRP not available" in wpf_html
     assert "Plaque unmeasured" in wpf_html
     assert "UACR 0" not in wpf_html
     assert "ApoB 0" not in wpf_html

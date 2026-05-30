@@ -25,7 +25,7 @@ def test_uacr_missing_is_not_rendered_as_zero_and_zero_is_not_missing():
     missing = render_case_output(Patient(age=55, sex="male", egfr=80, uacr=None))["outputs"]["visible"]
     zero = render_case_output(Patient(age=55, sex="male", egfr=80, uacr=0))["outputs"]["visible"]
     assert "UACR 0" not in missing
-    assert "UACR missing" in missing
+    assert "UACR not available" in missing
     assert "UACR 0" in zero or "0 mg/g" in zero
     assert "albuminuria not measured" not in zero
 

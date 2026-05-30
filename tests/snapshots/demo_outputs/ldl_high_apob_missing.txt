@@ -1,4 +1,4 @@
-DEMO: LDL-C high, ApoB missing
+DEMO: LDL-C high, ApoB not available
 CASE: ldl_high_apob_missing
 
 EMR:
@@ -18,7 +18,7 @@ Recommendations:
 4. BP: Treat toward <130/80.
 5. Glycemia: No glycemic action; A1c 5.6.
 6. Aspirin: Not routine for primary prevention.
-7. Clarify: ApoB; Lp(a).
+7. Additional information: ApoB; Lp(a).
 
 PATIENT ROADMAP:
 Your Prevention Roadmap
@@ -46,8 +46,7 @@ STEP 3
 Your goals:
 - LDL-C: 172 mg/dL to <100 mg/dL
 - non-HDL-C: 200 mg/dL calculated to <130 mg/dL
-- ApoB: - to <90 mg/dL
-- A1c: 5.6% to individualized
+- A1c: 5.6% to normal range
 - BP: 130/78 mmHg to <130/80
 - Kidney / albuminuria: 9 mg/g; G1A1 to reduce albuminuria / preserve eGFR
 - Weight: BMI 29.0 to individualized
@@ -55,11 +54,11 @@ Your goals:
 STEP 4
 Your next steps:
 1. Lower plaque-driving cholesterol: Discuss cholesterol-lowering therapy.
-2. Artery plaque: A calcium scan may help only if treatment choices are still uncertain.
-3. Protect the kidneys: Kidney markers do not show an immediate action signal.
-4. Blood pressure: Review blood pressure goals with your clinician.
-5. Blood sugar: No immediate blood sugar action is shown from the current data.
-6. Aspirin safety: Do not start aspirin unless your clinician recommends it.
+2. Artery plaque: Calcium scan only if it would change the treatment decision.
+3. Protect the kidneys: No kidney action from current eGFR/UACR.
+4. Blood pressure: Treat toward <130/80.
+5. Blood sugar: Normal range.
+6. Aspirin safety: Do not start routine aspirin.
 
 ACTIONS:
 - Lipid lowering: Discuss moderate-intensity statin. LDL-C 172; target <100. Obtain ApoB for particle burden.
@@ -68,7 +67,7 @@ ACTIONS:
 - Blood pressure: Treat toward <130/80. Current 130/78.
 - Glycemia / metabolic: No glycemic action. A1c 5.6.
 - Aspirin / antiplatelet: Not routine for primary prevention. Do not start routine aspirin.
-- Data to clarify: Complete key data. ApoB, Lp(a).
+- Additional information: Additional information. ApoB, Lp(a).
 
 RSS: 4
 RSS CONTRIBUTORS:

@@ -24,6 +24,21 @@ ROADMAP_FORBIDDEN = (
     "None",
     "null",
     "NaN",
+    "interpreted with the overall risk picture",
+    "reviewed as part of the prevention plan",
+    "does not show an immediate action signal",
+    "No immediate blood sugar action is shown",
+    "Targets to review with your clinician",
+    "management as appropriate",
+    "incomplete",
+    "deficiency",
+    "deficient",
+    "failed",
+    "overdue",
+    "should have",
+    "missing ApoB",
+    "missing CAC",
+    "missing UACR",
 )
 
 
@@ -86,6 +101,34 @@ def test_patient_roadmap_prioritizes_concise_next_steps():
     ]
     assert 1 <= len(next_step_lines) <= 5
     assert all(len(line) < 220 for line in next_step_lines)
+
+
+def test_patient_roadmap_low_risk_old_egfr_missing_uacr_is_specific():
+    roadmap = render_case_output(
+        Patient(
+            age=52,
+            sex="female",
+            ldl_c=97,
+            hdl_c=62,
+            triglycerides=80,
+            a1c=5.4,
+            egfr=55,
+            uacr=None,
+            sbp=105,
+            dbp=71,
+            prevent_10y_ascvd=2.1,
+        )
+    )["outputs"]["roadmap"]
+
+    assert "A1c: 5.4% to normal range" in roadmap
+    assert "BP: 105/71 mmHg to <130/80" in roadmap
+    assert "Kidney: eGFR 55; UACR not available to repeat eGFR/UACR if due" in roadmap
+    assert "Blood pressure: At goal." in roadmap
+    assert "Blood sugar: Normal range." in roadmap
+    assert "Protect the kidneys: Repeat kidney blood/urine testing; eGFR 55 and UACR not available." in roadmap
+    assert "Artery plaque: Calcium scan only if it would change the treatment decision." in roadmap
+    assert "ApoB:" not in roadmap
+    assert "hsCRP" not in roadmap
 
 
 def test_patient_roadmap_html_uses_distinct_compact_section_panels():

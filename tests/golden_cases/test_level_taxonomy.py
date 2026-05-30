@@ -591,19 +591,19 @@ def test_level_3b_intermediate_prevent_uacr_missing_prioritizes_uacr_and_specifi
 
     assert classification.level == "3B"
     assert classification.prevent_category == "INTERMEDIATE"
-    assert "kidney G2; UACR missing" in note
-    assert "UACR missing; obtain UACR" in note
+    assert "kidney G2; UACR not available" in note
+    assert "UACR not available; obtain UACR" in note
     assert result.dominant_action == (
         "Moderate-intensity statin therapy is reasonable given borderline ASCVD risk with risk-enhancing factors."
     )
     assert recommendation_lines[:7] == [
         "1. Lipids: Discuss moderate-intensity statin; LDL-C <100, ApoB <90, non-HDL-C <130.",
         "2. Plaque: CAC may clarify risk.",
-        "3. Kidney: UACR missing; obtain UACR.",
+        "3. Kidney: UACR not available; obtain UACR.",
         "4. BP: Treat toward <130/80.",
         "5. Glycemia: Prediabetes prevention; A1c 5.9%.",
         "6. Aspirin: Not routine for primary prevention.",
-        "7. Clarify: UACR; hsCRP.",
+        "7. Additional information: UACR.",
     ]
     assert "CAC reasonable for risk clarification if treatment decision remains uncertain" not in actions
     assert "subclinical coronary atherosclerosis" not in diagnoses.lower()

@@ -591,7 +591,7 @@ def render_recommended_smartphrase_template(st):
       template.focus();
       template.select();
       const ok = document.execCommand("copy");
-      msg.textContent = ok ? "Template copied." : "Copy failed - select the template manually.";
+      msg.textContent = ok ? "Template copied." : "Copy unavailable - select the template manually.";
       template.classList.add("recommended-smartphrase-hidden");
     }}
     setTimeout(function() {{ msg.textContent = ""; }}, 1800);
@@ -800,7 +800,7 @@ def render_parser_recognition_strip(report) -> str:
     chips = []
     for index, item in enumerate(items):
         label = item.value if item.status == "extracted" and item.value else (
-            f"{item.label} missing" if item.status == "missing" else item.label
+            f"{item.label} not available" if item.status == "missing" else item.label
         )
         if item.status == "extracted" and item.label not in str(label):
             label = f"{item.label} {label}"

@@ -5,10 +5,10 @@ from smartphrase_ingest.models import ExtractedCandidate, ParsedPatientDraft
 
 
 REQUIRED_REVIEW_FIELDS = (
-    ("apob", "ApoB missing"),
-    ("lp_a_value", "Lp(a) missing"),
-    ("uacr", "UACR missing"),
-    ("cac", "CAC missing"),
+    ("apob", "ApoB not available"),
+    ("lp_a_value", "Lp(a) not available"),
+    ("uacr", "UACR not available"),
+    ("cac", "CAC not measured"),
     ("premature_fhx_ascvd", "Family history unknown"),
 )
 

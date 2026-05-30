@@ -116,7 +116,7 @@ def test_cac_350_uses_high_plaque_burden_pathway():
     assert target.ldl_c_target == 70
     assert target.non_hdl_c_target == 100
     assert "CAC 300-999" in target.rationale
-    assert "very-high-risk targets may be reasonable" in target.rationale
+    assert "Consider very-high-risk targets only when overall context supports intensification" in target.rationale
     assert "Severe subclinical coronary atherosclerosis" in _diagnosis_names(result)
 
 

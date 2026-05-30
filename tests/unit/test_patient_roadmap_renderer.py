@@ -79,7 +79,7 @@ def test_render_patient_roadmap_groups_full_clinical_story_without_raw_html():
     assert "Why your risk is higher" in html
     assert "The main reasons your risk is higher." in html
     assert "Your goals" in html
-    assert "Targets to review with your clinician." in html
+    assert "Current goals and values." in html
     assert "Your next steps" in html
     assert "The most important steps to lower future risk." in html
     assert "Your Prevention Roadmap" in html
@@ -145,9 +145,9 @@ def test_render_patient_roadmap_groups_full_clinical_story_without_raw_html():
     assert "Discuss stronger cholesterol-lowering therapy." in html
     assert "No repeat calcium scan is needed for today&#x27;s decision." not in html
     assert "Aspirin safety" in html
-    assert "Do not start aspirin unless your clinician recommends it." in html
+    assert "Do not start routine aspirin." in html
     assert "Protect the kidneys" in html
-    assert "Review kidney protection options with your clinician." in html
+    assert "Review kidney protection; UACR 45." in html
     assert "Lp(a) can be checked once to guide long-term prevention." not in html
     assert "This roadmap is for discussion with your clinician." not in html
     assert "Medication decisions should be individualized." not in html
@@ -248,9 +248,9 @@ def test_render_patient_roadmap_text_is_copy_ready_plain_text():
     assert "STEP 4" in text
     assert "Your next steps:" in text
     assert "1. Lower plaque-driving cholesterol: Discuss stronger cholesterol-lowering therapy." in text
-    assert "2. Artery plaque: Your calcium score is included in the prevention plan." in text
-    assert "3. Protect the kidneys: Review kidney protection options with your clinician." in text
-    assert "6. Aspirin safety: Do not start aspirin unless your clinician recommends it." in text
+    assert "2. Artery plaque: CAC 350 is included in the prevention plan." in text
+    assert "3. Protect the kidneys: Review kidney protection; UACR 45." in text
+    assert "6. Aspirin safety: Do not start routine aspirin." in text
     assert "4. Additional testing: Lp(a) can be checked once to guide long-term prevention." not in text
     assert "Dominant action" not in text
     assert "dominant_action" not in text
@@ -296,7 +296,7 @@ def test_render_printable_patient_roadmap_uses_dedicated_print_html():
     assert "ApoB" in html
     assert "BP" in html
     assert "A1c" in html
-    assert "Clinician review required" in html
+    assert "Clinician review recommended" in html
     assert "<pre" not in html
     assert "<canvas" not in html
     assert "<img" not in html
@@ -394,8 +394,8 @@ def test_render_patient_roadmap_explains_unavailable_prevent():
 
     assert "10-year ASCVD risk" in html
     assert "Unavailable" in html
-    assert "Missing inputs: systolic BP, smoking status" in html
-    assert "Missing inputs: systolic BP, smoking status" in text
+    assert "Not available: systolic BP, smoking status" in html
+    assert "Not available: systolic BP, smoking status" in text
 
 
 def test_patient_roadmap_cac_percentile_context_is_secondary_to_absolute_score():

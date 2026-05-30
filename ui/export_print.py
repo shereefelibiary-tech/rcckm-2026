@@ -55,7 +55,7 @@ def _fallback_printable_roadmap_html(roadmap_text: str) -> str:
 <main class="print-roadmap-page" aria-label="Printable patient roadmap">
   <h1>Patient prevention roadmap</h1>
   {lines}
-  <div class="print-roadmap-disclaimer">Clinician review required. This roadmap supports discussion and does not replace medical judgment.</div>
+  <div class="print-roadmap-disclaimer">Clinician review recommended. This roadmap supports discussion and does not replace medical judgment.</div>
 </main>
 """.strip()
 
@@ -161,7 +161,7 @@ def _copy_print_component_html(
       textarea.select();
       const ok = document.execCommand("copy");
       document.body.removeChild(textarea);
-      setMessage(ok ? label + " copied." : "Copy failed - select the text manually.");
+      setMessage(ok ? label + " copied." : "Copy unavailable - select the text manually.");
     }}
   }}
 

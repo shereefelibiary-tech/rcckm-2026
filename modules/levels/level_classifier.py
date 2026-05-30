@@ -127,6 +127,12 @@ def _albuminuria(patient) -> bool:
     return uacr is not None and uacr >= 30
 
 
+def _advanced_ckd_albuminuria(patient) -> bool:
+    egfr = _num(getattr(patient, "egfr", None))
+    uacr = _num(getattr(patient, "uacr", None))
+    return bool(egfr is not None and egfr < 30 and uacr is not None and uacr >= 300)
+
+
 def _bp_signal(patient) -> bool:
     sbp = _num(getattr(patient, "sbp", None))
     dbp = _num(getattr(patient, "dbp", None))
@@ -400,6 +406,17 @@ def classify_rcckm_level(patient, prevent_result=None, rss_result=None, diagnosi
             result,
             patient,
             "treatment-forward",
+        )
+
+    if _advanced_ckd_albuminuria(patient):
+        return _classification(
+            "3B",
+            "Level 3B - advanced CKM / severe kidney-risk phenotype",
+            "Advanced CKD with severely increased albuminuria is a severe kidney-risk phenotype.",
+            actionable or ["advanced CKD", "severely increased albuminuria"],
+            result,
+            patient,
+            "domain action",
         )
 
     if _albuminuria(patient) and (len(actionable) >= 2 or mild):

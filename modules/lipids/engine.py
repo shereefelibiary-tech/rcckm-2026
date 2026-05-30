@@ -6,7 +6,7 @@ def classify_atherogenic_burden(patient) -> List[str]:
 
     apob = getattr(patient, "apob", None)
     if apob is None:
-        findings.append("ApoB missing")
+        findings.append("ApoB not available")
     else:
         if apob >= 130:
             findings.append("Severe ApoB elevation")

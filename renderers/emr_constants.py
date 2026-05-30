@@ -34,7 +34,7 @@ EMR_RECOMMENDATION_DOMAIN_LABELS = {
     "blood_pressure": "BP",
     "glycemia_metabolic": "Glycemia",
     "aspirin_antiplatelet": "Aspirin",
-    "data_to_clarify": "Clarify",
+    "data_to_clarify": "Additional information",
 }
 
 EMR_ASSESSMENT_TITLE = "Assessment:"
@@ -48,7 +48,13 @@ FORBIDDEN_EMR_FILLER_FRAGMENTS = (
     "no repeat CAC needed",
     "Risk context:",
     "Risk:",
+    "Clarify:",
     "Level: Level",
+    "incomplete",
+    "Missing inputs",
+    "UACR missing",
+    "ApoB missing",
+    "CAC missing",
     "Estimated population risk",
     "near-term",
     "longer-term trajectory",

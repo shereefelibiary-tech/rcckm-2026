@@ -86,7 +86,7 @@ REPRODUCTIVE_FIELDS = (
 STATUS_META = {
     "found": ("&#10003;", "extracted"),
     "review": ("&#9888;", "review"),
-    "missing": ("&#9675;", "not found"),
+    "missing": ("&#9675;", "not available"),
     "conflict": ("&#10005;", "conflict"),
 }
 
@@ -312,10 +312,10 @@ def _improvement_tips(parsed: dict[str, Any], meta: dict[str, Any], conflicts: s
 
 def _item(label: str, field: str, value: str, status: str, detail: str) -> str:
     icon, status_text = STATUS_META[status]
-    value_html = html.escape(value or f"{label} missing")
+    value_html = html.escape(value or f"{label} not available")
     detail_attr = f' data-detail="{html.escape(detail)}"' if detail else ""
     focus_attr = ' tabindex="0"' if detail else ""
-    aria = f'{label}: {status_text}. {value or "not found"}'
+    aria = f'{label}: {status_text}. {value or "not available"}'
     return (
         f'<div class="parse-item parse-item-{status}"{detail_attr}{focus_attr} aria-label="{html.escape(aria)}">'
         f'<span class="parse-icon" aria-hidden="true">{icon}</span>'

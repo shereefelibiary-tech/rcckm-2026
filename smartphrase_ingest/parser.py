@@ -1316,7 +1316,8 @@ def _parse_bp_readings_table(report: ParseReport, text: str) -> None:
             continue
         if not clean:
             continue
-        match = re.search(r"\b\d{1,2}/\d{1,2}/\d{2,4}\s+(\d{2,3})\s*/\s*(\d{2,3})\b", clean)
+        clean = re.sub(r"\(!\)", " ", clean)
+        match = re.search(r"\b\d{1,2}/\d{1,2}/\d{2,4}\b\s+(?:\S+\s+)?(\d{2,3})\s*/\s*(\d{2,3})\b", clean)
         if match:
             _record(report, "sbp", float(match.group(1)), "parsed", "most recent BP readings table")
             _record(report, "dbp", float(match.group(2)), "parsed", "most recent BP readings table")
@@ -1546,7 +1547,14 @@ def parse_smartphrase_report(text: str) -> ParseReport:
     sex_match = re.search(r"\b(?:sex|gender)\s*(?:=|:|is)?\s*(male|female|m|f)\b", text, re.IGNORECASE)
     if sex_match:
         sex = sex_match.group(1).lower()
-        _record(report, "sex", "male" if sex == "m" else "female" if sex == "f" else sex, "parsed", "explicit sex")
+        sex_value = "male" if sex == "m" else "female" if sex == "f" else sex
+        current_source = str((report.field_meta.get("sex") or {}).get("source") or "").lower()
+        if report.extracted.get("sex") not in {None, sex_value} and "explicit" not in current_source:
+            report.extracted["sex"] = sex_value
+            report.field_meta["sex"] = {"confidence": "parsed", "source": "explicit sex"}
+            report.conflicts = [conflict for conflict in report.conflicts if not conflict.startswith("sex:")]
+        else:
+            _record(report, "sex", sex_value, "parsed", "explicit sex")
     race_match = re.search(r"\b(?:race(?:/ethnicity)?|ethnicity)\s*(?:=|:|is)?\s*([^\n]+)", text, re.IGNORECASE)
     if race_match:
         race = race_match.group(1).strip().strip(".")
@@ -1605,7 +1613,7 @@ def parse_smartphrase_report(text: str) -> ParseReport:
     if agatston and "cac" not in report.extracted:
         _record(report, "cac", float(agatston.group(1)), "parsed", "Agatston/CAC score")
 
-    lpa_match = re.search(r"\b(?:lp\(a\)|lpa|lp a|lipoprotein\s*\(a\))\s*(?:=|:|is|\|)?\s*([<>]?\s*\d+(?:\.\d+)?)\s*(nmol/L|mg/dL)?", text, re.IGNORECASE)
+    lpa_match = re.search(r"\b(?:lp\(a\)|lpa|lp a|lipoa|lipoprotein\s*\(a\))\s*(?:=|:|is|\|)?\s*([<>]?\s*\d+(?:\.\d+)?)\s*(nmol/L|mg/dL)?", text, re.IGNORECASE)
     if lpa_match:
         _record(report, "lpa", float(lpa_match.group(1).replace(" ", "").lstrip("<>")), "parsed", "Lp(a)")
         if lpa_match.group(2):
@@ -1717,7 +1725,7 @@ def parse_smartphrase_report(text: str) -> ParseReport:
             "confidence": "uncertain",
             "source": "family history mentioned without complete relationship/event/age",
         }
-        report.warnings.append("Family history mentioned but relationship, event, or age was incomplete.")
+        report.warnings.append("Family history mentioned; relationship, event, or age not specified.")
 
     diabetes_text = _without_gestational_diabetes_context(text_without_problem_list)
     diabetes_lowered = diabetes_text.lower()

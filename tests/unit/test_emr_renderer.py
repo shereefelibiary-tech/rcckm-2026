@@ -53,7 +53,7 @@ def test_render_emr_note_outputs_plain_text_sections_in_order():
     assert note.index("Level: HIGH.") < note.index("Assessment:") < note.index("Recommendations:")
     assert "Level: HIGH." in note
     assert "PREVENT: ASCVD 10y 8.2% (Intermediate); 30y 24.5%." in note
-    assert "CKM/Kidney/Plaque: CKM 3; kidney G3aA2; UACR missing; CAC 350." in note
+    assert "CKM/Kidney/Plaque: CKM 3; kidney G3aA2; UACR not available; CAC 350." in note
     assert "- Clinical ASCVD (ICD: I25.10)" in note
     assert "- Type 2 diabetes mellitus (ICD: E11.9)" in note
 
@@ -129,7 +129,7 @@ def test_cac_only_level4_emr_names_subclinical_atherosclerosis_driver():
     assert "3. Kidney: No kidney-risk signal." in note
     assert "5. Glycemia: No glycemic action; A1c 4.9." in note
     assert "6. Aspirin: Not routine for primary prevention." in note
-    assert "7. Clarify: ApoB." in note
+    assert "7. Additional information: ApoB." in note
 
 
 def test_low_cac_ldl_at_goal_emr_hides_non_decision_relevant_clarifiers():

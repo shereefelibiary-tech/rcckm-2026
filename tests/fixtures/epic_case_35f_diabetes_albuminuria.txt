@@ -1,0 +1,52 @@
+Synthetic example. Not real patient data.
+
+Epic copied header: 35M risk calculator artifact
+
+Demographics
+Age: 35 y.o.
+Sex: female
+
+Vitals
+BP Readings from Last 3 Encounters:
+05/29/26    (!) 166/100
+04/23/26    124/86
+04/06/26    (!) 142/90
+
+BMI
+Estimated body mass index is 36.2 kg/m2.
+
+Lipids
+Date          TC    TG    HDL    LDL
+05/29/2026    236   265   42     125
+
+A1c:
+Hemoglobin A1C
+Date          Value    Ref Range    Status
+05/29/2026    8.2 (H)  0 - 5.6 %    Final
+
+ApoB
+APOB 88 02/25/2026
+
+Lp(a)
+LIPOA 22.4 02/25/2026
+
+eGFR
+eGFR Cre 95
+
+UACR
+Albumin/Creatinine Ratio, Urine
+05/29/2026  362 (H)
+
+CAC
+Coronary artery calcium (CAC) score: ***
+
+Family history
+Premature ASCVD in first-degree relative: No
+
+Relevant diagnoses/problem list
+- Type 2 diabetes mellitus with albuminuria
+- PCOS / irregular menses
+
+Current medications
+dapagliflozin 10 mg daily
+lisinopril 20 mg daily

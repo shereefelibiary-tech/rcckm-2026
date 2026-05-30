@@ -42,10 +42,10 @@ def test_epic_placeholder_fixture_parses_through_staged_pipeline():
     assert resolved["bp_treated"] is True
     assert resolved["ace_arb"] is True
 
-    assert "ApoB missing" in draft.review_flags
-    assert "Lp(a) missing" in draft.review_flags
-    assert "UACR missing" in draft.review_flags
-    assert "CAC missing" in draft.review_flags
+    assert "ApoB not available" in draft.review_flags
+    assert "Lp(a) not available" in draft.review_flags
+    assert "UACR not available" in draft.review_flags
+    assert "CAC not measured" in draft.review_flags
     assert "Family history unknown" in draft.review_flags
     assert "BMI parsed from calculated text" in draft.review_flags
     assert "Multiple BP readings detected; most recent selected" in draft.review_flags

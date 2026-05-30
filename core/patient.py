@@ -88,6 +88,7 @@ class Patient:
     dm_meds_raw: Optional[str] = None
     statin_intensity: Optional[str] = None
     statin_intolerance: Optional[bool] = None
+    aspirin: Optional[bool] = None
     sglt2: Optional[bool] = None
     glp1: Optional[bool] = None
     ace_arb: Optional[bool] = None

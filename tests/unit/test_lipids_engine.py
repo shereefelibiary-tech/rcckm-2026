@@ -5,7 +5,7 @@ from modules.lipids.engine import classify_atherogenic_burden
 def test_apob_missing():
     patient = Patient(age=50, sex="male")
     labels = classify_atherogenic_burden(patient)
-    assert "ApoB missing" in labels
+    assert "ApoB not available" in labels
 
 
 def test_apob_85_borderline():

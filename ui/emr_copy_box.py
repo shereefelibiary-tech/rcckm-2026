@@ -99,7 +99,7 @@ def render_emr_copy_box(
       ta.focus();
       ta.select();
       const ok = document.execCommand("copy");
-      msg.textContent = ok ? "Copied to clipboard." : "Copy failed - select all and copy manually.";
+      msg.textContent = ok ? "Copied to clipboard." : "Copy unavailable - select all and copy manually.";
       setTimeout(() => msg.textContent = "", 2000);
     }}
   }}

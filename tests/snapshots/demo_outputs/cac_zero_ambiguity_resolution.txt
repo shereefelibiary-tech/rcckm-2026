@@ -18,7 +18,7 @@ Recommendations:
 4. BP: Treat toward <130/80.
 5. Glycemia: Prediabetes prevention; A1c 5.7%.
 6. Aspirin: Not routine for primary prevention.
-7. Clarify: Lp(a); hsCRP.
+7. Additional information: Lp(a).
 
 PATIENT ROADMAP:
 Your Prevention Roadmap
@@ -47,7 +47,7 @@ STEP 3
 Your goals:
 - LDL-C: 142 mg/dL to -
 - ApoB: 105 mg/dL to -
-- A1c: 5.7% to individualized
+- A1c: 5.7% to prediabetes range
 - BP: 134/82 mmHg; treated to <130/80
 - Kidney / albuminuria: 10 mg/g; G2A1 to reduce albuminuria / preserve eGFR
 - Weight: BMI 29.7 to individualized
@@ -55,11 +55,11 @@ Your goals:
 STEP 4
 Your next steps:
 1. Lower plaque-driving cholesterol: Discuss cholesterol-lowering therapy.
-2. Artery plaque: CAC 0 means no calcified coronary plaque was detected.
-3. Protect the kidneys: Kidney markers do not show an immediate action signal.
-4. Blood pressure: Review blood pressure goals with your clinician.
-5. Blood sugar: Keep diabetes or metabolic care moving toward the safest individualized goal.
-6. Aspirin safety: Do not start aspirin unless your clinician recommends it.
+2. Artery plaque: CAC 0 is included in the prevention plan.
+3. Protect the kidneys: No kidney action from current eGFR/UACR.
+4. Blood pressure: Treat toward <130/80.
+5. Blood sugar: Prediabetes range; focus on weight/activity.
+6. Aspirin safety: Do not start routine aspirin.
 
 ACTIONS:
 - Lipid lowering: Discuss moderate-intensity statin. LDL-C 142. ApoB 105.
@@ -68,7 +68,7 @@ ACTIONS:
 - Blood pressure: Treat toward <130/80. Current 134/82.
 - Glycemia / metabolic: Prediabetes prevention. A1c 5.7%; weight/activity focus.
 - Aspirin / antiplatelet: Not routine for primary prevention. Do not start routine aspirin.
-- Data to clarify: Complete key data. Lp(a), hsCRP.
+- Additional information: Additional information. Lp(a).
 
 RSS: 10
 RSS CONTRIBUTORS:

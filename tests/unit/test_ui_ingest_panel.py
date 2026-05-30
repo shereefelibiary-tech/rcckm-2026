@@ -163,10 +163,36 @@ def test_epic_case_problem_list_hierarchy_and_review_states():
     assert "Confirm Lp(a) units" in recognition_html
     assert "Possible sleep apnea" in recognition_html
     assert "Inflammatory arthritis review" in recognition_html
-    assert "hsCRP missing" in recognition_html
+    assert "hsCRP not available" in recognition_html
     assert "OSA Yes" not in recognition_html
     assert "Rheumatoid arthritis" not in recognition_html
     assert "Clinical ASCVD" not in recognition_html
+
+
+def test_epic_case_35f_diabetes_albuminuria_parser_regression():
+    text = (FIXTURES_DIR / "epic_case_35f_diabetes_albuminuria.txt").read_text(encoding="utf-8")
+
+    report = parse_ingest_report(text)
+    parsed = report["parsed"]
+    items = {item.field_id: item for item in build_parser_recognition_items(report)}
+
+    assert parsed["age"] == 35
+    assert parsed["sex"] == "female"
+    assert not any(conflict.startswith("sex:") for conflict in report["conflicts"])
+    assert parsed["sbp"] == 166
+    assert parsed["dbp"] == 100
+    assert parsed["lp_a_value"] == 22.4
+    assert parsed["uacr"] == 362
+    assert parsed["sglt2"] is True
+    assert parsed["ace_arb"] is True
+    assert parsed.get("cac") is None
+    assert parsed.get("cac_not_done") is True
+
+    assert items["bp"].value == "166/100"
+    assert items["lp_a_value"].status == "extracted"
+    assert items["lp_a_value"].value == "22.4"
+    assert items["uacr"].value == "362 mg/g"
+    assert items["sex"].value == "female"
 
 
 def test_parsed_values_can_be_stringified_for_review_table():
@@ -212,7 +238,7 @@ def test_parser_recognition_strip_uses_status_classes_without_fake_success():
     assert "parser-recognition-chip extracted" in html
     assert "BP 132/77" in html
     assert "Former smoker" in html
-    assert "ApoB missing" in html
+    assert "ApoB not available" in html
     assert "CAC placeholder detected" in html
     assert "&#10003;</span>CAC" not in html
     assert "Current smoker" not in html
@@ -744,10 +770,10 @@ def test_epic_placeholder_garbage_smartphrase_parses_only_real_values():
     recognition_html = render_parser_recognition_strip(report)
     assert "Family history unclear" in recognition_html
     assert "CAC placeholder detected" in recognition_html
-    assert "ApoB missing" in recognition_html
-    assert "Lp(a) missing" in recognition_html
-    assert "UACR missing" in recognition_html
-    assert "hsCRP missing" in recognition_html
+    assert "ApoB not available" in recognition_html
+    assert "Lp(a) not available" in recognition_html
+    assert "UACR not available" in recognition_html
+    assert "hsCRP not available" in recognition_html
     assert "OSA" not in recognition_html
     assert "MASLD" not in recognition_html
     assert "Father &lt;55" not in recognition_html

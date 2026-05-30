@@ -9,7 +9,7 @@ STATUS_ROWS = (
     ("Golden cases", "Active"),
     ("Never-cross invariants", "Active"),
     ("Output snapshots", "Active"),
-    ("Clinical use", "Clinician review required"),
+    ("Clinical use", "Clinician review recommended"),
     ("PHI", "Do not enter PHI in public/demo use"),
 )
 

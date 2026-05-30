@@ -135,9 +135,9 @@ def test_uacr_missing_zero_and_albuminuria_stages_never_cross():
     a3_patient, a3_result = evaluate_case({"age": 55, "sex": "female", "egfr": 76, "uacr": 300})
 
     assert "UACR 0" not in visible_text(missing_patient, missing_result)
-    assert "UACR missing" in visible_text(missing_patient, missing_result)
+    assert "UACR not available" in visible_text(missing_patient, missing_result)
     assert "UACR 0" in visible_text(zero_patient, zero_result)
-    assert "UACR missing" not in visible_text(zero_patient, zero_result)
+    assert "UACR not available" not in visible_text(zero_patient, zero_result)
     assert getattr(a2_result, "albuminuria_stage", None) == "A2"
     assert getattr(a3_result, "albuminuria_stage", None) == "A3"
 

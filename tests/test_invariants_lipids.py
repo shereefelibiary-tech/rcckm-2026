@@ -232,7 +232,7 @@ def test_apob_value_not_reported_as_missing_and_lpa_not_called_inherited_risk():
     )
     text = bundle["outputs"]["visible"]
     assert "ApoB" in text
-    assert "ApoB missing" not in text
+    assert "ApoB not available" not in text
     assert_absent(text, ("inherited risk", "genetics"))
 
 

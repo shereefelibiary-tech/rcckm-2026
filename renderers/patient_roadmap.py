@@ -356,11 +356,11 @@ def _patient_safe_phrase(text):
 def _prevent_unavailable_reason_text(result):
     missing = list(getattr(result, "prevent_missing_inputs", None) or [])
     if missing:
-        return "Missing inputs: " + ", ".join(str(item) for item in missing)
+        return "Not available: " + ", ".join(str(item) for item in missing)
     unsupported = str(getattr(result, "prevent_unsupported_reason", "") or "").strip()
     if unsupported:
         return unsupported
-    return "Complete the missing worksheet inputs to calculate risk."
+    return "Add worksheet inputs to calculate risk."
 
 
 def _naturalize_level_detail(text):
@@ -784,9 +784,7 @@ def _target_rows(patient, result):
                 f"<{_fmt(non_hdl['target_value'])} mg/dL",
             )
         )
-    if getattr(patient, "apob", None) is not None or (
-        target and target.apob_target is not None
-    ):
+    if getattr(patient, "apob", None) is not None:
         rows.append(
             (
                 "ApoB",
@@ -795,12 +793,28 @@ def _target_rows(patient, result):
             )
         )
     if getattr(patient, "a1c", None) is not None:
-        a1c_goal = "<7.0%" if bool(getattr(patient, "diabetes", False)) else "individualized"
-        rows.append(("A1c", _fmt(getattr(patient, "a1c", None), "%", 1), a1c_goal))
+        a1c = _fmt(getattr(patient, "a1c", None), "%", 1)
+        try:
+            a1c_value = float(getattr(patient, "a1c", None))
+        except (TypeError, ValueError):
+            a1c_value = None
+        if bool(getattr(patient, "diabetes", False)):
+            a1c_goal = "<7.0%"
+        elif a1c_value is not None and a1c_value < 5.7:
+            a1c_goal = "normal range"
+        elif a1c_value is not None and a1c_value < 6.5:
+            a1c_goal = "prediabetes range"
+        else:
+            a1c_goal = "individualized"
+        rows.append(("A1c", a1c, a1c_goal))
     bp = _bp_value(patient)
     if bp:
         rows.append(("BP", bp, "<130/80"))
-    if getattr(patient, "uacr", None) is not None or getattr(result, "kdigo_stage", None):
+    egfr = getattr(patient, "egfr", None)
+    uacr = getattr(patient, "uacr", None)
+    if uacr is None and egfr is not None:
+        rows.append(("Kidney", f"eGFR {_fmt(egfr)}; UACR not available", "repeat eGFR/UACR if due"))
+    elif uacr is not None or getattr(result, "kdigo_stage", None):
         rows.append(
             (
                 "Kidney / albuminuria",
@@ -835,8 +849,8 @@ def _recommendation_label(text):
         return "Coronary calcium"
     if "aspirin" in lowered or "antiplatelet" in lowered:
         return "Aspirin"
-    if "clarification" in lowered or "check lp(a)" in lowered or "obtain apob" in lowered or "hscrp" in lowered:
-        return "Clarification"
+    if "additional information" in lowered or "check lp(a)" in lowered or "obtain apob" in lowered or "hscrp" in lowered:
+        return "Additional information"
     if "smoking" in lowered:
         return "Smoking"
     return "Plan"
@@ -887,7 +901,7 @@ def _patient_next_steps(patient, result):
         lowered = str(item or "").lower()
         if "no repeat cac" in lowered:
             continue
-        elif "obtain uacr" in lowered or "uacr" in lowered and "missing" in lowered:
+        elif "obtain uacr" in lowered or "uacr" in lowered and ("missing" in lowered or "not available" in lowered):
             label = "Additional testing"
             detail = "Urine albumin test can help check early kidney stress."
         elif "cac reasonable" in lowered or "cac not routinely recommended" in lowered or "plaque burden unmeasured" in lowered:
@@ -1517,7 +1531,7 @@ def render_printable_patient_roadmap(patient, result, *, generated_on=None, comp
     {_print_list_html(next_items, class_name="print-roadmap-next-list")}
   </section>
   <div class="print-roadmap-disclaimer">
-    Clinician review required. This roadmap supports discussion and does not replace medical judgment.
+    Clinician review recommended. This roadmap supports discussion and does not replace medical judgment.
   </div>
 </main>
 """.strip()
@@ -1777,7 +1791,7 @@ def _render_patient_roadmap_legacy(patient, result):
     <div class="roadmap-goals-line">{goal_html}</div>
     <div class="roadmap-section-title">Your next steps</div>
     {next_html}
-    <div class="roadmap-footer">This roadmap supports clinician review and shared decision-making.</div>
+  <div class="roadmap-footer">Clinician review recommended.</div>
 </div>
 """.strip()
 
@@ -2275,7 +2289,7 @@ def render_patient_roadmap(patient, result):
         _roadmap_section_html(
             "STEP 3",
             "Your goals",
-            "Targets to review with your clinician.",
+            "Current goals and values.",
             goals_body,
         ),
         _roadmap_section_html(

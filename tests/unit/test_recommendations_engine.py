@@ -24,7 +24,7 @@ def test_moderate_returns_high_risk_prevention_wording():
 def test_mild_returns_preventive_optimization_wording():
     result = RCCKMResult(plaque_category=PlaqueCategory.MILD)
     message = build_dominant_action(None, result)
-    assert "Preventive lipid optimization is reasonable" in message
+    assert "Review lipid targets" in message
 
 
 def test_none_returns_no_plaque_wording():

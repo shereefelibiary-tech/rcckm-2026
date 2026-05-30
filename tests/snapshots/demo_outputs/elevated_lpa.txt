@@ -47,19 +47,19 @@ STEP 3
 Your goals:
 - LDL-C: 124 mg/dL to -
 - ApoB: 86 mg/dL to -
-- A1c: 5.3% to individualized
+- A1c: 5.3% to normal range
 - BP: 118/72 mmHg to <130/80
 - Kidney / albuminuria: 5 mg/g; G1A1 to reduce albuminuria / preserve eGFR
 - Weight: BMI 24.2 to individualized
 
 STEP 4
 Your next steps:
-1. Lower plaque-driving cholesterol: No lipid escalation based on current cholesterol and risk profile.
-2. Artery plaque: A calcium scan may help only if treatment choices are still uncertain.
-3. Protect the kidneys: Kidney markers do not show an immediate action signal.
-4. Blood pressure: Blood pressure is reviewed as part of the prevention plan.
-5. Blood sugar: No immediate blood sugar action is shown from the current data.
-6. Aspirin safety: Do not start aspirin unless your clinician recommends it.
+1. Lower plaque-driving cholesterol: Continue current approach; LDL-C is 124.
+2. Artery plaque: Calcium scan only if it would change the treatment decision.
+3. Protect the kidneys: No kidney action from current eGFR/UACR.
+4. Blood pressure: At goal.
+5. Blood sugar: Normal range.
+6. Aspirin safety: Do not start routine aspirin.
 
 ACTIONS:
 - Lipid lowering: No lipid escalation. LDL-C 124. ApoB 86.

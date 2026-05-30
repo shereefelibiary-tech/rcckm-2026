@@ -251,7 +251,7 @@ def assign_lipid_targets(patient, engine_context=None):
 
     if patient.cac is not None and patient.cac >= 300:
         return _high_risk_primary_prevention_target(
-            "CAC 300-999: severe subclinical plaque burden; treat toward high-risk target. Intensification to very-high-risk targets may be reasonable."
+            "CAC 300-999: severe subclinical plaque burden; treat toward high-risk target. Consider very-high-risk targets only when overall context supports intensification."
         )
 
     if patient.cac is not None and patient.cac >= 100:
@@ -284,7 +284,7 @@ def assign_lipid_targets(patient, engine_context=None):
     if _has_diabetes(patient) and _age_40_to_75(patient):
         if _has_diabetes_risk_enhancer(patient):
             return _high_risk_primary_prevention_target(
-                "Diabetes age 40-75 with additional risk factors: high-intensity statin reasonable; high-risk targets."
+                "Diabetes age 40-75 with additional risk factors: high-intensity statin pathway; high-risk targets."
             )
         return _primary_prevention_target(
             "Diabetes age 40-75: moderate-intensity statin target range."
@@ -314,7 +314,7 @@ def assign_lipid_targets(patient, engine_context=None):
             prevent_30y is not None and prevent_30y >= 10
         ):
             return _primary_prevention_target(
-                "Low 10-year PREVENT risk with LDL-C 160-189 or 30-year risk >=10%: moderate statin reasonable if chosen."
+                "Low 10-year PREVENT risk with LDL-C 160-189 or 30-year risk >=10%: moderate-intensity statin discussion pathway."
             )
 
         return TargetResult(

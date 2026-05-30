@@ -30,7 +30,7 @@ def test_missing_uacr_does_not_become_kdigo_a1():
 
     assert result.albuminuria_stage is None
     assert result.kdigo_stage == "G2"
-    assert "albuminuria not measured" in html
+    assert "UACR not available" in html
     assert "G2A1" not in html
 
 
@@ -44,7 +44,7 @@ def test_missing_uacr_triggers_clarifier_for_diabetes_and_bp_treated_contexts():
     assert diabetes_result.clarification["recommend_uacr"] is True
     assert bp_result.clarification["recommend_uacr"] is True
     assert "UACR" in build_clarifier_card_html(diabetes_result)
-    assert "Additional tests that may help clarify:" in build_clarifier_card_html(diabetes_result)
+    assert "Additional information:" in build_clarifier_card_html(diabetes_result)
 
 
 def test_bp_treated_missing_uacr_is_visually_prominent_in_audit_and_kdigo():
@@ -57,15 +57,15 @@ def test_bp_treated_missing_uacr_is_visually_prominent_in_audit_and_kdigo():
     note = render_emr_note(patient, result)
 
     assert "eGFR 76" in where_html
-    assert "UACR missing" in where_html
+    assert "UACR not available" in where_html
     assert "wpf-patient-uacr-missing" in where_html
     assert "wpf-chip-needed" in where_html
-    assert "eGFR 76UACR missing" not in where_html
-    assert "KDIGO incomplete: G2; UACR missing" in ckm_html
-    assert "UACR missing; albuminuria not measured" in ckm_html
+    assert "eGFR 76UACR not available" not in where_html
+    assert "KDIGO partial: G2; UACR not available" in ckm_html
+    assert "eGFR 76; UACR not available" in ckm_html
     assert "UACR" in clarifier_html
-    assert "Additional tests that may help clarify:" in clarifier_html
-    assert "UACR missing; obtain UACR." in note
+    assert "Additional information:" in clarifier_html
+    assert "UACR not available; obtain UACR." in note
 
 
 def test_uacr_present_a2_does_not_trigger_missing_clarifier():
@@ -86,7 +86,7 @@ def test_measured_uacr_values_do_not_render_missing_badge_or_clarifier():
 
         assert f"UACR {uacr} mg/g" in html
         assert 'class="wpf-patient-uacr-missing"' not in html
-        assert "UACR missing" not in html
+        assert "UACR not available" not in html
         assert result.clarification["recommend_uacr"] is False
         assert "complete kidney-risk assessment" not in clarifier_html
 
@@ -97,7 +97,7 @@ def test_where_patient_falls_shows_missing_uacr_as_needed_not_normal():
     html = build_where_patient_falls_html(patient, result)
 
     assert "eGFR 84" in html
-    assert "UACR missing" in html
+    assert "UACR not available" in html
     assert "needed" in html
     assert "UACR 0" not in html
 
@@ -106,7 +106,7 @@ def test_parse_coverage_shows_uacr_not_found_when_not_parsed():
     html = render_parse_coverage({"parsed": {"age": 55}, "meta": {}, "warnings": [], "conflicts": []})
 
     assert "UACR" in html
-    assert "not found" in html
+    assert "not available" in html
 
 
 def test_prevent_uses_base_model_with_compact_uacr_missing_note():
@@ -131,10 +131,10 @@ def test_prevent_uses_base_model_with_compact_uacr_missing_note():
     assert prevent["available"] is True
     assert prevent["model_used"] == "base"
     assert prevent["prevent_10y_ascvd"] is not None
-    assert "UACR missing; base PREVENT model used." in prevent["warnings"]
+    assert "UACR not available; base PREVENT model used." in prevent["warnings"]
     assert "Model used" not in html
     assert "base PREVENT model used" not in html
-    assert "UACR missing; PREVENT calculated without UACR." in html
+    assert "UACR not available; PREVENT calculated without UACR." in html
 
 
 def test_emr_note_includes_uacr_completion_only_when_relevant():
@@ -144,8 +144,8 @@ def test_emr_note_includes_uacr_completion_only_when_relevant():
     relevant_note = render_emr_note(relevant_patient, evaluate_patient(relevant_patient))
     low_context_note = render_emr_note(low_context_patient, evaluate_patient(low_context_patient))
 
-    assert "UACR missing; obtain UACR." in relevant_note
-    assert "UACR missing; obtain UACR" not in low_context_note
+    assert "UACR not available; obtain UACR." in relevant_note
+    assert "UACR not available; obtain UACR" not in low_context_note
 
 
 def test_diabetes_ckd_missing_uacr_does_not_render_albuminuria_diagnosis():
@@ -157,11 +157,11 @@ def test_diabetes_ckd_missing_uacr_does_not_render_albuminuria_diagnosis():
     assert patient.uacr is None
     assert result.albuminuria_stage is None
     assert result.kdigo_stage == "G3a"
-    assert "kidney G3a; UACR missing" in note
+    assert "kidney G3a; UACR not available" in note
     assert "Type 2 diabetes mellitus with CKD G3a" in assessment
     assert "albuminuria" not in assessment.lower()
     assert "CKD stage 3a ICD: N18.31" in assessment
-    assert "UACR missing; obtain UACR." in note
+    assert "UACR not available; obtain UACR." in note
 
 
 def test_diabetes_ckd_uacr_zero_is_measured_a1_without_albuminuria_diagnosis():

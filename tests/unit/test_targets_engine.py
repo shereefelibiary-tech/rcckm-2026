@@ -71,7 +71,7 @@ def test_build_target_result_returns_extensive_cac_targets():
     assert result.non_hdl_c_target == 100
     assert result.apob_target == 80
     assert "CAC 300-999" in result.rationale
-    assert "very-high-risk targets may be reasonable" in result.rationale
+    assert "Consider very-high-risk targets only when overall context supports intensification" in result.rationale
 
 
 def test_build_target_result_returns_elevated_cac_targets():

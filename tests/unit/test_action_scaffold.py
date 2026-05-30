@@ -1,6 +1,7 @@
 import re
 
 from core.engine import evaluate_patient
+from core.diagnosis_workflow import prepare_diagnosis_display_entries
 from core.enums import RiskLevel
 from core.patient import Patient
 from core.results import RCCKMResult
@@ -11,6 +12,7 @@ from modules.actions.scaffold import (
     build_compact_action_detail_lines,
     build_compact_action_items,
 )
+from modules.risk_enhancers.reproductive import reproductive_history_summary
 from renderers.emr_renderer import render_emr_note
 from ui.report_layout import _build_action_html
 
@@ -282,7 +284,7 @@ def test_action_html_renders_structured_sections_without_loose_duplicate_list():
     assert lipid_lead in html
     assert lipid_detail in html
     assert aspirin_lead in html
-    assert "Consider only if low bleeding risk and shared decision-making supports it." in html
+    assert "Consider only if bleeding risk is low and prevention context supports it." in html
     assert kidney_line in html
     assert kidney_detail in html
     assert glycemia_line in html
@@ -358,7 +360,7 @@ def test_action_instrument_panel_groups_kidney_cac_and_aspirin_without_empty_cla
     assert "SGLT2" not in panel["blood_pressure"].status + panel["blood_pressure"].detail
     assert panel["blood_pressure"].status == "BP needed"
     assert panel["aspirin_antiplatelet"].status == "Aspirin not routine for primary prevention"
-    assert "low bleeding risk" in panel["aspirin_antiplatelet"].hover_detail
+    assert "bleeding risk is low" in panel["aspirin_antiplatelet"].hover_detail
     assert "data_to_clarify" not in panel
 
 
@@ -367,7 +369,7 @@ def test_action_instrument_panel_shows_decision_relevant_clarifiers():
     result = evaluate_patient(patient)
     panel = {item.domain_id: item for item in build_action_instrument_panel(patient, result)}
 
-    assert panel["data_to_clarify"].label == "Data to clarify"
+    assert panel["data_to_clarify"].label == "Additional information"
     assert "ApoB" in panel["data_to_clarify"].detail
 
 
@@ -390,7 +392,7 @@ def test_action_instrument_panel_keeps_kidney_and_bp_messages_separate():
 
     assert panel["kidney_protection"].status == "Optimize kidney protection"
     assert "UACR 45" in kidney_text
-    assert "continue ACEi-ARB" in kidney_text
+    assert "ACEi/ARB active" in kidney_text
     assert "Consider SGLT2 for diabetic CKD" in kidney_text
     assert "BP" not in kidney_text
     assert "<130/80" not in kidney_text
@@ -429,10 +431,10 @@ def test_action_kidney_sglt2_branches_are_specific_and_hovered():
     }["kidney_protection"]
 
     assert lower_item.status == "Monitor albuminuria"
-    assert lower_item.detail == "UACR 80; continue/optimize ACEi-ARB."
+    assert lower_item.detail == "UACR 80; ACEi/ARB active."
     assert "SGLT2" not in lower_item.status + lower_item.detail
     assert diabetic_item.status == "Optimize kidney protection"
-    assert diabetic_item.detail == "UACR 80; continue ACEi-ARB. Consider SGLT2 for diabetic CKD."
+    assert diabetic_item.detail == "UACR 80; ACEi/ARB active. Consider SGLT2 for diabetic CKD."
     assert "SGLT2 benefit is strongest" in diabetic_item.hover_detail
     assert strong_item.status == "Add SGLT2 if no contraindication"
     assert strong_item.detail == "UACR 220; eGFR 55."
@@ -441,6 +443,98 @@ def test_action_kidney_sglt2_branches_are_specific_and_hovered():
     assert "nephrology guidance" in low_egfr_item.detail
     for item in (lower_item, diabetic_item, strong_item, low_egfr_item):
         assert "per criteria" not in item.status + item.detail
+
+
+def test_severe_ckd_diabetes_actions_are_active_med_aware():
+    patient = Patient(
+        age=61,
+        sex="female",
+        tc=210,
+        hdl_c=43,
+        ldl_c=None,
+        triglycerides=478,
+        apob=80,
+        diabetes=True,
+        a1c=11.8,
+        egfr=16,
+        uacr=2417,
+        sglt2=True,
+        ace_arb=True,
+        lipid_lowering=True,
+        statin_intensity="high",
+        aspirin=True,
+        sbp=142,
+        dbp=84,
+        prevent_10y_ascvd=29.03,
+    )
+    result = evaluate_patient(patient)
+    panel = {item.domain_id: item for item in build_action_instrument_panel(patient, result)}
+    note = render_emr_note(patient, result)
+    diagnosis_text = "\n".join(candidate.name for candidate in result.diagnosis_candidates)
+
+    assert result.kdigo_stage == "G4A3"
+    assert result.level_classification["label"] == "Level 3B - advanced CKM / severe kidney-risk phenotype"
+    assert result.ckm_stage["stage"] == 3
+    assert "N18.4" in note
+    assert "clinical ascvd" not in diagnosis_text.lower()
+
+    assert panel["kidney_protection"].status == "Continue kidney-protective therapy"
+    assert panel["kidney_protection"].detail == "eGFR 16; UACR 2417; ACEi/ARB + SGLT2 active."
+    assert "Do not newly start" not in panel["kidney_protection"].status + panel["kidney_protection"].detail
+    assert "nephrology" in panel["kidney_protection"].hover_detail
+
+    assert panel["aspirin_antiplatelet"].status == "Aspirin active; confirm indication"
+    assert "Do not start" not in panel["aspirin_antiplatelet"].status + panel["aspirin_antiplatelet"].detail
+    assert "Primary-prevention benefit uncertain" in panel["aspirin_antiplatelet"].detail
+
+    assert "LDL-C unavailable due to TG 478" in panel["lipid_lowering"].detail
+    assert "ApoB 80; target <80" in panel["lipid_lowering"].detail
+    assert "CKM/Kidney/Plaque: CKM 3; kidney G4A3; CAC not measured." in note
+    assert "1. Lipids: High-intensity lipid-lowering active; ApoB 80, target <80" in note
+    assert "LDL-C unavailable due to TG" in note
+    assert "3. Kidney: eGFR 16; UACR 2417; ACEi/ARB + SGLT2 active." in note
+    assert "6. Aspirin: Active; confirm indication." in note
+    assert "no repeat CAC" not in note.lower()
+    assert "secondary-prevention" not in note.lower()
+
+
+def test_35f_diabetes_albuminuria_actions_active_sglt2_and_no_duplicate_diagnosis():
+    patient = Patient(
+        age=35,
+        sex="female",
+        tc=236,
+        hdl_c=42,
+        ldl_c=125,
+        triglycerides=265,
+        apob=88,
+        lp_a_value=22.4,
+        diabetes=True,
+        a1c=8.2,
+        egfr=95,
+        uacr=362,
+        sglt2=True,
+        ace_arb=True,
+        sbp=166,
+        dbp=100,
+        pcos_or_irregular_menses=True,
+        cac=None,
+        cac_not_done=True,
+    )
+    result = evaluate_patient(patient)
+    panel = {item.domain_id: item for item in build_action_instrument_panel(patient, result)}
+    note = render_emr_note(patient, result)
+    diagnoses = prepare_diagnosis_display_entries(result)
+    labels = [entry.get("label_display") or entry.get("label") for entry in diagnoses]
+
+    assert panel["kidney_protection"].status == "Continue kidney-protective therapy"
+    assert panel["kidney_protection"].detail == "UACR 362; ACEi/ARB + SGLT2 active."
+    assert "Add SGLT2" not in panel["kidney_protection"].status + panel["kidney_protection"].detail
+    assert "hsCRP" not in " ".join(item.status + " " + item.detail for item in panel.values())
+    assert "hsCRP" not in note
+
+    assert any("Type 2 diabetes mellitus with albuminuria" in str(label) for label in labels)
+    assert "Type 2 diabetes mellitus" not in labels
+    assert "PCOS / irregular menses" == reproductive_history_summary(patient)
 
 
 def test_compact_action_items_group_priorities_and_preserve_details():

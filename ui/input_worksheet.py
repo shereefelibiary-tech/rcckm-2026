@@ -817,7 +817,7 @@ def render_manual_worksheet(st, parsed):
         with metabolic_cols[3]:
             inputs["uacr"] = _numeric_input(st, "UACR", parsed, "uacr")
             if inputs["uacr"] is None:
-                st.caption("UACR missing - needed for kidney risk completion.")
+                st.caption("UACR not available.")
             elif inputs["uacr"] == 0:
                 st.caption("Measured UACR 0 mg/g.")
         diabetes_cols = st.columns([0.9, 3.0], gap="small")

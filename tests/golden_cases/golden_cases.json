@@ -329,10 +329,10 @@
     "required_phrases": [
       "Level: 3B - actionable early CKM / atherogenic risk.",
       "PREVENT: ASCVD 10y 3.42% (Borderline); 30y 17.53%.",
-      "CKM/Kidney/Plaque: CKM 2; kidney G2; UACR missing; CAC not measured.",
+      "CKM/Kidney/Plaque: CKM 2; kidney G2; UACR not available; CAC not measured.",
       "Early menopause 43; Gestational hypertension; Gestational diabetes.",
       "1. Lipids: Discuss moderate-intensity statin",
-      "3. Kidney: UACR missing; obtain UACR.",
+      "3. Kidney: UACR not available; obtain UACR.",
       "6. Aspirin: Not routine for primary prevention."
     ],
     "forbidden_phrases": [
@@ -1214,7 +1214,7 @@
     },
     "forbidden_phrases": [
       "missing UACR",
-      "UACR missing",
+      "UACR not available",
       "phenotype"
     ]
   },
@@ -1248,7 +1248,7 @@
     "required_phrases": [
       "Level: 3B",
       "PREVENT: ASCVD 10y 5.41% (Intermediate); 30y 22.55%.",
-      "UACR missing; obtain UACR",
+      "UACR not available; obtain UACR",
       "1. Lipids: Discuss moderate-intensity statin",
       "2. Plaque: CAC may clarify risk.",
       "6. Aspirin: Not routine for primary prevention."

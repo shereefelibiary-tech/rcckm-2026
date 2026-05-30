@@ -113,7 +113,7 @@ def test_rss_layout_contains_tower_and_list_zones_without_clarifiers():
     assert 'class="rss-list-zone rss-drivers"' in rendered
     assert "Missing clarifiers" not in rendered
     assert "Plaque burden clarification" not in rendered
-    assert "UACR missing" not in rendered
+    assert "UACR not available" not in rendered
 
 
 def test_rss_title_and_contributor_labels_are_concise():
@@ -383,7 +383,7 @@ def test_missing_lpa_appears_as_missing_clarifier_when_relevant():
     assert "Missing clarifiers" not in html
     assert "One-time risk assessment" not in html
     assert "Lp(a)" in clarifier_html
-    assert "Additional tests that may help clarify:" in clarifier_html
+    assert "Additional information:" in clarifier_html
     assert "Lp(a) measurement" not in clarifier_html
 
 
@@ -700,7 +700,7 @@ def test_cac_missing_clarifier_is_separate_from_rss_card():
     assert "Missing clarifiers" not in rss_html
     assert "plaque burden clarification" not in rss_html.lower()
     assert "CAC" in clarifier_html
-    assert "Additional tests that may help clarify:" in clarifier_html
+    assert "Additional information:" in clarifier_html
     assert "plaque burden clarification" not in clarifier_html
 
 

@@ -14,6 +14,7 @@ DIAGNOSIS_DISPLAY_PRIORITY = {
     "subclinical coronary atherosclerosis": 2,
     "type 2 diabetes mellitus with diabetic chronic kidney disease": 3,
     "type 2 diabetes mellitus with albuminuria": 4,
+    "type 2 diabetes mellitus with albuminuria / kidney involvement": 4,
     "chronic kidney disease, stage 5": 5,
     "chronic kidney disease, stage 4": 6,
     "chronic kidney disease, stage 3b": 7,
@@ -367,8 +368,16 @@ def prioritize_linked_diagnoses(candidates: list[Any]) -> list[Any]:
     rows = list(candidates or [])
     keys = {_diagnosis_key(candidate) for candidate in rows}
 
-    has_diabetic_ckd = "type 2 diabetes mellitus with diabetic chronic kidney disease" in keys
-    has_diabetic_albuminuria = "type 2 diabetes mellitus with albuminuria" in keys
+    has_diabetic_ckd = any(
+        "type 2 diabetes mellitus" in key
+        and (
+            "diabetic chronic kidney disease" in key
+            or "chronic kidney" in key
+            or "ckd" in key
+        )
+        for key in keys
+    )
+    has_diabetic_albuminuria = any("type 2 diabetes mellitus" in key and "albuminuria" in key for key in keys)
     has_staged_ckd = any(key.startswith("chronic kidney disease, stage") for key in keys)
     has_severe_albuminuria = "severely increased albuminuria" in keys
     has_severe_cac = "severe subclinical coronary atherosclerosis" in keys
@@ -380,6 +389,7 @@ def prioritize_linked_diagnoses(candidates: list[Any]) -> list[Any]:
         suppressed.add("type 2 diabetes mellitus")
     if has_diabetic_ckd:
         suppressed.add("type 2 diabetes mellitus with albuminuria")
+        suppressed.add("type 2 diabetes mellitus with albuminuria / kidney involvement")
         suppressed.add("albuminuria")
     if has_staged_ckd:
         suppressed.add("chronic kidney disease")

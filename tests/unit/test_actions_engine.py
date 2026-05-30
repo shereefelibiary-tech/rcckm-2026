@@ -429,7 +429,7 @@ def test_build_action_plan_adds_uacr_for_diabetes_and_kidney_uncertainty():
     assert plan["domains"]["uacr_testing"] == "Obtain UACR to complete kidney-risk assessment."
 
 
-def test_build_action_plan_adds_hscrp_for_metabolic_or_family_history_context():
+def test_build_action_plan_suppresses_hscrp_when_inflammation_would_not_change_management():
     patient = Patient(
         age=60,
         sex="male",
@@ -440,11 +440,17 @@ def test_build_action_plan_adds_hscrp_for_metabolic_or_family_history_context():
 
     plan = build_action_plan(patient, RCCKMResult())
 
+    assert "hsCRP" not in " ".join(plan["recommendations"])
+    assert "hscrp_testing" not in plan["domains"]
+
+
+def test_build_action_plan_adds_hscrp_for_active_inflammatory_context():
+    patient = Patient(age=60, sex="male", rheumatoid_arthritis=True)
+
+    plan = build_action_plan(patient, RCCKMResult())
+
     assert "Obtain hsCRP if inflammatory risk clarification would change management." in plan["recommendations"]
-    assert (
-        plan["domains"]["hscrp_testing"]
-        == "Obtain hsCRP if inflammatory risk clarification would change management."
-    )
+    assert plan["domains"]["hscrp_testing"] == "Obtain hsCRP if inflammatory risk clarification would change management."
 
 
 def test_build_action_plan_adds_repeat_fasting_lipids_for_tg_uncertainty():

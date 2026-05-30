@@ -347,7 +347,7 @@ def calculate_prevent(patient, model="best_available") -> dict[str, Any]:
             "sdi": "SDI",
         }.get(model_used, model_used)
         informational_warnings.append(
-            f"UACR missing; {model_label} PREVENT model used."
+            f"UACR not available; {model_label} PREVENT model used."
         )
     age_value = inputs.get("age")
     if age_value is not None:
@@ -396,7 +396,7 @@ def calculate_prevent(patient, model="best_available") -> dict[str, Any]:
             )
         return base
     if missing:
-        base["unavailable_reason"] = "Missing required PREVENT inputs."
+        base["unavailable_reason"] = "PREVENT inputs not available."
         return base
     if warnings:
         base["unavailable_reason"] = "One or more PREVENT inputs are outside the validated range."

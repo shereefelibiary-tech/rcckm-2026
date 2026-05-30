@@ -20,11 +20,11 @@ def build_dominant_action(patient, result):
         )
 
     if category == PlaqueCategory.MILD:
-        return "Mild plaque burden present. Preventive lipid optimization is reasonable."
+        return "Mild plaque burden present. Review lipid targets."
 
     if category == PlaqueCategory.NONE:
         return "No plaque identified. Continue risk-factor optimization and reassess over time."
 
     return (
-        "Risk assessment incomplete. Additional data may improve preventive risk classification."
+        "Plaque status not available. Add plaque data only if results would change management."
     )

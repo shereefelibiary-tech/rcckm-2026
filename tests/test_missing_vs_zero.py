@@ -29,10 +29,10 @@ def test_missing_numeric_fields_stay_none_and_do_not_render_as_zero():
 
     assert patient.cac_not_done is False
     assert result.prevent_available is False
-    assert "UACR missing" in html
-    assert "ApoB missing" in html
-    assert "Lp(a) missing" in html
-    assert "hsCRP missing" in html
+    assert "UACR not available" in html
+    assert "ApoB not available" in html
+    assert "Lp(a) not available" in html
+    assert "hsCRP not available" in html
     assert "Plaque unmeasured" in html
     assert "UACR 0" not in html
     assert "ApoB 0" not in html

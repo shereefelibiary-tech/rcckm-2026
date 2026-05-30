@@ -186,7 +186,7 @@ def test_custom_html_renderers_return_html_strings():
         RCCKMResult(clarification={"recommend_apob": True, "recommend_lpa": True})
     )
     assert "<div" in clarifier_html
-    assert "Additional tests that may help clarify:" in clarifier_html
+    assert "Additional information:" in clarifier_html
 
 
 def test_report_uses_component_html_for_custom_renderers():

@@ -12,7 +12,7 @@ DEMO_CASES = (
     ("Younger patient with premature family history", "younger_strong_family_history"),
     ("Prediabetes / insulin resistance", "prediabetes_insulin_resistance"),
     ("High ApoB discordance", "high_apob_discordance"),
-    ("LDL-C high, ApoB missing", "ldl_high_apob_missing"),
+    ("LDL-C high, ApoB not available", "ldl_high_apob_missing"),
     ("LDL-C >=190 severe hypercholesterolemia", "ldl_severe_hypercholesterolemia_demo"),
     ("Elevated Lp(a)", "elevated_lpa"),
     ("Hypertriglyceridemia / insulin resistance", "hypertriglyceridemia_insulin_resistance"),
@@ -37,7 +37,7 @@ DEMO_CASES = (
     ("South Asian ancestry context", "south_asian_ancestry_context"),
     ("Active smoker prevention visit", "active_smoker_prevention"),
     ("Cancer survivor context", "cancer_survivor_context"),
-    ("Multiple enhancers, missing ApoB/Lp(a)", "multiple_enhancers_missing_apob_lpa"),
+    ("Multiple enhancers, ApoB/Lp(a) not available", "multiple_enhancers_missing_apob_lpa"),
 )
 
 
@@ -1086,7 +1086,7 @@ DEMO_CASE_DESCRIPTIONS = {
         "Prediabetes and insulin-resistance pattern with reproductive history context."
     ),
     "high_apob_discordance": (
-        "Low 10-year risk, but elevated ApoB and premature family history make earlier lipid-lowering reasonable to discuss."
+        "Low 10-year risk, but elevated ApoB and premature family history support discussion of earlier lipid-lowering."
     ),
     "ldl_high_apob_missing": (
         "LDL-C is high while ApoB is missing, showing how RCCKM prompts particle-burden clarification."
@@ -1174,7 +1174,7 @@ DEMO_CASE_DESCRIPTIONS = {
         "Cancer survivorship appears as context while lipid decisions remain driven by ASCVD risk."
     ),
     "multiple_enhancers_missing_apob_lpa": (
-        "Multiple enhancers with missing ApoB/Lp(a)/UACR shows data-completion value."
+        "Multiple enhancers with ApoB/Lp(a)/UACR not available shows value of additional information."
     ),
 }
 
@@ -1207,7 +1207,7 @@ DEMO_CASE_METADATA = {
     "low_10y_elevated_30y": {
         "category": "Foundational prevention",
         "expected_showcase_points": ("low 10-year high 30-year", "prevention opportunity"),
-        "expected_primary_action": "Prevention intensity and shared decision-making.",
+        "expected_primary_action": "Prevention intensity review.",
         "expected_level_or_level_range": "Level 3A-3B",
         "expected_risk_framing": "Low short-term risk with elevated longer-term ASCVD risk.",
     },
@@ -1244,7 +1244,7 @@ DEMO_CASE_METADATA = {
         "expected_showcase_points": ("LDL-C", "missing-data clarification"),
         "expected_primary_action": "Measure ApoB and discuss lipid lowering.",
         "expected_level_or_level_range": "Level 3",
-        "expected_risk_framing": "LDL-C burden with ApoB missing.",
+        "expected_risk_framing": "LDL-C burden with ApoB not available.",
     },
     "ldl_severe_hypercholesterolemia_demo": {
         "category": "Atherogenic burden",

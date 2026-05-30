@@ -290,7 +290,7 @@ def _plain_value(value, class_name=""):
 
 
 def _patient_value_html(value, class_name="", *, uacr_attention=False):
-    if uacr_attention and value == "UACR missing":
+    if uacr_attention and value == "UACR not available":
         return _plain_value(value, "wpf-patient-uacr-missing")
     return _plain_value(value, class_name)
 
@@ -310,7 +310,7 @@ def _patient_values(values, *, active=False, missing=False, uacr_attention=False
         )
     if active:
         head, *tail = clean
-        if uacr_attention and head == "UACR missing":
+        if uacr_attention and head == "UACR not available":
             html = _patient_value_html(head, uacr_attention=True)
         else:
             html = _patient_pill(head)
@@ -346,7 +346,7 @@ def _row(marker, threshold, values, effect, active=False):
     row_impact_class = f" marker-row-{impact_class.removeprefix('risk-impact-')}" if impact_class else ""
     effect_html = _chip(effect) if effect and effect != "none" else ""
     missing = effect in {"missing", "clarifier"}
-    uacr_attention = "UACR missing" in {str(value).strip() for value in values} and effect in {
+    uacr_attention = "UACR not available" in {str(value).strip() for value in values} and effect in {
         "needed",
         "major driver",
     }
@@ -412,11 +412,11 @@ def _build_grouped_rows(patient, result, *, show_not_active=False):
     if apob is not None:
         values.append(f"ApoB {_fmt_num(apob)} mg/dL")
     else:
-        values.append("ApoB missing")
+        values.append("ApoB not available")
     if ldl is not None:
         values.append(f"LDL-C {_fmt_num(ldl)} mg/dL")
     else:
-        values.append("LDL-C missing")
+        values.append("LDL-C not available")
     effect = _effect_for_apob_ldl(apob, ldl)
     add_signal("ApoB" if apob is not None else "LDL-C", values[0] if apob is not None else values[1], effect)
     add_row(
@@ -430,7 +430,7 @@ def _build_grouped_rows(patient, result, *, show_not_active=False):
 
     a1c = getattr(patient, "a1c", None)
     diabetes = bool(getattr(patient, "diabetes", False))
-    value = f"A1c {_fmt_num(a1c, 1)}%" if a1c is not None else "A1c missing"
+    value = f"A1c {_fmt_num(a1c, 1)}%" if a1c is not None else "A1c not available"
     if diabetes:
         value += "; diabetes reported"
     effect = _effect_for_glycemia(a1c, diabetes)
@@ -447,11 +447,11 @@ def _build_grouped_rows(patient, result, *, show_not_active=False):
     egfr = getattr(patient, "egfr", None)
     uacr = getattr(patient, "uacr", None)
     values = [
-        f"eGFR {_fmt_num(egfr)}" if egfr is not None else "eGFR missing",
-        f"UACR {_fmt_num(uacr)} mg/g" if uacr is not None else "UACR missing",
+        f"eGFR {_fmt_num(egfr)}" if egfr is not None else "eGFR not available",
+        f"UACR {_fmt_num(uacr)} mg/g" if uacr is not None else "UACR not available",
     ]
     effect = _effect_for_kidney(egfr, uacr)
-    kidney_signal_value = "; ".join(v for v in values if "missing" not in v) or "kidney data missing"
+    kidney_signal_value = "; ".join(v for v in values if "not available" not in v) or "kidney data not available"
     add_signal("Kidney", kidney_signal_value, effect)
     add_row(
         "KIDNEY (EGFR/UACR)",
@@ -467,7 +467,7 @@ def _build_grouped_rows(patient, result, *, show_not_active=False):
     value = (
         f"Lp(a) {_fmt_num(lpa)} {lpa_unit or ''}".strip()
         if lpa is not None
-        else "Lp(a) missing"
+        else "Lp(a) not available"
     )
     effect = _effect_for_lpa(lpa, lpa_unit)
     add_signal("Lp(a)", value, effect)
@@ -512,7 +512,7 @@ def _build_grouped_rows(patient, result, *, show_not_active=False):
 
     hscrp = getattr(patient, "hscrp", None)
     effect = _effect_for_hscrp(hscrp, patient)
-    value = f"hsCRP {_fmt_num(hscrp, 1)} mg/L" if hscrp is not None else "hsCRP missing"
+    value = f"hsCRP {_fmt_num(hscrp, 1)} mg/L" if hscrp is not None else "hsCRP not available"
     add_signal("hsCRP", value, effect)
     add_row(
         "HSCRP",
@@ -975,7 +975,7 @@ def build_where_patient_falls_html(patient, result, *, show_not_active=False):
 <div class="wpf-head">
 <div>
 <div class="wpf-title rc-card-title" aria-label="WHERE THIS PATIENT FALLS">Where this patient falls</div>
-<div class="wpf-subtitle">Inputs, missing data, and level-driving findings.</div>
+<div class="wpf-subtitle">Inputs, available data, and level-driving findings.</div>
 <div class="wpf-legend">Risk impact: Major = changes level/action &middot; Contributes = supports risk &middot; Context = background &middot; Not active = audit only.</div>
 </div>
 <div class="wpf-badge">{escape(badge)}</div>

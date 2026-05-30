@@ -381,7 +381,7 @@ def _prevent_impression_sentence(patient, result):
     if getattr(result, "prevent_30y_ascvd", None) is not None:
         fragments.append(f"30-year ASCVD risk: {result.prevent_30y_ascvd:g}%")
     if not fragments:
-        return "PREVENT unavailable or incomplete; interpretation is based on reviewed worksheet data."
+        return "PREVENT unavailable; interpretation is based on worksheet data."
     return ".\n".join(fragments) + "."
 
 
@@ -498,7 +498,7 @@ def _impression_paragraphs(patient, result):
 
     third_parts = []
     if _uacr_completion_relevant(patient, result):
-        third_parts.append("UACR not available; obtain to complete kidney-risk assessment.")
+        third_parts.append("UACR not available; obtain UACR.")
     history = (
         _young_family_history_context_sentence(patient)
         if _young_family_metabolic_trajectory(patient, result)
@@ -533,8 +533,8 @@ def _skip_emr_recommendation(recommendation):
 
 def _short_recommendation_line(recommendation):
     replacements = {
-        "Moderate-intensity lipid-lowering therapy is reasonable to reduce cumulative atherogenic exposure.": "Moderate-intensity lipid-lowering therapy reasonable.",
-        "Moderate-intensity statin therapy is reasonable to reduce cumulative atherogenic exposure.": "Moderate-intensity statin therapy reasonable.",
+        "Moderate-intensity lipid-lowering therapy is reasonable to reduce cumulative atherogenic exposure.": "Discuss moderate-intensity lipid-lowering.",
+        "Moderate-intensity statin therapy is reasonable to reduce cumulative atherogenic exposure.": "Discuss moderate-intensity statin.",
         "Lipid-lowering therapy is indicated; treat toward high-risk targets.": "Lipid-lowering therapy indicated; treat toward high-risk targets.",
         "Intensify secondary-prevention lipid-lowering therapy; treat toward very-high-risk ASCVD targets.": "Intensify secondary-prevention lipid-lowering therapy; treat toward very-high-risk ASCVD targets: LDL-C <55 mg/dL, non-HDL-C <85 mg/dL, and ApoB <65 mg/dL if available. LDL-C <70 mg/dL remains the minimum secondary-prevention threshold.",
         "Secondary-prevention lipid-lowering therapy indicated; treat toward very-high-risk ASCVD targets.": "Treat toward very-high-risk ASCVD targets: LDL-C <55 mg/dL, non-HDL-C <85 mg/dL, and ApoB <65 mg/dL if available. LDL-C <70 mg/dL remains the minimum secondary-prevention threshold.",
@@ -543,8 +543,8 @@ def _short_recommendation_line(recommendation):
         "Optimize kidney-protective therapy and confirm albuminuria persistence.": "Confirm albuminuria persistence and optimize kidney-protective therapy.",
         "Treat blood pressure toward individualized goal.": "Treat BP toward goal <130/80.",
         "Optimize BP to <130/80.": "Treat BP toward goal <130/80.",
-        "CAC reasonable for risk clarification if treatment decision remains uncertain.": "CAC reasonable if treatment decision remains uncertain.",
-        "Aspirin may be considered only if bleeding risk is low after shared decision-making.": "Aspirin only if bleeding risk is low after shared decision-making.",
+        "CAC reasonable for risk clarification if treatment decision remains uncertain.": "CAC may clarify risk if treatment decision remains uncertain.",
+        "Aspirin may be considered only if bleeding risk is low after shared decision-making.": "Aspirin only if bleeding risk is low.",
         "Obtain hsCRP if inflammatory risk clarification would change management.": "Obtain hsCRP only if inflammatory risk clarification would change management.",
     }
     return replacements.get(recommendation, recommendation)
@@ -555,10 +555,10 @@ def _young_family_metabolic_recommendations(patient, result):
         return None
     return [
         "Focus on early risk reduction given metabolic risk signals and strong family history.",
-        "Moderate-intensity statin therapy may be reasonable after shared decision-making if ApoB/LDL-C burden, family history, or clinician judgment supports treatment.",
+        "Discuss moderate-intensity statin if ApoB/LDL-C burden, family history, or clinician judgment supports treatment.",
         "CAC not routinely recommended at this age; consider only if results would change management.",
         "Aspirin not indicated for routine primary prevention.",
-        "Consider ApoB, Lp(a), and hsCRP for further risk clarification if not already available.",
+        "Additional information: ApoB, Lp(a), and hsCRP if results would change management.",
     ]
 
 
@@ -651,9 +651,9 @@ def _emr_ckm_line(patient, result):
     if kdigo:
         parts.append(f"kidney {kdigo}")
         if getattr(patient, "uacr", None) is None and _uacr_completion_relevant(patient, result):
-            parts.append("UACR missing")
+            parts.append("UACR not available")
     elif _uacr_completion_relevant(patient, result):
-        parts.append("UACR missing")
+        parts.append("UACR not available")
     cac = _emr_fmt(getattr(patient, "cac", None))
     if cac is not None:
         parts.append(f"CAC {cac}")
@@ -787,6 +787,24 @@ def _short_lipid_action(item, patient, result):
         action = "No lipid escalation"
     else:
         action = status.rstrip(".") or "Review lipids"
+    triglycerides = getattr(patient, "triglycerides", None)
+    apob = getattr(patient, "apob", None)
+    target = (getattr(result, "targets", None) or [None])[0]
+    apob_target = getattr(target, "apob_target", None) if target else None
+    non_hdl = getattr(patient, "non_hdl_c", None)
+    non_hdl_target = getattr(target, "non_hdl_c_target", None) if target else None
+    ldl_unavailable = getattr(patient, "ldl_c", None) is None and triglycerides is not None and 400 <= triglycerides < 500
+    if ldl_unavailable:
+        if "high-intensity" in lowered and getattr(patient, "lipid_lowering", False):
+            action = "High-intensity lipid-lowering active"
+        parts = []
+        if apob is not None and apob_target is not None:
+            parts.append(f"ApoB {_emr_fmt(apob)}, target <{_emr_fmt(apob_target)}")
+        if non_hdl is not None and non_hdl_target is not None:
+            parts.append(f"non-HDL-C {_emr_fmt(non_hdl)}, target <{_emr_fmt(non_hdl_target)}")
+        targets = "; ".join(parts)
+        unavailable = "LDL-C unavailable due to TG"
+        return f"{action}; {targets}; {unavailable}" if targets else f"{action}; {unavailable}"
     targets = _lipid_target_phrase(patient, result)
     return f"{action}; {targets}" if targets and "no lipid escalation" not in action.lower() else action
 
@@ -809,7 +827,7 @@ def _short_kidney_action(item, patient):
     if status == "No kidney-risk signal":
         return status
     if uacr is None and "obtain uacr" in status.lower():
-        return "UACR missing; obtain UACR"
+        return "UACR not available; obtain UACR"
     if detail:
         detail = detail.replace("Consider SGLT2 for diabetic CKD.", "consider SGLT2 for diabetic CKD")
         return detail
@@ -841,6 +859,8 @@ def _short_aspirin_action(item):
     lowered = status.lower()
     if "antiplatelet" in lowered:
         return "Secondary-prevention antiplatelet therapy"
+    if "aspirin active" in lowered:
+        return "Active; confirm indication"
     if "consider" in lowered:
         return "Consider only if low bleeding risk"
     return "Not routine for primary prevention"
@@ -930,6 +950,6 @@ def render_emr_note(patient, result):
     if recommendations:
         lines.extend(recommendations)
     else:
-        lines.append("1. Clarify: No active domain changes.")
+        lines.append("1. Additional information: none.")
 
     return "\n".join(lines)

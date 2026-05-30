@@ -16,4 +16,4 @@ Recommendations:
 4. BP: BP needed.
 5. Glycemia: Prediabetes prevention; A1c 6.1%.
 6. Aspirin: Not routine for primary prevention.
-7. Clarify: Lp(a); hsCRP.
+7. Additional information: Lp(a).

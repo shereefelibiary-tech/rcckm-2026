@@ -2,7 +2,7 @@ RISK CONTINUUM CKM
 
 Level: 3B - elevated lifetime cardiometabolic risk despite low short-term event risk.
 PREVENT: ASCVD 10y 1.37% (Low); 30y 9.09%.
-CKM/Kidney/Plaque: CKM 2; UACR missing; CAC not measured.
+CKM/Kidney/Plaque: CKM 2; UACR not available; CAC not measured.
 Context: premature family history.
 
 Assessment:
@@ -12,8 +12,8 @@ Assessment:
 Recommendations:
 1. Lipids: Discuss moderate-intensity statin; LDL-C <100, ApoB <90, non-HDL-C <130.
 2. Plaque: CAC not routinely recommended.
-3. Kidney: UACR missing; obtain UACR.
+3. Kidney: UACR not available; obtain UACR.
 4. BP: BP needed.
 5. Glycemia: Prediabetes prevention; A1c 5.9%.
 6. Aspirin: Not routine for primary prevention.
-7. Clarify: Lp(a); UACR; hsCRP.
+7. Additional information: Lp(a); UACR.

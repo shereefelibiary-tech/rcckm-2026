@@ -9,7 +9,7 @@ def test_validation_safety_section_contains_clinician_facing_status_rows():
     assert "Golden cases" in html
     assert "Never-cross invariants" in html
     assert "Output snapshots" in html
-    assert "Clinician review required" in html
+    assert "Clinician review recommended" in html
     assert "Do not enter PHI in public/demo use" in html
 
 

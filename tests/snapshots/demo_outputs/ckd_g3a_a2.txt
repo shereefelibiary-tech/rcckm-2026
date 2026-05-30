@@ -15,11 +15,10 @@ Assessment:
 Recommendations:
 1. Lipids: Discuss moderate-intensity statin; LDL-C <100, ApoB <90, non-HDL-C <130.
 2. Plaque: CAC not measured.
-3. Kidney: UACR 72; continue/optimize ACEi-ARB.
+3. Kidney: UACR 72; ACEi/ARB active.
 4. BP: Treat toward <130/80.
 5. Glycemia: Prediabetes prevention; A1c 5.8%.
 6. Aspirin: Not routine for primary prevention.
-7. Clarify: hsCRP.
 
 PATIENT ROADMAP:
 Your Prevention Roadmap
@@ -47,7 +46,7 @@ Your goals:
 - LDL-C: 118 mg/dL to <100 mg/dL
 - non-HDL-C: 146 mg/dL calculated to <130 mg/dL
 - ApoB: 94 mg/dL to <90 mg/dL
-- A1c: 5.8% to individualized
+- A1c: 5.8% to prediabetes range
 - BP: 138/78 mmHg; treated to <130/80
 - Kidney / albuminuria: 72 mg/g; G3aA2 to reduce albuminuria / preserve eGFR
 - Weight: BMI 31.2 to individualized
@@ -55,20 +54,19 @@ Your goals:
 STEP 4
 Your next steps:
 1. Lower plaque-driving cholesterol: Discuss cholesterol-lowering therapy.
-2. Artery plaque: Plaque testing is interpreted with the overall risk picture.
-3. Protect the kidneys: Review kidney protection options with your clinician.
-4. Blood pressure: Review blood pressure goals with your clinician.
-5. Blood sugar: Keep diabetes or metabolic care moving toward the safest individualized goal.
-6. Aspirin safety: Do not start aspirin unless your clinician recommends it.
+2. Artery plaque: Calcium scan only if it would change the treatment decision.
+3. Protect the kidneys: Review kidney protection; UACR 72.
+4. Blood pressure: Treat toward <130/80.
+5. Blood sugar: Prediabetes range; focus on weight/activity.
+6. Aspirin safety: Do not start routine aspirin.
 
 ACTIONS:
 - Lipid lowering: Discuss moderate-intensity statin. LDL-C 118; target <100. ApoB 94; target <90.
 - CAC / plaque: Not measured. Plaque burden unmeasured.
-- Kidney protection: Monitor albuminuria. UACR 72; continue/optimize ACEi-ARB.
+- Kidney protection: Monitor albuminuria. UACR 72; ACEi/ARB active.
 - Blood pressure: Treat toward <130/80. Current 138/78.
 - Glycemia / metabolic: Prediabetes prevention. A1c 5.8%; weight/activity focus.
 - Aspirin / antiplatelet: Not routine for primary prevention. Do not start routine aspirin.
-- Data to clarify: Complete key data. hsCRP.
 
 RSS: 17
 RSS CONTRIBUTORS:

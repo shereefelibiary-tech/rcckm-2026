@@ -56,7 +56,7 @@ def test_parse_coverage_missing_fields_are_muted_after_parse():
     assert "Core fields recognized:" in html
     assert "Generic EMR text detected. Some fields may need review." in html
     assert "TG" in html
-    assert "not found" in html
+    assert "not available" in html
     assert "parse-item-missing" in html
     assert "&#9675;" in html
 
@@ -121,10 +121,10 @@ def test_parse_coverage_epic_placeholder_fixture_is_calm_and_ordered():
     assert "LDL-C" in html
     assert "90 mg/dL" in html
     assert "ApoB" in html
-    assert "ApoB missing" in html
+    assert "ApoB not available" in html
     assert "Add ApoB for atherogenic burden interpretation." in html
     assert "Lp(a)" in html
-    assert "Lp(a) missing" in html
+    assert "Lp(a) not available" in html
     assert "Add Lp(a) for inherited lipid-risk context." in html
     assert "Family history" in html
     assert "parse-item-review" in html

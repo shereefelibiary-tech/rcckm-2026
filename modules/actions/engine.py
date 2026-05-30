@@ -502,10 +502,10 @@ def _sglt2_action_text(patient, result=None):
         return None
     if uacr_value < 30 and not _has_heart_failure(patient):
         return None
-    if egfr_value < 20:
-        return "SGLT2 inhibitor initiation is not routinely recommended at this eGFR; individualize based on nephrology guidance and existing therapy."
     if bool(getattr(patient, "sglt2", False)):
         return "Continue SGLT2 inhibitor therapy if tolerated and clinically appropriate."
+    if egfr_value < 20:
+        return "SGLT2 inhibitor initiation is not routinely recommended at this eGFR; individualize based on nephrology guidance and existing therapy."
     if _has_heart_failure(patient) or uacr_value >= 200:
         return "Add an SGLT2 inhibitor for kidney and cardiovascular protection if no contraindication, despite ACEi/ARB therapy."
     if _has_diabetes(patient) and uacr_value >= 30:
@@ -965,15 +965,16 @@ def _build_testing_actions(patient, result):
             "Obtain UACR to complete kidney-risk assessment.",
         )
 
-    hscrp_relevant = (
-        bool(getattr(patient, "inflammatory_disease", False))
-        or _has_premature_family_history(patient)
-        or (
-            getattr(patient, "apob", None) is not None
-            and patient.apob >= 100
-            and cac is None
+    hscrp_relevant = any(
+        bool(getattr(patient, field, False))
+        for field in (
+            "inflammatory_disease",
+            "rheumatoid_arthritis",
+            "sle",
+            "psoriasis",
+            "inflammatory_arthritis",
+            "ibd",
         )
-        or (_has_metabolic_risk(patient) and not _prevent_low(result))
     )
     if getattr(patient, "hscrp", None) is None and hscrp_relevant:
         _add_action(

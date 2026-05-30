@@ -38,8 +38,8 @@ LOW_10YR_HIGH_30YR_APOB_PATIENT_SUMMARY = (
 
 LOW_10YR_HIGH_30YR_CLINICIAN_SUMMARY = (
     "Low 10-year ASCVD risk with elevated 30-year ASCVD risk. Use longer-term risk to guide "
-    "prevention intensity, risk-enhancer review, and shared decision-making. Statin therapy is "
-    "not automatic from 30-year risk alone, but may be reasonable when ApoB/LDL-C burden, "
+    "prevention intensity and risk-enhancer review. Statin therapy is "
+    "not automatic from 30-year risk alone; discuss treatment when ApoB/LDL-C burden, "
     "CKD/albuminuria, premature family history, Lp(a), diabetes, smoking, hypertension, or "
     "CAC/plaque supports treatment."
 )
