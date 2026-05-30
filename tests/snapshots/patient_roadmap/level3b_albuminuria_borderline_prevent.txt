@@ -1,24 +1,23 @@
 Your Prevention Roadmap
-Your results and next steps.
 
 STEP 1
-Where you stand:
+Where you stand
 - 10-year ASCVD risk: 3.74%
 - 30-year ASCVD risk: 18.8%
-- About 19 in 100 similar patients may have a heart attack, stroke, or related artery disease event over 30 years.
 - 10-year risk is low; 30-year risk is higher than expected.
 - About 4 in 100 similar patients may have a heart attack, stroke, or related artery disease event over 10 years.
+- About 19 in 100 similar patients may have a heart attack, stroke, or related artery disease event over 30 years.
 - Plaque status has not been measured.
 - Care focus: Level 3 (3B) - Actionable early CKM / atherogenic risk
 
 STEP 2
-Why your risk is higher:
-- Cholesterol particles: ApoB 92; LDL-C 126; non-HDL-C 156 (calculated). These numbers help show plaque-driving cholesterol in the blood.
-- Blood sugar / diabetes: A1c 6.1%. Improving blood sugar can lower long-term heart, kidney, and metabolic risk.
+Why your risk is higher
+- Cholesterol: LDL-C 126; non-HDL-C 156 (calculated). These numbers help show plaque-driving cholesterol in the blood.
+- Blood sugar: A1c 6.1%. Improving blood sugar can lower long-term heart, kidney, and metabolic risk.
 - Kidney protection: eGFR 82; UACR 34. Kidney markers also help estimate heart and metabolic risk.
 
 STEP 3
-Your goals:
+Your goals
 - LDL-C: 126 mg/dL to <100 mg/dL
 - non-HDL-C: 156 mg/dL calculated to <130 mg/dL
 - ApoB: 92 mg/dL to <90 mg/dL
@@ -26,10 +25,10 @@ Your goals:
 - Kidney / albuminuria: 34 mg/g; G2A2 to reduce albuminuria / preserve eGFR
 
 STEP 4
-Your next steps:
-1. Lower plaque-driving cholesterol: Review the cholesterol plan with your clinician.
+Your next steps
+1. Cholesterol: Review the cholesterol plan with your clinician.
 2. Artery plaque: Calcium scan only if it would change the treatment decision.
-3. Protect the kidneys: Review kidney protection; UACR 34.
+3. Kidneys: Optimize kidney protection; UACR 34.
 4. Blood pressure: Blood pressure reading needed.
 5. Blood sugar: Prediabetes range; focus on weight/activity.
-6. Aspirin safety: Do not start routine aspirin.
+6. Aspirin: Do not start routine aspirin.

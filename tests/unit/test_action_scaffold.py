@@ -6,14 +6,20 @@ from core.enums import RiskLevel
 from core.patient import Patient
 from core.results import RCCKMResult
 from modules.actions.scaffold import (
+    action_domain_clinician_text,
+    action_domain_patient_text,
     build_action_recommendation_lines,
     build_action_scaffold,
     build_action_instrument_panel,
     build_compact_action_detail_lines,
     build_compact_action_items,
+    build_domain_actions,
+    render_action_domain_text,
 )
 from modules.risk_enhancers.reproductive import reproductive_history_summary
 from renderers.emr_renderer import render_emr_note
+from renderers.patient_roadmap import render_patient_roadmap_text
+from renderers.render_modes import RenderMode
 from ui.report_layout import _build_action_html
 
 
@@ -151,12 +157,13 @@ def test_cac_100_299_on_treatment_above_target_uses_intensification_wording():
         "CAC 145 already measured; no repeat CAC needed for current decision-making."
     )
     assert _section(sections, "Aspirin").line == (
-        "Aspirin not routine for primary prevention."
+        "Aspirin may be considered only if bleeding risk is low."
     )
     assert "Lipid-lowering therapy is reasonable" not in recommendations
     assert "Intensify lipid-lowering" in recommendations
     assert "ApoB <80" in recommendations
     assert "2. Plaque: CAC 145." in recommendations
+    assert "6. Aspirin: Consider only if bleeding risk is low; CAC 145." in recommendations
     assert "CAC reasonable" not in recommendations
     assert "Subclinical coronary atherosclerosis" in note
     assert "Severe subclinical coronary atherosclerosis" not in note
@@ -167,7 +174,7 @@ def test_aspirin_default_not_indicated():
     result = evaluate_patient(patient)
 
     assert _section(build_action_scaffold(patient, result), "Aspirin").line == (
-        "Aspirin not indicated for routine primary prevention."
+        "Aspirin not routine for primary prevention."
     )
 
 
@@ -176,7 +183,7 @@ def test_aspirin_consideration_only_for_rcckm_high_risk_context():
     result = evaluate_patient(patient)
 
     assert _section(build_action_scaffold(patient, result), "Aspirin").line == (
-        "Aspirin not routine for primary prevention."
+        "Aspirin may be considered only if bleeding risk is low."
     )
 
 
@@ -185,8 +192,25 @@ def test_age_70_aspirin_not_routine_primary_prevention():
     result = evaluate_patient(patient)
 
     assert _section(build_action_scaffold(patient, result), "Aspirin").line == (
-        "Aspirin not indicated for routine primary prevention."
+        "Aspirin not routine for primary prevention."
     )
+
+
+def test_cac_guided_primary_prevention_aspirin_branches_align_surfaces():
+    cases = [
+        (Patient(age=54, sex="male", cac=0), "Aspirin not routine for primary prevention.", "Not routine for primary prevention", "Do not start routine aspirin."),
+        (Patient(age=54, sex="male", cac=50), "Aspirin not routine for primary prevention.", "Not routine for primary prevention", "Do not start routine aspirin."),
+        (Patient(age=54, sex="male", cac=184), "Aspirin may be considered only if bleeding risk is low.", "Consider only if bleeding risk is low; CAC 184", "Discuss only if bleeding risk is low."),
+        (Patient(age=58, sex="male", cac=350), "Aspirin may be considered if bleeding risk is low; plaque burden is high.", "Consider only if bleeding risk is low; CAC 350", "May be considered if bleeding risk is low."),
+        (Patient(age=75, sex="male", cac=350), "Aspirin not routine for primary prevention.", "Not routine for primary prevention", "Do not start routine aspirin."),
+        (Patient(age=58, sex="male", cac=350, aspirin_bleeding_risk_high=True), "Avoid routine primary-prevention aspirin.", "Avoid routine primary-prevention aspirin", "Avoid routine aspirin."),
+    ]
+
+    for patient, scaffold_line, emr_fragment, roadmap_fragment in cases:
+        result = evaluate_patient(patient)
+        assert _section(build_action_scaffold(patient, result), "Aspirin").line == scaffold_line
+        assert f"6. Aspirin: {emr_fragment}." in render_emr_note(patient, result)
+        assert f"6. Aspirin: {roadmap_fragment}" in render_patient_roadmap_text(patient, result)
 
 
 def test_clinical_ascvd_uses_secondary_prevention_antiplatelet_wording():
@@ -253,7 +277,7 @@ def test_action_html_renders_structured_sections_without_loose_duplicate_list():
 
     lipid_lead = "High-intensity therapy indicated"
     lipid_detail = "LDL-C"
-    aspirin_lead = "Aspirin not routine for primary prevention"
+    aspirin_lead = "Consider if bleeding risk is low"
     kidney_line = "Kidney protection"
     kidney_detail = "UACR 45"
     glycemia_line = "Optimize diabetes care"
@@ -284,7 +308,7 @@ def test_action_html_renders_structured_sections_without_loose_duplicate_list():
     assert lipid_lead in html
     assert lipid_detail in html
     assert aspirin_lead in html
-    assert "Consider only if bleeding risk is low and prevention context supports it." in html
+    assert "Primary-prevention aspirin is selective. Consider only if bleeding risk is low." in html
     assert kidney_line in html
     assert kidney_detail in html
     assert glycemia_line in html
@@ -359,9 +383,22 @@ def test_action_instrument_panel_groups_kidney_cac_and_aspirin_without_empty_cla
     assert "SGLT2 benefit is strongest" in panel["kidney_protection"].hover_detail
     assert "SGLT2" not in panel["blood_pressure"].status + panel["blood_pressure"].detail
     assert panel["blood_pressure"].status == "BP needed"
-    assert panel["aspirin_antiplatelet"].status == "Aspirin not routine for primary prevention"
+    assert panel["aspirin_antiplatelet"].status == "Consider if bleeding risk is low"
+    assert panel["aspirin_antiplatelet"].detail == "High plaque burden."
     assert "bleeding risk is low" in panel["aspirin_antiplatelet"].hover_detail
     assert "data_to_clarify" not in panel
+
+
+def test_action_domain_render_modes_separate_clinician_and_patient_language():
+    patient = Patient(age=58, sex="male", cac=350)
+    result = evaluate_patient(patient)
+    plaque_panel = next(item for item in build_action_instrument_panel(patient, result) if item.domain_id == "plaque_cac")
+    plaque_domain = next(item for item in build_domain_actions(patient, result) if item.domain_id == "plaque_cac")
+
+    assert action_domain_clinician_text(plaque_panel) == "CAC / plaque: CAC 350."
+    assert action_domain_patient_text(plaque_domain) == "High plaque burden (CAC 350)."
+    assert render_action_domain_text(plaque_panel, RenderMode.CLINICIAN) == "CAC / plaque: CAC 350."
+    assert render_action_domain_text(plaque_domain, RenderMode.PATIENT) == "High plaque burden (CAC 350)."
 
 
 def test_action_instrument_panel_shows_decision_relevant_clarifiers():
@@ -473,7 +510,7 @@ def test_severe_ckd_diabetes_actions_are_active_med_aware():
     diagnosis_text = "\n".join(candidate.name for candidate in result.diagnosis_candidates)
 
     assert result.kdigo_stage == "G4A3"
-    assert result.level_classification["label"] == "Level 3B - advanced CKM / severe kidney-risk phenotype"
+    assert result.level_classification["label"] == "Level 3B - advanced CKM / severe kidney-risk pattern"
     assert result.ckm_stage["stage"] == 3
     assert "N18.4" in note
     assert "clinical ascvd" not in diagnosis_text.lower()
@@ -588,7 +625,7 @@ def test_emr_recommendations_use_action_scaffold():
 
     lipid_line = "1. Lipids: High-intensity lipid-lowering therapy indicated; LDL-C <70, non-HDL-C <100."
     cac_line = "2. Plaque: CAC 350."
-    aspirin_line = "6. Aspirin: Not routine for primary prevention."
+    aspirin_line = "6. Aspirin: Consider only if bleeding risk is low; CAC 350."
     assert lipid_line in note
     assert "Recheck lipids in 4-12 weeks" not in note
     assert cac_line in note
@@ -615,7 +652,7 @@ def test_flat_recommendation_lines_keep_order_without_visible_scaffold_labels():
     assert any("optimize kidney-protective therapy" in line for line in lines)
     assert "Optimize diabetes care." in lines
     assert "CAC 350 already measured; no repeat CAC needed for current decision-making." in lines
-    assert "Aspirin not routine for primary prevention." in lines
+    assert "Aspirin may be considered if bleeding risk is low; plaque burden is high." in lines
     assert not any(line.startswith(("Lipid therapy:", "Coronary calcium:", "Aspirin:", "Supporting actions:")) for line in lines)
     assert "lipid" not in lines[2].lower()
 
@@ -692,7 +729,7 @@ def test_low_risk_complete_data_below_cac_age_threshold_stays_calm_without_cac_r
     assert result.prevent_risk_category == RiskLevel.LOW
     assert _section(sections, "Lipid therapy").line == "Lipid lowering: no escalation based on current LDL-C/ApoB and ASCVD risk profile."
     assert _section(sections, "Lifestyle").line == "Continue lifestyle-based prevention."
-    assert _section(sections, "Aspirin").line == "Aspirin not indicated for routine primary prevention."
+    assert _section(sections, "Aspirin").line == "Aspirin not routine for primary prevention."
     assert not any(section.label == "Coronary calcium" for section in sections)
     assert "- No diagnosis candidates generated." in note
     assert "1. Lipids: No lipid escalation." in recommendations

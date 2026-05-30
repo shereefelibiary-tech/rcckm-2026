@@ -132,7 +132,7 @@ def test_aspirin_not_routinely_recommended_and_cac_not_repeated_when_measured():
     patient, result = evaluate_dict({"age": 55, "sex": "male", "cac": 350})
     text = clinical_visible_text(patient, result) + "\n" + render_emr_note(patient, result)
 
-    assert "Aspirin: Not routine for primary prevention." in text
+    assert "Aspirin: Consider only if bleeding risk is low; CAC 350." in text
     assert "CAC 350" in text
     assert "no repeat CAC needed" not in text
     assert "Coronary calcium reasonable for plaque clarification" not in "\n".join(action_lines(result))

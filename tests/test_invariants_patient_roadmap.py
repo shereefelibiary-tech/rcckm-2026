@@ -125,7 +125,7 @@ def test_patient_roadmap_low_risk_old_egfr_missing_uacr_is_specific():
     assert "Kidney: eGFR 55; UACR not available to repeat eGFR/UACR if due" in roadmap
     assert "Blood pressure: At goal." in roadmap
     assert "Blood sugar: Normal range." in roadmap
-    assert "Protect the kidneys: Repeat kidney blood/urine testing; eGFR 55 and UACR not available." in roadmap
+    assert "Kidneys: Repeat kidney blood/urine testing; eGFR 55 and UACR not available." in roadmap
     assert "Artery plaque: Calcium scan only if it would change the treatment decision." in roadmap
     assert "ApoB:" not in roadmap
     assert "hsCRP" not in roadmap

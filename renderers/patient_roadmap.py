@@ -1,4 +1,3 @@
-from datetime import date
 from html import escape
 from textwrap import dedent
 
@@ -368,7 +367,7 @@ def _naturalize_level_detail(text):
         str(text or "")
         .replace("Very high risk / ASCVD intensity", "Very high risk")
         .replace("Very high risk / high plaque burden", "Very high risk")
-        .replace("ASCVD-intensity phenotype", "high plaque burden")
+        .replace("ASCVD-intensity pattern", "high plaque burden")
         .replace("ASCVD intensity", "high plaque burden")
     )
 
@@ -506,7 +505,7 @@ def _contributor_groups(patient, result):
     if non_hdl:
         lipids.append(f"non-HDL-C {_fmt(non_hdl['current_value'])} mg/dL calculated")
     if lipids:
-        groups.append(("Cholesterol particles", "; ".join(lipids)))
+        groups.append(("Cholesterol", "; ".join(lipids)))
 
     a1c = getattr(patient, "a1c", None)
     diabetes = bool(getattr(patient, "diabetes", False)) or (
@@ -527,7 +526,7 @@ def _contributor_groups(patient, result):
     if kdigo:
         kidney_bits.append(f"KDIGO {kdigo}")
     if diabetes and (egfr is not None or uacr is not None or kdigo):
-        groups.append(("Diabetes / kidney involvement", "; ".join(kidney_bits)))
+        groups.append(("Blood sugar and kidneys", "; ".join(kidney_bits)))
     elif diabetes or a1c is not None:
         groups.append(("Blood sugar / metabolic", "; ".join(kidney_bits)))
     elif egfr is not None or uacr is not None or kdigo:
@@ -662,9 +661,9 @@ def _patient_contributor_groups(patient, result):
     apob = getattr(patient, "apob", None)
     ldl = getattr(patient, "ldl_c", None)
     lipid_bits = []
-    if apob is not None:
+    if apob is not None and apob >= 100:
         lipid_bits.append(f"ApoB {_fmt(apob)}")
-    if ldl is not None:
+    if ldl is not None and ldl >= 100:
         lipid_bits.append(f"LDL-C {_fmt(ldl)}")
     non_hdl = format_non_hdl_display(patient, result) if should_show_non_hdl_default(patient, result) else None
     if non_hdl:
@@ -672,7 +671,7 @@ def _patient_contributor_groups(patient, result):
     if lipid_bits:
         groups.append(
             (
-                "Cholesterol particles",
+                "Cholesterol",
                 "; ".join(lipid_bits),
                 "These numbers help show plaque-driving cholesterol in the blood.",
                 "amber",
@@ -687,7 +686,7 @@ def _patient_contributor_groups(patient, result):
         finding = f"A1c {_fmt(a1c, '%', 1)}" if a1c is not None else "Diabetes"
         groups.append(
             (
-                "Blood sugar / diabetes",
+                "Blood sugar",
                 finding,
                 "Improving blood sugar can lower long-term heart, kidney, and metabolic risk.",
                 "orange" if diabetes else "amber",
@@ -724,7 +723,15 @@ def _patient_contributor_groups(patient, result):
 
     other = []
     lpa = getattr(patient, "lp_a_value", None)
-    if lpa is not None:
+    lpa_unit = str(getattr(patient, "lp_a_unit", "") or "").strip()
+    lpa_elevated = bool(
+        lpa is not None
+        and (
+            (lpa_unit == "nmol/L" and lpa >= 125)
+            or (lpa_unit == "mg/dL" and lpa >= 50)
+        )
+    )
+    if lpa_elevated:
         other.append(f"Lp(a) {_fmt(lpa)} {getattr(patient, 'lp_a_unit', None) or ''}".strip())
     family_summary = getattr(patient, "family_history_summary", None)
     if family_summary or getattr(patient, "family_history_premature_ascvd", False):
@@ -738,6 +745,10 @@ def _patient_contributor_groups(patient, result):
         other.append("OSA")
     if getattr(patient, "masld", False):
         other.append(MASLD_PATIENT_LABEL)
+    if getattr(patient, "south_asian_ancestry", False):
+        other.append("South Asian ancestry")
+    if getattr(patient, "filipino_ancestry", False):
+        other.append("Filipino ancestry")
     inflammatory = _inflammatory_context(patient)
     if inflammatory:
         other.append(", ".join(inflammatory))
@@ -765,9 +776,7 @@ def _target_rows(patient, result):
     rows = []
     target = result.targets[0] if getattr(result, "targets", None) else None
 
-    if getattr(patient, "ldl_c", None) is not None or (
-        target and target.ldl_c_target is not None
-    ):
+    if target and target.ldl_c_target is not None:
         rows.append(
             (
                 "LDL-C",
@@ -784,7 +793,7 @@ def _target_rows(patient, result):
                 f"<{_fmt(non_hdl['target_value'])} mg/dL",
             )
         )
-    if getattr(patient, "apob", None) is not None:
+    if target and target.apob_target is not None and getattr(patient, "apob", None) is not None:
         rows.append(
             (
                 "ApoB",
@@ -872,13 +881,13 @@ def _recommendation_rows(patient, result):
 
 def _patient_next_steps(patient, result):
     domain_label_map = {
-        "lipid_lowering": "Lower plaque-driving cholesterol",
+        "lipid_lowering": "Cholesterol",
         "plaque_cac": "Artery plaque",
-        "kidney_protection": "Protect the kidneys",
+        "kidney_protection": "Kidneys",
         "blood_pressure": "Blood pressure",
         "glycemia_metabolic": "Blood sugar",
         "inflammation_context": "Inflammation",
-        "aspirin_antiplatelet": "Aspirin safety",
+        "aspirin_antiplatelet": "Aspirin",
         "data_to_clarify": "Additional testing",
     }
     domain_rows = []
@@ -1079,30 +1088,28 @@ def _patient_driver_sections(patient, result):
 
     apob = getattr(patient, "apob", None)
     ldl = getattr(patient, "ldl_c", None)
-    if apob is not None:
+    if apob is not None and apob >= 100:
         lipid_bits = [f"ApoB {_fmt(apob)}"]
-        if ldl is not None:
+        if ldl is not None and ldl >= 100:
             lipid_bits.append(f"LDL-C {_fmt(ldl)}")
         non_hdl = format_non_hdl_display(patient, result) if should_show_non_hdl_default(patient, result) else None
         if non_hdl:
             lipid_bits.append(f"non-HDL-C {_fmt(non_hdl['current_value'])} calculated")
         priority.append(
             (
-                f"ApoB {_fmt(apob)} - elevated particle burden",
-                "ApoB reflects cholesterol-carrying particles that can contribute to plaque. "
-                + "; ".join(lipid_bits)
-                + ".",
+                f"Elevated cholesterol particles (ApoB {_fmt(apob)})",
+                "Current values: " + "; ".join(lipid_bits) + ".",
                 "amber",
             )
         )
-    elif ldl is not None or should_show_non_hdl_default(patient, result):
+    elif (ldl is not None and ldl >= 100) or should_show_non_hdl_default(patient, result):
         lipid_bits = []
-        if ldl is not None:
+        if ldl is not None and ldl >= 100:
             lipid_bits.append(f"LDL-C {_fmt(ldl)}")
         non_hdl = format_non_hdl_display(patient, result) if should_show_non_hdl_default(patient, result) else None
         if non_hdl:
             lipid_bits.append(f"non-HDL-C {_fmt(non_hdl['current_value'])} calculated")
-        priority.append(("Cholesterol particles", "These numbers show plaque-driving cholesterol in the blood. Current values: " + "; ".join(lipid_bits) + ".", "amber"))
+        priority.append(("Cholesterol", "Current values: " + "; ".join(lipid_bits) + ".", "amber"))
 
     a1c = getattr(patient, "a1c", None)
     diabetes = bool(getattr(patient, "diabetes", False)) or (
@@ -1124,19 +1131,20 @@ def _patient_driver_sections(patient, result):
         kidney_bits.append(f"KDIGO {kdigo}")
     if kidney_bits and (diabetes or egfr is not None or uacr is not None):
         if diabetes and (egfr is not None or uacr is not None or kdigo):
-            label = "Diabetes / kidney involvement"
-            detail = "Blood sugar and kidney markers add to long-term risk. "
+            label = "Blood sugar and kidneys"
+            detail = "Kidney involvement is present. "
         else:
-            label = "Blood sugar / kidney"
-            detail = "Blood sugar and kidney markers help guide prevention. "
+            label = "Blood sugar and kidneys"
+            detail = "Current values: "
         priority.append((label, detail + "; ".join(kidney_bits) + ".", "blue" if diabetes else "green"))
 
     lpa = getattr(patient, "lp_a_value", None)
-    if lpa is not None:
+    lpa_unit = str(getattr(patient, "lp_a_unit", "") or "").strip()
+    if lpa is not None and (
+        (lpa_unit == "nmol/L" and lpa >= 125)
+        or (lpa_unit == "mg/dL" and lpa >= 50)
+    ):
         context.append(f"Lp(a) {_fmt(lpa)} {getattr(patient, 'lp_a_unit', None) or ''}".strip())
-    bp = _bp_value(patient)
-    if bp:
-        context.append(f"BP {bp.replace(' mmHg', '')}")
     family_summary = getattr(patient, "family_history_summary", None)
     if family_summary or getattr(patient, "family_history_premature_ascvd", False):
         context.append(family_summary or "family history")
@@ -1167,7 +1175,7 @@ def _patient_driver_sections(patient, result):
     if inflammatory:
         context.extend(inflammatory)
 
-    return priority[:3], context
+    return priority[:3], list(dict.fromkeys(item for item in context if item))
 
 
 def _patient_priority_drivers_html(rows):
@@ -1230,31 +1238,32 @@ def _text_lines(patient, result):
     risk = getattr(result, "prevent_10y_ascvd", None)
     ascvd_30y = _ascvd_30y_value(result)
     level, level_detail = _continuum_label(patient, result)
+    prevent_10y_text = _prevent_explanation(risk)
+    prevent_30y_text = _prevent_30y_explanation(ascvd_30y) if ascvd_30y is not None else ""
 
     lines = [
         "Your Prevention Roadmap",
-        "Your results and next steps.",
         "",
         "STEP 1",
-        "Where you stand:",
+        "Where you stand",
         f"- 10-year ASCVD risk: {_fmt(risk, '%') or 'unavailable'}",
     ]
     if ascvd_30y is not None:
         lines.append(f"- 30-year ASCVD risk: {_fmt(ascvd_30y, '%')}")
-        prevent_30y_text = _prevent_30y_explanation(ascvd_30y)
-        if prevent_30y_text:
-            lines.append(f"- {prevent_30y_text}")
     summary_sentence = build_patient_risk_summary_sentence(patient, result, ascvd_30y)
     if summary_sentence:
         lines.append(f"- {summary_sentence}")
+    if prevent_10y_text:
+        lines.append(f"- {prevent_10y_text}")
+    if prevent_30y_text:
+        lines.append(f"- {prevent_30y_text}")
     lines.extend(
         [
-            f"- {_prevent_explanation(risk)}",
             f"- {_patient_plaque_status(patient, result)}",
             f"- Care focus: {level}" + (f" - {level_detail}" if level_detail else ""),
             "",
             "STEP 2",
-            "Why your risk is higher:",
+            "Why your risk is higher",
         ]
     )
     if risk is None:
@@ -1262,23 +1271,16 @@ def _text_lines(patient, result):
 
     if _has_early_metabolic_risk(patient, result):
         lines.append("- Early metabolic signals are present.")
-    if _has_lpa_family_context(patient):
-        lines.append("- Lp(a) and family history increase long-term risk context.")
-
     for label, finding, note, _tone in _patient_contributor_groups(patient, result):
         lines.append(f"- {label}: {finding}. {note}")
 
-    _priority, context_items = _patient_driver_sections(patient, result)
-    if context_items:
-        lines.append("- Other context: " + "; ".join(context_items[:8]) + ".")
-
     target_rows = _target_rows(patient, result)
     if target_rows:
-        lines.extend(["", "STEP 3", "Your goals:"])
+        lines.extend(["", "STEP 3", "Your goals"])
         for area, current, goal in target_rows:
             lines.append(f"- {area}: {current} to {goal}")
 
-    lines.extend(["", "STEP 4", "Your next steps:"])
+    lines.extend(["", "STEP 4", "Your next steps"])
     for index, (label, detail) in enumerate(_patient_next_steps(patient, result)[:6], start=1):
         lines.append(f"{index}. {label}: {detail}")
 
@@ -1322,219 +1324,11 @@ def _print_targets_html(patient, result):
 
 
 def render_printable_patient_roadmap(patient, result, *, generated_on=None, compact=True):
-    """Return print-ready patient roadmap HTML with dedicated Letter-size CSS.
-
-    The printable version reuses patient-roadmap data but suppresses app chrome,
-    hover-only details, and transparency/debug content so browser-native print
-    output stays text-based, compact, and patient-friendly.
-    """
-    generated = generated_on or date.today().isoformat()
-    risk = getattr(result, "prevent_10y_ascvd", None)
-    ascvd_30y = _ascvd_30y_value(result)
-    level, level_detail = _continuum_label(patient, result)
-    summary_sentence = build_patient_risk_summary_sentence(patient, result, ascvd_30y)
-
-    where_items = [
-        f"10-year ASCVD risk: {_fmt(risk, '%') or 'unavailable'}",
-        _prevent_explanation(risk),
-    ]
-    if ascvd_30y is not None:
-        where_items.insert(1, f"30-year ASCVD risk: {_fmt(ascvd_30y, '%')}")
-        prevent_30y_text = _prevent_30y_explanation(ascvd_30y)
-        if prevent_30y_text:
-            where_items.insert(2, prevent_30y_text)
-    if summary_sentence:
-        where_items.append(summary_sentence)
-    where_items.append(_patient_plaque_status(patient, result))
-    care_focus = f"Care focus: {level}" + (f" - {level_detail}" if level_detail else "")
-    where_items.append(care_focus)
-
-    priority_drivers, context_items = _patient_driver_sections(patient, result)
-    why_items = [f"{label}: {detail}" for label, detail, _tone in priority_drivers]
-    if context_items:
-        why_items.append("Other context: " + "; ".join(context_items[:8]) + ".")
-    if not why_items:
-        why_items = [
-            f"{label}: {finding}. {note}"
-            for label, finding, note, _tone in _patient_contributor_groups(patient, result)[:5]
-        ]
-
-    next_items = [
-        f"{label}: {detail}"
-        for label, detail in _patient_next_steps(patient, result)[:6]
-        if str(detail).strip()
-    ]
-    compact_class = " print-roadmap-compact" if compact else ""
-    css = dedent(
-        """
-        <style>
-        @page {
-            size: Letter;
-            margin: 0.45in;
-        }
-        .print-roadmap-page {
-            background: #ffffff;
-            color: #111111;
-            font-family: Arial, Helvetica, sans-serif;
-            font-size: 11pt;
-            line-height: 1.34;
-            margin: 0 auto;
-            max-width: 7.6in;
-            padding: 0;
-        }
-        .print-roadmap-header {
-            border-bottom: 1px solid #c9d2dc;
-            display: flex;
-            justify-content: space-between;
-            gap: 18px;
-            margin-bottom: 12px;
-            padding-bottom: 9px;
-        }
-        .print-roadmap-title {
-            font-size: 18pt;
-            font-weight: 800;
-            line-height: 1.1;
-            margin: 0;
-        }
-        .print-roadmap-subtitle {
-            color: #31485f;
-            font-size: 10.5pt;
-            font-weight: 600;
-            margin-top: 3px;
-        }
-        .print-roadmap-date {
-            color: #475569;
-            font-size: 9.5pt;
-            font-weight: 700;
-            text-align: right;
-            white-space: nowrap;
-        }
-        .print-roadmap-section {
-            break-inside: avoid;
-            page-break-inside: avoid;
-            margin-top: 11px;
-        }
-        .print-roadmap-section h2 {
-            color: #0b1f3a;
-            font-size: 13.5pt;
-            line-height: 1.15;
-            margin: 0 0 5px;
-        }
-        .print-roadmap-list,
-        .print-roadmap-next-list {
-            margin: 0;
-            padding-left: 17px;
-        }
-        .print-roadmap-list li,
-        .print-roadmap-next-list li {
-            margin: 2px 0;
-        }
-        .print-roadmap-target-grid {
-            display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 8px;
-        }
-        .print-roadmap-target {
-            border: 1px solid #d6dde5;
-            border-radius: 7px;
-            padding: 7px 8px;
-        }
-        .print-roadmap-target-label {
-            color: #334155;
-            font-size: 9.5pt;
-            font-weight: 800;
-        }
-        .print-roadmap-target-goal {
-            color: #111111;
-            font-size: 12.5pt;
-            font-weight: 850;
-            margin-top: 1px;
-        }
-        .print-roadmap-target-current {
-            color: #475569;
-            font-size: 9.5pt;
-            margin-top: 1px;
-        }
-        .print-roadmap-disclaimer {
-            border-top: 1px solid #d6dde5;
-            color: #475569;
-            font-size: 8.8pt;
-            line-height: 1.28;
-            margin-top: 13px;
-            padding-top: 7px;
-        }
-        .print-roadmap-muted {
-            color: #64748b;
-            font-style: italic;
-        }
-        .print-roadmap-compact .print-roadmap-section {
-            margin-top: 9px;
-        }
-        @media print {
-            html, body {
-                background: #ffffff !important;
-            }
-            .stApp, header, footer, [data-testid="stToolbar"], [data-testid="stSidebar"],
-            .export-copy-grid, .export-message, button {
-                display: none !important;
-            }
-            .print-roadmap-page {
-                box-shadow: none !important;
-                margin: 0 !important;
-                max-width: none !important;
-                width: 100% !important;
-            }
-            .print-roadmap-section {
-                break-inside: avoid;
-                page-break-inside: avoid;
-            }
-        }
-        @media (max-width: 760px) {
-            .print-roadmap-header {
-                display: block;
-            }
-            .print-roadmap-date {
-                margin-top: 6px;
-                text-align: left;
-            }
-            .print-roadmap-target-grid {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
-        }
-        </style>
-        """
-    ).strip()
-    return f"""
-{css}
-<main class="print-roadmap-page{compact_class}" aria-label="Printable patient roadmap">
-  <header class="print-roadmap-header">
-    <div>
-      <h1 class="print-roadmap-title">Patient prevention roadmap</h1>
-      <div class="print-roadmap-subtitle">Concise plan to review with your clinician.</div>
-    </div>
-    <div class="print-roadmap-date">Date: {escape(str(generated))}</div>
-  </header>
-  <section class="print-roadmap-section">
-    <h2>Where you stand</h2>
-    {_print_list_html(where_items)}
-  </section>
-  <section class="print-roadmap-section">
-    <h2>Why risk is elevated</h2>
-    {_print_list_html(why_items, empty_text="No major measured factors identified.")}
-  </section>
-  <section class="print-roadmap-section">
-    <h2>Targets</h2>
-    {_print_targets_html(patient, result)}
-  </section>
-  <section class="print-roadmap-section">
-    <h2>Next steps</h2>
-    {_print_list_html(next_items, class_name="print-roadmap-next-list")}
-  </section>
-  <div class="print-roadmap-disclaimer">
-    Clinician review recommended. This roadmap supports discussion and does not replace medical judgment.
-  </div>
-</main>
-""".strip()
+    """Return the same visual patient roadmap HTML with print mode enabled."""
+    return render_patient_roadmap_html(
+        build_patient_roadmap_view_model(patient, result),
+        print_mode=True,
+    )
 
 
 def _editorial_rows_html(rows, *, empty_text="No major measured contributors identified.", class_name="roadmap-rows"):
@@ -1575,14 +1369,13 @@ def _goals_strip_html(rows):
     return '<div class="roadmap-goal-strip">' + "".join(parts) + "</div>"
 
 
-def _roadmap_section_html(eyebrow: str, title: str, description: str, body_html: str) -> str:
+def _roadmap_section_html(eyebrow: str, title: str, body_html: str) -> str:
     """Render a patient roadmap section panel with a consistent header."""
     return (
         '<section class="roadmap-section-panel">'
         '<div class="roadmap-section-header">'
         f'<div class="roadmap-section-eyebrow">{escape(eyebrow)}</div>'
         f'<div class="roadmap-section-title">{escape(title)}</div>'
-        f'<div class="roadmap-section-description">{escape(description)}</div>'
         "</div>"
         f'<div class="roadmap-section-body">{body_html}</div>'
         "</section>"
@@ -1796,8 +1589,22 @@ def _render_patient_roadmap_legacy(patient, result):
 """.strip()
 
 
-def render_patient_roadmap(patient, result):
-    """Return one complete HTML string for inline Streamlit rendering.
+def build_patient_roadmap_view_model(patient, result):
+    """Return the shared view-model input for screen and print roadmap HTML."""
+    return {"patient": patient, "result": result}
+
+
+def render_patient_roadmap_html(view_model, print_mode=False):
+    """Render the visual patient roadmap HTML for screen or browser print."""
+    return _render_patient_roadmap_from_patient_result(
+        view_model["patient"],
+        view_model["result"],
+        print_mode=print_mode,
+    )
+
+
+def _render_patient_roadmap_from_patient_result(patient, result, *, print_mode=False):
+    """Return one complete HTML string for inline Streamlit or print rendering.
 
     Structural HTML is assembled as raw fragments with no leading Markdown-code
     indentation. Only values and free text are escaped.
@@ -1879,13 +1686,6 @@ def render_patient_roadmap(patient, result):
             line-height: 1.15;
             margin: 0 0 3px;
         }
-        .roadmap-subtitle {
-            color: rgba(17, 17, 17, 0.66);
-            font-size: 15px;
-            font-weight: 560;
-            line-height: 1.42;
-            max-width: 760px;
-        }
         .roadmap-chip {
             border: 1px solid rgba(217, 119, 6, 0.24);
             border-radius: 999px;
@@ -1928,14 +1728,6 @@ def render_patient_roadmap(patient, result):
             letter-spacing: -0.01em;
             line-height: 1.22;
             margin: 0;
-        }
-        .roadmap-section-description {
-            color: rgba(17, 17, 17, 0.56);
-            font-size: 15px;
-            font-weight: 560;
-            line-height: 1.38;
-            margin-top: 2px;
-            max-width: 720px;
         }
         .roadmap-section-body {
             min-width: 0;
@@ -2186,35 +1978,56 @@ def render_patient_roadmap(patient, result):
             padding-top: 9px;
         }
         @media print {
+            @page {
+                size: Letter;
+                margin: 0.45in;
+            }
+            html,
+            body {
+                background: #ffffff !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .stApp,
+            [data-testid="stToolbar"],
+            [data-testid="stSidebar"],
+            .export-copy-grid,
+            .export-message,
+            .export-panel,
+            button {
+                display: none !important;
+            }
+            .print-roadmap-page {
+                background: #ffffff !important;
+                color: var(--rc-black);
+                margin: 0 auto !important;
+                max-width: 7.6in;
+                padding: 0;
+                width: 100%;
+            }
             .roadmap-card {
-                box-shadow: none;
+                box-shadow: 0 6px 18px rgba(17, 17, 17, 0.06);
                 margin: 0;
                 page-break-inside: avoid;
-                padding: 16px 18px 14px;
+                padding: 12px 14px 12px;
             }
             .roadmap-section-panel {
-                border-radius: 16px;
-                margin-top: 16px;
-                padding: 18px 20px 19px;
+                break-inside: avoid;
+                page-break-inside: avoid;
             }
             .roadmap-section-header {
-                margin-bottom: 14px;
+                margin-bottom: 8px;
             }
             .roadmap-section-eyebrow {
-                font-size: 0.68rem;
-                margin-bottom: 4px;
+                font-size: 13px;
             }
             .roadmap-section-title {
-                font-size: 1.08rem;
-            }
-            .roadmap-section-description {
-                font-size: 0.80rem;
+                font-size: 18px;
             }
             .roadmap-risk-card,
             .roadmap-driver-row,
             .roadmap-goal-strip,
             .roadmap-step-list li {
-                box-shadow: none;
                 page-break-inside: avoid;
                 break-inside: avoid;
             }
@@ -2270,35 +2083,41 @@ def render_patient_roadmap(patient, result):
     body_parts = [
         '<div class="roadmap-card rc-panel">',
         '<div class="roadmap-head">',
-        '<div><div class="roadmap-title rc-card-title">Your Prevention Roadmap</div>',
-        '<div class="roadmap-subtitle">Your results and next steps.</div></div>',
+        '<div><div class="roadmap-title rc-card-title">Your Prevention Roadmap</div></div>',
         f'<div class="roadmap-chip">{escape(badge)}</div>',
         "</div>",
         _roadmap_section_html(
             "STEP 1",
             "Where you stand",
-            "Your estimated artery disease risk and current care level.",
             where_body,
         ),
         _roadmap_section_html(
             "STEP 2",
             "Why your risk is higher",
-            "The main reasons your risk is higher.",
             drivers_body,
         ),
         _roadmap_section_html(
             "STEP 3",
             "Your goals",
-            "Current goals and values.",
             goals_body,
         ),
         _roadmap_section_html(
             "STEP 4",
             "Your next steps",
-            "The most important steps to lower future risk.",
             next_body,
         ),
         "</div>",
     ]
 
-    return css + "\n" + "\n".join(part for part in body_parts if part)
+    roadmap_html = "\n".join(part for part in body_parts if part)
+    if print_mode:
+        roadmap_html = (
+            '<main class="print-roadmap-page" aria-label="Printable patient roadmap">'
+            f"{roadmap_html}</main>"
+        )
+    return css + "\n" + roadmap_html
+
+
+def render_patient_roadmap(patient, result):
+    """Return the screen patient roadmap HTML from the shared visual renderer."""
+    return render_patient_roadmap_html(build_patient_roadmap_view_model(patient, result))

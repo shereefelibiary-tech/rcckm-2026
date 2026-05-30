@@ -854,15 +854,27 @@ def _short_glycemia_action(item):
     return status
 
 
-def _short_aspirin_action(item):
+def _number_or_none(value):
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _short_aspirin_action(item, patient=None):
     status = str(getattr(item, "status", "") or "").strip().rstrip(".")
     lowered = status.lower()
     if "antiplatelet" in lowered:
         return "Secondary-prevention antiplatelet therapy"
     if "aspirin active" in lowered:
         return "Active; confirm indication"
+    if "avoid" in lowered:
+        return "Avoid routine primary-prevention aspirin"
     if "consider" in lowered:
-        return "Consider only if low bleeding risk"
+        cac = _number_or_none(getattr(patient, "cac", None)) if patient is not None else None
+        if cac is not None:
+            return f"Consider only if bleeding risk is low; CAC {cac:g}"
+        return "Consider only if bleeding risk is low"
     return "Not routine for primary prevention"
 
 
@@ -896,7 +908,7 @@ def _emr_recommendation_text(item, patient, result):
     if item.domain_id == "glycemia_metabolic":
         return _short_glycemia_action(item)
     if item.domain_id == "aspirin_antiplatelet":
-        return _short_aspirin_action(item)
+        return _short_aspirin_action(item, patient)
     if item.domain_id == "data_to_clarify":
         return _short_clarifier_action(item)
     return ""

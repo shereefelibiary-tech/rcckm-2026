@@ -53,13 +53,14 @@ def test_render_emr_note_outputs_plain_text_sections_in_order():
     assert note.index("Level: HIGH.") < note.index("Assessment:") < note.index("Recommendations:")
     assert "Level: HIGH." in note
     assert "PREVENT: ASCVD 10y 8.2% (Intermediate); 30y 24.5%." in note
+    assert note.index("ASCVD 10y 8.2%") < note.index("30y 24.5%")
     assert "CKM/Kidney/Plaque: CKM 3; kidney G3aA2; UACR not available; CAC 350." in note
     assert "- Clinical ASCVD (ICD: I25.10)" in note
     assert "- Type 2 diabetes mellitus (ICD: E11.9)" in note
 
     lipid_line = "1. Lipids: High-intensity lipid-lowering therapy indicated."
     cac_line = "2. Plaque: CAC 350."
-    aspirin_line = "6. Aspirin: Not routine for primary prevention."
+    aspirin_line = "6. Aspirin: Consider only if bleeding risk is low; CAC 350."
     assert lipid_line in note
     assert "Recheck lipids in 4-12 weeks" not in note
     assert cac_line in note
@@ -92,7 +93,7 @@ def test_stress_smartphrase_emr_uses_extracted_uacr_and_concise_surface_lines():
     assert "2. Plaque: CAC 125." in note
     assert "no repeat CAC needed" not in note
     assert "ApoB <80" in note
-    assert "6. Aspirin: Not routine for primary prevention." in note
+    assert "6. Aspirin: Consider only if bleeding risk is low; CAC 125." in note
 
 
 def test_cac_only_level4_emr_names_subclinical_atherosclerosis_driver():

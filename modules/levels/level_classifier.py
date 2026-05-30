@@ -411,8 +411,8 @@ def classify_rcckm_level(patient, prevent_result=None, rss_result=None, diagnosi
     if _advanced_ckd_albuminuria(patient):
         return _classification(
             "3B",
-            "Level 3B - advanced CKM / severe kidney-risk phenotype",
-            "Advanced CKD with severely increased albuminuria is a severe kidney-risk phenotype.",
+            "Level 3B - advanced CKM / severe kidney-risk pattern",
+            "Advanced CKD with severely increased albuminuria is a severe kidney-risk pattern.",
             actionable or ["advanced CKD", "severely increased albuminuria"],
             result,
             patient,

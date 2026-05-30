@@ -130,7 +130,7 @@ def _copy_print_component_html(
 <div class="export-copy-grid">
   <button class="export-button" id="copyEmr">Copy EMR note</button>
   <button class="export-button" id="copyRoadmap">Copy patient roadmap</button>
-  <button class="export-button" id="printRoadmap">Print roadmap</button>
+  <button class="export-button" id="printRoadmap">Print patient roadmap</button>
 </div>
 <div class="export-message" id="exportMessage"></div>
 <div class="print-roadmap-host" id="printRoadmapDocument">{printable_html}</div>

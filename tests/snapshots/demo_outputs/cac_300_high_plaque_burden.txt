@@ -21,32 +21,29 @@ Recommendations:
 3. Kidney: No kidney-risk signal.
 4. BP: Treat toward <130/80.
 5. Glycemia: Prediabetes prevention; A1c 6%.
-6. Aspirin: Not routine for primary prevention.
+6. Aspirin: Consider only if bleeding risk is low; CAC 350.
 
 PATIENT ROADMAP:
 Your Prevention Roadmap
-Your results and next steps.
 
 STEP 1
-Where you stand:
+Where you stand
 - 10-year ASCVD risk: 8.32%
 - About 8 in 100 similar patients may have a heart attack, stroke, or related artery disease event over 10 years.
 - CAC 350: high plaque burden.
 - Care focus: Level 5 - Very high risk
 
 STEP 2
-Why your risk is higher:
-- Lp(a) and family history increase long-term risk context.
+Why your risk is higher
 - Artery plaque: CAC 350. The calcium score shows a high amount of coronary plaque.
-- Cholesterol particles: ApoB 110; LDL-C 126; non-HDL-C 168 (calculated). These numbers help show plaque-driving cholesterol in the blood.
-- Blood sugar / diabetes: A1c 6.0%. Improving blood sugar can lower long-term heart, kidney, and metabolic risk.
+- Cholesterol: ApoB 110; LDL-C 126; non-HDL-C 168 (calculated). These numbers help show plaque-driving cholesterol in the blood.
+- Blood sugar: A1c 6.0%. Improving blood sugar can lower long-term heart, kidney, and metabolic risk.
 - Kidney protection: eGFR 74; UACR 18. Kidney markers also help estimate heart and metabolic risk.
 - Blood pressure: 136/82 mmHg; treated. Keeping blood pressure in a safer range protects the heart, brain, and kidneys.
 - Other factors: Lp(a) 160 nmol/L; Brother MI age 50. These details can shape the prevention plan with your clinician.
-- Other context: Lp(a) 160 nmol/L; BP 136/82; treated; Brother MI age 50.
 
 STEP 3
-Your goals:
+Your goals
 - LDL-C: 126 mg/dL to <70 mg/dL
 - non-HDL-C: 168 mg/dL calculated to <100 mg/dL
 - ApoB: 110 mg/dL to <80 mg/dL
@@ -56,13 +53,13 @@ Your goals:
 - Weight: BMI 30.1 to individualized
 
 STEP 4
-Your next steps:
-1. Lower plaque-driving cholesterol: Discuss stronger cholesterol-lowering therapy.
-2. Artery plaque: CAC 350 is included in the prevention plan.
-3. Protect the kidneys: No kidney action from current eGFR/UACR.
+Your next steps
+1. Cholesterol: Discuss stronger cholesterol-lowering therapy.
+2. Artery plaque: High plaque burden (CAC 350).
+3. Kidneys: No kidney action from current eGFR/UACR.
 4. Blood pressure: Treat toward <130/80.
 5. Blood sugar: Prediabetes range; focus on weight/activity.
-6. Aspirin safety: Do not start routine aspirin.
+6. Aspirin: May be considered if bleeding risk is low.
 
 ACTIONS:
 - Lipid lowering: High-intensity therapy indicated. LDL-C 126; target <70. ApoB 110; target <80.
@@ -70,7 +67,7 @@ ACTIONS:
 - Kidney protection: No kidney-risk signal. eGFR/UACR available.
 - Blood pressure: Treat toward <130/80. Current 136/82.
 - Glycemia / metabolic: Prediabetes prevention. A1c 6%; weight/activity focus.
-- Aspirin / antiplatelet: Aspirin not routine for primary prevention.
+- Aspirin / antiplatelet: Consider if bleeding risk is low. High plaque burden.
 
 RSS: 55
 RSS CONTRIBUTORS:

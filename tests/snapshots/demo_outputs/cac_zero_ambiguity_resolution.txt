@@ -22,44 +22,40 @@ Recommendations:
 
 PATIENT ROADMAP:
 Your Prevention Roadmap
-Your results and next steps.
 
 STEP 1
-Where you stand:
+Where you stand
 - 10-year ASCVD risk: 5.45%
 - 30-year ASCVD risk: 23.03%
-- About 23 in 100 similar patients may have a heart attack, stroke, or related artery disease event over 30 years.
 - Longer-term ASCVD risk is elevated.
 - About 5 in 100 similar patients may have a heart attack, stroke, or related artery disease event over 10 years.
+- About 23 in 100 similar patients may have a heart attack, stroke, or related artery disease event over 30 years.
 - CAC 0: no calcified plaque detected.
 - Care focus: Level 3 (3B) - Actionable early CKM / atherogenic risk
 
 STEP 2
-Why your risk is higher:
+Why your risk is higher
 - Artery plaque: CAC 0. No calcified coronary plaque was detected on this test.
-- Cholesterol particles: ApoB 105; LDL-C 142. These numbers help show plaque-driving cholesterol in the blood.
-- Blood sugar / diabetes: A1c 5.7%. Improving blood sugar can lower long-term heart, kidney, and metabolic risk.
+- Cholesterol: ApoB 105; LDL-C 142. These numbers help show plaque-driving cholesterol in the blood.
+- Blood sugar: A1c 5.7%. Improving blood sugar can lower long-term heart, kidney, and metabolic risk.
 - Kidney protection: eGFR 86; UACR 10. Kidney markers also help estimate heart and metabolic risk.
 - Blood pressure: 134/82 mmHg; treated. Keeping blood pressure in a safer range protects the heart, brain, and kidneys.
-- Other context: BP 134/82; treated.
 
 STEP 3
-Your goals:
-- LDL-C: 142 mg/dL to -
-- ApoB: 105 mg/dL to -
+Your goals
 - A1c: 5.7% to prediabetes range
 - BP: 134/82 mmHg; treated to <130/80
 - Kidney / albuminuria: 10 mg/g; G2A1 to reduce albuminuria / preserve eGFR
 - Weight: BMI 29.7 to individualized
 
 STEP 4
-Your next steps:
-1. Lower plaque-driving cholesterol: Discuss cholesterol-lowering therapy.
-2. Artery plaque: CAC 0 is included in the prevention plan.
-3. Protect the kidneys: No kidney action from current eGFR/UACR.
+Your next steps
+1. Cholesterol: Discuss cholesterol-lowering therapy.
+2. Artery plaque: No calcified plaque detected (CAC 0).
+3. Kidneys: No kidney action from current eGFR/UACR.
 4. Blood pressure: Treat toward <130/80.
 5. Blood sugar: Prediabetes range; focus on weight/activity.
-6. Aspirin safety: Do not start routine aspirin.
+6. Aspirin: Do not start routine aspirin.
 
 ACTIONS:
 - Lipid lowering: Discuss moderate-intensity statin. LDL-C 142. ApoB 105.

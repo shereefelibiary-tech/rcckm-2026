@@ -5,7 +5,7 @@ from modules.levels.explanation import build_level_explanation
 from renderers.continuum_bar import build_continuum_bar_html
 
 
-def test_build_risk_continuum_html_highlights_plaque_phenotype_level():
+def test_build_risk_continuum_html_highlights_plaque_pattern_level():
     patient = Patient(age=60, sex="male", cac=50)
     result = RCCKMResult(risk_level=RiskLevel.HIGH)
 
@@ -106,7 +106,7 @@ def test_build_risk_continuum_html_keeps_level_5_inside_responsive_grid():
     assert "rc-level-5 rc-card-active" in html
     assert "Very high risk / high plaque burden" not in html
     assert "Very high risk" in html
-    assert "ASCVD-intensity phenotype" not in html
+    assert "ASCVD-intensity pattern" not in html
     assert "High plaque burden (CAC 350)" not in html
     assert "CAC 350" in html
     assert "overflow: visible" in html

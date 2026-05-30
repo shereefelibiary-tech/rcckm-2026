@@ -8,6 +8,7 @@ from modules.prevention_context.engine import (
     classify_prevention_context,
 )
 from modules.risk_enhancers.reproductive import has_reproductive_risk_markers
+from renderers.render_modes import RenderMode
 
 
 @dataclass
@@ -429,15 +430,28 @@ def _aspirin_line(patient: Any, result: Any) -> str:
         return "Antiplatelet therapy is indicated for secondary prevention if clinically appropriate and no contraindication is present."
     if _aspirin_active(patient):
         return "Aspirin active; confirm indication."
+    if _aspirin_bleeding_risk_high(patient):
+        return "Avoid routine primary-prevention aspirin."
     if age is not None and age >= 70:
-        return "Aspirin not indicated for routine primary prevention."
+        return "Aspirin not routine for primary prevention."
     if cac is None:
-        return "Aspirin not indicated for routine primary prevention."
-    if age is not None and 40 <= age <= 69 and 100 <= cac <= 299:
         return "Aspirin not routine for primary prevention."
-    if age is not None and 40 <= age <= 69 and (cac >= 100 or _prevent_high(result)):
+    if cac < 100:
         return "Aspirin not routine for primary prevention."
-    return "Aspirin not indicated for routine primary prevention."
+    if age is not None and 40 <= age <= 69 and cac >= 300:
+        return "Aspirin may be considered if bleeding risk is low; plaque burden is high."
+    if age is not None and 40 <= age <= 69 and cac >= 100:
+        return "Aspirin may be considered only if bleeding risk is low."
+    return "Aspirin not routine for primary prevention."
+
+
+def _aspirin_bleeding_risk_high(patient: Any) -> bool:
+    if bool(getattr(patient, "aspirin_bleeding_risk_high", False)):
+        return True
+    if bool(getattr(patient, "bleeding_risk_high", False)) or bool(getattr(patient, "high_bleeding_risk", False)):
+        return True
+    bleeding_risk = str(getattr(patient, "bleeding_risk", "") or "").strip().lower()
+    return bleeding_risk in {"high", "elevated"}
 
 
 def _aspirin_active(patient: Any) -> bool:
@@ -768,12 +782,7 @@ def _compact_aspirin_item(section: ActionSection | None) -> CompactActionItem | 
             "aspirin",
         )
     if "bleeding risk" in lowered:
-        return CompactActionItem(
-            "Aspirin: only if low bleeding risk",
-            "Shared decision-making.",
-            "",
-            "aspirin",
-        )
+        return None
     return None
 
 
@@ -963,23 +972,27 @@ def _patient_lipid_line(patient: Any, item: ActionDomainReadout, source_line: st
     # Kept intentionally simple for patient wording; action/EMR carry the exact target semantics.
     lowered = f"{item.status} {item.detail} {source_line}".lower()
     if "no lipid escalation" in lowered or "lifestyle-focused" in lowered or "lifestyle" in lowered:
-        if ldl is not None:
-            if ldl < 100:
-                return "Continue current approach; LDL-C is near goal."
-            return f"Continue current approach; LDL-C is {ldl:g}."
-        return "Continue current cholesterol approach."
+        return "Continue current lipid treatment."
     return _lipid_patient_line(item.status, item.detail, source_line)
 
 
 def _patient_plaque_line(patient: Any, item: ActionDomainReadout) -> str:
     status = item.status.lower()
+    if _clinical_ascvd(patient):
+        return "Known cardiovascular disease is present."
     if "may clarify" in status:
         return "Calcium scan only if it would change the treatment decision."
     if "not routine" in status or "not needed" in status:
         return "Calcium scan not needed right now."
     cac = _num(getattr(patient, "cac", None))
     if cac is not None:
-        return f"CAC {cac:g} is included in the prevention plan."
+        if cac >= 300:
+            return f"High plaque burden (CAC {cac:g})."
+        if cac >= 100:
+            return f"Moderate plaque burden (CAC {cac:g})."
+        if cac > 0:
+            return f"Plaque present (CAC {cac:g})."
+        return "No calcified plaque detected (CAC 0)."
     if "not measured" in status:
         return "Calcium scan only if it would change the treatment decision."
     return "Calcium scan only if it would change the treatment decision."
@@ -995,8 +1008,14 @@ def _patient_kidney_line(patient: Any, item: ActionDomainReadout) -> str:
         return "Repeat kidney urine testing; UACR not available."
     if item.state in {"action", "consider"}:
         if uacr is not None:
-            return f"Review kidney protection; UACR {uacr:g}."
-        return "Review kidney protection options."
+            if "continue kidney-protective therapy" in status_detail:
+                return f"Continue kidney-protective therapy; UACR {uacr:g}."
+            if "sglt2" in status_detail:
+                return f"Discuss kidney-protective therapy; UACR {uacr:g}."
+            if "monitor" in status_detail:
+                return f"Monitor albuminuria; UACR {uacr:g}."
+            return f"Optimize kidney protection; UACR {uacr:g}."
+        return "Discuss kidney protection options."
     if "no kidney-risk signal" in status_detail:
         return "No kidney action from current eGFR/UACR."
     return "Repeat kidney blood/urine testing if due."
@@ -1022,7 +1041,7 @@ def _patient_glycemia_line(patient: Any, item: ActionDomainReadout) -> str:
     if "prediabetes" in status:
         return "Prediabetes range; focus on weight/activity."
     if "optimize diabetes" in status:
-        return "Work toward A1c goal."
+        return "Work toward A1c <7.0."
     if "lifestyle" in status:
         return "Focus on weight/activity."
     return item.status.rstrip(".") + "."
@@ -1034,14 +1053,35 @@ def _patient_aspirin_line(item: ActionDomainReadout) -> str:
         return "Aspirin is active; confirm the reason."
     if "antiplatelet" in status:
         return "Review antiplatelet therapy."
+    if "avoid" in status:
+        return "Avoid routine aspirin."
+    if "plaque burden is high" in status or "high plaque burden" in item.detail.lower():
+        return "May be considered if bleeding risk is low."
     if "consider" in status:
-        return "Consider only if bleeding risk is low."
+        return "Discuss only if bleeding risk is low."
     return "Do not start routine aspirin."
 
 
 def _line_or_none(text: str) -> str:
     text = _clean_readout_text(text)
     return text if text else ""
+
+
+def action_domain_clinician_text(item: ActionDomainReadout) -> str:
+    """Return compact clinician text for a structured action domain."""
+    return _readout_sentence(item)
+
+
+def action_domain_patient_text(item: ActionDomainReadout) -> str:
+    """Return patient-facing text for a structured action domain."""
+    return _clean_readout_text(getattr(item, "patient_line", "") or _readout_sentence(item))
+
+
+def render_action_domain_text(item: ActionDomainReadout, mode: RenderMode = RenderMode.CLINICIAN) -> str:
+    """Render one action domain using the requested audience mode."""
+    if mode == RenderMode.PATIENT:
+        return action_domain_patient_text(item)
+    return action_domain_clinician_text(item)
 
 
 def _first_target(result: Any) -> Any:
@@ -1361,23 +1401,37 @@ def _aspirin_readout(patient: Any, result: Any, section: ActionSection | None) -
             state="consider",
             hover_detail="Consider only if bleeding risk is low and prevention context supports it.",
         )
-    if "bleeding risk" in lowered or "consider" in lowered:
-        return _make_readout("aspirin_antiplatelet", "Aspirin / antiplatelet", "Consider only if low bleeding risk", "Review indication.", priority="low", state="consider")
     cac = _num(getattr(patient, "cac", None))
-    age = _num(getattr(patient, "age", None))
-    hover = (
-        "Consider only if bleeding risk is low and prevention context supports it."
-        if age is not None and 40 <= age <= 69 and cac is not None and cac >= 100
-        else ""
-    )
+    if "avoid routine" in lowered:
+        return _make_readout("aspirin_antiplatelet", "Aspirin / antiplatelet", "Avoid routine primary-prevention aspirin", "", priority="low", state="neutral")
+    if "plaque burden is high" in lowered:
+        return _make_readout(
+            "aspirin_antiplatelet",
+            "Aspirin / antiplatelet",
+            "Consider if bleeding risk is low",
+            "High plaque burden.",
+            priority="low",
+            state="consider",
+            hover_detail="Primary-prevention aspirin is selective. Consider only if bleeding risk is low.",
+        )
+    if "bleeding risk" in lowered or "consider" in lowered:
+        detail = f"CAC {cac:g}." if cac is not None else "Review bleeding risk."
+        return _make_readout(
+            "aspirin_antiplatelet",
+            "Aspirin / antiplatelet",
+            "Consider only if bleeding risk is low",
+            detail,
+            priority="low",
+            state="consider",
+            hover_detail="Primary-prevention aspirin is selective. Consider only if bleeding risk is low.",
+        )
     if line == "Aspirin not routine for primary prevention.":
         return _make_readout(
             "aspirin_antiplatelet",
             "Aspirin / antiplatelet",
-            "Aspirin not routine for primary prevention",
-            "",
+            "Not routine for primary prevention",
+            "Do not start routine aspirin.",
             state="neutral",
-            hover_detail=hover,
         )
     return _make_readout("aspirin_antiplatelet", "Aspirin / antiplatelet", "Not routine for primary prevention", "Do not start routine aspirin.", state="neutral")
 

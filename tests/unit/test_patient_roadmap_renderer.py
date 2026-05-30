@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from core.enums import PlaqueCategory, RiskLevel
 from core.engine import evaluate_patient
 from core.patient import Patient
@@ -8,6 +10,8 @@ from renderers.patient_roadmap import (
     render_patient_roadmap_text,
     render_printable_patient_roadmap,
 )
+from ui.ingest_panel import parse_ingest_report
+from ui.input_worksheet import build_patient_from_inputs
 
 
 def _patient():
@@ -75,16 +79,17 @@ def test_render_patient_roadmap_groups_full_clinical_story_without_raw_html():
     assert "STEP 2" in html
     assert "STEP 3" in html
     assert "STEP 4" in html
-    assert "Your estimated artery disease risk and current care level." in html
+    assert "Your estimated artery disease risk and current care level." not in html
+    assert "Where you stand" in html
     assert "Why your risk is higher" in html
-    assert "The main reasons your risk is higher." in html
+    assert "The main reasons your risk is higher." not in html
     assert "Your goals" in html
-    assert "Current goals and values." in html
+    assert "Current goals and values." not in html
     assert "Your next steps" in html
-    assert "The most important steps to lower future risk." in html
+    assert "The most important steps to lower future risk." not in html
     assert "Your Prevention Roadmap" in html
-    assert "Your results and next steps." in html
-    assert "roadmap-subtitle" in html
+    assert "Your results and next steps." not in html
+    assert "roadmap-subtitle" not in html
     assert "roadmap-risk-card" in html
     assert "roadmap-driver-row" in html
     assert html.count('<div class="roadmap-driver-row">') == 2
@@ -118,14 +123,14 @@ def test_render_patient_roadmap_groups_full_clinical_story_without_raw_html():
     assert "Level 5 - Very high risk" in html
     assert "Very high risk / high plaque burden" not in html
     assert "Coronary calcium score 350 - high plaque burden" not in html
-    assert "ApoB 110 - elevated particle burden" in html
+    assert "Elevated cholesterol particles (ApoB 110)" in html
     assert "Atherogenic burden" not in html
     assert "Atherogenic particle burden" not in html
     assert "ApoB 110" in html
     assert "LDL-C 132" in html
     assert "Blood sugar / diabetes" not in html
     assert "Kidney protection" not in html
-    assert "Diabetes / kidney involvement" in html
+    assert "Blood sugar and kidneys" in html
     assert "Diabetes with kidney involvement" not in html
     assert "A1c 7.1%" in html
     assert "KDIGO G3aA2" in html
@@ -133,7 +138,7 @@ def test_render_patient_roadmap_groups_full_clinical_story_without_raw_html():
     assert "180 nmol/L" in html
     assert "Other context" in html
     assert "Blood pressure" in html
-    assert "BP 138/82; treated" in html
+    assert "BP 138/82; treated" not in html
     assert "Sleep / hypoxia" not in html
     assert "Liver / MASLD" not in html
     assert "OSA" in html
@@ -141,20 +146,20 @@ def test_render_patient_roadmap_groups_full_clinical_story_without_raw_html():
     assert "LDL-C" in html
     assert "below 70 mg/dL" in html
     assert "Current 132 mg/dL" in html
-    assert "Lower plaque-driving cholesterol" in html
+    assert "Cholesterol" in html
     assert "Discuss stronger cholesterol-lowering therapy." in html
     assert "No repeat calcium scan is needed for today&#x27;s decision." not in html
-    assert "Aspirin safety" in html
-    assert "Do not start routine aspirin." in html
-    assert "Protect the kidneys" in html
-    assert "Review kidney protection; UACR 45." in html
+    assert "Aspirin" in html
+    assert "May be considered if bleeding risk is low." in html
+    assert "Kidneys" in html
+    assert "Discuss kidney-protective therapy; UACR 45." in html
     assert "Lp(a) can be checked once to guide long-term prevention." not in html
     assert "This roadmap is for discussion with your clinician." not in html
     assert "Medication decisions should be individualized." not in html
     assert "Dominant action" not in html
     assert 'roadmap-row-label">Next step' not in html
     next_section = html.split('<div class="roadmap-section-title">Your next steps</div>', 1)[1]
-    assert next_section.index("Lower plaque-driving cholesterol") < next_section.index("Protect the kidneys") < next_section.index("Aspirin safety")
+    assert next_section.index("Cholesterol") < next_section.index("Kidneys") < next_section.index("Aspirin")
     assert "Supporting actions:" not in html
     assert "Lipid therapy:" not in html
     assert "Aspirin: Aspirin" not in html
@@ -185,7 +190,7 @@ def test_render_patient_roadmap_sections_use_distinct_panels_not_underlines():
     assert "padding: 12px 14px 13px" in html
     assert "margin: 11px 0 0" in html
     assert "roadmap-section-eyebrow" in html
-    assert "roadmap-section-description" in html
+    assert "roadmap-section-description" not in html
     assert "--patient-font-base: 16px" in html
     assert "--patient-font-small: 14.5px" in html
     assert "--patient-font-title: 19px" in html
@@ -194,11 +199,11 @@ def test_render_patient_roadmap_sections_use_distinct_panels_not_underlines():
     assert "font-size: 15px" in html
     assert "font-size: 14px" in html
     assert "@media print" in html
-    assert "padding: 18px 20px 19px" in html
+    assert "print-color-adjust: exact" in html
     assert "roadmap-section-title" in html
     assert "text-decoration" not in html
     title_css = html.split(".roadmap-section-title", 1)[1].split(
-        ".roadmap-section-description", 1
+        ".roadmap-section-body", 1
     )[0]
     assert "border-top" not in title_css
     assert "border-bottom" not in title_css
@@ -209,7 +214,7 @@ def test_patient_roadmap_uses_plain_masld_language_when_displayed():
     text = render_patient_roadmap_text(patient, evaluate_patient(patient))
 
     assert "Metabolic fatty liver disease" in text
-    assert "fatty liver disease risk context" in text
+    assert "fatty liver disease risk context" not in text
     assert "MASLD" not in text
 
 
@@ -217,9 +222,9 @@ def test_render_patient_roadmap_text_is_copy_ready_plain_text():
     text = render_patient_roadmap_text(_patient(), _result())
 
     assert "Your Prevention Roadmap" in text
-    assert "Your results and next steps." in text
+    assert "Your results and next steps." not in text
     assert "STEP 1" in text
-    assert "Where you stand:" in text
+    assert "Where you stand" in text
     assert "- 10-year ASCVD risk: 8.2%" in text
     assert "- 30-year ASCVD risk: 24.5%" in text
     assert "About 25 in 100 similar patients may have a heart attack, stroke, or related artery disease event over 30 years." in text
@@ -234,23 +239,23 @@ def test_render_patient_roadmap_text_is_copy_ready_plain_text():
     assert "PREVENT percentile" not in text
     assert "- CAC 350: high plaque burden." in text
     assert "Artery plaque: CAC 350." in text
-    assert "Cholesterol particles: ApoB 110; LDL-C 132." in text
+    assert "Cholesterol: ApoB 110; LDL-C 132." in text
     assert "non-HDL-C" not in text
-    assert "Blood sugar / diabetes: A1c 7.1%." in text
+    assert "Blood sugar: A1c 7.1%." in text
     assert "phenotype" not in text.lower()
     assert "glycemia" not in text.lower()
     assert "clarification" not in text.lower()
     assert "- LDL-C: 132 mg/dL to <70 mg/dL" in text
     assert "STEP 2" in text
-    assert "Why your risk is higher:" in text
+    assert "Why your risk is higher" in text
     assert "STEP 3" in text
-    assert "Your goals:" in text
+    assert "Your goals" in text
     assert "STEP 4" in text
-    assert "Your next steps:" in text
-    assert "1. Lower plaque-driving cholesterol: Discuss stronger cholesterol-lowering therapy." in text
-    assert "2. Artery plaque: CAC 350 is included in the prevention plan." in text
-    assert "3. Protect the kidneys: Review kidney protection; UACR 45." in text
-    assert "6. Aspirin safety: Do not start routine aspirin." in text
+    assert "Your next steps" in text
+    assert "1. Cholesterol: Discuss stronger cholesterol-lowering therapy." in text
+    assert "2. Artery plaque: High plaque burden (CAC 350)." in text
+    assert "3. Kidneys: Discuss kidney-protective therapy; UACR 45." in text
+    assert "6. Aspirin: May be considered if bleeding risk is low." in text
     assert "4. Additional testing: Lp(a) can be checked once to guide long-term prevention." not in text
     assert "Dominant action" not in text
     assert "dominant_action" not in text
@@ -265,10 +270,21 @@ def test_render_patient_roadmap_text_is_copy_ready_plain_text():
     assert "Supporting actions:" not in text
     assert "Lipid therapy:" not in text
     assert "Aspirin: Aspirin" not in text
-    assert text.index("1. Lower plaque-driving cholesterol") < text.index(
-        "3. Protect the kidneys"
-    ) < text.index("6. Aspirin safety")
+    assert text.index("1. Cholesterol") < text.index("3. Kidneys") < text.index("6. Aspirin")
     assert "<div" not in text
+
+
+def test_patient_roadmap_prevent_order_is_10_year_before_30_year():
+    text = render_patient_roadmap_text(_patient(), _result())
+    assert text.index("- 10-year ASCVD risk: 8.2%") < text.index("- 30-year ASCVD risk: 24.5%")
+    assert text.index("About 8 in 100 similar patients") < text.index("About 25 in 100 similar patients")
+
+    html = render_patient_roadmap(_patient(), _result())
+    assert html.index("10-year ASCVD risk") < html.index("30-year ASCVD risk")
+
+    printable = render_printable_patient_roadmap(_patient(), _result())
+    assert printable.index("10-year ASCVD risk") < printable.index("30-year ASCVD risk")
+    assert printable.index("About 8 in 100 similar patients") < printable.index("About 25 in 100 similar patients")
 
 
 def test_render_printable_patient_roadmap_uses_dedicated_print_html():
@@ -279,6 +295,10 @@ def test_render_printable_patient_roadmap_uses_dedicated_print_html():
     )
 
     assert "print-roadmap-page" in html
+    assert "roadmap-card" in html
+    assert "roadmap-section-panel" in html
+    assert "roadmap-risk-card" in html
+    assert "roadmap-chip" in html
     assert "Printable patient roadmap" in html
     assert "@page" in html
     assert "size: Letter" in html
@@ -286,24 +306,39 @@ def test_render_printable_patient_roadmap_uses_dedicated_print_html():
     assert "@media print" in html
     assert "break-inside: avoid" in html
     assert "page-break-inside: avoid" in html
-    assert "Date: 2026-05-27" in html
     assert "Where you stand" in html
-    assert "Why risk is elevated" in html
-    assert "Targets" in html
-    assert "Next steps" in html
+    assert "Why your risk is higher" in html
+    assert "Your goals" in html
+    assert "Your next steps" in html
     assert "CAC 350: high plaque burden." in html
     assert "LDL-C" in html
     assert "ApoB" in html
     assert "BP" in html
     assert "A1c" in html
-    assert "Clinician review recommended" in html
+    assert "print-roadmap-section" not in html
+    assert "Patient prevention roadmap" not in html
     assert "<pre" not in html
     assert "<canvas" not in html
     assert "<img" not in html
     assert "screenshot" not in html.lower()
-    assert "roadmap-risk-card" not in html
     assert "RSS" not in html
     assert "tooltip" not in html.lower()
+
+
+def test_35f_diabetes_albuminuria_patient_roadmap_is_action_domain_aligned():
+    text = Path("tests/fixtures/epic_case_35f_diabetes_albuminuria.txt").read_text(encoding="utf-8")
+    patient = build_patient_from_inputs(parse_ingest_report(text)["parsed"])
+    result = evaluate_patient(patient)
+    roadmap = render_patient_roadmap_text(patient, result)
+    expected = Path("tests/snapshots/patient_roadmap/epic_case_35f_diabetes_albuminuria.txt").read_text(encoding="utf-8").strip()
+
+    assert roadmap.strip() == expected
+    assert "to -" not in roadmap
+    assert roadmap.count("Lp(a)") <= 1
+    assert "elevated particle burden" not in roadmap
+    assert "Review kidney protection" not in roadmap
+    assert "Kidneys: Continue kidney-protective therapy; UACR 362." in roadmap
+    assert "Cholesterol: Continue current lipid treatment." in roadmap
 
 
 def test_patient_risk_summary_is_secondary_prevention_aware():

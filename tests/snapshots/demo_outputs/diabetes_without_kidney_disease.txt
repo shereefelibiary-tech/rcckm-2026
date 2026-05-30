@@ -22,29 +22,26 @@ Recommendations:
 
 PATIENT ROADMAP:
 Your Prevention Roadmap
-Your results and next steps.
 
 STEP 1
-Where you stand:
+Where you stand
 - 10-year ASCVD risk: 5.76%
 - 30-year ASCVD risk: 23.61%
-- About 24 in 100 similar patients may have a heart attack, stroke, or related artery disease event over 30 years.
 - Longer-term ASCVD risk is elevated.
 - About 6 in 100 similar patients may have a heart attack, stroke, or related artery disease event over 10 years.
+- About 24 in 100 similar patients may have a heart attack, stroke, or related artery disease event over 30 years.
 - Plaque status has not been measured.
 - Care focus: Level 3 (3B) - Actionable early CKM / atherogenic risk
 
 STEP 2
-Why your risk is higher:
-- Cholesterol particles: ApoB 104; LDL-C 122; non-HDL-C 160 (calculated). These numbers help show plaque-driving cholesterol in the blood.
-- Blood sugar / diabetes: A1c 7.1%. Improving blood sugar can lower long-term heart, kidney, and metabolic risk.
+Why your risk is higher
+- Cholesterol: ApoB 104; LDL-C 122; non-HDL-C 160 (calculated). These numbers help show plaque-driving cholesterol in the blood.
+- Blood sugar: A1c 7.1%. Improving blood sugar can lower long-term heart, kidney, and metabolic risk.
 - Kidney protection: eGFR 92; UACR 8. Kidney markers also help estimate heart and metabolic risk.
 - Blood pressure: 128/78 mmHg. Keeping blood pressure in a safer range protects the heart, brain, and kidneys.
-- Other factors: Lp(a) 30 nmol/L. These details can shape the prevention plan with your clinician.
-- Other context: Lp(a) 30 nmol/L; BP 128/78.
 
 STEP 3
-Your goals:
+Your goals
 - LDL-C: 122 mg/dL to <70 mg/dL
 - non-HDL-C: 160 mg/dL calculated to <100 mg/dL
 - ApoB: 104 mg/dL to <80 mg/dL
@@ -54,13 +51,13 @@ Your goals:
 - Weight: BMI 31.3 to individualized
 
 STEP 4
-Your next steps:
-1. Lower plaque-driving cholesterol: Discuss cholesterol-lowering therapy.
+Your next steps
+1. Cholesterol: Discuss cholesterol-lowering therapy.
 2. Artery plaque: Calcium scan only if it would change the treatment decision.
-3. Protect the kidneys: No kidney action from current eGFR/UACR.
+3. Kidneys: No kidney action from current eGFR/UACR.
 4. Blood pressure: At goal.
-5. Blood sugar: Work toward A1c goal.
-6. Aspirin safety: Do not start routine aspirin.
+5. Blood sugar: Work toward A1c <7.0.
+6. Aspirin: Do not start routine aspirin.
 
 ACTIONS:
 - Lipid lowering: Discuss moderate-intensity statin. LDL-C 122; target <70. ApoB 104; target <80.

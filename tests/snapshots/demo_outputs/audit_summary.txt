@@ -2,7 +2,7 @@ RCCKM Demo Case Audit
 Cases checked: 32
 Errors: 0
 Warnings: 1
-Suggestions: 7
+Suggestions: 11
 
 Summary table:
 Score  Complete  Coherent  Readable  Showcase  Demo
@@ -19,7 +19,6 @@ Score  Complete  Coherent  Readable  Showcase  Demo
   100       100       100       100       100  CAC >=100 treatment clarification
   100       100       100       100       100  CAC >=300 high plaque burden
   100       100       100       100       100  Incidental CAC on CT
-  100       100       100       100       100  Breast arterial calcification
   100       100       100       100       100  Type 2 diabetes without kidney disease
   100       100       100       100       100  Type 2 diabetes with albuminuria
   100       100       100       100       100  CKD G2A2 albuminuria
@@ -27,20 +26,21 @@ Score  Complete  Coherent  Readable  Showcase  Demo
   100       100       100       100       100  Higher albuminuria / SGLT2 consideration
   100       100       100       100       100  BP treated but above kidney goal
   100       100       100       100       100  ACEi/ARB with persistent albuminuria
-  100       100       100       100       100  Rheumatoid arthritis risk enhancer
   100       100       100       100       100  South Asian ancestry context
-  100       100       100       100       100  Active smoker prevention visit
-  100       100       100       100       100  Cancer survivor context
    98       100       100       100        94  Low-risk clean prevention
    98       100       100       100        94  Low 10-year / elevated 30-year risk
+   98       100       100       100        94  Breast arterial calcification
    98       100       100       100        94  On-treatment above-target lipids
    98       100       100       100        94  High-intensity statin, add-on discussion
    98       100       100       100        94  Statin intolerance
+   98       100       100       100        94  Rheumatoid arthritis risk enhancer
+   98       100       100       100        94  Active smoker prevention visit
+   98       100       100       100        94  Cancer survivor context
    98        92       100       100       100  Multiple enhancers, ApoB/Lp(a) not available
    97       100       100       100        88  Severe secondary prevention
 
 Strongest demos: Borderline ASCVD discussion, Younger patient with premature family history, Prediabetes / insulin resistance
-Weakest demos: Statin intolerance, Multiple enhancers, ApoB/Lp(a) not available, Severe secondary prevention
+Weakest demos: Cancer survivor context, Multiple enhancers, ApoB/Lp(a) not available, Severe secondary prevention
 Sparse demos: Multiple enhancers, ApoB/Lp(a) not available
 Contradictory demos: none
 Demos needing rewrite: none
@@ -51,8 +51,12 @@ Warnings:
 Suggestions:
 - Low-risk clean prevention: showcase concept may be too subtle: lifestyle prevention
 - Low 10-year / elevated 30-year risk: showcase concept may be too subtle: prevention opportunity
+- Breast arterial calcification: showcase concept may be too subtle: risk-enhancer context
 - On-treatment above-target lipids: showcase concept may be too subtle: statin intolerance
 - High-intensity statin, add-on discussion: showcase concept may be too subtle: add-on therapy
 - Severe secondary prevention: showcase concept may be too subtle: very-high-risk ASCVD targets
 - Severe secondary prevention: showcase concept may be too subtle: add-on therapy
 - Statin intolerance: showcase concept may be too subtle: statin intolerance
+- Rheumatoid arthritis risk enhancer: showcase concept may be too subtle: risk-enhancer context
+- Active smoker prevention visit: showcase concept may be too subtle: risk-enhancer context
+- Cancer survivor context: showcase concept may be too subtle: risk-enhancer context

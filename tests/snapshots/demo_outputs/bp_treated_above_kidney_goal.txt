@@ -23,10 +23,9 @@ Recommendations:
 
 PATIENT ROADMAP:
 Your Prevention Roadmap
-Your results and next steps.
 
 STEP 1
-Where you stand:
+Where you stand
 - 10-year ASCVD risk: 10.09%
 - Your 10-year ASCVD risk is elevated, so prevention and lipid-lowering therapy should be discussed with your clinician.
 - About 10 in 100 similar patients may have a heart attack, stroke, or related artery disease event over 10 years.
@@ -34,16 +33,14 @@ Where you stand:
 - Care focus: Level 3 (3B) - Actionable early CKM / atherogenic risk
 
 STEP 2
-Why your risk is higher:
-- Cholesterol particles: ApoB 98; LDL-C 118; non-HDL-C 152 (calculated). These numbers help show plaque-driving cholesterol in the blood.
-- Blood sugar / diabetes: A1c 6.1%. Improving blood sugar can lower long-term heart, kidney, and metabolic risk.
+Why your risk is higher
+- Cholesterol: LDL-C 118; non-HDL-C 152 (calculated). These numbers help show plaque-driving cholesterol in the blood.
+- Blood sugar: A1c 6.1%. Improving blood sugar can lower long-term heart, kidney, and metabolic risk.
 - Kidney protection: eGFR 62; UACR 86. Kidney markers also help estimate heart and metabolic risk.
 - Blood pressure: 148/86 mmHg; treated. Keeping blood pressure in a safer range protects the heart, brain, and kidneys.
-- Other factors: Lp(a) 34 nmol/L. These details can shape the prevention plan with your clinician.
-- Other context: Lp(a) 34 nmol/L; BP 148/86; treated.
 
 STEP 3
-Your goals:
+Your goals
 - LDL-C: 118 mg/dL to <70 mg/dL
 - non-HDL-C: 152 mg/dL calculated to <100 mg/dL
 - ApoB: 98 mg/dL to <80 mg/dL
@@ -53,13 +50,13 @@ Your goals:
 - Weight: BMI 31.6 to individualized
 
 STEP 4
-Your next steps:
-1. Lower plaque-driving cholesterol: Discuss cholesterol-lowering therapy.
+Your next steps
+1. Cholesterol: Discuss cholesterol-lowering therapy.
 2. Artery plaque: Calcium scan only if it would change the treatment decision.
-3. Protect the kidneys: Review kidney protection; UACR 86.
+3. Kidneys: Monitor albuminuria; UACR 86.
 4. Blood pressure: Treat toward <130/80.
 5. Blood sugar: Prediabetes range; focus on weight/activity.
-6. Aspirin safety: Do not start routine aspirin.
+6. Aspirin: Do not start routine aspirin.
 
 ACTIONS:
 - Lipid lowering: Discuss moderate-intensity statin. LDL-C 118; target <70. ApoB 98; target <80.

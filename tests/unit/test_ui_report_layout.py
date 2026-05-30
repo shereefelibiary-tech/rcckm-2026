@@ -320,9 +320,10 @@ def test_export_print_section_uses_plain_text_outputs_and_downloads():
     assert "Copy the EMR note for clinical documentation" in combined
     assert "Copy EMR note" in combined
     assert "Copy patient roadmap" in combined
-    assert "Print roadmap" in combined
-    assert "Print patient roadmap" not in combined
+    assert "Print patient roadmap" in combined
     assert "print-roadmap-page" in combined
+    assert "roadmap-card" in combined
+    assert "roadmap-risk-card" in combined
     assert "printableRoadmapHtml" in combined
     assert "window.print()" in combined
     assert "@media print" in combined
@@ -518,8 +519,8 @@ def test_targets_card_prioritizes_ldl_and_apob_by_default():
     assert "Calculated from total cholesterol minus HDL-C." not in html
     assert html.count('<span class="target-item">') == 2
     assert html.count('<span class="target-main">') == 2
-    assert html.index("LDL-C") < html.index("&lt;70 mg/dL") < html.index("Current 132")
-    assert html.index("ApoB") < html.index("&lt;80 mg/dL") < html.index("Current 110")
+    assert html.index("LDL-C") < html.index("132 mg/dL") < html.index("-&gt; &lt;70 mg/dL")
+    assert html.index("ApoB") < html.index("110 mg/dL") < html.index("-&gt; &lt;80 mg/dL")
     assert 'content: "•"' not in html
     assert "ApoB is shown as an RCCKM advanced particle target." not in html
     assert "Show target rationale" in html
@@ -537,7 +538,7 @@ def test_targets_card_shows_severe_triglycerides_when_pathway_relevant():
     html = _build_targets_html(result, patient)
 
     assert "Triglycerides" in html
-    assert "Current 1040" in html
+    assert "1040 mg/dL" in html
     assert "Pancreatitis-risk TG pathway active." in html
 
 
@@ -1684,7 +1685,7 @@ def test_primary_report_copy_limits_repeated_ascvd_jargon():
     )
 
     assert combined_html.count("ASCVD") <= 6
-    assert "ASCVD-intensity phenotype" not in combined_html
+    assert "ASCVD-intensity pattern" not in combined_html
     assert combined_html.count("Atherosclerotic events include heart attack") == 1
     assert "10-year ASCVD risk" in combined_html
     assert "30-year ASCVD risk" in combined_html

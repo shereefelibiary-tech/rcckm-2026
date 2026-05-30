@@ -454,12 +454,12 @@ def _build_targets_html(result, patient=None, *, clinician_detail_mode=False):
         target_html = ""
         if target_value is not None and not apob_missing:
             target_html = (
-                f'<span class="target-goal">&lt;{_fmt_target_number(target_value)} {escape(unit)}</span>'
+                f'<span class="target-goal">-&gt; &lt;{_fmt_target_number(target_value)} {escape(unit)}</span>'
             )
         current_html = ""
         if current_value is not None:
             current_html = (
-                f'<span class="target-current">Current {_fmt_target_number(current_value)}</span>'
+                f'<span class="target-current">{_fmt_target_number(current_value)} {escape(unit)}</span>'
             )
         elif apob_missing:
             current_html = '<span class="target-current">Obtain for particle burden clarification</span>'
@@ -470,9 +470,9 @@ def _build_targets_html(result, patient=None, *, clinician_detail_mode=False):
             '<span class="target-item">'
             '<span class="target-main">'
             f'<span class="target-name">{escape(label)}</span>'
+            f"{current_html}"
             f"{target_html}"
             "</span>"
-            f"{current_html}"
             f"{rationale_html}"
             "</span>"
         )

@@ -1,8 +1,7 @@
 Your Prevention Roadmap
-Your results and next steps.
 
 STEP 1
-Where you stand:
+Where you stand
 - 10-year ASCVD risk: 2.5%
 - Known cardiovascular disease is present.
 - About 3 in 100 similar patients may have a heart attack, stroke, or related artery disease event over 10 years.
@@ -10,18 +9,18 @@ Where you stand:
 - Care focus: Level 5 - Very high risk
 
 STEP 2
-Why your risk is higher:
+Why your risk is higher
 - Artery plaque: Known cardiovascular disease. This means prevention decisions should be more treatment-focused.
 
 STEP 3
-Your goals:
+Your goals
 - LDL-C: - to <70 mg/dL
 
 STEP 4
-Your next steps:
-1. Lower plaque-driving cholesterol: Discuss stronger cholesterol-lowering therapy toward secondary-prevention goals.
-2. Artery plaque: CAC 0 is included in the prevention plan.
-3. Protect the kidneys: Repeat kidney urine testing; UACR not available.
+Your next steps
+1. Cholesterol: Discuss stronger cholesterol-lowering therapy toward secondary-prevention goals.
+2. Artery plaque: Known cardiovascular disease is present.
+3. Kidneys: Repeat kidney urine testing; UACR not available.
 4. Blood pressure: Blood pressure reading needed.
 5. Blood sugar: A1c needed.
-6. Aspirin safety: Review antiplatelet therapy.
+6. Aspirin: Review antiplatelet therapy.

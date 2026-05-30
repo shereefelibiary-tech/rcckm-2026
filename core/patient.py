@@ -89,6 +89,8 @@ class Patient:
     statin_intensity: Optional[str] = None
     statin_intolerance: Optional[bool] = None
     aspirin: Optional[bool] = None
+    aspirin_bleeding_risk_high: Optional[bool] = None
+    aspirin_bleeding_risk_low: Optional[bool] = None
     sglt2: Optional[bool] = None
     glp1: Optional[bool] = None
     ace_arb: Optional[bool] = None

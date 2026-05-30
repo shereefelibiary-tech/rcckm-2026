@@ -127,6 +127,8 @@ def test_render_prevent_card_shows_30_year_risk_when_available():
     assert "About 24 in 100 similar patients may have a heart attack, stroke, or related artery disease event over 30 years." in html
     assert "longer-term risk trajectory" not in html.lower()
     assert PREVENT_CVD_SCOPE_EXPLAINER in html
+    assert html.index("10-year") < html.index("30-year")
+    assert html.index('<span class="value">8.2%</span>') < html.index('<span class="value">24.5%</span>')
 
 
 def test_render_prevent_card_separates_rcckm_level_from_prevent_category():
