@@ -196,6 +196,141 @@ def test_problem_list_ascvd_does_not_activate_secondary_prevention():
     assert result.risk_level != "Level 5"
 
 
+def test_problem_list_generic_family_history_is_review_not_premature():
+    report = parse_ingest_report(
+        """
+        Problem list:
+        - Family history of ischemic heart disease
+        """
+    )
+    parsed = report["parsed"]
+    recognition_html = render_parser_recognition_strip(report)
+
+    assert parsed["family_history_review"] is True
+    assert parsed.get("family_history_premature_ascvd") is not True
+    assert "Family history of CAD; premature status not specified" in recognition_html
+
+
+def test_problem_list_premature_family_history_is_review_without_detail():
+    parsed = parse_ingest_text(
+        """
+        Problem list:
+        - Family history of premature coronary artery disease
+        """
+    )
+
+    assert parsed["family_history_premature_review"] is True
+    assert parsed.get("family_history_premature_ascvd") is not True
+
+
+def test_problem_list_family_history_detail_binds_relationship_event_age():
+    parsed = parse_ingest_text(
+        """
+        Problem list:
+        - Father MI age 49
+        """
+    )
+
+    assert parsed["family_history_premature_ascvd"] is True
+    assert parsed["family_history_relationship"] == "father"
+    assert parsed["family_history_event_type"] == "mi"
+    assert parsed["family_history_age_at_event"] == 49
+
+
+def test_problem_list_suspected_sleep_apnea_is_review_not_osa():
+    parsed = parse_ingest_text(
+        """
+        Problem list:
+        - Suspected sleep apnea
+        - Snoring
+        - Hypersomnia
+        """
+    )
+
+    assert parsed["sleep_apnea_review"] is True
+    assert parsed.get("osa") is not True
+
+
+def test_problem_list_confirmed_osa_sets_osa():
+    parsed = parse_ingest_text(
+        """
+        Problem list:
+        - Obstructive sleep apnea
+        """
+    )
+
+    assert parsed["osa"] is True
+
+
+def test_problem_list_sah_aneurysm_is_not_clinical_ascvd():
+    parsed = parse_ingest_text(
+        """
+        Problem list:
+        - Subarachnoid hemorrhage from aneurysm
+        - Ruptured middle cerebral artery aneurysm
+        """
+    )
+
+    assert parsed.get("clinical_ascvd") is not True
+    assert parsed.get("ascvd_clinical") is not True
+    assert parsed["cerebrovascular_review"] is True
+
+
+def test_problem_list_diabetes_overrides_a1c_prediabetes_range():
+    parsed = parse_ingest_text(
+        """
+        A1c: 6.1
+        Problem list:
+        - Type 2 diabetes mellitus with hyperglycemia
+        """
+    )
+
+    assert parsed["a1c"] == 6.1
+    assert parsed["diabetes"] is True
+    assert parsed["diabetes_source"] == "problem_list"
+
+
+def test_explicit_diabetes_no_beats_problem_list_diabetes_with_conflict():
+    report = parse_ingest_report(
+        """
+        Diabetes: No
+        Problem list:
+        - Type 2 diabetes mellitus
+        """
+    )
+
+    assert report["parsed"]["diabetes"] is False
+    assert any("diabetes: explicit false vs problem list diagnosis" in conflict for conflict in report["conflicts"])
+
+
+def test_problem_list_ckd_stage_conflict_keeps_lab_derived_stage_authority():
+    report = parse_ingest_report(
+        """
+        eGFR: 16
+        Urine ACR: 2417
+        Problem list:
+        - CKD stage 2
+        """
+    )
+    parsed = report["parsed"]
+
+    assert parsed["egfr"] == 16
+    assert parsed["uacr"] == 2417
+    assert parsed["ckd_stage_review"] is True
+    assert any("labs show G4A3" in warning for warning in report["warnings"])
+
+
+def test_problem_list_history_of_cancer_does_not_set_active_cancer():
+    parsed = parse_ingest_text(
+        """
+        Problem list:
+        - History of renal cell carcinoma
+        """
+    )
+
+    assert parsed.get("active_cancer") is not True
+
+
 def test_explicit_osa_no_beats_problem_list_osa_with_conflict():
     report = parse_ingest_report(
         """

@@ -16,6 +16,9 @@ from smartphrase_ingest.aliases import (
     UACR_ALIASES,
 )
 from smartphrase_ingest.med_vocab import extract_medications_structured
+from smartphrase_ingest.problem_list_parser import ProblemListSignal, extract_problem_list_signals
+from smartphrase_ingest.source_resolver import apply_signal_metadata, can_apply_signal
+from modules.kdigo.engine import classify_albuminuria_stage, classify_egfr_stage
 
 
 @dataclass
@@ -421,7 +424,7 @@ PROBLEM_LIST_HEADER_RE = re.compile(
 )
 
 SECTION_HEADER_RE = re.compile(
-    r"^\s*(?:Demographics|Smoking|Vitals|BMI|Family history|Lipids|A1c|ApoB|Lp\(a\)|hsCRP|eGFR|UACR|Kidney|Imaging|Medications|Calcification|Plaque|Assessment|Plan)\s*:?\s*$",
+    r"^\s*(?:Demographics|Smoking|Vitals|BMI|Family history|Lipids|A1c|ApoB|Lp\(a\)|hsCRP|eGFR|UACR|Kidney|Imaging|Medications|Calcification|Plaque|Assessment|Plan|Notes)\s*:?\s*$",
     re.IGNORECASE,
 )
 
@@ -511,159 +514,121 @@ def _problem_list_positive_evidence(
     return ""
 
 
-def apply_problem_list_diagnoses(report: ParseReport, text: str) -> None:
-    """Extract high-confidence conditions from the problem list using review-safe rules."""
-    block = _problem_list_block(text)
-    if not block:
-        return
-
-    ascvd_evidence = _problem_list_evidence(
-        block,
-        (
-            r"\bcoronary\s+artery\s+disease\b",
-            r"\bCAD\b",
-            r"\bmyocardial\s+infarction\b",
-            r"\bMI\b",
-            r"\bNSTEMI\b",
-            r"\bSTEMI\b",
-            r"\bPCI\b",
-            r"\bCABG\b",
-            r"\bcoronary\s+stent\b",
-            r"\bischemic\s+stroke\b",
-            r"\blacunar\s+infarction\b",
-            r"\bTIA\b",
-            r"\bPAD\b",
-            r"\bperipheral\s+arter(?:y|ial)\s+disease\b",
-        ),
-    )
-    if ascvd_evidence:
+def _apply_problem_list_signal(report: ParseReport, signal: ProblemListSignal) -> None:
+    if signal.field == "clinical_ascvd_review":
         _record_source_meta(
             report,
             "clinical_ascvd_review",
             True,
             "uncertain",
-            "Clinical ASCVD found in problem list; confirm.",
-            source_text=ascvd_evidence,
+            signal.reason,
+            source_text=signal.source_text,
             review_required=True,
         )
-        warning = "Clinical ASCVD found in problem list; confirm."
-        if warning not in report.warnings:
-            report.warnings.append(warning)
+        if signal.reason not in report.warnings:
+            report.warnings.append(signal.reason)
         if report.extracted.get("ascvd_clinical") is not True:
             report.extracted["ascvd_clinical"] = False
             report.field_meta["ascvd_clinical"] = {
                 "confidence": "parsed",
                 "source": "problem list ASCVD review-only text",
-                "source_text": ascvd_evidence,
+                "source_text": signal.source_text,
                 "review_required": "true",
+                "proof_level": "problem_list",
             }
+        return
 
-    sleep_apnea_review = _problem_list_evidence(
-        block,
-        (
-            r"\bsuspected\s+sleep\s+apnea\b",
-            r"\bpossible\s+(?:OSA|obstructive\s+sleep\s+apnea|sleep\s+apnea)\b",
-            r"\brule\s+out\s+(?:OSA|obstructive\s+sleep\s+apnea|sleep\s+apnea)\b",
-            r"\bsnoring\b",
-            r"\bhypersomnia\b",
-            r"\bnon[-\s]?restorative\s+sleep\b",
-        ),
-    )
-    if sleep_apnea_review:
-        _record_source_meta(
-            report,
-            "sleep_apnea_review",
-            True,
-            "uncertain",
-            "Possible sleep apnea.",
-            source_text=sleep_apnea_review,
-            review_required=True,
-        )
-        if "Possible sleep apnea; confirm diagnosis." not in report.warnings:
-            report.warnings.append("Possible sleep apnea; confirm diagnosis.")
-    else:
-        _record_problem_list_bool(
-            report,
-            "osa",
-            _problem_list_positive_evidence(
-                block,
-                (
-                    r"\bOSA\b",
-                    r"\bobstructive\s+sleep\s+apnea\b",
-                    r"\bcomplex\s+sleep\s+apnea\b",
-                    r"\bsleep\s+apnea\b",
-                ),
-                (r"\bsuspected\b", r"\bpossible\b", r"\brule\s+out\b"),
-            ),
-        )
-    _record_problem_list_bool(
-        report,
-        "diabetes",
-        _problem_list_evidence(
-            block,
-            (
-                r"\btype\s+2\s+diabetes\s+mellitus\b",
-                r"\bT2DM\b",
-                r"\bDM2\b",
-                r"\bdiabetes\s+mellitus\b",
-                r"\bE11(?:\.|$)",
-            ),
-        ),
-        override_false=True,
-    )
-    _record_problem_list_bool(
-        report,
-        "masld",
-        _problem_list_evidence(
-            block,
-            (
-                r"\bMASLD\b",
-                r"\bNAFLD\b",
-                r"\bfatty\s+liver\b",
-                r"\bhepatic\s+steatosis\b",
-                r"\bsteatotic\s+liver\s+disease\b",
-            ),
-        ),
-    )
-    _record_problem_list_bool(
-        report,
-        "ckd",
-        _problem_list_evidence(
-            block,
-            (
-                r"\bchronic\s+kidney\s+disease\b",
-                r"\bCKD\b",
-            ),
-        ),
-    )
-
-    inflammatory_review = _problem_list_evidence(
-        block,
-        (
-            r"\bpolyarthritis\b[^\n]*\b(?:positive\s+rheumatoid\s+factor|positive\s+RF|RF\s+positive)\b",
-            r"\b(?:positive\s+rheumatoid\s+factor|positive\s+RF|RF\s+positive)\b[^\n]*\bpolyarthritis\b",
-        ),
-    )
-    if inflammatory_review:
-        _record_source_meta(
-            report,
-            "inflammatory_arthritis_review",
-            True,
-            "uncertain",
-            "Inflammatory arthritis review.",
-            source_text=inflammatory_review,
-            review_required=True,
-        )
-        if report.extracted.get("rheumatoid_arthritis") is not True:
+    if signal.field in {
+        "sleep_apnea_review",
+        "inflammatory_arthritis_review",
+        "family_history_review",
+        "family_history_premature_review",
+        "cerebrovascular_review",
+    }:
+        report.extracted[signal.field] = True
+        apply_signal_metadata(report, signal)
+        if signal.reason not in report.warnings:
+            report.warnings.append(signal.reason)
+        if signal.field == "inflammatory_arthritis_review" and report.extracted.get("rheumatoid_arthritis") is not True:
             report.extracted["rheumatoid_arthritis"] = False
             report.field_meta["rheumatoid_arthritis"] = {
                 "confidence": "uncertain",
-                "source": "polyarthritis with RF is review-only for RA",
-                "source_text": inflammatory_review,
+                "source": "polyarthritis/RF is review-only for RA",
+                "source_text": signal.source_text,
                 "review_required": "true",
+                "proof_level": "problem_list",
             }
-        if "Polyarthritis with positive rheumatoid factor requires inflammatory arthritis review." not in report.warnings:
-            report.warnings.append("Polyarthritis with positive rheumatoid factor requires inflammatory arthritis review.")
+        return
+
+    if signal.field == "family_history_detail":
+        detail = _find_family_history_event_detail(signal.source_text)
+        if not detail:
+            return
+        _record(report, "fhx", detail["premature_fhx_ascvd"], "parsed", "problem list family history detail")
+        _record(report, "family_history_relationship", detail["relationship"], "parsed", "problem list family history detail")
+        _record(report, "family_history_event_type", detail["event_type"], "parsed", "problem list family history detail")
+        _record(report, "family_history_age_at_event", int(detail["age_at_event"]), "parsed", "problem list family history detail")
+        _record(report, "fhx_text", signal.source_text, "parsed", "problem list family history detail")
+        for field in ("fhx", "family_history_relationship", "family_history_event_type", "family_history_age_at_event", "fhx_text"):
+            report.field_meta.setdefault(field, {})
+            report.field_meta[field].update({"source_text": signal.source_text, "proof_level": "problem_list"})
+        return
+
+    current_source = str((report.field_meta.get(signal.field) or {}).get("source") or "")
+    override_false = signal.field == "diabetes" and current_source.startswith("A1c ")
+    if not can_apply_signal(report, signal, override_false=override_false):
+        current = report.extracted.get(signal.field)
+        if current is False and signal.value is True:
+            report.conflicts.append(f"{signal.field}: explicit false vs problem list diagnosis ({signal.source_text})")
+        return
+    report.extracted[signal.field] = signal.value
+    apply_signal_metadata(report, signal)
+    if signal.field == "diabetes":
+        report.extracted["diabetes_source"] = "problem_list"
+        report.field_meta["diabetes_source"] = {
+            "confidence": "parsed",
+            "source": "problem list diagnosis",
+            "source_text": signal.source_text,
+            "proof_level": "problem_list",
+        }
+
+
+def apply_problem_list_diagnoses(report: ParseReport, text: str) -> None:
+    """Extract controlled problem-list signals without overriding higher-proof data."""
+    block = _problem_list_block(text)
+    if not block:
+        return
+    for signal in extract_problem_list_signals(block):
+        _apply_problem_list_signal(report, signal)
+    _review_problem_list_ckd_stage_conflict(report, block)
+
+
+def _review_problem_list_ckd_stage_conflict(report: ParseReport, block: str) -> None:
+    match = re.search(r"\bCKD\s+stage\s+(?P<stage>[2345][ab]?)\b", block or "", re.IGNORECASE)
+    if not match:
+        return
+    egfr = report.extracted.get("egfr")
+    uacr = report.extracted.get("uacr")
+    egfr_stage = classify_egfr_stage(egfr) if egfr is not None else None
+    uacr_stage = classify_albuminuria_stage(uacr) if uacr is not None else None
+    if not egfr_stage:
+        return
+    problem_g = f"G{match.group('stage')}".replace("G3A", "G3a").replace("G3B", "G3b")
+    if problem_g.lower() == str(egfr_stage).lower():
+        return
+    lab_stage = egfr_stage + (uacr_stage or "")
+    warning = f"CKD stage conflict: labs show {lab_stage}."
+    if warning not in report.warnings:
+        report.warnings.append(warning)
+    report.conflicts.append(f"ckd: problem list {problem_g} vs labs {lab_stage}")
+    report.extracted["ckd_stage_review"] = True
+    report.field_meta["ckd_stage_review"] = {
+        "confidence": "uncertain",
+        "source": warning,
+        "source_text": match.group(0),
+        "review_required": "true",
+        "proof_level": "problem_list",
+    }
 
 
 def _without_gestational_diabetes_context(raw: str) -> str:

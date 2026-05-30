@@ -23,23 +23,38 @@ def test_ingest_phi_warning_detects_common_identifiers():
 
 def test_recommended_epic_smartphrase_template_contains_core_sections():
     for section in (
-        "Demographics",
-        "Smoking",
-        "Vitals",
+        "=== CARDIOVASCULAR RISK ASSESSMENT ===",
+        "Age: @AGE@",
+        "Sex: @SEX@",
+        "Race/Ethnicity: @RACE@",
+        "Smoking status: @SMOKINGSTATUS@",
+        "Blood pressure (most recent): @LASTBP(3)@",
         "BMI",
-        "Family history",
+        "Clinical ASCVD: Unknown",
+        "Family History:",
         "Lipids",
+        "@RESUFAST(CHLPL,CHOL,TRIG,HDL,LDLCHOLESTEROL,LDL,LABVLDL,VLDL,CHOLHDLRATIO)@",
         "A1c",
+        "@LASTHBA1C@",
         "ApoB",
         "Lp(a)",
         "hsCRP",
         "eGFR",
-        "UACR",
-        "CAC",
+        "Urine ACR",
+        "Coronary artery calcium (CAC) score: Unknown",
         "Medications",
-        "Relevant diagnoses/problem list",
+        "@MEDSCONDENSED@",
+        "Problem list:",
+        "@PROB@",
     ):
         assert section in EPIC_SMARTPHRASE_TEMPLATE
+    for removed in (
+        "OSA:",
+        "MASLD/fatty liver:",
+        "Inflammatory/autoimmune disease:",
+        "Heart failure:",
+    ):
+        assert removed not in EPIC_SMARTPHRASE_TEMPLATE
 
 
 def test_parse_ingest_text_family_history_structured_fields():

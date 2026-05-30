@@ -73,7 +73,16 @@ IMPORTANT_ADD_ON_FIELDS: tuple[tuple[str, str, tuple[str, ...], str | None], ...
     ("lp_a_value", "Lp(a)", ("lp_a_value",), None),
     ("uacr", "UACR", ("uacr",), "mg/g"),
     ("cac", "CAC", ("cac", "cac_not_done"), None),
-    ("family_history", "Family history", ("family_history_premature_ascvd",), None),
+    (
+        "family_history",
+        "Family history",
+        (
+            "family_history_review",
+            "family_history_premature_review",
+            "family_history_premature_ascvd",
+        ),
+        None,
+    ),
     ("clinical_ascvd_review", "Clinical ASCVD", ("clinical_ascvd_review",), None),
 )
 
@@ -206,6 +215,10 @@ def _field_value(field_id: str, keys: tuple[str, ...], parsed: dict[str, Any], u
     if field_id == "cac":
         return _compact(parsed.get("cac")) if parsed.get("cac") is not None else ""
     if field_id == "family_history":
+        if parsed.get("family_history_premature_review") is True:
+            return "Premature family history; confirm"
+        if parsed.get("family_history_review") is True:
+            return "Family history of CAD; premature status not specified"
         value = parsed.get("family_history_premature_ascvd")
         if value is True:
             relationship = str(parsed.get("family_history_relationship") or "").strip().lower()

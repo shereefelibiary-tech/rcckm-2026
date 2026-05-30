@@ -316,7 +316,16 @@ RECOGNITION_FIELD_ORDER = (
     ("lp_a_review", "Lp(a) units", ("lp_a_review",), None),
     ("uacr", "UACR", ("uacr", "uacr_status"), "mg/g"),
     ("cac", "CAC", ("cac", "cac_not_done"), None),
-    ("family_history", "Family history", ("family_history_premature_ascvd",), None),
+    (
+        "family_history",
+        "Family history",
+        (
+            "family_history_review",
+            "family_history_premature_review",
+            "family_history_premature_ascvd",
+        ),
+        None,
+    ),
     ("clinical_ascvd_review", "Clinical ASCVD", ("clinical_ascvd_review",), None),
     ("hscrp", "hsCRP", ("hscrp",), "mg/L"),
     ("osa", "OSA", ("osa", "sleep_apnea_review"), None),
@@ -358,66 +367,61 @@ RECOGNITION_FIELD_ORDER = (
 
 EPIC_SMARTPHRASE_TEMPLATE = """Recommended RCCKM Epic template
 
-Demographics
-Age:
-Sex:
+=== CARDIOVASCULAR RISK ASSESSMENT ===
 
-Smoking
-Smoking status:
-Pack-years:
-Quit date:
+Age: @AGE@
+Sex: @SEX@
+Race/Ethnicity: @RACE@
 
-Vitals
-Most recent BP:
+Smoking status: @SMOKINGSTATUS@
 
-BMI
-BMI:
+Blood pressure (most recent): @LASTBP(3)@
+BMI: @LAST_BMI@
+@BMI@
+@BMIE@
 
-Family history
+Clinical ASCVD: Unknown
+Clinical ASCVD details:
+
+Family History:
 Premature ASCVD in first-degree relative: Unknown
-Relationship/event/age if yes:
+Relationship:
+Event type:
+Age at event:
 
-Lipids
-Total cholesterol:
-LDL-C:
-HDL-C:
-Triglycerides:
+Lipids:
+@RESUFAST(CHLPL,CHOL,TRIG,HDL,LDLCHOLESTEROL,LDL,LABVLDL,VLDL,CHOLHDLRATIO)@
 
-A1c
-Hemoglobin A1c:
+A1c:
+@LASTHBA1C@
 
-ApoB
 ApoB:
+@RESUFAST(APOB,APOB)@
 
-Lp(a)
 Lp(a):
-Lp(a) unit: nmol/L or mg/dL
+@RESUFAST(LIPOA)@ nmol/L
 
-hsCRP
 hsCRP:
+@RESUFAST(CRPHS)@
 
-eGFR
 eGFR:
+@RESUFAST(LABGLOM,LABGLOM)@
 
-UACR
-Urine albumin/creatinine ratio:
+Urine ACR:
+@RESUFAST(ALBCREAT)@
 
-CAC
-Coronary artery calcium score:
-Incidental CAC on CT:
+@EGFR@
+@GFRCG@
+@EGFRCRE@
 
-Medications
-Current medications:
+Coronary artery calcium (CAC) score: Unknown
+CAC percentile:
 
-Relevant diagnoses/problem list
-Clinical ASCVD:
-Diabetes:
-CKD:
-Heart failure:
-Hypertension:
-OSA:
-MASLD/fatty liver:
-Inflammatory/autoimmune disease:
+Medications:
+@MEDSCONDENSED@
+
+Problem list:
+@PROB@
 """
 
 
@@ -658,6 +662,10 @@ def _recognition_field_value(field_id, keys, parsed, unit):
             return "not calculable"
         return ""
     if field_id == "family_history":
+        if parsed.get("family_history_premature_review") is True:
+            return "Premature family history; confirm"
+        if parsed.get("family_history_review") is True:
+            return "Family history of CAD; premature status not specified"
         value = parsed.get("family_history_premature_ascvd")
         if value is True:
             relationship = str(parsed.get("family_history_relationship") or "").strip().lower()
