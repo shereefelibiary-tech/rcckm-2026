@@ -1025,7 +1025,7 @@ def _patient_bp_line(patient: Any, item: ActionDomainReadout) -> str:
     if item.status.lower() == "at goal":
         return "At goal."
     if "bp needed" in item.status.lower():
-        return "Blood pressure reading needed."
+        return "Reading needed."
     if "treat toward" in item.status.lower():
         return "Treat toward <130/80."
     return item.status.rstrip(".") + "."

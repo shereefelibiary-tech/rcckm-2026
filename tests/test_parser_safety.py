@@ -331,6 +331,34 @@ def test_problem_list_history_of_cancer_does_not_set_active_cancer():
     assert parsed.get("active_cancer") is not True
 
 
+def test_recommended_epic_template_placeholders_do_not_become_values():
+    text = Path("tests/fixtures/ingest/recommended_epic_template_placeholders.txt").read_text(encoding="utf-8")
+    report = parse_ingest_report(text)
+    parsed = report["parsed"]
+
+    assert parsed["lp_a_unit"] == "nmol/L"
+    assert parsed["cac"] is None
+    assert parsed["cac_not_done"] is True
+    assert parsed["clinical_ascvd"] is None
+    assert parsed["family_history_premature_ascvd"] is None
+    for field in (
+        "age",
+        "sbp",
+        "dbp",
+        "bmi",
+        "tc",
+        "ldl_c",
+        "hdl_c",
+        "triglycerides",
+        "apob",
+        "lp_a_value",
+        "a1c",
+        "egfr",
+        "uacr",
+    ):
+        assert field not in parsed or parsed[field] is None
+
+
 def test_explicit_osa_no_beats_problem_list_osa_with_conflict():
     report = parse_ingest_report(
         """

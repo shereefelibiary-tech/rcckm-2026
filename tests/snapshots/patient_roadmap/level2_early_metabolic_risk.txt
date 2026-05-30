@@ -28,6 +28,6 @@ Your next steps
 1. Cholesterol: Continue current lipid treatment.
 2. Artery plaque: Calcium scan only if it would change the treatment decision.
 3. Kidneys: No kidney action from current eGFR/UACR.
-4. Blood pressure: Blood pressure reading needed.
+4. Blood pressure: Reading needed.
 5. Blood sugar: Prediabetes range; focus on weight/activity.
 6. Aspirin: Do not start routine aspirin.

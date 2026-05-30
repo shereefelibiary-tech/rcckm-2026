@@ -56,6 +56,9 @@ FORBIDDEN_SNAPSHOT_PHRASES = (
     "when safe",
     "reviewed as part of the prevention plan",
     "interpreted with the overall risk picture",
+    "included in the prevention plan",
+    "Coronary plaque: Coronary artery plaque",
+    "Blood pressure: Blood pressure",
     "does not show an immediate action signal",
     "No immediate blood sugar action is shown",
     "risk-factor control",
@@ -69,6 +72,7 @@ FORBIDDEN_SNAPSHOT_PHRASES = (
     "missing ApoB",
     "missing CAC",
     "missing UACR",
+    "to -",
 )
 
 

@@ -1599,6 +1599,8 @@ def parse_smartphrase_report(text: str) -> ParseReport:
                 "source": "Lp(a) value present but unit missing",
             }
             report.warnings.append("Lp(a) value parsed without units; please review nmol/L vs mg/dL.")
+    elif re.search(r"\b(?:Lp\(a\)|LIPOA|lipoprotein\s*\(a\))\b[\s\S]{0,80}\bnmol/L\b", text, re.IGNORECASE):
+        _record(report, "lpa_unit", "nmol/L", "parsed", "Lp(a) unit")
 
     for field, label in (
         ("egfr", "eGFR"),

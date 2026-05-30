@@ -151,3 +151,25 @@ def test_cross_surface_alignment_governance_reports_domain_specific_mismatches()
     assert "cac" in messages
     assert "kidney" in messages
     assert "aspirin" in messages
+
+
+def test_emr_and_roadmap_domain_order_tracks_action_domain_order():
+    patient = build_demo_patient("cac_300_high_plaque_burden")
+    result = evaluate_patient(patient)
+    domain_ids = [domain.domain_id for domain in build_domain_actions(patient, result)]
+
+    assert [domain_id for domain_id in domain_ids if domain_id in REQUIRED_DOMAIN_ORDER] == REQUIRED_DOMAIN_ORDER
+
+    emr_text = render_emr_note(patient, result).lower()
+    emr_recommendations = emr_text.split("recommendations:", 1)[-1]
+    roadmap_text = render_patient_roadmap_text(patient, result).lower()
+    roadmap_next_steps = roadmap_text.split("step 4", 1)[-1]
+
+    emr_terms = ("lipids:", "plaque:", "kidney:", "bp:", "glycemia:", "aspirin:")
+    roadmap_terms = ("cholesterol:", "artery plaque:", "kidneys:", "blood pressure:", "blood sugar:", "aspirin:")
+
+    emr_positions = [emr_recommendations.index(term) for term in emr_terms]
+    roadmap_positions = [roadmap_next_steps.index(term) for term in roadmap_terms]
+
+    assert emr_positions == sorted(emr_positions)
+    assert roadmap_positions == sorted(roadmap_positions)

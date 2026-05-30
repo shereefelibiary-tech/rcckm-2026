@@ -1,0 +1,55 @@
+=== CARDIOVASCULAR RISK ASSESSMENT ===
+
+Age: @AGE@
+Sex: @SEX@
+Race/Ethnicity: @RACE@
+
+Smoking status: @SMOKINGSTATUS@
+
+Blood pressure (most recent): @LASTBP(3)@
+BMI: @LAST_BMI@
+@BMI@
+@BMIE@
+
+Clinical ASCVD: Unknown
+Clinical ASCVD details:
+
+Family History:
+Premature ASCVD in first-degree relative: Unknown
+Relationship:
+Event type:
+Age at event:
+
+Lipids:
+@RESUFAST(CHLPL,CHOL,TRIG,HDL,LDLCHOLESTEROL,LDL,LABVLDL,VLDL,CHOLHDLRATIO)@
+
+A1c:
+@LASTHBA1C@
+
+ApoB:
+@RESUFAST(APOB,APOB)@
+
+Lp(a):
+@RESUFAST(LIPOA)@ nmol/L
+
+hsCRP:
+@RESUFAST(CRPHS)@
+
+eGFR:
+@RESUFAST(LABGLOM,LABGLOM)@
+
+Urine ACR:
+@RESUFAST(ALBCREAT)@
+
+@EGFR@
+@GFRCG@
+@EGFRCRE@
+
+Coronary artery calcium (CAC) score: Unknown
+CAC percentile:
+
+Medications:
+@MEDSCONDENSED@
+
+Problem list:
+@PROB@

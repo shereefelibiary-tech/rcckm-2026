@@ -11,8 +11,15 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def _run(label: str, args: list[str]) -> int:
     print(f"\n== {label} ==")
-    completed = subprocess.run(args, cwd=ROOT)
+    print("Command:", " ".join(str(arg) for arg in args))
+    completed = subprocess.run(args, cwd=ROOT, capture_output=True, text=True)
+    if completed.stdout:
+        print(completed.stdout, end="" if completed.stdout.endswith("\n") else "\n")
+    if completed.stderr:
+        print(completed.stderr, end="" if completed.stderr.endswith("\n") else "\n", file=sys.stderr)
     if completed.returncode:
+        print(f"Layer failed: {label}")
+        print("Failed command:", " ".join(str(arg) for arg in args))
         print(f"{label} failed with exit code {completed.returncode}")
     return completed.returncode
 

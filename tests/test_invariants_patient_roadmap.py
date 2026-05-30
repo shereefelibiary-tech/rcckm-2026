@@ -25,6 +25,9 @@ ROADMAP_FORBIDDEN = (
     "null",
     "NaN",
     "interpreted with the overall risk picture",
+    "included in the prevention plan",
+    "Coronary plaque: Coronary artery plaque",
+    "Blood pressure: Blood pressure",
     "reviewed as part of the prevention plan",
     "does not show an immediate action signal",
     "No immediate blood sugar action is shown",
@@ -39,6 +42,7 @@ ROADMAP_FORBIDDEN = (
     "missing ApoB",
     "missing CAC",
     "missing UACR",
+    "to -",
 )
 
 
