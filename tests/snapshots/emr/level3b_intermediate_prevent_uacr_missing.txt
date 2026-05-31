@@ -5,6 +5,7 @@ PREVENT: ASCVD 10y 5.41% (Intermediate); 30y 22.55%.
 CKM/Kidney/Plaque: CKM 2; kidney G2; UACR not available; CAC not measured.
 
 Assessment:
+- Essential hypertension (ICD: I10)
 - Hypertriglyceridemia (ICD: E78.1)
 - Prediabetes (ICD: R73.03)
 
@@ -14,5 +15,5 @@ Recommendations:
 3. Kidney: UACR not available; obtain UACR.
 4. BP: Treat toward <130/80.
 5. Glycemia: Prediabetes prevention; A1c 5.9%.
-6. Aspirin: Not routine for primary prevention.
+6. Aspirin: Not indicated.
 7. Additional information: UACR.

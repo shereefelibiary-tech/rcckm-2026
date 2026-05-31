@@ -9,15 +9,14 @@ PREVENT: ASCVD 10y 5.8% (Intermediate); 30y 18.6%.
 CKM/Kidney/Plaque: CKM 0; kidney G2A1; CAC not measured.
 
 Assessment:
-- No diagnosis candidates generated.
 
 Recommendations:
 1. Lipids: Discuss moderate-intensity statin; LDL-C <100, ApoB <90, non-HDL-C <130.
 2. Plaque: CAC may clarify risk.
-3. Kidney: No kidney action.
+3. Kidney: Stable.
 4. BP: Treat toward <130/80.
 5. Glycemia: No glycemic action; A1c 5.5.
-6. Aspirin: Not routine for primary prevention.
+6. Aspirin: Not indicated.
 
 PATIENT ROADMAP:
 Your Prevention Roadmap
@@ -60,7 +59,7 @@ Your next steps
 ACTIONS:
 - Lipid lowering: Discuss moderate-intensity statin. LDL-C 134; target <100. ApoB 102; target <90.
 - Plaque: CAC may clarify risk.
-- Kidney protection: No kidney action.
+- Kidney protection: Stable.
 - Blood pressure: Treat toward <130/80. Current 132/80.
 - Glycemia / metabolic: No glycemic action. A1c 5.5.
 - Aspirin / antiplatelet: Not indicated.

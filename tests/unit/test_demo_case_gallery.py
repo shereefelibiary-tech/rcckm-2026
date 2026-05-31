@@ -161,7 +161,7 @@ def test_younger_premature_family_history_demo_output_uses_lifetime_trajectory_l
     assert "total cardiovascular risk" not in combined.lower()
     assert "2. Plaque: CAC not routinely recommended." in emr
     assert "hsCRP - inflammatory residual risk" not in combined
-    assert "6. Aspirin: Not routine for primary prevention." in emr
+    assert "6. Aspirin: Not indicated." in emr
     assert "Context: father MI age 49." in emr
 
 
@@ -182,7 +182,7 @@ def test_high_apob_discordance_demo_is_apob_driven_and_actionable():
     assert "Premature family history" in text
     assert "PREVENT: ASCVD 10y 2.8% (Low); 30y 15.04%." in text
     assert "2. Plaque: CAC may clarify risk." in text
-    assert "6. Aspirin: Not routine for primary prevention." in text
+    assert "6. Aspirin: Not indicated." in text
     assert "if risk-enhancing factors or ApoB/LDL-C burden support treatment" not in text
     assert "high near-term risk" not in text.lower()
     assert "High-intensity statin" not in text
@@ -207,7 +207,7 @@ def test_rheumatoid_arthritis_demo_is_inflammatory_context_without_overtreatment
     assert "No new cardiometabolic diagnosis candidates generated." in text
     assert "1. Lipids: No lipid-lowering medication indicated." in text
     assert "2. Plaque: CAC not measured." in text
-    assert "6. Aspirin: Not routine for primary prevention." in text
+    assert "6. Aspirin: Not indicated." in text
     assert "Level 3B - actionable early CKM / atherogenic risk" not in text
     assert "Moderate-intensity statin therapy is reasonable" not in text
     assert "High-intensity statin" not in text

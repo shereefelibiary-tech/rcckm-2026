@@ -23,11 +23,14 @@ def test_build_risk_continuum_html_highlights_plaque_pattern_level():
     assert "border-top: 8px solid rgba(7, 26, 47, 0.70)" in html
     assert "border-bottom: 0" in html
     assert "rc-caret" not in html
-    assert "transform: translateY(6px)" in html
+    assert "transform: translateY(-4px)" in html
     assert "rc-marker" not in html
     assert "Plaque present (CAC 50)" in html
     assert "box-sizing: border-box" in html
-    assert "grid-template-columns: repeat(5, minmax(118px, 1fr))" in html
+    assert "grid-template-columns: repeat(5, minmax(128px, 1fr))" in html
+    assert "gap: 0" in html
+    assert "border-radius: 14px" in html
+    assert ".rc-card-wrap + .rc-card-wrap .rc-card" in html
     assert "Subclinical atherosclerosis present" in html
     assert "Lower signal / lower urgency" in html
     assert "Higher signal / higher urgency" in html
@@ -42,6 +45,7 @@ def test_build_risk_continuum_html_highlights_plaque_pattern_level():
     assert "Why?" not in html
     assert "top: calc(100% + 12px)" in html
     assert "z-index: 9999" in html
+    assert "white-space: pre-line" in html
     assert ".rc-card-wrap:last-child .rc-card-active::after" in html
     assert "overflow: visible !important" in html
 
@@ -110,12 +114,12 @@ def test_build_risk_continuum_html_keeps_level_5_inside_responsive_grid():
     assert "High plaque burden (CAC 350)" not in html
     assert "CAC 350" in html
     assert "overflow: visible" in html
-    assert "min-height: 126px" in html
-    assert "font-size: clamp(0.94rem, 1.0vw, 1.02rem)" in html
-    assert "font-size: clamp(0.76rem, 0.86vw, 0.84rem)" in html
-    assert "font-size: clamp(0.72rem, 0.78vw, 0.80rem)" in html
+    assert "min-height: 94px" in html
+    assert "font-size: clamp(1rem, 1.12vw, 1.12rem)" in html
+    assert "font-size: clamp(0.82rem, 0.92vw, 0.90rem)" in html
+    assert "font-size: clamp(0.76rem, 0.82vw, 0.84rem)" in html
     assert "white-space: normal" in html
-    assert "clamp(6px, 0.76vw, 12px)" in html
+    assert "gap: 0" in html
 
 
 def test_build_risk_continuum_html_level_5_clinical_ascvd_copy_is_compact():
@@ -188,10 +192,10 @@ def test_build_risk_continuum_html_level_3b_has_room_for_context_line():
     assert "Level 3B" in html
     assert "Actionable early CKM / atherogenic risk" in html
     assert "Plaque unmeasured" in html
-    assert "min-height: 126px" in html
+    assert "min-height: 94px" in html
     assert "overflow: visible" in html
     assert "white-space: normal" in html
-    assert "line-height: 1.24" in html
+    assert "line-height: 1.22" in html
 
 
 def test_level_tooltip_explains_level_5_high_cac():
@@ -201,8 +205,7 @@ def test_level_tooltip_explains_level_5_high_cac():
     tooltip = build_level_explanation(patient, result)
     html = build_continuum_bar_html(patient, result)
 
-    assert "Level 5 is assigned because coronary calcium shows high plaque burden." in tooltip
-    assert "ApoB" in tooltip or "diabetes" in tooltip
+    assert tooltip.splitlines() == ["CAC 350", "Very high plaque burden"]
     assert escape_for_test(tooltip) in html
     assert 'class="rc-card rc-level-5 rc-card-active" role="button" tabindex="0"' in html
     assert "Current level explanation:" in html
@@ -218,8 +221,8 @@ def test_level_tooltip_explains_cac_zero_without_plaque_positive_language():
         RCCKMResult(prevent_10y_ascvd=2.0),
     )
 
-    assert "CAC 0 indicates no calcified coronary plaque detected." in tooltip
-    assert "not detected plaque" in tooltip
+    assert tooltip == "CAC 0"
+    assert "not detected plaque" not in tooltip
     assert "plaque burden" not in tooltip.lower()
 
 
@@ -241,9 +244,10 @@ def test_level_tooltip_explains_low_10_year_high_30_year_young_patient():
         ),
     )
 
-    assert "short-term ASCVD risk is low" in tooltip
-    assert "longer-term risk is elevated" in tooltip
-    assert "Premature family history" in tooltip or "family history" in tooltip
+    assert "30y PREVENT 24%" in tooltip
+    assert "Premature family history" in tooltip
+    assert "Prediabetes (A1c 6%)" in tooltip
+    assert "assigned because" not in tooltip
 
 
 def test_level_tooltip_explains_ckd_albuminuria():
@@ -252,8 +256,9 @@ def test_level_tooltip_explains_ckd_albuminuria():
         RCCKMResult(prevent_10y_ascvd=6.65, prevent_30y_ascvd=26.07),
     )
 
-    assert "CKM stage 3 with albuminuria" in tooltip
-    assert "kidney-mediated cardiometabolic risk" in tooltip
+    assert "UACR 48 mg/g" in tooltip
+    assert "Prediabetes (A1c 6%)" in tooltip
+    assert "kidney-mediated cardiometabolic risk" not in tooltip
 
 
 def test_level_tooltip_explains_apob_driven_case():
@@ -262,20 +267,20 @@ def test_level_tooltip_explains_apob_driven_case():
         RCCKMResult(prevent_10y_ascvd=4.0),
     )
 
-    assert "ApoB/atherogenic particle burden" in tooltip
+    assert tooltip == "ApoB 124 mg/dL"
 
 
-def test_level_tooltip_includes_missing_data_confidence_sentence():
+def test_level_tooltip_omits_missing_data_confidence_sentence():
     tooltip = build_level_explanation(
         Patient(age=56, sex="male", cac=None, cac_not_done=True, ldl_c=132),
         RCCKMResult(prevent_10y_ascvd=4.2),
     )
 
-    assert "ApoB" in tooltip
-    assert "Lp(a)" in tooltip
-    assert "UACR" in tooltip
-    assert "CAC" in tooltip
-    assert "could further clarify risk" in tooltip
+    assert tooltip == "LDL-C 132 mg/dL"
+    assert "ApoB" not in tooltip
+    assert "Lp(a)" not in tooltip
+    assert "UACR" not in tooltip
+    assert "could further clarify risk" not in tooltip
 
 
 def escape_for_test(text):

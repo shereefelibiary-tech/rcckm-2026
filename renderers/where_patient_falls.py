@@ -123,12 +123,58 @@ def _supportive_hscrp_context(patient):
     return kidney or inflammatory or metabolic
 
 
-def _effect_for_lpa(value, unit):
+def _as_float(value):
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _classification_text(result):
+    classification = getattr(result, "level_classification", None) or {}
+    if isinstance(classification, dict):
+        parts = [
+            classification.get("label"),
+            classification.get("short_reason"),
+            classification.get("reason"),
+            " ".join(str(driver) for driver in classification.get("drivers", []) or []),
+        ]
+    else:
+        parts = [classification]
+    return " ".join(str(part or "") for part in parts).lower()
+
+
+def _hidden_or_occult_pathway(result):
+    text = _classification_text(result)
+    return any(term in text for term in ("hidden", "occult", "risk-enhancer burden", "atherogenic risk burden"))
+
+
+def _inflammatory_pathway(result):
+    text = _classification_text(result)
+    return "inflammatory" in text or "ra is a risk enhancer" in text
+
+
+def _confirmed_premature_family_history(patient):
+    return bool(getattr(patient, "premature_fhx_ascvd", False)) or bool(
+        getattr(patient, "family_history_premature_ascvd", False)
+    )
+
+
+def _major_lpa_context(patient, result):
+    return (
+        _confirmed_premature_family_history(patient)
+        or (_as_float(getattr(patient, "cac", None)) or 0) > 0
+        or (_as_float(getattr(patient, "apob", None)) or 0) >= 100
+        or (_as_float(getattr(patient, "ldl_c", None)) or 0) >= 130
+        or _hidden_or_occult_pathway(result)
+    )
+
+
+def _effect_for_lpa(value, unit, patient=None, result=None):
     if value is None:
         return "clarifier"
-    try:
-        number = float(value)
-    except (TypeError, ValueError):
+    number = _as_float(value)
+    if number is None:
         return "clarifier"
     unit = str(unit or "").strip()
     if unit == "nmol/L":
@@ -137,7 +183,7 @@ def _effect_for_lpa(value, unit):
         if number >= 250:
             return "high"
         if number >= 125:
-            return "elevated"
+            return "major driver" if patient is not None and result is not None and _major_lpa_context(patient, result) else "elevated"
         if number >= 75:
             return "mild/context"
         return "no major signal"
@@ -147,30 +193,37 @@ def _effect_for_lpa(value, unit):
         if number >= 100:
             return "high"
         if number >= 50:
-            return "elevated"
+            return "major driver" if patient is not None and result is not None and _major_lpa_context(patient, result) else "elevated"
         if number >= 30:
             return "mild/context"
     return "no major signal"
 
 
-def _effect_for_apob_ldl(apob, ldl):
+def _effect_for_apob_ldl(apob, ldl, result=None):
+    hidden_or_action = result is not None and _hidden_or_occult_pathway(result)
     if apob is not None:
         if apob >= 140:
             return "severe particle burden"
         if apob >= 120:
             return "major driver / risk-enhancing"
         if apob >= 100:
-            return "elevated"
+            return "major driver" if hidden_or_action else "elevated"
         if apob >= 80:
             return "mild signal"
+    if ldl is not None:
+        if ldl >= 190:
+            return "major driver"
+        if ldl >= 160:
+            return "major driver"
+        if ldl >= 130:
+            return "major driver" if hidden_or_action else "moderate signal"
+        if ldl >= 100:
+            return "mild signal"
+    if apob is not None:
         return "no major signal"
     if ldl is not None:
         if ldl >= 190:
             return "major driver"
-        if ldl >= 130:
-            return "moderate signal"
-        if ldl >= 100:
-            return "mild signal"
         return "no major signal"
     return "missing"
 
@@ -197,12 +250,45 @@ def _effect_for_kidney(egfr, uacr):
     return "no major signal"
 
 
-def _effect_for_hscrp(hscrp, patient):
+def _effect_for_family_history(patient, result):
+    if not _confirmed_premature_family_history(patient):
+        return "no major signal"
+    risk_cluster = (
+        (_as_float(getattr(patient, "cac", None)) or 0) > 0
+        or (_as_float(getattr(patient, "lp_a_value", None)) or 0) >= 125
+        or (_as_float(getattr(patient, "apob", None)) or 0) >= 100
+        or (_as_float(getattr(patient, "ldl_c", None)) or 0) >= 130
+    )
+    if _hidden_or_occult_pathway(result) or risk_cluster:
+        return "major driver"
+    return "mild signal"
+
+
+def _effect_for_hscrp(hscrp, patient, result=None):
     if hscrp is None:
         return "missing"
     if hscrp < 2:
         return "no major signal"
-    if _supportive_hscrp_context(patient):
+    if _supportive_hscrp_context(patient) and result is not None and _inflammatory_pathway(result):
+        return "major driver"
+    return "mild signal"
+
+
+def _effect_for_inflammatory_disease(patient, result):
+    present = any(
+        bool(getattr(patient, field, False))
+        for field in (
+            "inflammatory_disease",
+            "rheumatoid_arthritis",
+            "sle",
+            "psoriasis",
+            "ibd",
+            "inflammatory_arthritis",
+        )
+    )
+    if not present:
+        return "no major signal"
+    if _hidden_or_occult_pathway(result) or _inflammatory_pathway(result):
         return "major driver"
     return "mild signal"
 
@@ -238,6 +324,66 @@ def _enabled_labels(patient, fields):
         if bool(getattr(patient, field, False)):
             labels.append(label)
     return labels
+
+
+REPRODUCTIVE_DISPLAY_LABEL_BY_FIELD = {
+    "preeclampsia": "Preeclampsia",
+    "gestational_diabetes": "Gestational diabetes",
+    "gestational_hypertension": "Gestational hypertension",
+    "early_menopause": "Premature menopause",
+    "premature_menopause": "Premature menopause",
+    "preterm_delivery": "Preterm delivery",
+    "recurrent_pregnancy_loss": "Recurrent pregnancy loss",
+    "small_for_gestational_age": "Small-for-gestational-age pregnancy",
+    "pcos_or_irregular_menses": "PCOS / irregular menses",
+}
+
+REPRODUCTIVE_DISPLAY_FIELD_ORDER = (
+    "preeclampsia",
+    "gestational_diabetes",
+    "gestational_hypertension",
+    "early_menopause",
+    "premature_menopause",
+    "preterm_delivery",
+    "recurrent_pregnancy_loss",
+    "small_for_gestational_age",
+    "pcos_or_irregular_menses",
+)
+
+
+def _format_reproductive_marker_display(items):
+    item_by_field = {
+        str(item.get("field") or "").strip(): item
+        for item in items or []
+        if str(item.get("field") or "").strip()
+    }
+    ordered_items = [item_by_field[field] for field in REPRODUCTIVE_DISPLAY_FIELD_ORDER if field in item_by_field]
+    ordered_items.extend(
+        item
+        for item in items or []
+        if str(item.get("field") or "").strip() not in REPRODUCTIVE_DISPLAY_FIELD_ORDER
+    )
+    labels = []
+    seen = set()
+    for item in ordered_items:
+        field = str(item.get("field") or "").strip()
+        label = REPRODUCTIVE_DISPLAY_LABEL_BY_FIELD.get(field) or str(item.get("label") or "").strip()
+        if not label:
+            continue
+        key = label.lower()
+        if key in seen:
+            continue
+        labels.append(label)
+        seen.add(key)
+    if not labels:
+        return []
+
+    head, *tail = labels
+    clean_tail = [
+        label if label.startswith("PCOS") else label[:1].lower() + label[1:]
+        for label in tail
+    ]
+    return ["; ".join([head, *clean_tail])]
 
 
 def _chip(label):
@@ -417,7 +563,7 @@ def _build_grouped_rows(patient, result, *, show_not_active=False):
         values.append(f"LDL-C {_fmt_num(ldl)} mg/dL")
     else:
         values.append("LDL-C not available")
-    effect = _effect_for_apob_ldl(apob, ldl)
+    effect = _effect_for_apob_ldl(apob, ldl, result)
     add_signal("ApoB" if apob is not None else "LDL-C", values[0] if apob is not None else values[1], effect)
     add_row(
         "ATHEROGENIC BURDEN",
@@ -469,7 +615,7 @@ def _build_grouped_rows(patient, result, *, show_not_active=False):
         if lpa is not None
         else "Lp(a) not available"
     )
-    effect = _effect_for_lpa(lpa, lpa_unit)
+    effect = _effect_for_lpa(lpa, lpa_unit, patient, result)
     add_signal("Lp(a)", value, effect)
     add_row(
         "LP(A)",
@@ -484,7 +630,7 @@ def _build_grouped_rows(patient, result, *, show_not_active=False):
         getattr(patient, "family_history_premature_ascvd", False)
     )
     family_summary = getattr(patient, "family_history_summary", None)
-    effect = "mild signal" if fhx else "no major signal"
+    effect = _effect_for_family_history(patient, result)
     value = family_summary or ("Yes" if fhx else "No")
     add_signal("Family history", value, effect)
     add_row(
@@ -511,7 +657,7 @@ def _build_grouped_rows(patient, result, *, show_not_active=False):
     )
 
     hscrp = getattr(patient, "hscrp", None)
-    effect = _effect_for_hscrp(hscrp, patient)
+    effect = _effect_for_hscrp(hscrp, patient, result)
     value = f"hsCRP {_fmt_num(hscrp, 1)} mg/L" if hscrp is not None else "hsCRP not available"
     add_signal("hsCRP", value, effect)
     add_row(
@@ -539,14 +685,14 @@ def _build_grouped_rows(patient, result, *, show_not_active=False):
         if inflammatory_labels
         else ("Chronic inflammatory condition reported" if inflammatory else "None reported")
     )
-    effect = "enhancer context" if inflammatory_labels or inflammatory else "no major signal"
+    effect = _effect_for_inflammatory_disease(patient, result)
     add_row(
         "INFLAMMATORY DISEASE",
         "Immune/inflammatory context",
         "RA, SLE, psoriasis, inflammatory arthritis, IBD",
         [value],
         effect,
-        active=False,
+        active=_is_active_effect(effect),
     )
 
     if bool(getattr(patient, "hiv", False)):
@@ -581,11 +727,7 @@ def _build_grouped_rows(patient, result, *, show_not_active=False):
 
     reproductive_items = reproductive_marker_items(patient)
     if reproductive_items:
-        values = []
-        for item in reproductive_items:
-            detail = str(item.get("detail") or "").strip()
-            label = str(item.get("label") or "").strip()
-            values.append(f"{label} {detail}".strip())
+        values = _format_reproductive_marker_display(reproductive_items)
         add_row(
             "REPRODUCTIVE HISTORY",
             "Reproductive history",
@@ -649,7 +791,7 @@ def _build_grouped_rows(patient, result, *, show_not_active=False):
         )
         if percentile_context:
             value = f"{value}; {percentile_context}"
-        effect = "moderate signal"
+        effect = "major driver"
     elif cac > 0:
         value = f"CAC {_fmt_num(cac)}"
         percentile_context = format_cac_percentile_context(
@@ -659,7 +801,7 @@ def _build_grouped_rows(patient, result, *, show_not_active=False):
         )
         if percentile_context:
             value = f"{value}; {percentile_context}"
-        effect = "plaque present"
+        effect = "major driver"
     else:
         value = "CAC 0"
         effect = "no major signal"

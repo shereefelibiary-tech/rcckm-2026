@@ -20,12 +20,20 @@ DIAGNOSIS_DISPLAY_PRIORITY = {
     "chronic kidney disease, stage 3b": 7,
     "chronic kidney disease, stage 3a": 8,
     "severely increased albuminuria": 9,
+    "moderately increased albuminuria": 10,
     "albuminuria": 10,
     "type 2 diabetes mellitus": 11,
-    "severe hypercholesterolemia": 12,
-    "elevated apob": 13,
-    "severe hypertriglyceridemia": 14,
-    "hypertriglyceridemia": 15,
+    "essential hypertension": 12,
+    "elevated blood pressure reading": 13,
+    "severe hypercholesterolemia": 14,
+    "possible familial hypercholesterolemia": 15,
+    "elevated apob": 16,
+    "severe hypertriglyceridemia": 17,
+    "hypertriglyceridemia": 18,
+    "morbid obesity": 19,
+    "obesity": 20,
+    "metabolic dysfunction-associated steatotic liver disease": 21,
+    "obstructive sleep apnea": 22,
 }
 
 
@@ -101,6 +109,28 @@ def augment_diagnoses_with_bmi_glp1(
     rows = [d for d in (all_dx or []) if isinstance(d, dict)]
     has_obesity = any(str(d.get("dx_id") or "").strip() == "dx_obesity" for d in rows)
     has_overweight = any(str(d.get("dx_id") or "").strip() == "dx_overweight" for d in rows)
+
+    if bmi >= 40.0:
+        rows = [d for d in rows if str(d.get("dx_id") or "").strip() != "dx_overweight"]
+        if not has_obesity:
+            rows.append(
+                {
+                    "dx_id": "dx_obesity",
+                    "label": "Morbid obesity",
+                    "label_display": "Morbid obesity",
+                    "status": "confirmed",
+                    "icd10_suggested": ["E66.01"],
+                    "icd10_confirmed": ["E66.01"],
+                    "hcc_suggested": [],
+                    "hcc_confirmed": [],
+                    "ev": [{"key": "bmi", "value": bmi, "unit": "kg/m2"}],
+                    "glp1_support": {
+                        "eligible_by_bmi": True,
+                        "eligible_by_bmi_and_comorbidity": True,
+                    },
+                }
+            )
+        return rows
 
     if bmi >= 30.0:
         rows = [d for d in rows if str(d.get("dx_id") or "").strip() != "dx_overweight"]
@@ -387,10 +417,12 @@ def prioritize_linked_diagnoses(candidates: list[Any]) -> list[Any]:
     suppressed = set()
     if has_diabetic_ckd or has_diabetic_albuminuria:
         suppressed.add("type 2 diabetes mellitus")
+        suppressed.add("moderately increased albuminuria")
     if has_diabetic_ckd:
         suppressed.add("type 2 diabetes mellitus with albuminuria")
         suppressed.add("type 2 diabetes mellitus with albuminuria / kidney involvement")
         suppressed.add("albuminuria")
+        suppressed.add("moderately increased albuminuria")
     if has_staged_ckd:
         suppressed.add("chronic kidney disease")
     if has_severe_albuminuria:

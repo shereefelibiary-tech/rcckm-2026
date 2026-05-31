@@ -173,9 +173,7 @@ def test_aspirin_default_not_indicated():
     patient = Patient(age=55, sex="male", cac=0)
     result = evaluate_patient(patient)
 
-    assert _section(build_action_scaffold(patient, result), "Aspirin").line == (
-        "Aspirin not routine for primary prevention."
-    )
+    assert _section(build_action_scaffold(patient, result), "Aspirin").line == "Not indicated."
 
 
 def test_aspirin_consideration_only_for_rcckm_high_risk_context():
@@ -191,18 +189,16 @@ def test_age_70_aspirin_not_routine_primary_prevention():
     patient = Patient(age=72, sex="male", cac=350)
     result = evaluate_patient(patient)
 
-    assert _section(build_action_scaffold(patient, result), "Aspirin").line == (
-        "Aspirin not routine for primary prevention."
-    )
+    assert _section(build_action_scaffold(patient, result), "Aspirin").line == "Not indicated."
 
 
 def test_cac_guided_primary_prevention_aspirin_branches_align_surfaces():
     cases = [
-        (Patient(age=54, sex="male", cac=0), "Aspirin not routine for primary prevention.", "Not routine for primary prevention", "Not indicated."),
-        (Patient(age=54, sex="male", cac=50), "Aspirin not routine for primary prevention.", "Not routine for primary prevention", "Not indicated."),
+        (Patient(age=54, sex="male", cac=0), "Not indicated.", "Not indicated", "Not indicated."),
+        (Patient(age=54, sex="male", cac=50), "Not indicated.", "Not indicated", "Not indicated."),
         (Patient(age=54, sex="male", cac=184), "Aspirin may be considered only if bleeding risk is low.", "Consider only if bleeding risk is low; CAC 184", "Discuss only if bleeding risk is low."),
         (Patient(age=58, sex="male", cac=350), "Aspirin may be considered if bleeding risk is low; plaque burden is high.", "Consider only if bleeding risk is low; CAC 350", "May be considered if bleeding risk is low."),
-        (Patient(age=75, sex="male", cac=350), "Aspirin not routine for primary prevention.", "Not routine for primary prevention", "Not indicated."),
+        (Patient(age=75, sex="male", cac=350), "Not indicated.", "Not indicated", "Not indicated."),
         (Patient(age=58, sex="male", cac=350, aspirin_bleeding_risk_high=True), "Avoid routine primary-prevention aspirin.", "Avoid routine primary-prevention aspirin", "Avoid routine aspirin."),
     ]
 
@@ -261,6 +257,72 @@ def test_no_lipid_change_wording_is_medication_state_aware_across_surfaces():
     assert treated_lipids.status == "Continue current lipid treatment"
     assert "1. Lipids: Continue current lipid treatment." in treated_emr
     assert "1. Cholesterol: Continue current lipid treatment." in treated_roadmap
+
+
+def test_cac_positive_lipid_wording_is_medication_state_aware():
+    untreated = Patient(
+        age=44,
+        sex="female",
+        cac=38,
+        ldl_c=117,
+        apob=92,
+        lipid_lowering=False,
+    )
+    untreated_result = evaluate_patient(untreated)
+    untreated_lipid = next(
+        item for item in build_action_instrument_panel(untreated, untreated_result)
+        if item.domain_id == "lipid_lowering"
+    )
+    untreated_action = untreated_lipid.action_card_line
+    untreated_emr = render_emr_note(untreated, untreated_result)
+    untreated_roadmap = render_patient_roadmap_text(untreated, untreated_result)
+
+    assert untreated_result.level_classification["level"] == "4"
+    assert "Lipid-lowering therapy indicated" in untreated_action
+    assert "intensify" not in untreated_action.lower()
+    assert "1. Lipids: Lipid-lowering therapy indicated; LDL-C <100, ApoB <90, non-HDL-C <130." in untreated_emr
+    assert "Intensify" not in untreated_emr
+    assert "1. Cholesterol: Discuss starting cholesterol-lowering therapy." in untreated_roadmap
+    assert "stronger" not in untreated_roadmap.lower()
+    assert "continue current lipid treatment" not in untreated_roadmap.lower()
+    assert "escalation" not in untreated_roadmap.lower()
+
+    treated_above = Patient(
+        age=44,
+        sex="female",
+        cac=38,
+        ldl_c=117,
+        apob=92,
+        lipid_lowering=True,
+        statin_intensity="low",
+    )
+    treated_above_result = evaluate_patient(treated_above)
+    treated_above_lipid = next(
+        item for item in build_action_instrument_panel(treated_above, treated_above_result)
+        if item.domain_id == "lipid_lowering"
+    )
+
+    assert "Intensify lipid-lowering" in treated_above_lipid.action_card_line
+    assert "1. Lipids: Intensify lipid-lowering; LDL-C <100, ApoB <90, non-HDL-C <130." in render_emr_note(treated_above, treated_above_result)
+    assert "1. Cholesterol: Discuss stronger cholesterol-lowering therapy." in render_patient_roadmap_text(treated_above, treated_above_result)
+
+    treated_at_target = Patient(
+        age=44,
+        sex="female",
+        cac=38,
+        ldl_c=82,
+        apob=70,
+        lipid_lowering=True,
+        statin_intensity="low",
+    )
+    treated_at_target_result = evaluate_patient(treated_at_target)
+    treated_at_target_lipid = next(
+        item for item in build_action_instrument_panel(treated_at_target, treated_at_target_result)
+        if item.domain_id == "lipid_lowering"
+    )
+
+    assert "Continue current lipid treatment" in treated_at_target_lipid.action_card_line
+    assert "1. Cholesterol: Continue current lipid treatment." in render_patient_roadmap_text(treated_at_target, treated_at_target_result)
 
 
 def test_clinical_ascvd_uses_secondary_prevention_antiplatelet_wording():
@@ -358,7 +420,8 @@ def test_action_html_renders_structured_sections_without_loose_duplicate_list():
     assert lipid_lead in html
     assert lipid_detail in html
     assert aspirin_lead in html
-    assert "Primary-prevention aspirin is selective. Consider only if bleeding risk is low." in html
+    assert "CAC &gt;=100 may identify patients more likely to benefit from aspirin when bleeding risk is low." in html
+    assert "Primary-prevention aspirin is selective." not in html
     assert kidney_line in html
     assert kidney_detail in html
     assert glycemia_line in html
@@ -433,10 +496,11 @@ def test_action_card_suppresses_low_value_cac_kidney_and_aspirin_details():
     assert panel["plaque_cac"].status == "CAC may clarify risk"
     assert panel["plaque_cac"].detail == ""
     assert "Use only if it would change lipid-treatment intensity" in panel["plaque_cac"].hover_detail
-    assert panel["kidney_protection"].status == "No kidney action"
+    assert panel["kidney_protection"].status == "Stable"
     assert panel["kidney_protection"].detail == ""
     assert panel["aspirin_antiplatelet"].status == "Not indicated"
     assert panel["aspirin_antiplatelet"].detail == ""
+    assert panel["aspirin_antiplatelet"].hover_detail == ""
 
     visible_action_text = _visible_action_readout_text(_build_action_html(result, patient))
     assert "Use only if it would change lipid-treatment intensity" not in visible_action_text
@@ -464,7 +528,9 @@ def test_action_instrument_panel_groups_kidney_cac_and_aspirin_without_empty_cla
     assert panel["blood_pressure"].status == "BP needed"
     assert panel["aspirin_antiplatelet"].status == "Consider if bleeding risk is low"
     assert panel["aspirin_antiplatelet"].detail == "High plaque burden."
-    assert "bleeding risk is low" in panel["aspirin_antiplatelet"].hover_detail
+    assert panel["aspirin_antiplatelet"].hover_detail == (
+        "CAC >=100 may identify patients more likely to benefit from aspirin when bleeding risk is low."
+    )
     assert "data_to_clarify" not in panel
 
 
@@ -494,8 +560,8 @@ def test_action_instrument_panel_shows_decision_relevant_clarifiers():
     result = evaluate_patient(patient)
     panel = {item.domain_id: item for item in build_action_instrument_panel(patient, result)}
 
-    assert panel["data_to_clarify"].label == "Additional information"
-    assert "ApoB" in panel["data_to_clarify"].detail
+    assert panel["data_to_clarify"].label == "Additional information that may help clarify risk"
+    assert "ApoB" in panel["data_to_clarify"].status
 
 
 def test_action_instrument_panel_keeps_kidney_and_bp_messages_separate():
@@ -532,7 +598,8 @@ def test_action_instrument_panel_secondary_prevention_antiplatelet_slot():
     panel = {item.domain_id: item for item in build_action_instrument_panel(patient, result)}
 
     assert panel["lipid_lowering"].status == "Secondary-prevention lipid therapy"
-    assert panel["aspirin_antiplatelet"].status == "Antiplatelet therapy"
+    assert panel["aspirin_antiplatelet"].status == "Indicated"
+    assert panel["aspirin_antiplatelet"].hover_detail == "Clinical ASCVD."
     assert "primary prevention" not in panel["aspirin_antiplatelet"].status.lower()
 
 
@@ -817,11 +884,11 @@ def test_low_risk_complete_data_below_cac_age_threshold_stays_calm_without_cac_r
     assert result.prevent_risk_category == RiskLevel.LOW
     assert _section(sections, "Lipid therapy").line == "Lipid lowering: no escalation based on current LDL-C/ApoB and ASCVD risk profile."
     assert _section(sections, "Lifestyle").line == "Continue lifestyle-based prevention."
-    assert _section(sections, "Aspirin").line == "Aspirin not routine for primary prevention."
+    assert _section(sections, "Aspirin").line == "Not indicated."
     assert not any(section.label == "Coronary calcium" for section in sections)
     assert "- No diagnosis candidates generated." in note
     assert "1. Lipids: No lipid-lowering medication indicated." in recommendations
-    assert "6. Aspirin: Not routine for primary prevention." in recommendations
+    assert "6. Aspirin: Not indicated." in recommendations
     assert "CAC reasonable" not in recommendations
     assert "CAC not performed" not in recommendations
     assert "Plaque: unmeasured / CAC not performed" not in note

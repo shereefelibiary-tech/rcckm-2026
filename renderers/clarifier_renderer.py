@@ -124,7 +124,7 @@ def build_clarifier_card_html(result, include_title=True, patient=None):
 
     title_html = (
         '<div class="clarifier-heading">'
-        '<div class="clarifier-title rc-card-title">Additional information:</div>'
+        '<div class="clarifier-title rc-card-title">Additional information that may help clarify risk:</div>'
         '</div>'
         if include_title
         else ""

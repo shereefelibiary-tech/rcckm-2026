@@ -133,7 +133,7 @@
       "Prediabetes",
       "Hypertriglyceridemia",
       "1. Lipids: No lipid-lowering medication indicated.",
-      "6. Aspirin: Not routine for primary prevention."
+      "6. Aspirin: Not indicated."
     ],
     "forbidden_phrases": [
       "CAC reasonable",
@@ -182,7 +182,7 @@
       "PREVENT: ASCVD 10y 1.37% (Low); 30y 9.09%.",
       "1. Lipids: Discuss moderate-intensity statin",
       "2. Plaque: CAC not needed.",
-      "6. Aspirin: Not routine for primary prevention.",
+      "6. Aspirin: Not indicated.",
       "premature family history",
       "Prediabetes"
     ],
@@ -272,7 +272,7 @@
       "premature family history",
       "1. Lipids: No lipid-lowering medication indicated.",
       "2. Plaque: CAC may clarify risk.",
-      "6. Aspirin: Not routine for primary prevention."
+      "6. Aspirin: Not indicated."
     ],
     "forbidden_phrases": [
       "LOW\n",
@@ -332,7 +332,7 @@
       "Early menopause 43; Gestational hypertension; Gestational diabetes.",
       "1. Lipids: Discuss moderate-intensity statin",
       "3. Kidney: UACR not available; obtain UACR.",
-      "6. Aspirin: Not routine for primary prevention."
+      "6. Aspirin: Not indicated."
     ],
     "forbidden_phrases": [
       "BORDERLINE.",
@@ -375,7 +375,7 @@
       "PREVENT: ASCVD 10y 1.73% (Low); 30y 11.85%.",
       "1. Lipids: Discuss moderate-intensity statin",
       "2. Plaque: CAC may clarify risk.",
-      "6. Aspirin: Not routine for primary prevention."
+      "6. Aspirin: Not indicated."
     ],
     "forbidden_phrases": [
       "CAC reasonable for risk clarification if treatment decision remains uncertain",
@@ -912,7 +912,7 @@
       "Hypertriglyceridemia",
       "3. Kidney: UACR 34; optimize ACEi-ARB.",
       "2. Plaque: CAC may clarify risk.",
-      "6. Aspirin: Not routine for primary prevention."
+      "6. Aspirin: Not indicated."
     ],
     "forbidden_phrases": [
       "BORDERLINE.",
@@ -1250,7 +1250,7 @@
       "UACR not available; obtain UACR",
       "1. Lipids: Discuss moderate-intensity statin",
       "2. Plaque: CAC may clarify risk.",
-      "6. Aspirin: Not routine for primary prevention."
+      "6. Aspirin: Not indicated."
     ],
     "forbidden_phrases": [
       "CAC reasonable for risk clarification if treatment decision remains uncertain",

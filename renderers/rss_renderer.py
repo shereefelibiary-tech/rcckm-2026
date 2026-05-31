@@ -692,7 +692,6 @@ def build_rss_tower_html(rss_contributions):
     if empty_capacity:
         segments.append(
             f'<div class="rss-tower-empty" '
-            f'title="Unused RSS capacity" '
             f'style="height: {empty_capacity:.2f}%;"></div>'
         )
 

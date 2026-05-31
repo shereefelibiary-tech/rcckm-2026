@@ -11,14 +11,15 @@ Context: elevated Lp(a); father MI age 54.
 
 Assessment:
 - Subclinical coronary atherosclerosis (ICD: I25.10)
+- Essential hypertension (ICD: I10)
 - Hypertriglyceridemia (ICD: E78.1)
 - Prediabetes (ICD: R73.03)
 - Elevated lipoprotein(a) (ICD: E78.41)
 
 Recommendations:
-1. Lipids: Intensify lipid-lowering; LDL-C <70, ApoB <80, non-HDL-C <100.
+1. Lipids: Lipid-lowering therapy indicated; LDL-C <70, ApoB <80, non-HDL-C <100.
 2. Plaque: CAC 145.
-3. Kidney: No kidney action.
+3. Kidney: Stable.
 4. BP: Treat toward <130/80.
 5. Glycemia: Prediabetes prevention; A1c 5.9%.
 6. Aspirin: Consider only if bleeding risk is low; CAC 145.
@@ -54,7 +55,7 @@ Your goals
 
 STEP 4
 Your next steps
-1. Cholesterol: Discuss starting high-intensity cholesterol-lowering therapy.
+1. Cholesterol: Discuss starting cholesterol-lowering therapy.
 2. Coronary plaque: High burden (CAC 145).
 3. Kidneys: Stable.
 4. Blood pressure: Treat toward <130/80.
@@ -62,9 +63,9 @@ Your next steps
 6. Aspirin: Discuss only if bleeding risk is low.
 
 ACTIONS:
-- Lipid lowering: Intensify lipid-lowering. LDL-C 124; target <70. ApoB 112; target <80.
+- Lipid lowering: Lipid-lowering therapy indicated. LDL-C 124; target <70. ApoB 112; target <80.
 - Plaque: High burden (CAC 145).
-- Kidney protection: No kidney action.
+- Kidney protection: Stable.
 - Blood pressure: Treat toward <130/80. Current 138/84.
 - Glycemia / metabolic: Prediabetes prevention. A1c 5.9%; weight/activity focus.
 - Aspirin / antiplatelet: Consider only if bleeding risk is low. CAC 145.

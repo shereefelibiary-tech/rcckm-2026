@@ -128,6 +128,41 @@ def test_where_patient_falls_omits_invalid_or_zero_cac_percentile_context():
     assert "percentile" not in invalid_html.lower()
 
 
+def test_where_patient_falls_marks_level_defining_cac_as_major_driver():
+    patient = Patient(
+        age=58,
+        sex="male",
+        cac=145,
+        cac_percentile=91,
+        ldl_c=124,
+        apob=112,
+        lp_a_value=238,
+        lp_a_unit="nmol/L",
+        premature_fhx_ascvd=True,
+        family_history_premature_ascvd=True,
+        family_history_summary="father MI age 54",
+        a1c=5.9,
+        egfr=78,
+        uacr=14,
+    )
+    result, _rss_total, _contributions = run_patient(patient)
+
+    html = build_where_patient_falls_html(patient, result)
+
+    assert result.level_classification["level"] == "4"
+    cac_row = _row_snippet(html, "CAC 145")
+    assert "CAC 145" in cac_row
+    assert "91th percentile" in cac_row
+    assert ">Major driver<" in cac_row
+    assert ">Contributes<" not in cac_row
+    assert "Contributes" in _row_snippet(html, "ApoB / LDL-C")
+    assert "Major driver" in _row_snippet(html, "Lp(a)")
+    assert "Major driver" in _row_snippet(html, "Premature family history")
+    assert "Contributes" in _row_snippet(html, "A1c / diabetes")
+    assert "Contributes" in _row_snippet(html, "eGFR / UACR")
+    assert "Context only" in _row_snippet(html, "hsCRP")
+
+
 def test_where_patient_falls_normalizes_risk_impact_labels():
     assert normalize_risk_impact_label("major driver") == "Major driver"
     assert normalize_risk_impact_label("very high risk") == "Major driver"
@@ -171,6 +206,25 @@ def test_where_patient_falls_uses_only_simplified_risk_impact_vocabulary():
         ">very high risk<",
     ):
         assert old_label not in html
+
+
+def test_where_patient_falls_reproductive_history_uses_clean_deduplicated_labels():
+    patient = Patient(
+        age=48,
+        sex="female",
+        preeclampsia=True,
+        gestational_diabetes=True,
+        premature_menopause=True,
+        early_menopause=True,
+        pcos_or_irregular_menses=True,
+    )
+    html = build_where_patient_falls_html(patient, run_patient(patient)[0])
+    row = _row_snippet(html, "Reproductive history")
+
+    assert "Preeclampsia; gestational diabetes; premature menopause; PCOS / irregular menses" in row
+    assert "Preeclampsia History of preeclampsia" not in row
+    assert "Gestational diabetes Gestational diabetes" not in row
+    assert row.count("premature menopause") == 1
 
 
 def test_where_patient_falls_risk_impact_chip_hierarchy_is_restrained():

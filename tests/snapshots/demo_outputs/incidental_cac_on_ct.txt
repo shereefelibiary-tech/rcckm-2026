@@ -9,15 +9,16 @@ PREVENT: ASCVD 10y 5.84% (Intermediate).
 CKM/Kidney/Plaque: CKM 2; kidney G2A1; Moderate incidental coronary artery calcification noted on CT.
 
 Assessment:
+- Essential hypertension (ICD: I10)
 - Prediabetes (ICD: R73.03)
 
 Recommendations:
 1. Lipids: Discuss moderate-intensity statin; LDL-C <100, ApoB <90, non-HDL-C <130.
 2. Plaque: Moderate incidental CAC.
-3. Kidney: No kidney action.
+3. Kidney: Stable.
 4. BP: Treat toward <130/80.
 5. Glycemia: Prediabetes prevention; A1c 5.7%.
-6. Aspirin: Not routine for primary prevention.
+6. Aspirin: Not indicated.
 
 PATIENT ROADMAP:
 Your Prevention Roadmap
@@ -59,7 +60,7 @@ Your next steps
 ACTIONS:
 - Lipid lowering: Discuss moderate-intensity statin. LDL-C 118; target <100. ApoB 96; target <90.
 - Plaque: Moderate incidental CAC. Qualitative plaque evidence.
-- Kidney protection: No kidney action.
+- Kidney protection: Stable.
 - Blood pressure: Treat toward <130/80. Current 130/76.
 - Glycemia / metabolic: Prediabetes prevention. A1c 5.7%; weight/activity focus.
 - Aspirin / antiplatelet: Not indicated.

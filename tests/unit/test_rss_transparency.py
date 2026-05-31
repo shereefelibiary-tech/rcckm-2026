@@ -383,7 +383,7 @@ def test_missing_lpa_appears_as_missing_clarifier_when_relevant():
     assert "Missing clarifiers" not in html
     assert "One-time risk assessment" not in html
     assert "Lp(a)" in clarifier_html
-    assert "Additional information:" in clarifier_html
+    assert "Additional information that may help clarify risk:" in clarifier_html
     assert "Lp(a) measurement" not in clarifier_html
 
 
@@ -626,6 +626,10 @@ def test_low_rss_18_case_has_callout_and_keeps_exact_tower_scale():
     assert sum(item["points"] for item in display["contributors"] if item["stack_in_tower"]) == rss_total
     assert tower.count('class="rss-tower-segment"') == 5
     assert 'style="height: 82.00%;"' in tower
+    empty_segment = tower.split('class="rss-tower-empty"', 1)[1].split(">", 1)[0]
+    assert "title=" not in empty_segment
+    assert "aria-label" not in empty_segment
+    assert "Unused RSS" not in tower
     assert 'data-rss-id="a1c"' in tower
     assert 'data-rss-id="apob"' in tower
     assert 'data-rss-id="triglycerides"' in tower
@@ -700,7 +704,7 @@ def test_cac_missing_clarifier_is_separate_from_rss_card():
     assert "Missing clarifiers" not in rss_html
     assert "plaque burden clarification" not in rss_html.lower()
     assert "CAC" in clarifier_html
-    assert "Additional information:" in clarifier_html
+    assert "Additional information that may help clarify risk:" in clarifier_html
     assert "plaque burden clarification" not in clarifier_html
 
 

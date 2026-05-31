@@ -433,16 +433,16 @@ def _aspirin_line(patient: Any, result: Any) -> str:
     if _aspirin_bleeding_risk_high(patient):
         return "Avoid routine primary-prevention aspirin."
     if age is not None and age >= 70:
-        return "Aspirin not routine for primary prevention."
+        return "Not indicated."
     if cac is None:
-        return "Aspirin not routine for primary prevention."
+        return "Not indicated."
     if cac < 100:
-        return "Aspirin not routine for primary prevention."
+        return "Not indicated."
     if age is not None and 40 <= age <= 69 and cac >= 300:
         return "Aspirin may be considered if bleeding risk is low; plaque burden is high."
     if age is not None and 40 <= age <= 69 and cac >= 100:
         return "Aspirin may be considered only if bleeding risk is low."
-    return "Aspirin not routine for primary prevention."
+    return "Not indicated."
 
 
 def _aspirin_bleeding_risk_high(patient: Any) -> bool:
@@ -873,7 +873,7 @@ ACTION_PANEL_DOMAIN_ORDER = [
 ]
 
 
-def _line_to_lipid_readout(line: str, patient: Any | None = None) -> tuple[str, str, str, str]:
+def _line_to_lipid_readout(line: str, patient: Any | None = None, result: Any | None = None) -> tuple[str, str, str, str]:
     lowered = str(line or "").lower()
     if "secondary-prevention" in lowered:
         return "Secondary-prevention lipid therapy", "Treat toward ASCVD targets.", "high", "action"
@@ -884,6 +884,10 @@ def _line_to_lipid_readout(line: str, patient: Any | None = None) -> tuple[str, 
     if "review intensity" in lowered and "atherogenic burden remains elevated" in lowered:
         return "Review intensity; atherogenic burden remains elevated", "", "moderate", "consider"
     if "intensify" in lowered or "above target" in lowered:
+        if patient is not None and not _is_on_lipid_lowering(patient):
+            return "Lipid-lowering therapy indicated", "Treat toward lipid targets.", "high", "action"
+        if patient is not None and result is not None and _lipids_at_or_below_targets(patient, result):
+            return "Continue current lipid treatment", "", "none", "neutral"
         return "Intensify lipid-lowering", "Treat toward lipid targets.", "high", "action"
     if lowered.strip() == "discuss lipid-lowering therapy.":
         return "Discuss lipid-lowering therapy", "", "moderate", "consider"
@@ -902,6 +906,10 @@ def _line_to_lipid_readout(line: str, patient: Any | None = None) -> tuple[str, 
             return "No lipid-lowering medication indicated", "", "none", "neutral"
         return "No lipid escalation", "Current LDL-C/ApoB and risk profile do not support medication change.", "none", "neutral"
     if "lipid-lowering therapy" in lowered or "statin therapy" in lowered:
+        if patient is not None and not _is_on_lipid_lowering(patient):
+            return "Lipid-lowering therapy indicated", "Treat toward lipid targets.", "moderate", "action"
+        if patient is not None and result is not None and _lipids_at_or_below_targets(patient, result):
+            return "Continue current lipid treatment", "", "none", "neutral"
         return "Intensify lipid-lowering", "Treat toward lipid targets.", "moderate", "action"
     return "Review lipid plan", "Use risk context and targets.", "low", "consider"
 
@@ -933,11 +941,14 @@ def _lipid_emr_line(line: str, patient: Any | None = None, result: Any | None = 
         phrase in text.lower()
         for phrase in (
             "lipid-lowering therapy recommended",
+            "lipid-lowering therapy is favored",
             "intensify lipid-lowering",
             "high-intensity lipid-lowering",
             "lipid-lowering therapy indicated",
         )
     ):
+        if _is_on_lipid_lowering(patient) and _lipids_at_or_below_targets(patient, result):
+            return "Continue current lipid treatment."
         target = _first_target(result)
         ldl_target = _num(getattr(target, "ldl_c_target", None)) if target else None
         apob_target = _num(getattr(target, "apob_target", None)) if target else None
@@ -954,7 +965,11 @@ def _lipid_emr_line(line: str, patient: Any | None = None, result: Any | None = 
             verb = (
                 "High-intensity lipid-lowering therapy indicated"
                 if "high-intensity" in text.lower()
-                else "Intensify lipid-lowering therapy"
+                else (
+                    "Intensify lipid-lowering therapy"
+                    if _is_on_lipid_lowering(patient)
+                    else "Lipid-lowering therapy indicated"
+                )
             )
             return f"{verb}; treat toward {_join_target_parts(target_parts)}."
     return text
@@ -981,6 +996,27 @@ def _is_on_lipid_lowering(patient: Any) -> bool:
     return any(name in medication_text for name in lipid_med_names)
 
 
+def _lipids_at_or_below_targets(patient: Any, result: Any) -> bool:
+    target = _first_target(result)
+    if not target:
+        return False
+    pairs = (
+        ("ldl_c", "ldl_c_target"),
+        ("apob", "apob_target"),
+        ("non_hdl_c", "non_hdl_c_target"),
+    )
+    checked = False
+    for patient_attr, target_attr in pairs:
+        current = _num(getattr(patient, patient_attr, None))
+        goal = _num(getattr(target, target_attr, None))
+        if current is None or goal is None:
+            continue
+        checked = True
+        if current > goal:
+            return False
+    return checked
+
+
 def _lipid_patient_line(patient: Any, status: str, detail: str, source_line: str) -> str:
     lowered = f"{status} {detail} {source_line}".lower()
     on_lipid_lowering = _is_on_lipid_lowering(patient)
@@ -992,6 +1028,14 @@ def _lipid_patient_line(patient: Any, status: str, detail: str, source_line: str
         if on_lipid_lowering:
             return "Discuss stronger cholesterol-lowering therapy."
         return "Discuss starting high-intensity cholesterol-lowering therapy."
+    if "lipid-lowering therapy indicated" in lowered:
+        if on_lipid_lowering:
+            return "Discuss stronger cholesterol-lowering therapy."
+        return "Discuss starting cholesterol-lowering therapy."
+    if "discuss starting lipid-lowering therapy" in lowered:
+        if on_lipid_lowering:
+            return "Discuss stronger cholesterol-lowering therapy."
+        return "Discuss starting cholesterol-lowering therapy."
     if "discuss lipid-lowering therapy" in lowered:
         if on_lipid_lowering:
             return "Discuss stronger cholesterol-lowering therapy."
@@ -1110,16 +1154,16 @@ def _patient_glycemia_line(patient: Any, item: ActionDomainReadout) -> str:
 
 
 def _patient_aspirin_line(item: ActionDomainReadout) -> str:
-    status = item.status.lower()
-    if "active" in status:
+    text = f"{item.status} {item.detail}".lower()
+    if "active" in text:
         return "Aspirin is active; confirm the reason."
-    if "antiplatelet" in status:
+    if "antiplatelet" in text or "clinical ascvd" in text:
         return "Review antiplatelet therapy."
-    if "avoid" in status:
+    if "avoid" in text:
         return "Avoid routine aspirin."
-    if "plaque burden is high" in status or "high plaque burden" in item.detail.lower():
+    if "plaque burden is high" in text or "high plaque burden" in text:
         return "May be considered if bleeding risk is low."
-    if "consider" in status:
+    if "consider" in text:
         return "Discuss only if bleeding risk is low."
     return "Not indicated."
 
@@ -1429,7 +1473,7 @@ def _kidney_readout(sections: list[ActionSection], patient: Any, result: Any) ->
             state="consider",
         )
     if egfr is not None or uacr is not None:
-        return _make_readout("kidney_protection", "Kidney protection", "No kidney action", state="complete")
+        return _make_readout("kidney_protection", "Kidney protection", "Stable", state="complete")
     return _make_readout("kidney_protection", "Kidney protection", "Kidney context not available", priority="low", state="neutral")
 
 
@@ -1471,7 +1515,15 @@ def _aspirin_readout(patient: Any, result: Any, section: ActionSection | None) -
     lowered = line.lower()
     aspirin_active = _aspirin_active(patient)
     if "antiplatelet therapy is indicated" in lowered:
-        return _make_readout("aspirin_antiplatelet", "Aspirin / antiplatelet", "Antiplatelet therapy", "Use if no contraindication.", priority="high", state="action")
+        return _make_readout(
+            "aspirin_antiplatelet",
+            "Aspirin / antiplatelet",
+            "Indicated",
+            "Clinical ASCVD.",
+            priority="high",
+            state="action",
+            hover_detail="Clinical ASCVD.",
+        )
     if aspirin_active and _prevention_context(patient, result) != PREVENTION_CONTEXT_SECONDARY_ASCVD:
         return _make_readout(
             "aspirin_antiplatelet",
@@ -1493,7 +1545,7 @@ def _aspirin_readout(patient: Any, result: Any, section: ActionSection | None) -
             "High plaque burden.",
             priority="low",
             state="consider",
-            hover_detail="Primary-prevention aspirin is selective. Consider only if bleeding risk is low.",
+            hover_detail="CAC >=100 may identify patients more likely to benefit from aspirin when bleeding risk is low.",
         )
     if "bleeding risk" in lowered or "consider" in lowered:
         detail = f"CAC {cac:g}." if cac is not None else "Review bleeding risk."
@@ -1504,9 +1556,9 @@ def _aspirin_readout(patient: Any, result: Any, section: ActionSection | None) -
             detail,
             priority="low",
             state="consider",
-            hover_detail="Primary-prevention aspirin is selective. Consider only if bleeding risk is low.",
+            hover_detail="CAC >=100 may identify patients more likely to benefit from aspirin when bleeding risk is low.",
         )
-    if line == "Aspirin not routine for primary prevention.":
+    if line == "Not indicated.":
         return _make_readout(
             "aspirin_antiplatelet",
             "Aspirin / antiplatelet",
@@ -1546,11 +1598,11 @@ def _clarifier_readout(result: Any, patient: Any | None = None) -> ActionDomainR
         if label.startswith("Obtain hsCRP"):
             label = "hsCRP"
         labels.append(label)
+    label_text = ", ".join(_unique(labels[:4]))
     return _make_readout(
         "data_to_clarify",
-        "Additional information",
-        "Additional information",
-        ", ".join(_unique(labels[:4])) + ".",
+        "Additional information that may help clarify risk",
+        label_text,
         priority="low",
         state="consider",
         detail_lines=clarifiers,
@@ -1622,14 +1674,18 @@ def _attach_surface_lines(
             item.patient_line = "Chronic inflammation can shape the prevention plan with your clinician."
         elif item.domain_id == "aspirin_antiplatelet":
             item.emr_line = _aspirin_line(patient, result)
-            if item.state == "consider" and item.emr_line == "Aspirin not routine for primary prevention.":
-                item.hover_detail = "Consider only if bleeding risk is low and prevention context supports it."
+            if item.status == "Not indicated":
+                item.emr_line = "Not indicated."
             item.patient_line = _patient_aspirin_line(item)
         elif item.domain_id == "data_to_clarify":
             if item.detail_lines:
                 item.emr_line = "; ".join(item.detail_lines)
                 item.emr_lines = list(item.detail_lines)
-                item.patient_line = "Additional information: " + item.detail.replace(".", "") + "."
+                item.patient_line = (
+                    "Additional information that may help clarify risk: "
+                    + item.status.replace(".", "")
+                    + "."
+                )
             else:
                 item.emr_line = ""
                 item.emr_lines = []
@@ -1661,7 +1717,7 @@ def build_action_instrument_panel(patient: Any, result: Any) -> list[ActionDomai
     by_label = {section.label: section for section in sections}
     triglycerides = _triglycerides(patient)
     lipid_line = _clean_readout_text(getattr(by_label.get("Lipid therapy"), "line", "") or _lipid_line(patient, result))
-    lipid_status, lipid_detail, lipid_priority, lipid_state = _line_to_lipid_readout(lipid_line, patient)
+    lipid_status, lipid_detail, lipid_priority, lipid_state = _line_to_lipid_readout(lipid_line, patient, result)
     if "moderate-intensity" in lipid_line.lower():
         lipid_detail = _compact_lipid_rationale(lipid_line)
     if triglycerides is not None and triglycerides >= 1000:

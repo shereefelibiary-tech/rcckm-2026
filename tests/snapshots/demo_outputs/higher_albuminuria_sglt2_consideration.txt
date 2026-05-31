@@ -11,7 +11,10 @@ CKM/Kidney/Plaque: CKM 3; kidney G3aA3; CAC not measured.
 Assessment:
 - Type 2 diabetes mellitus with CKD G3aA3 and albuminuria (ICD: E11.22; CKD stage 3a ICD: N18.31)
 - Severely increased albuminuria (ICD: R80.9)
+- Essential hypertension (ICD: I10)
 - Hypertriglyceridemia (ICD: E78.1)
+- Obesity (ICD: E66.9)
+- Adult BMI 31.0-31.9 (ICD: Z68.31)
 
 Recommendations:
 1. Lipids: Discuss moderate-intensity statin; LDL-C <70, ApoB <80, non-HDL-C <100.
@@ -19,7 +22,7 @@ Recommendations:
 3. Kidney: UACR 320; eGFR 48.
 4. BP: Treat toward <130/80.
 5. Glycemia: Optimize diabetes care; A1c 6.8%; goal <7.0.
-6. Aspirin: Not routine for primary prevention.
+6. Aspirin: Not indicated.
 
 PATIENT ROADMAP:
 Your Prevention Roadmap

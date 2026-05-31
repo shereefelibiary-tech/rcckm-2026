@@ -141,6 +141,16 @@ PARSER_CONTROLLED_SESSION_KEYS = (
     }
 )
 
+PARSER_APPLY_METADATA_KEYS = (
+    "parsed_ingest",
+    "parse_report",
+    "parsed_needs_review",
+    "parse_recognition_html",
+    "parse_recognition_visible",
+    "last_parsed_text_hash",
+    "_worksheet_field_sources",
+)
+
 BOOLEAN_WORKSHEET_FIELDS = {
     "diabetes",
     "diabetic_retinopathy",
@@ -880,6 +890,13 @@ def clear_parser_controlled_session_state(state):
             state.pop(key, None)
 
 
+def reset_worksheet_state_for_new_parse(state):
+    """Clear parser-owned worksheet and parser metadata before a new paste applies."""
+    clear_parser_controlled_session_state(state)
+    for key in PARSER_APPLY_METADATA_KEYS:
+        state.pop(key, None)
+
+
 def _next_parse_id(state):
     parse_id = int(state.get("_worksheet_parse_id", 0) or 0) + 1
     state["_worksheet_parse_id"] = parse_id
@@ -966,7 +983,7 @@ def _initialize_absent_parser_booleans(state, parsed, parse_id):
 
 def apply_parsed_to_session_state(state, parsed, *, clear_existing=True, parse_report=None):
     if clear_existing:
-        clear_parser_controlled_session_state(state)
+        reset_worksheet_state_for_new_parse(state)
     parse_id = _next_parse_id(state)
     if clear_existing:
         _initialize_absent_parser_booleans(state, parsed, parse_id)
@@ -1150,13 +1167,13 @@ def render_ingest_panel(st):
                     st.error("Possible PHI detected. Please remove identifiers before parsing.")
                 else:
                     report = parse_ingest_report(pending_text)
+                    clear_report_state(st.session_state, dirty=True)
+                    apply_parsed_to_session_state(st.session_state, report["parsed"], parse_report=report)
                     st.session_state.parse_recognition_html = render_parser_recognition_strip(report)
                     st.session_state.parsed_ingest = report["parsed"]
                     st.session_state.parse_report = report
                     st.session_state.last_parsed_text_hash = pending_hash
                     st.session_state.last_ingest_text_hash = pending_hash
-                    clear_report_state(st.session_state, dirty=True)
-                    apply_parsed_to_session_state(st.session_state, report["parsed"], parse_report=report)
                     for warning in report.get("warnings", []):
                         st.warning(warning)
                     for conflict in report.get("conflicts", []):

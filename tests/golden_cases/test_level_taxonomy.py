@@ -453,7 +453,7 @@ def test_high_lpa_reproductive_low_prevent_stays_level_2b_with_cac_clarification
     assert "Context: elevated Lp(a); Early menopause 44; Preeclampsia." in note
     assert "CAC reasonable for risk clarification if treatment decision remains uncertain" in actions
     assert "Lipid lowering: no escalation today; document elevated Lp(a) and reproductive risk markers as risk enhancers" in actions
-    assert "Aspirin: Not routine for primary prevention" in note
+    assert "Aspirin: Not indicated" in note
     assert "kidney-protective" not in actions
     assert "subclinical coronary atherosclerosis" not in diagnoses.lower()
 
@@ -486,6 +486,75 @@ def test_hidden_high_risk_cluster_upgrades_young_low_prevent_patient():
     assert panel["aspirin_antiplatelet"].status == "Not indicated"
     assert "diabetes" not in diagnoses.lower()
     assert "ckd" not in diagnoses.lower()
+
+
+def test_hidden_risk_lipid_discussion_assigns_targets_and_cac_clarification():
+    from modules.actions.scaffold import build_action_instrument_panel
+    from ui.report_layout import _build_targets_html
+
+    patient = Patient(
+        age=44,
+        sex="female",
+        ldl_c=147,
+        apob=118,
+        lp_a_value=282,
+        lp_a_unit="nmol/L",
+        family_history_premature_ascvd=True,
+        family_history_relationship="father",
+        family_history_event_type="MI",
+        family_history_age_at_event=52,
+        preeclampsia=True,
+        gestational_diabetes=True,
+        cac=None,
+        prevent_10y_ascvd=0.7,
+        prevent_30y_ascvd=5.2,
+        lipid_lowering=False,
+    )
+    result, classification, _actions, _diagnoses = _case(patient)
+    panel = {item.domain_id: item for item in build_action_instrument_panel(patient, result)}
+    targets_html = _build_targets_html(result, patient)
+
+    assert classification.level == "3B"
+    assert panel["lipid_lowering"].status in {
+        "Discuss lipid-lowering therapy",
+        "Discuss moderate-intensity statin",
+        "Lipid-lowering therapy indicated",
+    }
+    assert result.targets[0].ldl_c_target == 100
+    assert result.targets[0].apob_target == 90
+    assert "Not set" not in targets_html
+    assert "&lt;100 mg/dL" in targets_html
+    assert "&lt;90 mg/dL" in targets_html
+    assert panel["plaque_cac"].status == "CAC may clarify treatment"
+    assert "CAC not needed" not in panel["plaque_cac"].action_card_line
+
+
+def test_hidden_risk_cac_zero_does_not_force_cac_clarification():
+    from modules.actions.scaffold import build_action_instrument_panel
+
+    patient = Patient(
+        age=44,
+        sex="female",
+        ldl_c=147,
+        apob=118,
+        lp_a_value=282,
+        lp_a_unit="nmol/L",
+        family_history_premature_ascvd=True,
+        family_history_relationship="father",
+        family_history_event_type="MI",
+        family_history_age_at_event=52,
+        preeclampsia=True,
+        gestational_diabetes=True,
+        cac=0,
+        prevent_10y_ascvd=0.7,
+        prevent_30y_ascvd=5.2,
+        lipid_lowering=False,
+    )
+    result, _classification, _actions, _diagnoses = _case(patient)
+    panel = {item.domain_id: item for item in build_action_instrument_panel(patient, result)}
+
+    assert panel["plaque_cac"].status == "CAC 0"
+    assert "CAC may clarify treatment" not in panel["plaque_cac"].action_card_line
 
 
 def test_hidden_high_risk_cluster_does_not_fire_when_cac_zero():
@@ -564,7 +633,9 @@ def test_off_treatment_level3b_atherogenic_risk_discusses_lipid_lowering():
 
     assert classification.level == "3B"
     assert "Discuss lipid-lowering therapy" in actions
-    assert "1. Lipids: Discuss lipid-lowering therapy." in note
+    assert result.targets[0].ldl_c_target == 100
+    assert result.targets[0].apob_target == 90
+    assert "1. Lipids: Lipid-lowering therapy indicated; LDL-C <100, ApoB <90, non-HDL-C <130." in note
     assert "No lipid escalation" not in note
     assert "1. Cholesterol: Discuss starting cholesterol-lowering therapy." in roadmap
     assert "Continue current lipid treatment" not in roadmap
@@ -632,7 +703,7 @@ def test_level_2b_near_level_3_threshold_uses_shared_decision_wording():
     assert "Clinician-patient risk discussion reasonable given near-threshold LDL/ApoB burden and 30-year trajectory" in actions
     assert "CAC reasonable if treatment decision remains uncertain" in actions
     assert "Lipid-lowering therapy is reasonable" not in actions
-    assert "Aspirin: Not routine for primary prevention" in note
+    assert "Aspirin: Not indicated" in note
     assert "subclinical coronary atherosclerosis" not in diagnoses.lower()
 
 
@@ -694,7 +765,7 @@ def test_level_3b_atherogenic_30y_ldl_apob_uses_intensity_cac_wording():
     assert "Moderate-intensity statin therapy is reasonable to reduce cumulative atherogenic exposure" in actions
     assert "CAC may clarify plaque burden if treatment intensity remains uncertain" in actions
     assert "CAC reasonable for risk clarification if treatment decision remains uncertain" not in actions
-    assert "Aspirin: Not routine for primary prevention" in note
+    assert "Aspirin: Not indicated" in note
     assert "subclinical coronary atherosclerosis" not in diagnoses.lower()
     assert "severe hypercholesterolemia" not in diagnoses.lower()
 
@@ -738,7 +809,7 @@ def test_level_3b_intermediate_prevent_uacr_missing_prioritizes_uacr_and_specifi
         "3. Kidney: UACR not available; obtain UACR.",
         "4. BP: Treat toward <130/80.",
         "5. Glycemia: Prediabetes prevention; A1c 5.9%.",
-        "6. Aspirin: Not routine for primary prevention.",
+        "6. Aspirin: Not indicated.",
         "7. Additional information: UACR.",
     ]
     assert "CAC reasonable for risk clarification if treatment decision remains uncertain" not in actions

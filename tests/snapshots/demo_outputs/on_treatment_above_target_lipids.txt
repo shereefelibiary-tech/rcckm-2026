@@ -11,6 +11,7 @@ Context: elevated Lp(a).
 
 Assessment:
 - Subclinical coronary atherosclerosis (ICD: I25.10)
+- Essential hypertension (ICD: I10)
 - Hypertriglyceridemia (ICD: E78.1)
 - Prediabetes (ICD: R73.03)
 - Elevated lipoprotein(a) (ICD: E78.41)
@@ -18,7 +19,7 @@ Assessment:
 Recommendations:
 1. Lipids: Intensify lipid-lowering; LDL-C <70, ApoB <80, non-HDL-C <100.
 2. Plaque: CAC 145.
-3. Kidney: No kidney action.
+3. Kidney: Stable.
 4. BP: At goal.
 5. Glycemia: Prediabetes prevention; A1c 5.8%.
 6. Aspirin: Consider only if bleeding risk is low; CAC 145.
@@ -64,7 +65,7 @@ Your next steps
 ACTIONS:
 - Lipid lowering: Intensify lipid-lowering. LDL-C 124; target <70. ApoB 112; target <80.
 - Plaque: High burden (CAC 145).
-- Kidney protection: No kidney action.
+- Kidney protection: Stable.
 - Blood pressure: At goal. Current 124/76; goal <130/80.
 - Glycemia / metabolic: Prediabetes prevention. A1c 5.8%; weight/activity focus.
 - Aspirin / antiplatelet: Consider only if bleeding risk is low. CAC 145.

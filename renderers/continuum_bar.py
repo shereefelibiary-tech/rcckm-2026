@@ -104,8 +104,8 @@ div[data-testid="stVerticalBlock"]:has(.rc-shell) {{
 }}
 .rc-shell {{
     width: 100%;
-    padding: 16px 14px 96px;
-    margin: 18px 0 26px;
+    padding: 14px 12px 82px;
+    margin: 14px 0 20px;
     overflow: visible !important;
     font-family: var(--rc-font-body);
     position: relative;
@@ -141,10 +141,14 @@ div[data-testid="stVerticalBlock"]:has(.rc-shell) {{
 }}
 .rc-grid {{
     display: grid;
-    grid-template-columns: repeat(5, minmax(118px, 1fr));
-    gap: clamp(6px, 0.76vw, 12px);
+    grid-template-columns: repeat(5, minmax(128px, 1fr));
+    gap: 0;
     align-items: stretch;
-    margin-bottom: 4px;
+    margin-bottom: 2px;
+    border: 1px solid rgba(11, 31, 58, 0.18);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.72);
+    box-shadow: 0 8px 18px rgba(11, 31, 58, 0.08);
     overflow: visible !important;
     position: relative;
     z-index: 20;
@@ -153,18 +157,27 @@ div[data-testid="stVerticalBlock"]:has(.rc-shell) {{
     position: relative;
     min-width: 0;
     overflow: visible !important;
-    padding-top: 10px;
+    padding-top: 14px;
+}}
+.rc-card-wrap + .rc-card-wrap .rc-card {{
+    border-left: 1px solid rgba(11, 31, 58, 0.13);
+}}
+.rc-card-wrap:first-child .rc-card {{
+    border-radius: 13px 0 0 13px;
+}}
+.rc-card-wrap:last-child .rc-card {{
+    border-radius: 0 13px 13px 0;
 }}
 .rc-card {{
-    min-height: 126px;
-    border-radius: 10px;
-    border: 1px solid rgba(11, 31, 58, 0.18);
+    min-height: 94px;
+    border-radius: 0;
+    border: 0;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     text-align: center;
-    padding: 13px 9px;
+    padding: 12px 10px;
     color: var(--rc-text);
     height: 100%;
     min-width: 0;
@@ -188,16 +201,14 @@ div[data-testid="stVerticalBlock"]:has(.rc-shell) {{
     width: 0;
 }}
 .rc-card-active {{
-    border: 2px solid var(--rc-garnet);
     cursor: help;
-    box-shadow: 0 9px 18px rgba(115, 0, 10, 0.14);
-    transform: translateY(6px);
+    box-shadow: inset 0 0 0 2px var(--rc-garnet), 0 8px 16px rgba(115, 0, 10, 0.15);
+    transform: translateY(-4px);
     z-index: 50;
 }}
 .rc-card-active:hover,
 .rc-card-active:focus {{
-    border-color: var(--rc-garnet-deep);
-    box-shadow: 0 11px 22px rgba(115, 0, 10, 0.18);
+    box-shadow: inset 0 0 0 2px var(--rc-garnet-deep), 0 10px 20px rgba(115, 0, 10, 0.19);
     outline: none;
 }}
 .rc-card-active:focus-visible {{
@@ -226,7 +237,7 @@ div[data-testid="stVerticalBlock"]:has(.rc-shell) {{
     transform: translate(-50%, 4px);
     transition: opacity 120ms ease, transform 120ms ease;
     visibility: hidden;
-    white-space: normal;
+    white-space: pre-line;
     z-index: 9999;
 }}
 .rc-card-active:hover::after,
@@ -256,8 +267,7 @@ div[data-testid="stVerticalBlock"]:has(.rc-shell) {{
 .rc-level-2 {{ background: #eef4ef; }}
 .rc-level-3 {{ background: #fbf1df; }}
 .rc-level-3.rc-card-active {{
-    border-color: rgba(115,0,10,0.72);
-    box-shadow: 0 10px 20px rgba(115, 0, 10, 0.13), inset 0 0 0 2px rgba(245, 158, 11, 0.20);
+    box-shadow: inset 0 0 0 2px rgba(115,0,10,0.72), 0 8px 16px rgba(115, 0, 10, 0.14);
     background: linear-gradient(180deg, #fff6e7 0%, #f7dfb5 100%);
 }}
 .rc-level-3.rc-card-active .rc-level-title {{
@@ -270,30 +280,29 @@ div[data-testid="stVerticalBlock"]:has(.rc-shell) {{
     color: #ffffff;
 }}
 .rc-level-5.rc-card-active {{
-    border-color: var(--rc-garnet-deep);
-    box-shadow: 0 9px 18px rgba(75, 0, 7, 0.22);
+    box-shadow: inset 0 0 0 2px var(--rc-garnet-deep), 0 8px 16px rgba(75, 0, 7, 0.23);
 }}
 .rc-level-title {{
-    font-size: clamp(0.94rem, 1.0vw, 1.02rem);
+    font-size: clamp(1rem, 1.12vw, 1.12rem);
     font-weight: 800;
     line-height: 1.12;
-    margin-bottom: 6px;
+    margin-bottom: 5px;
 }}
 .rc-level-subtitle {{
-    font-size: clamp(0.76rem, 0.86vw, 0.84rem);
+    font-size: clamp(0.82rem, 0.92vw, 0.90rem);
     font-weight: 650;
-    line-height: 1.24;
+    line-height: 1.22;
     max-width: 100%;
 }}
 .rc-context {{
     border-top: 1px solid rgba(11, 31, 58, 0.13);
     color: rgba(7, 26, 47, 0.68);
-    font-size: clamp(0.72rem, 0.78vw, 0.80rem);
+    font-size: clamp(0.76rem, 0.82vw, 0.84rem);
     font-weight: 850;
     line-height: 1.18;
-    margin-top: 8px;
+    margin-top: 7px;
     max-width: 100%;
-    padding-top: 7px;
+    padding-top: 6px;
     white-space: normal;
 }}
 .rc-level-5 .rc-context {{
@@ -314,23 +323,21 @@ div[data-testid="stVerticalBlock"]:has(.rc-shell) {{
 @media (max-width: 760px) {{
     .rc-shell {{
         padding-left: 10px;
-        padding-bottom: 108px;
+        padding-bottom: 92px;
         padding-right: 10px;
     }}
     .rc-grid {{
-        grid-template-columns: repeat(5, minmax(96px, 1fr));
-        gap: 4px;
-        overflow-x: auto;
+        grid-template-columns: repeat(5, minmax(112px, 1fr));
+        overflow-x: auto !important;
         overflow-y: visible;
         padding-bottom: 4px;
     }}
     .rc-card {{
-        border-radius: 8px;
-        min-height: 118px;
+        min-height: 96px;
         padding: 11px 7px;
     }}
     .rc-card-active {{
-        transform: translateY(4px);
+        transform: translateY(-3px);
     }}
     .rc-current {{
         font-size: 0.92rem;

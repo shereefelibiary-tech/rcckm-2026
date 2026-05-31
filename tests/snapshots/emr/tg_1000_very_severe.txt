@@ -13,5 +13,5 @@ Recommendations:
 3. Kidney: UACR not available; obtain UACR.
 4. BP: BP needed.
 5. Glycemia: A1c needed; No current A1c available.
-6. Aspirin: Not routine for primary prevention.
+6. Aspirin: Not indicated.
 7. Additional information: ApoB; UACR.

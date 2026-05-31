@@ -11,8 +11,8 @@ Assessment:
 Recommendations:
 1. Lipids: Discuss moderate-intensity statin; LDL-C <100, ApoB <90, non-HDL-C <130.
 2. Plaque: CAC may clarify risk.
-3. Kidney: No kidney action.
+3. Kidney: Stable.
 4. BP: BP needed.
 5. Glycemia: A1c needed; No current A1c available.
-6. Aspirin: Not routine for primary prevention.
+6. Aspirin: Not indicated.
 7. Additional information: Lp(a).

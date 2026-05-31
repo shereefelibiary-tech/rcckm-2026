@@ -7,10 +7,6 @@ from modules.actions.scaffold import (
     build_action_instrument_panel,
     build_compact_action_detail_lines,
 )
-from modules.lipids.non_hdl import (
-    format_non_hdl_display,
-    should_show_non_hdl_default,
-)
 from modules.lipids.statin_intensity import get_statin_intensity_definition
 from modules.rss.engine import (
     build_rss_contributions,
@@ -339,91 +335,32 @@ def _num_or_none(value):
 def build_primary_targets_display(patient, result, detail_mode=False):
     """Build display-only target rows without changing target assignment logic."""
     target = result.targets[0] if getattr(result, "targets", None) else None
-    if not target:
-        return []
 
-    items = []
     ldl_current = _num_or_none(getattr(patient, "ldl_c", None)) if patient is not None else None
     apob_current = _num_or_none(getattr(patient, "apob", None)) if patient is not None else None
-    triglycerides = (
-        _num_or_none(getattr(patient, "triglycerides", None)) if patient is not None else None
-    )
+    ldl_target = _num_or_none(getattr(target, "ldl_c_target", None)) if target else None
+    apob_target = _num_or_none(getattr(target, "apob_target", None)) if target else None
 
-    if target.ldl_c_target is not None:
-        items.append(
-            {
-                "label": "LDL-C",
-                "target": target.ldl_c_target,
-                "current_value": ldl_current,
-                "unit": "mg/dL",
-                "display_priority": "primary",
-                "show_default": True,
-                "rationale": "Primary actionable cholesterol target.",
-            }
-        )
-
-    if target.apob_target is not None:
-        apob_detail = ""
-        if apob_current is None:
-            apob_detail = "Obtain for particle burden clarification."
-        items.append(
-            {
-                "label": "ApoB",
-                "target": target.apob_target,
-                "current_value": apob_current,
-                "unit": "mg/dL",
-                "display_priority": "primary",
-                "show_default": True,
-                "rationale": apob_detail or "RCCKM advanced particle target.",
-            }
-        )
-
-    severe_tg = triglycerides is not None and triglycerides >= 500
-    dominant_tg = "triglyceride" in str(getattr(result, "dominant_action", "") or "").lower()
-    if triglycerides is not None and (severe_tg or dominant_tg or detail_mode):
-        tg_goal = 500 if triglycerides >= 500 else 150
-        items.append(
-            {
-                "label": "Triglycerides",
-                "target": tg_goal,
-                "current_value": triglycerides,
-                "unit": "mg/dL",
-                "display_priority": "primary" if severe_tg or dominant_tg else "secondary",
-                "show_default": severe_tg or dominant_tg,
-                "rationale": (
-                    "Pancreatitis-risk TG pathway active."
-                    if triglycerides >= 1000
-                    else "Severe hypertriglyceridemia pathway active."
-                    if severe_tg
-                    else "Clinician detail lipid marker."
-                ),
-            }
-        )
-
-    show_non_hdl = False
-    if patient is not None:
-        show_non_hdl = should_show_non_hdl_default(
-            patient,
-            result,
-            {"clinician_detail_mode": detail_mode},
-        )
-    if show_non_hdl:
-        non_hdl = format_non_hdl_display(patient, result)
-        if non_hdl:
-            apob_missing = apob_current is None
-            items.append(
-                {
-                    "label": "non-HDL-C",
-                    "target": non_hdl["target_value"],
-                    "current_value": non_hdl["current_value"],
-                    "unit": "mg/dL",
-                    "display_priority": "secondary",
-                    "show_default": detail_mode or apob_missing,
-                    "rationale": non_hdl["subtitle"],
-                }
-            )
-
-    return [item for item in items if detail_mode or item["show_default"]]
+    return [
+        {
+            "label": "LDL-C",
+            "target": ldl_target,
+            "current_value": ldl_current,
+            "unit": "mg/dL",
+            "display_priority": "primary",
+            "show_default": True,
+            "rationale": "Primary actionable cholesterol target." if ldl_target is not None else "",
+        },
+        {
+            "label": "ApoB",
+            "target": apob_target,
+            "current_value": apob_current,
+            "unit": "mg/dL",
+            "display_priority": "primary",
+            "show_default": True,
+            "rationale": "RCCKM advanced particle target." if apob_target is not None else "",
+        },
+    ]
 
 
 def _build_targets_html(result, patient=None, *, clinician_detail_mode=False):
@@ -432,8 +369,6 @@ def _build_targets_html(result, patient=None, *, clinician_detail_mode=False):
         result,
         detail_mode=clinician_detail_mode,
     )
-    if not assigned_targets:
-        return ""
 
     target = result.targets[0] if result.targets else None
     context_line = _target_context_line(result, target, patient)
@@ -452,15 +387,12 @@ def _build_targets_html(result, patient=None, *, clinician_detail_mode=False):
         rationale = item.get("rationale") or ""
         apob_missing = label == "ApoB" and current_value is None
         target_number = _fmt_target_number(target_value) if target_value is not None else None
-        target_html = ""
-        if target_number is not None and not apob_missing:
-            target_html = (
-                f'<span class="target-goal">&lt;{escape(target_number)} {escape(unit)}</span>'
-            )
-        elif apob_missing and target_number is not None:
+        if target_number is not None:
             target_html = f'<span class="target-goal">&lt;{escape(target_number)} {escape(unit)}</span>'
+        else:
+            target_html = '<span class="target-goal target-goal-unset">Not set</span>'
         current_html = ""
-        status_text = "Not available"
+        status_text = ""
         if current_value is not None:
             current_number = _fmt_target_number(current_value)
             current_html = (
@@ -473,7 +405,7 @@ def _build_targets_html(result, patient=None, *, clinician_detail_mode=False):
                     status_text = ""
             else:
                 status_text = ""
-        elif apob_missing:
+        elif apob_missing or current_value is None:
             current_html = '<span class="target-current">Current not available</span>'
         rationale_html = ""
         if rationale and label in {"Triglycerides", "non-HDL-C"}:
@@ -580,22 +512,6 @@ def _build_targets_html(result, patient=None, *, clinician_detail_mode=False):
     font-size: 0.79rem;
     font-weight: 780;
     line-height: 1.2;
-}}
-.target-secondary {{
-    color: rgba(7, 26, 47, 0.58);
-    display: grid;
-    gap: 5px;
-    font-size: 0.78rem;
-    font-weight: 600;
-    line-height: 1.3;
-    margin-top: 5px;
-}}
-.target-secondary .target-name,
-.target-secondary .target-goal {{
-    font-weight: 680;
-}}
-.target-note {{
-    margin-left: 8px;
 }}
 .target-details {{
     color: rgba(7, 26, 47, 0.58);

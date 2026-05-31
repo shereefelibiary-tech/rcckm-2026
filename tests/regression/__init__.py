@@ -125,7 +125,7 @@ def test_glycemic_and_kidney_actions_surface_when_criteria_are_present():
 
     assert "Optimize diabetes care" in text
     assert "kidney-protective" in text
-    assert "Albuminuria" in diagnosis_text(result)
+    assert "albuminuria" in diagnosis_text(result).lower()
 
 
 def test_uacr_missing_zero_and_albuminuria_stages_never_cross():
@@ -150,7 +150,7 @@ def test_egfr_stages_and_preserved_egfr_albuminuria_surface_kidney_risk():
     assert getattr(g3a_result, "egfr_stage", None) == "G3a"
     assert getattr(g3b_result, "egfr_stage", None) == "G3b"
     assert "normal kidney function" not in visible_text(g3a_patient, g3a_result).lower()
-    assert "Albuminuria" in diagnosis_text(preserved_result)
+    assert "albuminuria" in diagnosis_text(preserved_result).lower()
     assert "A2" in visible_text(preserved_patient, preserved_result)
 
 
@@ -231,9 +231,9 @@ def test_albuminuria_diagnosis_requires_uacr_30_or_higher():
     _a1_patient, a1_result = evaluate_case({"age": 55, "sex": "female", "egfr": 76, "uacr": 29})
     _a2_patient, a2_result = evaluate_case({"age": 55, "sex": "female", "egfr": 76, "uacr": 30})
 
-    assert "Albuminuria" not in diagnosis_text(missing_result)
-    assert "Albuminuria" not in diagnosis_text(a1_result)
-    assert "Albuminuria" in diagnosis_text(a2_result)
+    assert "albuminuria" not in diagnosis_text(missing_result).lower()
+    assert "albuminuria" not in diagnosis_text(a1_result).lower()
+    assert "albuminuria" in diagnosis_text(a2_result).lower()
 
 
 def test_plaque_diagnoses_require_cac_thresholds_and_clinical_ascvd_does_not():

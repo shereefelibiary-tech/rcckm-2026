@@ -10,15 +10,16 @@ CKM/Kidney/Plaque: CKM 3 by subclinical atherosclerosis; kidney G2A1; CAC 90.
 
 Assessment:
 - Subclinical coronary atherosclerosis (ICD: I25.10)
+- Essential hypertension (ICD: I10)
 - Prediabetes (ICD: R73.03)
 
 Recommendations:
 1. Lipids: Intensify lipid-lowering; LDL-C <100, ApoB <90, non-HDL-C <130.
 2. Plaque: CAC 90.
-3. Kidney: No kidney action.
+3. Kidney: Stable.
 4. BP: At goal.
 5. Glycemia: Prediabetes prevention; A1c 5.7%.
-6. Aspirin: Not routine for primary prevention.
+6. Aspirin: Not indicated.
 
 PATIENT ROADMAP:
 Your Prevention Roadmap
@@ -60,7 +61,7 @@ Your next steps
 ACTIONS:
 - Lipid lowering: Intensify lipid-lowering. LDL-C 146; target <100. ApoB 116; target <90.
 - Plaque: Present (CAC 90).
-- Kidney protection: No kidney action.
+- Kidney protection: Stable.
 - Blood pressure: At goal. Current 128/76; goal <130/80.
 - Glycemia / metabolic: Prediabetes prevention. A1c 5.7%; weight/activity focus.
 - Aspirin / antiplatelet: Not indicated.

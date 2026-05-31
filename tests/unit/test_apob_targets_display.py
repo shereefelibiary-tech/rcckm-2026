@@ -35,6 +35,23 @@ def test_target_card_renders_target_first_without_arrow_text():
     assert html.count("Above goal") >= 2
 
 
+def test_target_card_always_renders_when_targets_are_not_set():
+    patient = Patient(age=55, sex="male", ldl_c=88, apob=None, cac=0)
+    result, _rss_total, _contributions = run_patient(patient)
+
+    html = _build_targets_html(result, patient)
+
+    assert "targets-compact" in html
+    assert "LDL-C" in html
+    assert "ApoB" in html
+    assert html.count('<span class="target-item">') == 2
+    assert html.count("Not set") == 2
+    assert "Current 88 mg/dL" in html
+    assert "Current not available" in html
+    assert "At goal" not in html
+    assert "Above goal" not in html
+
+
 def test_target_card_shows_apob_65_for_very_high_risk_when_advanced_target_shown():
     patient = Patient(
         age=65,

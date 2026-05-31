@@ -779,6 +779,10 @@ def _short_lipid_action(item, patient, result):
         action = "Intensify secondary-prevention lipid-lowering therapy"
     elif "high-intensity" in lowered:
         action = "High-intensity lipid-lowering therapy indicated"
+    elif "discuss starting lipid-lowering therapy" in lowered:
+        action = "Lipid-lowering therapy indicated"
+    elif "discuss lipid-lowering therapy" in lowered and not getattr(patient, "lipid_lowering", False):
+        action = "Lipid-lowering therapy indicated"
     elif "intensify" in lowered:
         action = "Intensify lipid-lowering"
     elif "moderate-intensity" in lowered:
@@ -828,8 +832,8 @@ def _short_kidney_action(item, patient):
     uacr = _emr_fmt(getattr(patient, "uacr", None))
     detail = str(getattr(item, "detail", "") or "").strip().rstrip(".")
     status = str(getattr(item, "status", "") or "").strip().rstrip(".")
-    if status in {"No kidney-risk signal", "No kidney action"}:
-        return status
+    if status in {"No kidney-risk signal", "No kidney action", "Stable"}:
+        return "Stable"
     if uacr is None and "obtain uacr" in status.lower():
         return "UACR not available; obtain UACR"
     if detail:
@@ -837,7 +841,7 @@ def _short_kidney_action(item, patient):
         return detail
     if status:
         return status
-    return "No kidney action"
+    return "Stable"
 
 
 def _short_bp_action(item):
@@ -867,8 +871,9 @@ def _number_or_none(value):
 
 def _short_aspirin_action(item, patient=None):
     status = str(getattr(item, "status", "") or "").strip().rstrip(".")
-    lowered = status.lower()
-    if "antiplatelet" in lowered:
+    detail = str(getattr(item, "detail", "") or "").strip().rstrip(".")
+    lowered = f"{status} {detail}".lower()
+    if "antiplatelet" in lowered or "clinical ascvd" in lowered:
         return "Secondary-prevention antiplatelet therapy"
     if "aspirin active" in lowered:
         return "Active; confirm indication"
@@ -879,7 +884,7 @@ def _short_aspirin_action(item, patient=None):
         if cac is not None:
             return f"Consider only if bleeding risk is low; CAC {cac:g}"
         return "Consider only if bleeding risk is low"
-    return "Not routine for primary prevention"
+    return "Not indicated"
 
 
 def _short_clarifier_action(item):

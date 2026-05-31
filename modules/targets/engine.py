@@ -1,4 +1,5 @@
 from core.results import TargetResult
+from modules.occult_risk import has_occult_lipid_discussion_path
 
 
 LDL_TARGET_PRIMARY_PREVENTION_DEFAULT = 100
@@ -279,6 +280,11 @@ def assign_lipid_targets(patient, engine_context=None):
             non_hdl_c_target=None,
             apob_target=None,
             rationale="CAC 0: no target assigned from plaque burden alone.",
+        )
+
+    if has_occult_lipid_discussion_path(patient, engine_context):
+        return _primary_prevention_target(
+            "Low 10-year PREVENT risk with clustered atherogenic and risk-enhancer burden: lipid-lowering discussion target range."
         )
 
     if _has_diabetes(patient) and _age_40_to_75(patient):

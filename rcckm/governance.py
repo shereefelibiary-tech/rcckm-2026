@@ -15,6 +15,13 @@ FORBIDDEN_FRAGMENTS = (
     "risk_continuum_sublevel",
     "Supporting actions:",
     "phenotype",
+    "no kidney action",
+    "no kidney-risk signal",
+    "do not start routine aspirin",
+    "not routine for primary prevention",
+    "artery plaque",
+    "current goals and values",
+    "the main reasons your risk is higher",
     "included in the prevention plan",
     "reviewed as part of the prevention plan",
     "interpreted with the overall risk picture",
@@ -246,6 +253,7 @@ def extract_domain_signals(text: str) -> dict[str, bool]:
                 "no lipid escalation",
                 "lipid lowering: no escalation",
                 "no escalation based on current ldl-c/apob",
+                "no lipid-lowering medication indicated",
             ),
         ),
         "statin_moderate": "moderate-intensity statin" in lowered,
@@ -384,7 +392,7 @@ def audit_cross_surface_alignment(
         _add(findings, "cross_surface_alignment", "CAC already measured but another surface recommends obtaining CAC.")
     if action_signals["kidney_albuminuria"] and not emr_signals["kidney_albuminuria"]:
         _add(findings, "cross_surface_alignment", "Kidney action mentions albuminuria but EMR lacks UACR/albuminuria context.")
-    if _contains_any(action, ("no kidney-risk signal", "no kidney action")) and (
+    if _contains_any(action, ("no kidney-risk signal", "no kidney action", "kidney protection: stable")) and (
         emr_signals["sglt2_consider"] or "optimize kidney-protective" in emr
     ):
         _add(findings, "cross_surface_alignment", "Kidney recommendation differs between Action card and EMR.")

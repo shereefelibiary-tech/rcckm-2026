@@ -170,7 +170,21 @@ def validate_patient(patient: dict[str, Any]) -> list[dict[str, Any]]:
     if len([name for name in names if name]) != len(set(name for name in names if name)):
         fail("duplicate_diagnosis", "Duplicate diagnosis candidate names generated.")
 
-    forbidden = ("phenotype", "inherited risk", "genetics", "Supporting actions:")
+    forbidden = (
+        "phenotype",
+        "inherited risk",
+        "genetics",
+        "Supporting actions:",
+        "no kidney action",
+        "no kidney-risk signal",
+        "do not start routine aspirin",
+        "not routine for primary prevention",
+        "artery plaque",
+        "current goals and values",
+        "the main reasons your risk is higher",
+        "included in the prevention plan",
+        "interpreted with the overall risk picture",
+    )
     for phrase in forbidden:
         if phrase.lower() in lower_text:
             fail("wording", f"Forbidden phrase visible: {phrase}")

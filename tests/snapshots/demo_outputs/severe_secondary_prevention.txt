@@ -11,10 +11,13 @@ Context: elevated Lp(a); suspected FH / HeFH; LDL-C >=190 / possible FH pathway;
 
 Assessment:
 - Type 2 diabetes mellitus with CKD G3aA2 and albuminuria (ICD: E11.22; CKD stage 3a ICD: N18.31)
+- Essential hypertension (ICD: I10)
 - Severe hypercholesterolemia (ICD: E78.00)
 - Elevated ApoB / atherogenic particle burden (ICD: E78.89)
 - Hypertriglyceridemia (ICD: E78.1)
+- Obesity (ICD: E66.9)
 - Clinical ASCVD / coronary artery disease with prior MI with PCI; ischemic stroke; PAD (ICD: I25.10)
+- Adult BMI 31.0-31.9 (ICD: Z68.31)
 - Elevated lipoprotein(a) (ICD: E78.41)
 
 Recommendations:
@@ -70,7 +73,7 @@ ACTIONS:
 - Kidney protection: Optimize kidney protection. UACR 86; ACEi/ARB active. Consider SGLT2 for diabetic CKD.
 - Blood pressure: Treat toward <130/80. Current 138/82.
 - Glycemia / metabolic: Optimize diabetes care. A1c 7.8%; goal <7.0.
-- Aspirin / antiplatelet: Antiplatelet therapy. Use if no contraindication.
+- Aspirin / antiplatelet: Indicated. Clinical ASCVD.
 
 RSS: 94
 RSS CONTRIBUTORS:

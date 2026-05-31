@@ -77,7 +77,7 @@ def test_all_demo_surfaces_share_structured_domain_actions(label, case_name):
         (
             "rheumatoid_arthritis_risk_enhancer",
             ("Inflammatory risk enhancer", "RA is a risk enhancer"),
-            ("Context: RA", "No lipid-lowering medication indicated"),
+            ("Context: RA",),
             ("rheumatoid arthritis",),
         ),
         (
@@ -107,7 +107,7 @@ def test_all_demo_surfaces_share_structured_domain_actions(label, case_name):
         (
             "healthy_low_risk_prevention",
             ("No lipid-lowering medication indicated",),
-            ("No lipid-lowering medication indicated", "No kidney action"),
+            ("No lipid-lowering medication indicated", "Stable"),
             ("cholesterol",),
         ),
     ],
@@ -133,7 +133,7 @@ def test_cross_surface_alignment_governance_reports_domain_specific_mismatches()
         action_card_text=(
             "Lipid lowering: No lipid-lowering medication indicated.\n"
             "Plaque: Very high burden (CAC 350).\n"
-            "Kidney protection: No kidney action.\n"
+            "Kidney protection: Stable.\n"
             "Aspirin / antiplatelet: Not indicated."
         ),
         emr_text=(

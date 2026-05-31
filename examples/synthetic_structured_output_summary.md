@@ -28,7 +28,7 @@ Synthetic example. Not real patient data.
 
 - Lipid lowering: high-intensity therapy indicated.
 - CAC / plaque: CAC 350.
-- Kidney protection: no kidney-risk signal.
+- Kidney protection: Stable.
 - Blood pressure: treat toward <130/80.
 - Glycemia / metabolic: prediabetes prevention.
 - Aspirin / antiplatelet: consider only if low bleeding risk.

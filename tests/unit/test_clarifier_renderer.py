@@ -62,7 +62,7 @@ def test_build_clarifier_card_html_contains_quick_read_recommended_list():
 
     html = build_clarifier_card_html(result)
 
-    assert "Additional information:" in html
+    assert "Additional information that may help clarify risk:" in html
     assert "risk clarification" not in html
     assert "clarifying data" not in html
     assert "already available" not in html.lower()
@@ -126,7 +126,7 @@ def test_render_clarifier_card_uses_unsafe_markdown():
     html, unsafe = fake_st.calls[0]
     assert unsafe is True
     assert "clarifier-card" in html
-    assert "Additional information:" in html
+    assert "Additional information that may help clarify risk:" in html
     assert "Show completed clarifiers" not in html
 
 
@@ -165,7 +165,7 @@ def test_build_clarifier_card_html_uses_compact_ordered_test_list():
 
     html = build_clarifier_card_html(result)
 
-    assert "Additional information:" in html
+    assert "Additional information that may help clarify risk:" in html
     assert "ApoB &bull; Lp(a) &bull; CAC &bull; UACR" in html
     assert "already available" not in html.lower()
 

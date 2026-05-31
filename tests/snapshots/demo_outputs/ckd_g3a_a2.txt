@@ -9,8 +9,11 @@ PREVENT: ASCVD 10y 8.28% (Intermediate).
 CKM/Kidney/Plaque: CKM 3; kidney G3aA2; CAC not measured.
 
 Assessment:
-- CKD stage G3aA2 / albuminuria (ICD: R80.9)
+- Moderately increased albuminuria (ICD: R80.9)
+- Essential hypertension (ICD: I10)
+- Obesity (ICD: E66.9)
 - Prediabetes (ICD: R73.03)
+- Adult BMI 31.0-31.9 (ICD: Z68.31)
 
 Recommendations:
 1. Lipids: Discuss moderate-intensity statin; LDL-C <100, ApoB <90, non-HDL-C <130.
@@ -18,7 +21,7 @@ Recommendations:
 3. Kidney: UACR 72; ACEi/ARB active.
 4. BP: Treat toward <130/80.
 5. Glycemia: Prediabetes prevention; A1c 5.8%.
-6. Aspirin: Not routine for primary prevention.
+6. Aspirin: Not indicated.
 
 PATIENT ROADMAP:
 Your Prevention Roadmap

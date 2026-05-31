@@ -186,7 +186,7 @@ def test_custom_html_renderers_return_html_strings():
         RCCKMResult(clarification={"recommend_apob": True, "recommend_lpa": True})
     )
     assert "<div" in clarifier_html
-    assert "Additional information:" in clarifier_html
+    assert "Additional information that may help clarify risk:" in clarifier_html
 
 
 def test_report_uses_component_html_for_custom_renderers():
@@ -537,7 +537,7 @@ def test_targets_card_prioritizes_ldl_and_apob_by_default():
     assert "rcckm-metric" not in html
 
 
-def test_targets_card_shows_severe_triglycerides_when_pathway_relevant():
+def test_targets_card_stays_lipid_target_only_when_triglycerides_are_severe():
     from core.patient import Patient
 
     patient = Patient(age=50, sex="male", ldl_c=120, apob=90, triglycerides=1040)
@@ -545,9 +545,11 @@ def test_targets_card_shows_severe_triglycerides_when_pathway_relevant():
 
     html = _build_targets_html(result, patient)
 
-    assert "Triglycerides" in html
-    assert "1040 mg/dL" in html
-    assert "Pancreatitis-risk TG pathway active." in html
+    assert "LDL-C" in html
+    assert "ApoB" in html
+    assert "Triglycerides" not in html
+    assert "1040 mg/dL" not in html
+    assert "Pancreatitis-risk TG pathway active." not in html
 
 
 def _action_html_for_lipid_recommendation(recommendation):

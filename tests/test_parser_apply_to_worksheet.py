@@ -1,5 +1,7 @@
 from pathlib import Path
 
+from modules.diagnoses.engine import build_diagnosis_candidates
+from ui.input_worksheet import build_patient_from_inputs
 from ui.ingest_panel import (
     apply_parsed_to_session_state,
     build_parser_recognition_items,
@@ -58,6 +60,20 @@ Current medications:
 amlodipine 5 mg daily
 lisinopril-HCTZ 20-12.5 mg daily
 """
+
+
+def _patient_from_worksheet_state(state):
+    return build_patient_from_inputs(
+        {
+            key.removeprefix("input_"): value
+            for key, value in state.items()
+            if str(key).startswith("input_")
+        }
+    )
+
+
+def _diagnosis_names(patient):
+    return {candidate.name for candidate in build_diagnosis_candidates(patient)}
 
 
 def test_false_values_apply_to_worksheet_state():
@@ -222,6 +238,51 @@ def test_new_parse_clears_stale_missing_numeric_fields():
     assert state.get("input_lp_a_value") is None
     assert state.get("input_lp_a_unit") is None
     assert state["input_age"] == 55
+
+
+def test_new_parse_clears_stale_medications_and_medication_booleans():
+    state = {}
+    first = parse_ingest_report("Current medications:\nlisinopril 10 mg daily")
+    second = parse_ingest_report("Age: 55\nSex: male\nLDL-C 90")
+
+    apply_parsed_to_session_state(state, first["parsed"], parse_report=first)
+
+    assert state["input_medications_raw"] == "lisinopril"
+    assert state["input_ace_arb"] is True
+    assert state["input_bp_treated"] is True
+    assert state["input_bp_meds"] is True
+
+    apply_parsed_to_session_state(state, second["parsed"], parse_report=second)
+
+    patient = _patient_from_worksheet_state(state)
+    names = _diagnosis_names(patient)
+
+    assert state.get("input_medications_raw") is None
+    assert state.get("input_dm_meds_raw") is None
+    assert state["input_ace_arb"] is False
+    assert state["input_bp_treated"] is False
+    assert state["input_bp_meds"] is False
+    assert "Essential hypertension" not in names
+
+
+def test_new_parse_clears_stale_cac_and_plaque_diagnosis():
+    state = {}
+    first = parse_ingest_report("CAC: 350")
+    second = parse_ingest_report("Coronary artery calcium (CAC) score: Unknown")
+
+    apply_parsed_to_session_state(state, first["parsed"], parse_report=first)
+    assert state["input_cac"] == 350
+
+    apply_parsed_to_session_state(state, second["parsed"], parse_report=second)
+
+    patient = _patient_from_worksheet_state(state)
+    names = _diagnosis_names(patient)
+
+    assert state.get("input_cac") is None
+    assert state["input_cac_not_done"] is True
+    assert patient.cac is None
+    assert "Subclinical coronary atherosclerosis" not in names
+    assert "Severe subclinical coronary atherosclerosis" not in names
 
 
 def test_family_history_conflict_when_explicit_premature_flag_disagrees_with_age():

@@ -56,7 +56,7 @@ def test_evaluate_patient_returns_combined_results():
     assert result.decision_stability == DecisionStability.HIGH
     assert len(result.targets) == 1
     assert any(c.name == "Chronic kidney disease" for c in result.diagnosis_candidates)
-    assert any(c.name == "Albuminuria" for c in result.diagnosis_candidates)
+    assert any("albuminuria" in c.name.lower() for c in result.diagnosis_candidates)
     assert any(c.name == "Type 2 diabetes mellitus" for c in result.diagnosis_candidates)
 
 

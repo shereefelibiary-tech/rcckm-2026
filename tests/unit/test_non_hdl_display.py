@@ -71,7 +71,7 @@ def test_non_hdl_available_but_not_default_when_tg_mildly_elevated_and_apob_pres
     assert "Calculated from total cholesterol minus HDL-C." not in html
 
 
-def test_non_hdl_shown_when_apob_missing_and_calculable():
+def test_non_hdl_not_shown_in_targets_card_when_apob_missing_and_calculable():
     patient = Patient(
         age=52,
         sex="female",
@@ -83,8 +83,12 @@ def test_non_hdl_shown_when_apob_missing_and_calculable():
     )
 
     assert should_show_non_hdl_default(patient, _result()) is True
-    assert "non-HDL-C" in _build_targets_html(_result(), patient)
-    assert "target-secondary" in _build_targets_html(_result(), patient)
+    html = _build_targets_html(_result(), patient)
+    assert "LDL-C" in html
+    assert "ApoB" in html
+    assert "Current not available" in html
+    assert "non-HDL-C" not in html
+    assert "target-secondary" not in html
 
 
 def test_non_hdl_not_shown_without_source_lipid_values_or_target():
@@ -99,7 +103,7 @@ def test_non_hdl_not_shown_without_source_lipid_values_or_target():
     assert "non-HDL-C" not in _build_targets_html(no_target, patient)
 
 
-def test_clinician_detail_mode_can_show_non_hdl_when_otherwise_hidden():
+def test_clinician_detail_mode_keeps_targets_card_limited_to_ldl_and_apob():
     patient = Patient(
         age=52,
         sex="female",
@@ -116,5 +120,5 @@ def test_clinician_detail_mode_can_show_non_hdl_when_otherwise_hidden():
     html = _build_targets_html(result, patient, clinician_detail_mode=True)
     assert "LDL-C" in html
     assert "ApoB" in html
-    assert "non-HDL-C" in html
-    assert "target-secondary" in html
+    assert "non-HDL-C" not in html
+    assert "target-secondary" not in html
