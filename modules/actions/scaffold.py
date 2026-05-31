@@ -881,6 +881,8 @@ def _line_to_lipid_readout(line: str) -> tuple[str, str, str, str]:
         return "Add-on therapy consideration", "If LDL-C/ApoB remain above target.", "high", "action"
     if "high-intensity" in lowered or "maximally tolerated" in lowered:
         return "High-intensity therapy indicated", "Treat toward high-risk targets.", "high", "action"
+    if "review intensity" in lowered and "atherogenic burden remains elevated" in lowered:
+        return "Review intensity; atherogenic burden remains elevated", "", "moderate", "consider"
     if "intensify" in lowered or "above target" in lowered:
         return "Intensify lipid-lowering", "Treat toward lipid targets.", "high", "action"
     if "moderate-intensity" in lowered:
@@ -981,21 +983,37 @@ def _patient_plaque_line(patient: Any, item: ActionDomainReadout) -> str:
     if _clinical_ascvd(patient):
         return "Known cardiovascular disease is present."
     if "may clarify" in status:
-        return "Calcium scan only if it would change the treatment decision."
+        return "Calcium scan may clarify treatment."
     if "not routine" in status or "not needed" in status:
         return "Calcium scan not needed right now."
     cac = _num(getattr(patient, "cac", None))
     if cac is not None:
         if cac >= 300:
-            return f"High plaque burden (CAC {cac:g})."
+            return f"Very high burden (CAC {cac:g})."
         if cac >= 100:
-            return f"Moderate plaque burden (CAC {cac:g})."
+            return f"High burden (CAC {cac:g})."
         if cac > 0:
-            return f"Plaque present (CAC {cac:g})."
-        return "No calcified plaque detected (CAC 0)."
+            return f"Present (CAC {cac:g})."
+        return "Not detected (CAC 0)."
     if "not measured" in status:
-        return "Calcium scan only if it would change the treatment decision."
-    return "Calcium scan only if it would change the treatment decision."
+        return "Not measured."
+    return "Not measured."
+
+
+def _patient_kidney_state_line(egfr: float | None, uacr: float | None) -> str:
+    if egfr is not None and egfr < 30:
+        return "Advanced kidney disease."
+    if egfr is not None and egfr < 60 and uacr is not None and uacr >= 30:
+        return f"Chronic kidney disease is present (UACR {uacr:g})."
+    if uacr is not None and uacr >= 300:
+        return f"Significant albuminuria is present (UACR {uacr:g})."
+    if uacr is not None and uacr >= 30:
+        return f"Albuminuria present (UACR {uacr:g})."
+    if egfr is not None and 45 <= egfr < 60:
+        return "Mild reduction in kidney function."
+    if egfr is not None or uacr is not None:
+        return "Stable."
+    return "UACR not available."
 
 
 def _patient_kidney_line(patient: Any, item: ActionDomainReadout) -> str:
@@ -1007,18 +1025,12 @@ def _patient_kidney_line(patient: Any, item: ActionDomainReadout) -> str:
             return f"Repeat kidney blood/urine testing; eGFR {egfr:g} and UACR not available."
         return "Repeat kidney urine testing; UACR not available."
     if item.state in {"action", "consider"}:
-        if uacr is not None:
-            if "continue kidney-protective therapy" in status_detail:
-                return f"Continue kidney-protective therapy; UACR {uacr:g}."
-            if "sglt2" in status_detail:
-                return f"Discuss kidney-protective therapy; UACR {uacr:g}."
-            if "monitor" in status_detail:
-                return f"Monitor albuminuria; UACR {uacr:g}."
-            return f"Optimize kidney protection; UACR {uacr:g}."
-        return "Discuss kidney protection options."
-    if "no kidney-risk signal" in status_detail:
-        return "No kidney action from current eGFR/UACR."
-    return "Repeat kidney blood/urine testing if due."
+        return _patient_kidney_state_line(egfr, uacr)
+    if "no kidney-risk signal" in status_detail or "no kidney action" in status_detail:
+        return _patient_kidney_state_line(egfr, uacr)
+    if "kidney context not available" in status_detail:
+        return "UACR not available."
+    return _patient_kidney_state_line(egfr, uacr)
 
 
 def _patient_bp_line(patient: Any, item: ActionDomainReadout) -> str:
@@ -1059,7 +1071,7 @@ def _patient_aspirin_line(item: ActionDomainReadout) -> str:
         return "May be considered if bleeding risk is low."
     if "consider" in status:
         return "Discuss only if bleeding risk is low."
-    return "Do not start routine aspirin."
+    return "Not indicated."
 
 
 def _line_or_none(text: str) -> str:
@@ -1176,7 +1188,7 @@ def _plaque_readout(patient: Any, result: Any, section: ActionSection | None) ->
         if cac is not None:
             return _make_readout(
                 "plaque_cac",
-                "CAC / plaque",
+                "Plaque",
                 f"CAC {cac:g}",
                 priority="low",
                 state="complete",
@@ -1185,7 +1197,7 @@ def _plaque_readout(patient: Any, result: Any, section: ActionSection | None) ->
             )
         return _make_readout(
             "plaque_cac",
-            "CAC / plaque",
+            "Plaque",
             "Clinical ASCVD present",
             "CAC is not needed for lipid decisions.",
             priority="low",
@@ -1196,7 +1208,7 @@ def _plaque_readout(patient: Any, result: Any, section: ActionSection | None) ->
         if cac == 0:
             return _make_readout(
                 "plaque_cac",
-                "CAC / plaque",
+                "Plaque",
                 "CAC 0",
                 state="complete",
                 hover_detail="No calcified plaque detected.",
@@ -1204,18 +1216,19 @@ def _plaque_readout(patient: Any, result: Any, section: ActionSection | None) ->
         if 1 <= cac <= 99:
             return _make_readout(
                 "plaque_cac",
-                "CAC / plaque",
-                f"CAC {cac:g}",
+                "Plaque",
+                f"Present (CAC {cac:g})",
                 priority="moderate",
                 state="consider",
                 hover_detail="Plaque present; no repeat CAC needed.",
             )
         if cac >= 100:
+            status = "Very high burden" if cac >= 300 else "High burden"
             burden = "High plaque burden" if cac >= 300 else "Moderate plaque burden"
             return _make_readout(
                 "plaque_cac",
-                "CAC / plaque",
-                f"CAC {cac:g}",
+                "Plaque",
+                f"{status} (CAC {cac:g})",
                 priority="high",
                 state="complete",
                 hover_detail=f"{burden}; no repeat CAC needed.",
@@ -1225,14 +1238,32 @@ def _plaque_readout(patient: Any, result: Any, section: ActionSection | None) ->
         detail = "Qualitative plaque evidence."
         if severity and severity not in {"unknown", "present"}:
             label = f"{severity.title()} incidental CAC"
-        return _make_readout("plaque_cac", "CAC / plaque", label, detail, priority="moderate", state="consider")
+        return _make_readout("plaque_cac", "Plaque", label, detail, priority="moderate", state="consider")
     if line:
         lowered = line.lower()
         if "not routinely recommended at this age" in lowered:
-            return _make_readout("plaque_cac", "CAC / plaque", "CAC not routinely recommended", "Consider only if results change management.", priority="low", state="neutral")
+            return _make_readout("plaque_cac", "Plaque", "CAC not needed", priority="low", state="neutral", hover_detail="Consider only if results change management.")
+        if "cac may clarify treatment" in lowered:
+            return _make_readout(
+                "plaque_cac",
+                "Plaque",
+                "CAC may clarify treatment",
+                priority="low",
+                state="consider",
+                hover_detail="Use only if it would change lipid-treatment intensity.",
+                expanded_detail_lines=["Use only if it would change lipid-treatment intensity."],
+            )
         if "cac reasonable" in lowered or "cac may clarify" in lowered:
-            return _make_readout("plaque_cac", "CAC / plaque", "CAC may clarify risk", "Use only if it would change lipid-treatment intensity.", priority="low", state="consider")
-    return _make_readout("plaque_cac", "CAC / plaque", "Not measured", "Plaque burden unmeasured.", state="neutral")
+            return _make_readout(
+                "plaque_cac",
+                "Plaque",
+                "CAC may clarify risk",
+                priority="low",
+                state="consider",
+                hover_detail="Use only if it would change lipid-treatment intensity.",
+                expanded_detail_lines=["Use only if it would change lipid-treatment intensity."],
+            )
+    return _make_readout("plaque_cac", "Plaque", "Not measured", state="neutral")
 
 
 def _kidney_readout(sections: list[ActionSection], patient: Any, result: Any) -> ActionDomainReadout:
@@ -1348,8 +1379,8 @@ def _kidney_readout(sections: list[ActionSection], patient: Any, result: Any) ->
             state="consider",
         )
     if egfr is not None or uacr is not None:
-        return _make_readout("kidney_protection", "Kidney protection", "No kidney-risk signal", "eGFR/UACR available.", state="complete")
-    return _make_readout("kidney_protection", "Kidney protection", "Kidney context not available", "eGFR/UACR not available.", priority="low", state="neutral")
+        return _make_readout("kidney_protection", "Kidney protection", "No kidney action", state="complete")
+    return _make_readout("kidney_protection", "Kidney protection", "Kidney context not available", priority="low", state="neutral")
 
 
 def _blood_pressure_readout(patient: Any, result: Any) -> ActionDomainReadout:
@@ -1429,11 +1460,10 @@ def _aspirin_readout(patient: Any, result: Any, section: ActionSection | None) -
         return _make_readout(
             "aspirin_antiplatelet",
             "Aspirin / antiplatelet",
-            "Not routine for primary prevention",
-            "Do not start routine aspirin.",
+            "Not indicated",
             state="neutral",
         )
-    return _make_readout("aspirin_antiplatelet", "Aspirin / antiplatelet", "Not routine for primary prevention", "Do not start routine aspirin.", state="neutral")
+    return _make_readout("aspirin_antiplatelet", "Aspirin / antiplatelet", "Not indicated", state="neutral")
 
 
 def _clarifier_readout(result: Any, patient: Any | None = None) -> ActionDomainReadout | None:

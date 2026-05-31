@@ -14,7 +14,7 @@ Assessment:
 Recommendations:
 1. Lipids: Discuss moderate-intensity statin; LDL-C <100, ApoB <90, non-HDL-C <130.
 2. Plaque: CAC may clarify risk.
-3. Kidney: No kidney-risk signal.
+3. Kidney: No kidney action.
 4. BP: Treat toward <130/80.
 5. Glycemia: No glycemic action; A1c 5.5.
 6. Aspirin: Not routine for primary prevention.
@@ -29,7 +29,7 @@ Where you stand
 - Longer-term ASCVD risk is elevated.
 - About 6 in 100 similar patients may have a heart attack, stroke, or related artery disease event over 10 years.
 - About 19 in 100 similar patients may have a heart attack, stroke, or related artery disease event over 30 years.
-- Plaque status has not been measured.
+- Coronary plaque: Not measured.
 - Care focus: Level 3 (3B) - Actionable early CKM / atherogenic risk
 
 STEP 2
@@ -51,19 +51,19 @@ Your goals
 STEP 4
 Your next steps
 1. Cholesterol: Discuss cholesterol-lowering therapy.
-2. Artery plaque: Calcium scan only if it would change the treatment decision.
-3. Kidneys: No kidney action from current eGFR/UACR.
+2. Coronary plaque: Calcium scan may clarify treatment.
+3. Kidneys: Stable.
 4. Blood pressure: Treat toward <130/80.
 5. Blood sugar: Normal range.
-6. Aspirin: Do not start routine aspirin.
+6. Aspirin: Not indicated.
 
 ACTIONS:
 - Lipid lowering: Discuss moderate-intensity statin. LDL-C 134; target <100. ApoB 102; target <90.
-- CAC / plaque: CAC may clarify risk. Use only if it would change lipid-treatment intensity.
-- Kidney protection: No kidney-risk signal. eGFR/UACR available.
+- Plaque: CAC may clarify risk.
+- Kidney protection: No kidney action.
 - Blood pressure: Treat toward <130/80. Current 132/80.
 - Glycemia / metabolic: No glycemic action. A1c 5.5.
-- Aspirin / antiplatelet: Not routine for primary prevention. Do not start routine aspirin.
+- Aspirin / antiplatelet: Not indicated.
 
 RSS: 8
 RSS CONTRIBUTORS:

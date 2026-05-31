@@ -18,6 +18,23 @@ def test_target_card_shows_apob_80_for_cac_100_primary_prevention():
     assert "RCCKM advanced particle target" not in html
 
 
+def test_target_card_renders_target_first_without_arrow_text():
+    patient = Patient(age=58, sex="female", cac=12, ldl_c=158, apob=121)
+    result, _rss_total, _contributions = run_patient(patient)
+
+    html = _build_targets_html(result, patient)
+
+    assert "-&gt;" not in html
+    assert "->" not in html
+    assert "&lt;100 mg/dL" in html
+    assert "&lt;90 mg/dL" in html
+    assert "Current 158 mg/dL" in html
+    assert "Current 121 mg/dL" in html
+    assert html.index("&lt;100 mg/dL") < html.index("Current 158 mg/dL")
+    assert html.index("&lt;90 mg/dL") < html.index("Current 121 mg/dL")
+    assert html.count("Above goal") >= 2
+
+
 def test_target_card_shows_apob_65_for_very_high_risk_when_advanced_target_shown():
     patient = Patient(
         age=65,

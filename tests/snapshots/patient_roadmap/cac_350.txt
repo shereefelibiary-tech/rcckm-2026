@@ -5,12 +5,12 @@ Where you stand
 - Not available: total cholesterol, HDL-C, systolic BP, BP treatment status, statin/lipid-lowering therapy status, diabetes status, smoking status, BMI, eGFR
 - 10-year ASCVD risk: unavailable
 - PREVENT estimate unavailable from the current data.
-- CAC 350: high plaque burden.
+- Coronary plaque: Very high burden (CAC 350).
 - Care focus: Level 5 - Very high risk
 
 STEP 2
 Why your risk is higher
-- Artery plaque: CAC 350. The calcium score shows a high amount of coronary plaque.
+- Coronary plaque: Very high burden (CAC 350).
 
 STEP 3
 Your goals
@@ -19,8 +19,8 @@ Your goals
 STEP 4
 Your next steps
 1. Cholesterol: Discuss stronger cholesterol-lowering therapy.
-2. Artery plaque: High plaque burden (CAC 350).
-3. Kidneys: Repeat kidney urine testing; UACR not available.
+2. Coronary plaque: Very high burden (CAC 350).
+3. Kidneys: UACR not available.
 4. Blood pressure: Reading needed.
 5. Blood sugar: A1c needed.
 6. Aspirin: May be considered if bleeding risk is low.

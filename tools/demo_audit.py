@@ -65,7 +65,7 @@ CONTRADICTIONS = (
     ("aspirin not indicated", "aspirin may be considered"),
 )
 
-AGE_AWARE_CAC_LINE = "Plaque: CAC not routinely recommended."
+AGE_AWARE_CAC_LINE = "Plaque: CAC not needed."
 
 EXPECTED_SHOWCASE = {
     "healthy_low_risk_prevention": ("low-risk complete data", "lifestyle prevention"),

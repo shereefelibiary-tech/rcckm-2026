@@ -198,11 +198,11 @@ def test_age_70_aspirin_not_routine_primary_prevention():
 
 def test_cac_guided_primary_prevention_aspirin_branches_align_surfaces():
     cases = [
-        (Patient(age=54, sex="male", cac=0), "Aspirin not routine for primary prevention.", "Not routine for primary prevention", "Do not start routine aspirin."),
-        (Patient(age=54, sex="male", cac=50), "Aspirin not routine for primary prevention.", "Not routine for primary prevention", "Do not start routine aspirin."),
+        (Patient(age=54, sex="male", cac=0), "Aspirin not routine for primary prevention.", "Not routine for primary prevention", "Not indicated."),
+        (Patient(age=54, sex="male", cac=50), "Aspirin not routine for primary prevention.", "Not routine for primary prevention", "Not indicated."),
         (Patient(age=54, sex="male", cac=184), "Aspirin may be considered only if bleeding risk is low.", "Consider only if bleeding risk is low; CAC 184", "Discuss only if bleeding risk is low."),
         (Patient(age=58, sex="male", cac=350), "Aspirin may be considered if bleeding risk is low; plaque burden is high.", "Consider only if bleeding risk is low; CAC 350", "May be considered if bleeding risk is low."),
-        (Patient(age=75, sex="male", cac=350), "Aspirin not routine for primary prevention.", "Not routine for primary prevention", "Do not start routine aspirin."),
+        (Patient(age=75, sex="male", cac=350), "Aspirin not routine for primary prevention.", "Not routine for primary prevention", "Not indicated."),
         (Patient(age=58, sex="male", cac=350, aspirin_bleeding_risk_high=True), "Avoid routine primary-prevention aspirin.", "Avoid routine primary-prevention aspirin", "Avoid routine aspirin."),
     ]
 
@@ -302,7 +302,7 @@ def test_action_html_renders_structured_sections_without_loose_duplicate_list():
     assert "action-indicator" not in html
     assert "grid-template-columns:32px 150px minmax(0,1fr)" in html
     assert "Lipid lowering" in html
-    assert "CAC / plaque" in html
+    assert "Plaque" in html
     assert "Blood pressure" in html
     assert "Data to clarify" not in html
     assert lipid_lead in html
@@ -328,8 +328,12 @@ def test_action_html_renders_structured_sections_without_loose_duplicate_list():
     assert "per criteria" not in visible_action_text
     assert "when safe" not in visible_action_text
     assert "suggested goal" not in visible_action_text
+    assert "No kidney-risk signal" not in visible_action_text
+    assert "eGFR/UACR available" not in visible_action_text
+    assert "Do not start routine aspirin" not in visible_action_text
+    assert "Use only if it would change lipid-treatment intensity" not in visible_action_text
     assert "High plaque burden; no repeat CAC needed." in html
-    assert html.index("Lipid lowering") < html.index("CAC / plaque") < html.index(kidney_line)
+    assert html.index("Lipid lowering") < html.index("Plaque") < html.index(kidney_line)
     assert "Show details" in html
     assert "\n            <div" not in html
 
@@ -350,7 +354,7 @@ def test_action_instrument_panel_has_fixed_domain_order_without_empty_clarifier_
     ]
     assert [item.label for item in panel] == [
         "Lipid lowering",
-        "CAC / plaque",
+        "Plaque",
         "Kidney protection",
         "Blood pressure",
         "Glycemia / metabolic",
@@ -363,7 +367,32 @@ def test_action_instrument_panel_has_fixed_domain_order_without_empty_clarifier_
     assert all("reviewed." not in item.status + item.detail for item in panel)
     assert next(item for item in panel if item.domain_id == "blood_pressure").status == "At goal"
     assert next(item for item in panel if item.domain_id == "glycemia_metabolic").status == "A1c needed"
-    assert next(item for item in panel if item.domain_id == "aspirin_antiplatelet").status == "Not routine for primary prevention"
+    kidney = next(item for item in panel if item.domain_id == "kidney_protection")
+    aspirin = next(item for item in panel if item.domain_id == "aspirin_antiplatelet")
+    assert kidney.status == "Kidney context not available"
+    assert kidney.detail == ""
+    assert aspirin.status == "Not indicated"
+    assert aspirin.detail == ""
+
+
+def test_action_card_suppresses_low_value_cac_kidney_and_aspirin_details():
+    patient = Patient(age=55, sex="male", prevent_10y_ascvd=6.0, egfr=80, uacr=10)
+    result = evaluate_patient(patient)
+    panel = {item.domain_id: item for item in build_action_instrument_panel(patient, result)}
+
+    assert panel["plaque_cac"].status == "CAC may clarify risk"
+    assert panel["plaque_cac"].detail == ""
+    assert "Use only if it would change lipid-treatment intensity" in panel["plaque_cac"].hover_detail
+    assert panel["kidney_protection"].status == "No kidney action"
+    assert panel["kidney_protection"].detail == ""
+    assert panel["aspirin_antiplatelet"].status == "Not indicated"
+    assert panel["aspirin_antiplatelet"].detail == ""
+
+    visible_action_text = _visible_action_readout_text(_build_action_html(result, patient))
+    assert "Use only if it would change lipid-treatment intensity" not in visible_action_text
+    assert "No kidney-risk signal" not in visible_action_text
+    assert "eGFR/UACR available" not in visible_action_text
+    assert "Do not start routine aspirin" not in visible_action_text
 
 
 def test_action_instrument_panel_groups_kidney_cac_and_aspirin_without_empty_clarifier():
@@ -373,7 +402,7 @@ def test_action_instrument_panel_groups_kidney_cac_and_aspirin_without_empty_cla
 
     assert panel["lipid_lowering"].status == "High-intensity therapy indicated"
     assert "LDL-C" in panel["lipid_lowering"].detail
-    assert panel["plaque_cac"].status == "CAC 350"
+    assert panel["plaque_cac"].status == "Very high burden (CAC 350)"
     assert panel["plaque_cac"].detail == ""
     assert panel["plaque_cac"].hover_detail == "High plaque burden; no repeat CAC needed."
     assert panel["kidney_protection"].status == "Optimize kidney protection"
@@ -395,10 +424,19 @@ def test_action_domain_render_modes_separate_clinician_and_patient_language():
     plaque_panel = next(item for item in build_action_instrument_panel(patient, result) if item.domain_id == "plaque_cac")
     plaque_domain = next(item for item in build_domain_actions(patient, result) if item.domain_id == "plaque_cac")
 
-    assert action_domain_clinician_text(plaque_panel) == "CAC / plaque: CAC 350."
-    assert action_domain_patient_text(plaque_domain) == "High plaque burden (CAC 350)."
-    assert render_action_domain_text(plaque_panel, RenderMode.CLINICIAN) == "CAC / plaque: CAC 350."
-    assert render_action_domain_text(plaque_domain, RenderMode.PATIENT) == "High plaque burden (CAC 350)."
+    assert action_domain_clinician_text(plaque_panel) == "Plaque: Very high burden (CAC 350)."
+    assert action_domain_patient_text(plaque_domain) == "Very high burden (CAC 350)."
+    assert render_action_domain_text(plaque_panel, RenderMode.CLINICIAN) == "Plaque: Very high burden (CAC 350)."
+    assert render_action_domain_text(plaque_domain, RenderMode.PATIENT) == "Very high burden (CAC 350)."
+
+
+def test_plaque_action_uses_burden_language_for_low_positive_cac():
+    patient = Patient(age=58, sex="female", cac=12)
+    result = evaluate_patient(patient)
+    plaque_panel = next(item for item in build_action_instrument_panel(patient, result) if item.domain_id == "plaque_cac")
+
+    assert plaque_panel.label == "Plaque"
+    assert plaque_panel.status == "Present (CAC 12)"
 
 
 def test_action_instrument_panel_shows_decision_relevant_clarifiers():

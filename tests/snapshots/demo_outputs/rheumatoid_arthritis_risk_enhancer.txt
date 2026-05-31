@@ -15,7 +15,7 @@ Assessment:
 Recommendations:
 1. Lipids: No lipid escalation.
 2. Plaque: CAC not measured.
-3. Kidney: No kidney-risk signal.
+3. Kidney: No kidney action.
 4. BP: At goal.
 5. Glycemia: No glycemic action; A1c 5.4.
 6. Aspirin: Not routine for primary prevention.
@@ -30,7 +30,7 @@ Where you stand
 - 10-year ASCVD risk is low.
 - About 2 in 100 similar patients may have a heart attack, stroke, or related artery disease event over 10 years.
 - About 10 in 100 similar patients may have a heart attack, stroke, or related artery disease event over 30 years.
-- Plaque status has not been measured.
+- Coronary plaque: Not measured.
 - Care focus: Level 3 (3A) - Elevated long-term risk trajectory
 
 STEP 2
@@ -51,20 +51,20 @@ Your goals
 STEP 4
 Your next steps
 1. Cholesterol: Continue current lipid treatment.
-2. Artery plaque: Calcium scan only if it would change the treatment decision.
-3. Kidneys: No kidney action from current eGFR/UACR.
+2. Coronary plaque: Not measured.
+3. Kidneys: Stable.
 4. Blood pressure: At goal.
 5. Blood sugar: Normal range.
 6. Inflammation: Chronic inflammation can shape the prevention plan with your clinician.
 
 ACTIONS:
 - Lipid lowering: Lifestyle-focused. LDL-C 132. ApoB 94.
-- CAC / plaque: Not measured. Plaque burden unmeasured.
-- Kidney protection: No kidney-risk signal. eGFR/UACR available.
+- Plaque: Not measured.
+- Kidney protection: No kidney action.
 - Blood pressure: At goal. Current 124/76; goal <130/80.
 - Glycemia / metabolic: No glycemic action. A1c 5.4.
 - Inflammation: Inflammatory risk enhancer. RA is a risk enhancer; ensure inflammation is clinically controlled and avoid undertreating traditional risk factors.
-- Aspirin / antiplatelet: Not routine for primary prevention. Do not start routine aspirin.
+- Aspirin / antiplatelet: Not indicated.
 
 RSS: 9
 RSS CONTRIBUTORS:

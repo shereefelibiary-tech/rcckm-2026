@@ -119,7 +119,7 @@ def test_render_patient_roadmap_groups_full_clinical_story_without_raw_html():
     assert "estimated population risk" not in html.lower()
     assert "cardiovascular event" not in html
     assert "Level 5" in html
-    assert "CAC 350: high plaque burden." in html
+    assert "Coronary plaque: Very high burden (CAC 350)." in html
     assert "Level 5 - Very high risk" in html
     assert "Very high risk / high plaque burden" not in html
     assert "Coronary calcium score 350 - high plaque burden" not in html
@@ -152,7 +152,7 @@ def test_render_patient_roadmap_groups_full_clinical_story_without_raw_html():
     assert "Aspirin" in html
     assert "May be considered if bleeding risk is low." in html
     assert "Kidneys" in html
-    assert "Discuss kidney-protective therapy; UACR 45." in html
+    assert "Chronic kidney disease is present (UACR 45)." in html
     assert "Lp(a) can be checked once to guide long-term prevention." not in html
     assert "This roadmap is for discussion with your clinician." not in html
     assert "Medication decisions should be individualized." not in html
@@ -237,8 +237,8 @@ def test_render_patient_roadmap_text_is_copy_ready_plain_text():
     assert "ASCVD means artery/plaque-related events" not in text
     assert "PREVENT-age" not in text
     assert "PREVENT percentile" not in text
-    assert "- CAC 350: high plaque burden." in text
-    assert "Artery plaque: CAC 350." in text
+    assert "- Coronary plaque: Very high burden (CAC 350)." in text
+    assert "Coronary plaque: Very high burden (CAC 350)." in text
     assert "Cholesterol: ApoB 110; LDL-C 132." in text
     assert "non-HDL-C" not in text
     assert "Blood sugar: A1c 7.1%." in text
@@ -253,9 +253,11 @@ def test_render_patient_roadmap_text_is_copy_ready_plain_text():
     assert "STEP 4" in text
     assert "Your next steps" in text
     assert "1. Cholesterol: Discuss stronger cholesterol-lowering therapy." in text
-    assert "2. Artery plaque: High plaque burden (CAC 350)." in text
-    assert "3. Kidneys: Discuss kidney-protective therapy; UACR 45." in text
+    assert "2. Coronary plaque: Very high burden (CAC 350)." in text
+    assert "3. Kidneys: Chronic kidney disease is present (UACR 45)." in text
     assert "6. Aspirin: May be considered if bleeding risk is low." in text
+    assert "Do not start routine aspirin" not in text
+    assert "Aspirin: Not routine for primary prevention" not in text
     assert "4. Additional testing: Lp(a) can be checked once to guide long-term prevention." not in text
     assert "Dominant action" not in text
     assert "dominant_action" not in text
@@ -287,6 +289,13 @@ def test_patient_roadmap_prevent_order_is_10_year_before_30_year():
     assert printable.index("About 8 in 100 similar patients") < printable.index("About 25 in 100 similar patients")
 
 
+def test_patient_roadmap_uses_coronary_plaque_language_for_low_positive_cac():
+    text = render_patient_roadmap_text(Patient(age=58, sex="female", cac=12), evaluate_patient(Patient(age=58, sex="female", cac=12)))
+
+    assert "Coronary plaque: Present (CAC 12)." in text
+    assert "Artery plaque" not in text
+
+
 def test_render_printable_patient_roadmap_uses_dedicated_print_html():
     html = render_printable_patient_roadmap(
         _patient(),
@@ -310,7 +319,7 @@ def test_render_printable_patient_roadmap_uses_dedicated_print_html():
     assert "Why your risk is higher" in html
     assert "Your goals" in html
     assert "Your next steps" in html
-    assert "CAC 350: high plaque burden." in html
+    assert "Coronary plaque: Very high burden (CAC 350)." in html
     assert "LDL-C" in html
     assert "ApoB" in html
     assert "BP" in html
@@ -337,7 +346,8 @@ def test_35f_diabetes_albuminuria_patient_roadmap_is_action_domain_aligned():
     assert roadmap.count("Lp(a)") <= 1
     assert "elevated particle burden" not in roadmap
     assert "Review kidney protection" not in roadmap
-    assert "Kidneys: Continue kidney-protective therapy; UACR 362." in roadmap
+    assert "Kidneys: Significant albuminuria is present (UACR 362)." in roadmap
+    assert "Aspirin: Not indicated." in roadmap
     assert "Cholesterol: Continue current lipid treatment." in roadmap
 
 
@@ -440,26 +450,26 @@ def test_patient_roadmap_cac_percentile_context_is_secondary_to_absolute_score()
         Patient(age=45, sex="female", cac=0, cac_percentile=99),
         RCCKMResult(plaque_category=PlaqueCategory.NONE),
     )
-    assert "CAC 0: no calcified plaque detected." in cac_zero
+    assert "Coronary plaque: Not detected (CAC 0)." in cac_zero
     assert "expected for age and sex" not in cac_zero
 
     mild_high_percentile = render_patient_roadmap(
         Patient(age=45, sex="male", cac=38, cac_percentile=82),
         result,
     )
-    assert "CAC 38: plaque present." in mild_high_percentile
+    assert "Coronary plaque: Present (CAC 38)." in mild_high_percentile
     assert "Higher than expected for age and sex." not in mild_high_percentile
 
     moderate_low_percentile = render_patient_roadmap(
         Patient(age=65, sex="female", cac=145, cac_percentile=52),
         RCCKMResult(plaque_category=PlaqueCategory.MODERATE),
     )
-    assert "CAC 145: moderate plaque burden." in moderate_low_percentile
+    assert "Coronary plaque: High burden (CAC 145)." in moderate_low_percentile
     assert "Within the expected range" not in moderate_low_percentile
 
     severe_with_percentile = render_patient_roadmap(
         Patient(age=65, sex="female", cac=350, cac_percentile=95),
         RCCKMResult(plaque_category=PlaqueCategory.SEVERE),
     )
-    assert "CAC 350: high plaque burden." in severe_with_percentile
+    assert "Coronary plaque: Very high burden (CAC 350)." in severe_with_percentile
     assert "expected for age and sex" not in severe_with_percentile

@@ -127,7 +127,7 @@ def test_cac_only_level4_emr_names_subclinical_atherosclerosis_driver():
         in note
     )
     assert "CKM/Kidney/Plaque: CKM 3; kidney G2A1; CAC 12." not in note
-    assert "3. Kidney: No kidney-risk signal." in note
+    assert "3. Kidney: No kidney action." in note
     assert "5. Glycemia: No glycemic action; A1c 4.9." in note
     assert "6. Aspirin: Not routine for primary prevention." in note
     assert "7. Additional information: ApoB." in note

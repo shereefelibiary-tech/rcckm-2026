@@ -1062,6 +1062,27 @@ def _parse_epic_table_labs(report: ParseReport, text: str) -> None:
             pending = None
 
 
+def _normalize_lpa_unit(unit_text: str | None) -> str | None:
+    """Normalize Lp(a) unit variants found near a result value."""
+    if not unit_text:
+        return None
+    compact = re.sub(r"\s+", "", unit_text).lower()
+    if compact == "nmol/l":
+        return "nmol/L"
+    if compact == "mg/dl":
+        return "mg/dL"
+    return None
+
+
+def _find_lpa_unit_near_value(text: str, value_start: int, value_end: int) -> str | None:
+    """Find an Lp(a) unit on the same or nearby following lines."""
+    window = text[value_start : min(len(text), value_end + 160)]
+    unit_match = re.search(r"\b(nmol\s*/\s*l|mg\s*/\s*dl)\b", window, re.IGNORECASE)
+    if not unit_match:
+        return None
+    return _normalize_lpa_unit(unit_match.group(1))
+
+
 def _parse_date_token(date_text: str) -> datetime | None:
     for fmt in ("%m/%d/%Y", "%m/%d/%y", "%Y-%m-%d"):
         try:
@@ -1581,9 +1602,15 @@ def parse_smartphrase_report(text: str) -> ParseReport:
     lpa_match = re.search(r"\b(?:lp\(a\)|lpa|lp a|lipoa|lipoprotein\s*\(a\))\s*(?:=|:|is|\|)?\s*([<>]?\s*\d+(?:\.\d+)?)\s*(nmol/L|mg/dL)?", text, re.IGNORECASE)
     if lpa_match:
         _record(report, "lpa", float(lpa_match.group(1).replace(" ", "").lstrip("<>")), "parsed", "Lp(a)")
-        if lpa_match.group(2):
-            unit = lpa_match.group(2).lower()
-            _record(report, "lpa_unit", "nmol/L" if unit == "nmol/l" else "mg/dL", "parsed", "Lp(a) unit")
+        unit = _normalize_lpa_unit(lpa_match.group(2)) or _find_lpa_unit_near_value(
+            text,
+            lpa_match.start(1),
+            lpa_match.end(1),
+        )
+        if unit:
+            _record(report, "lpa_unit", unit, "parsed", "Lp(a) unit")
+        elif report.extracted.get("lpa_unit"):
+            pass
         else:
             _record_source_meta(
                 report,

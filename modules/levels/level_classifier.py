@@ -40,6 +40,11 @@ def _age_30_to_59(patient) -> bool:
     return age is not None and 30 <= age <= 59
 
 
+def _age_40_to_59(patient) -> bool:
+    age = _num(getattr(patient, "age", None))
+    return age is not None and 40 <= age <= 59
+
+
 def _has_diabetes(patient) -> bool:
     a1c = _num(getattr(patient, "a1c", None))
     return bool(getattr(patient, "diabetes", False)) or (
@@ -202,6 +207,89 @@ def _enhancer_burden_count(patient) -> int:
         )
         if present
     )
+
+
+def _hidden_risk_drivers(patient) -> list[str]:
+    drivers: list[str] = []
+    apob = _num(getattr(patient, "apob", None))
+    ldl_c = _num(getattr(patient, "ldl_c", None))
+    if apob is not None and apob >= 120:
+        drivers.append("ApoB >=120")
+    elif ldl_c is not None and 150 <= ldl_c < 190:
+        drivers.append("LDL-C 150-189")
+    if _lpa_elevated(patient):
+        drivers.append("Lp(a)")
+    if _has_premature_family_history(patient):
+        drivers.append("premature family history")
+    if _inflammatory_signal(patient):
+        drivers.append("inflammatory disease")
+    if bool(getattr(patient, "south_asian_ancestry", False)):
+        drivers.append("South Asian ancestry")
+    if bool(getattr(patient, "filipino_ancestry", False)):
+        drivers.append("Filipino ancestry")
+    if bool(getattr(patient, "gestational_diabetes", False)):
+        drivers.append("gestational diabetes")
+    elif _reproductive_signal_count(patient):
+        drivers.append("reproductive risk marker")
+    if has_breast_arterial_calcification(patient):
+        drivers.append("breast arterial calcification")
+    return drivers
+
+
+def _hidden_risk_enhancer_count(patient) -> int:
+    return sum(
+        1
+        for present in (
+            _lpa_elevated(patient),
+            _has_premature_family_history(patient),
+            _inflammatory_signal(patient),
+            bool(getattr(patient, "south_asian_ancestry", False)),
+            bool(getattr(patient, "filipino_ancestry", False)),
+            bool(getattr(patient, "gestational_diabetes", False)),
+            bool(getattr(patient, "preeclampsia", False)),
+            bool(getattr(patient, "early_menopause", False))
+            or bool(getattr(patient, "premature_menopause", False)),
+            has_breast_arterial_calcification(patient),
+        )
+        if present
+    )
+
+
+def _hidden_risk_cluster(patient, result) -> bool:
+    """Return True for low-PREVENT patients with clustered occult risk."""
+    if result is None:
+        return False
+    prevent_10y = _num(getattr(result, "prevent_10y_ascvd", None))
+    prevent_category = _risk_value(getattr(result, "prevent_risk_category", None))
+    cac = _num(getattr(patient, "cac", None))
+    apob = _num(getattr(patient, "apob", None))
+    ldl_c = _num(getattr(patient, "ldl_c", None))
+    has_lipid_burden = bool(
+        (apob is not None and apob >= 120)
+        or (ldl_c is not None and 150 <= ldl_c < 190)
+    )
+    low_prevent = bool(
+        (prevent_10y is not None and prevent_10y < 3)
+        or str(prevent_category or "").upper() == "LOW"
+    )
+    clearly_low_lipid_burden = bool(
+        (ldl_c is None or ldl_c < 130)
+        and (apob is None or apob < 100)
+    )
+    return bool(
+        _age_40_to_59(patient)
+        and not bool(getattr(patient, "clinical_ascvd", False))
+        and cac is None
+        and low_prevent
+        and has_lipid_burden
+        and not clearly_low_lipid_burden
+        and _hidden_risk_enhancer_count(patient) >= 2
+    )
+
+
+def _hidden_high_risk_enhancer_cluster(patient, result) -> bool:
+    """Backward-compatible alias for the occult/hidden risk cluster helper."""
+    return _hidden_risk_cluster(patient, result)
 
 
 def _metabolic_burden_count(patient) -> int:
@@ -460,6 +548,17 @@ def classify_rcckm_level(patient, prevent_result=None, rss_result=None, diagnosi
             result,
             patient,
             "prevention discussion",
+        )
+
+    if _hidden_risk_cluster(patient, result):
+        return _classification(
+            "3B",
+            "Level 3B - hidden atherogenic risk burden",
+            "Low short-term PREVENT risk with clustered atherogenic and risk-enhancer burden.",
+            _hidden_risk_drivers(patient),
+            result,
+            patient,
+            "treatment discussion",
         )
 
     if _ldl_160_189(patient):

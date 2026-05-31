@@ -2,7 +2,7 @@ RCCKM Demo Case Audit
 Cases checked: 32
 Errors: 0
 Warnings: 1
-Suggestions: 11
+Suggestions: 12
 
 Summary table:
 Score  Complete  Coherent  Readable  Showcase  Demo
@@ -32,15 +32,15 @@ Score  Complete  Coherent  Readable  Showcase  Demo
    98       100       100       100        94  Breast arterial calcification
    98       100       100       100        94  On-treatment above-target lipids
    98       100       100       100        94  High-intensity statin, add-on discussion
-   98       100       100       100        94  Statin intolerance
    98       100       100       100        94  Rheumatoid arthritis risk enhancer
    98       100       100       100        94  Active smoker prevention visit
    98       100       100       100        94  Cancer survivor context
    98        92       100       100       100  Multiple enhancers, ApoB/Lp(a) not available
    97       100       100       100        88  Severe secondary prevention
+   97       100       100       100        88  Statin intolerance
 
 Strongest demos: Borderline ASCVD discussion, Younger patient with premature family history, Prediabetes / insulin resistance
-Weakest demos: Cancer survivor context, Multiple enhancers, ApoB/Lp(a) not available, Severe secondary prevention
+Weakest demos: Multiple enhancers, ApoB/Lp(a) not available, Severe secondary prevention, Statin intolerance
 Sparse demos: Multiple enhancers, ApoB/Lp(a) not available
 Contradictory demos: none
 Demos needing rewrite: none
@@ -57,6 +57,7 @@ Suggestions:
 - Severe secondary prevention: showcase concept may be too subtle: very-high-risk ASCVD targets
 - Severe secondary prevention: showcase concept may be too subtle: add-on therapy
 - Statin intolerance: showcase concept may be too subtle: statin intolerance
+- Statin intolerance: showcase concept may be too subtle: plaque-present pathway
 - Rheumatoid arthritis risk enhancer: showcase concept may be too subtle: risk-enhancer context
 - Active smoker prevention visit: showcase concept may be too subtle: risk-enhancer context
 - Cancer survivor context: showcase concept may be too subtle: risk-enhancer context

@@ -12,7 +12,7 @@ Assessment:
 Recommendations:
 1. Lipids: No lipid escalation.
 2. Plaque: CAC not measured.
-3. Kidney: No kidney-risk signal.
+3. Kidney: No kidney action.
 4. BP: BP needed.
 5. Glycemia: Prediabetes prevention; A1c 5.8%.
 6. Aspirin: Not routine for primary prevention.

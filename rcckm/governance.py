@@ -310,6 +310,7 @@ def extract_domain_signals(text: str) -> dict[str, bool]:
             (
                 "aspirin not indicated",
                 "not routine for primary prevention",
+                "not indicated",
                 "do not start routine aspirin",
                 "aspirin is not routine",
             ),
@@ -383,7 +384,9 @@ def audit_cross_surface_alignment(
         _add(findings, "cross_surface_alignment", "CAC already measured but another surface recommends obtaining CAC.")
     if action_signals["kidney_albuminuria"] and not emr_signals["kidney_albuminuria"]:
         _add(findings, "cross_surface_alignment", "Kidney action mentions albuminuria but EMR lacks UACR/albuminuria context.")
-    if "no kidney-risk signal" in action and (emr_signals["sglt2_consider"] or "optimize kidney-protective" in emr):
+    if _contains_any(action, ("no kidney-risk signal", "no kidney action")) and (
+        emr_signals["sglt2_consider"] or "optimize kidney-protective" in emr
+    ):
         _add(findings, "cross_surface_alignment", "Kidney recommendation differs between Action card and EMR.")
     if combined_signals["secondary_prevention"] and _contains_any(
         combined,

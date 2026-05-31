@@ -451,27 +451,43 @@ def _build_targets_html(result, patient=None, *, clinician_detail_mode=False):
         unit = item.get("unit") or "mg/dL"
         rationale = item.get("rationale") or ""
         apob_missing = label == "ApoB" and current_value is None
+        target_number = _fmt_target_number(target_value) if target_value is not None else None
         target_html = ""
-        if target_value is not None and not apob_missing:
+        if target_number is not None and not apob_missing:
             target_html = (
-                f'<span class="target-goal">-&gt; &lt;{_fmt_target_number(target_value)} {escape(unit)}</span>'
+                f'<span class="target-goal">&lt;{escape(target_number)} {escape(unit)}</span>'
             )
+        elif apob_missing and target_number is not None:
+            target_html = f'<span class="target-goal">&lt;{escape(target_number)} {escape(unit)}</span>'
         current_html = ""
+        status_text = "Not available"
         if current_value is not None:
+            current_number = _fmt_target_number(current_value)
             current_html = (
-                f'<span class="target-current">{_fmt_target_number(current_value)} {escape(unit)}</span>'
+                f'<span class="target-current">Current {escape(current_number)} {escape(unit)}</span>'
             )
+            if target_value is not None:
+                try:
+                    status_text = "At goal" if float(current_value) < float(target_value) else "Above goal"
+                except (TypeError, ValueError):
+                    status_text = ""
+            else:
+                status_text = ""
         elif apob_missing:
-            current_html = '<span class="target-current">Obtain for particle burden clarification</span>'
+            current_html = '<span class="target-current">Current not available</span>'
         rationale_html = ""
         if rationale and label in {"Triglycerides", "non-HDL-C"}:
             rationale_html = f'<span class="target-note">{escape(rationale)}</span>'
+        status_html = (
+            f'<span class="target-status">{escape(status_text)}</span>' if status_text else ""
+        )
         return (
             '<span class="target-item">'
             '<span class="target-main">'
             f'<span class="target-name">{escape(label)}</span>'
-            f"{current_html}"
             f"{target_html}"
+            f"{current_html}"
+            f"{status_html}"
             "</span>"
             f"{rationale_html}"
             "</span>"
@@ -557,6 +573,13 @@ def _build_targets_html(result, patient=None, *, clinician_detail_mode=False):
     font-weight: 600;
     margin-top: 2px;
     text-align: left;
+}}
+.target-status {{
+    color: rgba(7, 26, 47, 0.70);
+    display: block;
+    font-size: 0.79rem;
+    font-weight: 780;
+    line-height: 1.2;
 }}
 .target-secondary {{
     color: rgba(7, 26, 47, 0.58);

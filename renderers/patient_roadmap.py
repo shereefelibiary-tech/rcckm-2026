@@ -420,20 +420,20 @@ def _plaque_status(patient, result):
 def _patient_plaque_status(patient, result):
     cac = getattr(patient, "cac", None)
     if getattr(patient, "clinical_ascvd", False):
-        return "Known cardiovascular disease is present."
+        return "Coronary plaque: known cardiovascular disease."
     if cac is not None:
         try:
             value = float(cac)
         except (TypeError, ValueError):
-            return f"CAC {cac}."
+            return f"Coronary plaque: CAC {cac}."
         if value >= 300:
-            return f"CAC {value:g}: high plaque burden."
+            return f"Coronary plaque: Very high burden (CAC {value:g})."
         if value >= 100:
-            return f"CAC {value:g}: moderate plaque burden."
+            return f"Coronary plaque: High burden (CAC {value:g})."
         if value > 0:
-            return f"CAC {value:g}: plaque present."
-        return "CAC 0: no calcified plaque detected."
-    return "Plaque status has not been measured."
+            return f"Coronary plaque: Present (CAC {value:g})."
+        return "Coronary plaque: Not detected (CAC 0)."
+    return "Coronary plaque: Not measured."
 
 
 def _bp_value(patient):
@@ -492,7 +492,7 @@ def _contributor_groups(patient, result):
                     plaque_detail = f"{plaque_detail}; {percentile_detail}"
             except (TypeError, ValueError):
                 pass
-        groups.append(("Artery plaque", plaque_detail))
+        groups.append(("Coronary plaque", plaque_detail))
 
     apob = getattr(patient, "apob", None)
     ldl = getattr(patient, "ldl_c", None)
@@ -609,7 +609,7 @@ def _patient_contributor_groups(patient, result):
     if getattr(patient, "clinical_ascvd", False):
         groups.append(
             (
-                "Artery plaque",
+                "Coronary plaque",
                 "Known cardiovascular disease",
                 "This means prevention decisions should be more treatment-focused.",
                 "red",
@@ -623,27 +623,36 @@ def _patient_contributor_groups(patient, result):
         if value is not None and value >= 300:
             groups.append(
                 (
-                    "Artery plaque",
-                    f"CAC {value:g}",
-                    "The calcium score shows a high amount of coronary plaque.",
+                    "Coronary plaque",
+                    f"Very high burden (CAC {value:g})",
+                    "",
+                    "red",
+                )
+            )
+        elif value is not None and value >= 100:
+            groups.append(
+                (
+                    "Coronary plaque",
+                    f"High burden (CAC {value:g})",
+                    "",
                     "red",
                 )
             )
         elif value is not None and value > 0:
             groups.append(
                 (
-                    "Artery plaque",
-                    f"CAC {value:g}",
-                    "Calcium is present, which means plaque is present.",
+                    "Coronary plaque",
+                    f"Present (CAC {value:g})",
+                    "",
                     "amber",
                 )
             )
         elif value == 0:
             groups.append(
                 (
-                    "Artery plaque",
-                    "CAC 0",
-                    "No calcified coronary plaque was detected on this test.",
+                    "Coronary plaque",
+                    "Not detected (CAC 0)",
+                    "",
                     "green",
                 )
             )
@@ -882,7 +891,7 @@ def _recommendation_rows(patient, result):
 def _patient_next_steps(patient, result):
     domain_label_map = {
         "lipid_lowering": "Cholesterol",
-        "plaque_cac": "Artery plaque",
+        "plaque_cac": "Coronary plaque",
         "kidney_protection": "Kidneys",
         "blood_pressure": "Blood pressure",
         "glycemia_metabolic": "Blood sugar",
@@ -1072,6 +1081,19 @@ def _patient_contributor_cards_html(groups):
 def _patient_driver_sections(patient, result):
     priority = []
     context = []
+
+    classification = getattr(result, "level_classification", None) or {}
+    hidden_risk_path = str(classification.get("label") or "").lower() == (
+        "level 3b - hidden atherogenic risk burden"
+    )
+    if hidden_risk_path:
+        priority.append(
+            (
+                "Hidden risk",
+                "Several inherited and biologic risk factors are present despite a low short-term risk estimate.",
+                "amber",
+            )
+        )
 
     cac = getattr(patient, "cac", None)
     if getattr(patient, "clinical_ascvd", False):
@@ -1271,8 +1293,14 @@ def _text_lines(patient, result):
 
     if _has_early_metabolic_risk(patient, result):
         lines.append("- Early metabolic signals are present.")
+    classification = getattr(result, "level_classification", None) or {}
+    if str(classification.get("label") or "").lower() == "level 3b - hidden atherogenic risk burden":
+        lines.append(
+            "- Hidden risk: Several inherited and biologic risk factors are present despite a low short-term risk estimate."
+        )
     for label, finding, note, _tone in _patient_contributor_groups(patient, result):
-        lines.append(f"- {label}: {finding}. {note}")
+        note_text = f" {note}" if note else ""
+        lines.append(f"- {label}: {finding}.{note_text}")
 
     target_rows = _target_rows(patient, result)
     if target_rows:

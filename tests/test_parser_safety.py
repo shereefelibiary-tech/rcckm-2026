@@ -359,6 +359,43 @@ def test_recommended_epic_template_placeholders_do_not_become_values():
         assert field not in parsed or parsed[field] is None
 
 
+def test_lpa_unit_on_following_epic_table_line_suppresses_unit_review():
+    report = parse_ingest_report(
+        """
+        Lp(a):
+        Lab Results
+        Component Value Date
+        LIPOA 148.2 (H) 05/22/2026
+        nmol/L
+        """
+    )
+
+    parsed = report["parsed"]
+    assert parsed["lp_a_value"] == 148.2
+    assert parsed["lp_a_unit"] == "nmol/L"
+    assert "Confirm Lp(a) units." not in " ".join(report["warnings"])
+    assert "Lp(a) value parsed without units" not in " ".join(report["warnings"])
+    assert parsed.get("lp_a_review") is not True
+
+
+def test_lpa_inline_units_are_normalized_and_missing_units_still_review():
+    nmol = parse_ingest_report("Lp(a): 22.4 nmol/L")
+    assert nmol["parsed"]["lp_a_value"] == 22.4
+    assert nmol["parsed"]["lp_a_unit"] == "nmol/L"
+    assert not any("Lp(a) value parsed without units" in warning for warning in nmol["warnings"])
+
+    mgdl = parse_ingest_report("Lp(a): 56 mg/dL")
+    assert mgdl["parsed"]["lp_a_value"] == 56
+    assert mgdl["parsed"]["lp_a_unit"] == "mg/dL"
+    assert not any("Lp(a) value parsed without units" in warning for warning in mgdl["warnings"])
+
+    missing = parse_ingest_report("Lp(a): 180")
+    assert missing["parsed"]["lp_a_value"] == 180
+    assert "lp_a_unit" not in missing["parsed"]
+    assert missing["parsed"]["lp_a_review"] is True
+    assert any("Lp(a) value parsed without units" in warning for warning in missing["warnings"])
+
+
 def test_explicit_osa_no_beats_problem_list_osa_with_conflict():
     report = parse_ingest_report(
         """

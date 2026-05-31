@@ -349,6 +349,30 @@ def render_note_for(patient):
     return render_emr_note(patient, result)
 
 
+def _hidden_cluster_patient(**overrides):
+    values = dict(
+        age=43,
+        sex="female",
+        ldl_c=159,
+        apob=126,
+        lp_a_value=286,
+        lp_a_unit="nmol/L",
+        hscrp=3.1,
+        rheumatoid_arthritis=True,
+        south_asian_ancestry=True,
+        gestational_diabetes=True,
+        family_history_premature_ascvd=True,
+        family_history_relationship="father",
+        family_history_event_type="MI",
+        family_history_age_at_event=52,
+        cac=None,
+        prevent_10y_ascvd=0.7,
+        prevent_30y_ascvd=5.22,
+    )
+    values.update(overrides)
+    return Patient(**values)
+
+
 def test_level_3b_albuminuria_case_action_and_clarifiers_are_treatment_forward():
     patient = Patient(
         age=50,
@@ -432,6 +456,85 @@ def test_high_lpa_reproductive_low_prevent_stays_level_2b_with_cac_clarification
     assert "Aspirin: Not routine for primary prevention" in note
     assert "kidney-protective" not in actions
     assert "subclinical coronary atherosclerosis" not in diagnoses.lower()
+
+
+def test_hidden_high_risk_cluster_upgrades_young_low_prevent_patient():
+    from modules.actions.scaffold import build_action_instrument_panel
+    from renderers.patient_roadmap import render_patient_roadmap_text
+
+    patient = _hidden_cluster_patient()
+    result, classification, actions, diagnoses = _case(patient)
+    panel = {item.domain_id: item for item in build_action_instrument_panel(patient, result)}
+    roadmap = render_patient_roadmap_text(patient, result)
+
+    assert classification.level == "3B"
+    assert "hidden atherogenic risk burden" in classification.label
+    assert "ApoB >=120" in classification.drivers
+    assert "Lp(a)" in classification.drivers
+    assert "premature family history" in classification.drivers
+    assert "inflammatory disease" in classification.drivers
+    assert "South Asian ancestry" in classification.drivers
+    assert "gestational diabetes" in classification.drivers
+    assert "Discuss moderate-intensity statin therapy" in actions
+    assert panel["lipid_lowering"].status == "Discuss moderate-intensity statin"
+    assert panel["plaque_cac"].status == "CAC may clarify treatment"
+    assert "Coronary plaque: Calcium scan may clarify treatment." in roadmap
+    assert (
+        "Several inherited and biologic risk factors are present despite a low short-term risk estimate."
+        in roadmap
+    )
+    assert panel["aspirin_antiplatelet"].status == "Not indicated"
+    assert "diabetes" not in diagnoses.lower()
+    assert "ckd" not in diagnoses.lower()
+
+
+def test_hidden_high_risk_cluster_does_not_fire_when_cac_zero():
+    patient = _hidden_cluster_patient(cac=0)
+    _result, classification, _actions, diagnoses = _case(patient)
+
+    assert classification.label != "Level 3B - hidden atherogenic risk burden"
+    assert classification.level != "3B"
+    assert "subclinical coronary atherosclerosis" not in diagnoses.lower()
+
+
+def test_hidden_high_risk_cluster_requires_lipid_burden():
+    patient = _hidden_cluster_patient(ldl_c=120, apob=90)
+    _result, classification, _actions, _diagnoses = _case(patient)
+
+    assert classification.label != "Level 3B - hidden atherogenic risk burden"
+
+
+def test_hidden_high_risk_cluster_does_not_count_generic_family_history():
+    patient = _hidden_cluster_patient(
+        rheumatoid_arthritis=False,
+        south_asian_ancestry=False,
+        gestational_diabetes=False,
+        family_history_premature_ascvd=False,
+        premature_fhx_ascvd=False,
+        family_history_summary="Family history of CAD",
+        family_history_relationship=None,
+        family_history_event_type=None,
+        family_history_age_at_event=None,
+    )
+    _result, classification, _actions, _diagnoses = _case(patient)
+
+    assert classification.label != "Level 3B - hidden atherogenic risk burden"
+
+
+def test_hidden_high_risk_cluster_requires_at_least_two_enhancers():
+    patient = _hidden_cluster_patient(
+        rheumatoid_arthritis=False,
+        south_asian_ancestry=False,
+        gestational_diabetes=False,
+        family_history_premature_ascvd=False,
+        premature_fhx_ascvd=False,
+        family_history_relationship=None,
+        family_history_event_type=None,
+        family_history_age_at_event=None,
+    )
+    _result, classification, _actions, _diagnoses = _case(patient)
+
+    assert classification.label != "Level 3B - hidden atherogenic risk burden"
 
 
 def test_level_2b_converging_early_signals_low_prevent_uses_formal_taxonomy():

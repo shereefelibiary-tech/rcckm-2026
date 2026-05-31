@@ -438,6 +438,13 @@ def _level_3b_intermediate_prevent_path(result):
     )
 
 
+def _hidden_high_risk_enhancer_cluster_path(result):
+    classification = getattr(result, "level_classification", None) or {}
+    return str(classification.get("label") or "").lower() == (
+        "level 3b - hidden atherogenic risk burden"
+    )
+
+
 def _bp_above_target(patient):
     sbp = getattr(patient, "sbp", None)
     dbp = getattr(patient, "dbp", None)
@@ -543,6 +550,7 @@ def _needs_lipid_action(patient, result=None):
         or (_severe_tg(patient) and _atherogenic_metric_available(patient))
         or _has_hiv_pathway(patient)
         or (result is not None and _low_short_term_elevated_cumulative_lipid_path(patient, result))
+        or (result is not None and _hidden_high_risk_enhancer_cluster_path(result))
         or (result is not None and _low_10yr_elevated_30yr_prevent_path(patient, result))
         or (result is not None and _near_level3_lipid_trajectory(patient, result))
         or (result is not None and _low_with_lpa_reproductive_context(patient, result))
@@ -592,6 +600,8 @@ def _add_action(actions, domains, domain, recommendation):
 
 
 def _cac_testing_action_text(cac_recommendation, lipid_treatment_forward=False):
+    if cac_recommendation == "CAC may clarify treatment.":
+        return cac_recommendation
     if (
         cac_recommendation
         == "CAC may clarify plaque burden if the patient is hesitant or if treatment intensity remains uncertain."
@@ -670,6 +680,10 @@ def _lipid_action_text(patient, result):
         return "Lipid-lowering therapy is indicated; treat toward high-risk targets."
     if _has_hiv_pathway(patient):
         return "Statin therapy recommended/reasonable in HIV; review ART-statin interactions."
+    if _hidden_high_risk_enhancer_cluster_path(result):
+        if _on_statin_therapy(patient):
+            return "Review intensity; atherogenic burden remains elevated."
+        return "Discuss moderate-intensity statin therapy for hidden atherogenic risk."
     if _low_with_lpa_reproductive_context(patient, result):
         return "Lipid lowering: no escalation today; document elevated Lp(a) and reproductive risk markers as risk enhancers."
     if _near_level3_lipid_trajectory(patient, result):

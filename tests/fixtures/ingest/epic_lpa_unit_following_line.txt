@@ -1,0 +1,5 @@
+Lp(a):
+Lab Results
+Component Value Date
+LIPOA 148.2 (H) 05/22/2026
+nmol/L

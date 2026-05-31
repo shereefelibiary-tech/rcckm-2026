@@ -824,7 +824,7 @@ def _short_kidney_action(item, patient):
     uacr = _emr_fmt(getattr(patient, "uacr", None))
     detail = str(getattr(item, "detail", "") or "").strip().rstrip(".")
     status = str(getattr(item, "status", "") or "").strip().rstrip(".")
-    if status == "No kidney-risk signal":
+    if status in {"No kidney-risk signal", "No kidney action"}:
         return status
     if uacr is None and "obtain uacr" in status.lower():
         return "UACR not available; obtain UACR"
@@ -833,7 +833,7 @@ def _short_kidney_action(item, patient):
         return detail
     if status:
         return status
-    return "No kidney-risk signal"
+    return "No kidney action"
 
 
 def _short_bp_action(item):

@@ -1114,9 +1114,10 @@ def render_manual_worksheet(st, parsed):
             inputs["ace_arb"] = _checkbox_input(st, "ACE/ARB", parsed, "ace_arb")
         med_cols = st.columns([1.8, 1.3, 0.9, 0.9])
         with med_cols[0]:
-            inputs["medications_raw"] = st.text_input(
+            inputs["medications_raw"] = st.text_area(
                 "Medication list",
                 key="input_medications_raw",
+                height=110,
                 **(
                     {}
                     if "input_medications_raw" in st.session_state
@@ -1124,9 +1125,10 @@ def render_manual_worksheet(st, parsed):
                 ),
             )
         with med_cols[1]:
-            inputs["dm_meds_raw"] = st.text_input(
+            inputs["dm_meds_raw"] = st.text_area(
                 "Diabetes meds",
                 key="input_dm_meds_raw",
+                height=85,
                 **(
                     {}
                     if "input_dm_meds_raw" in st.session_state

@@ -199,7 +199,7 @@ def test_extract_domain_signals_detects_core_surface_semantics():
     signals = extract_domain_signals(
         "Lipid lowering: Intensify lipid-lowering. CAC 350 already measured. "
         "Kidney protection: Monitor albuminuria; UACR 45. "
-        "Aspirin / antiplatelet: Not routine for primary prevention."
+        "Aspirin / antiplatelet: Not indicated."
     )
 
     assert signals["lipid_intensify"]

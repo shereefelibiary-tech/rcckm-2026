@@ -1,4 +1,5 @@
 from core.enums import RiskLevel
+from modules.levels.level_classifier import _hidden_risk_cluster
 
 
 def _risk_value(risk_category):
@@ -194,6 +195,8 @@ def build_cac_age_gate_note(patient, result):
 def build_cac_recommendation(patient, result):
     if not _cac_available_for_decision(patient, result):
         return None
+    if _hidden_risk_cluster(patient, result):
+        return "CAC may clarify treatment."
     if not meets_cac_age_gate(patient):
         return None
 

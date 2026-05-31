@@ -90,7 +90,7 @@ def test_all_demo_surfaces_share_structured_domain_actions(label, case_name):
             "cac_300_high_plaque_burden",
             ("High-intensity therapy indicated", "CAC 350"),
             ("High-intensity lipid-lowering therapy indicated", "CAC 350."),
-            ("calcium score",),
+            ("very high burden",),
         ),
         (
             "severe_secondary_prevention",
@@ -107,7 +107,7 @@ def test_all_demo_surfaces_share_structured_domain_actions(label, case_name):
         (
             "healthy_low_risk_prevention",
             ("No lipid escalation",),
-            ("No lipid escalation", "No kidney-risk signal"),
+            ("No lipid escalation", "No kidney action"),
             ("cholesterol",),
         ),
     ],
@@ -132,9 +132,9 @@ def test_cross_surface_alignment_governance_reports_domain_specific_mismatches()
     findings = audit_cross_surface_alignment(
         action_card_text=(
             "Lipid lowering: No lipid escalation.\n"
-            "CAC / plaque: CAC 350 already measured.\n"
-            "Kidney protection: No kidney-risk signal.\n"
-            "Aspirin / antiplatelet: Not routine for primary prevention."
+            "Plaque: Very high burden (CAC 350).\n"
+            "Kidney protection: No kidney action.\n"
+            "Aspirin / antiplatelet: Not indicated."
         ),
         emr_text=(
             "Recommendations:\n"
@@ -166,7 +166,7 @@ def test_emr_and_roadmap_domain_order_tracks_action_domain_order():
     roadmap_next_steps = roadmap_text.split("step 4", 1)[-1]
 
     emr_terms = ("lipids:", "plaque:", "kidney:", "bp:", "glycemia:", "aspirin:")
-    roadmap_terms = ("cholesterol:", "artery plaque:", "kidneys:", "blood pressure:", "blood sugar:", "aspirin:")
+    roadmap_terms = ("cholesterol:", "coronary plaque:", "kidneys:", "blood pressure:", "blood sugar:", "aspirin:")
 
     emr_positions = [emr_recommendations.index(term) for term in emr_terms]
     roadmap_positions = [roadmap_next_steps.index(term) for term in roadmap_terms]

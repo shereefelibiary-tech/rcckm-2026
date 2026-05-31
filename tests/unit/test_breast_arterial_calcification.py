@@ -101,7 +101,7 @@ def test_cac_dominates_plaque_interpretation_when_bac_and_cac_present():
     diagnoses = _diagnosis_names(patient)
 
     assert result.plaque_category.value == "NONE"
-    assert "CAC 0: no calcified plaque detected." in roadmap
+    assert "Coronary plaque: Not detected (CAC 0)." in roadmap
     assert BAC_PATIENT_CONTEXT_TEXT in roadmap
     assert "Subclinical coronary atherosclerosis" not in diagnoses
 

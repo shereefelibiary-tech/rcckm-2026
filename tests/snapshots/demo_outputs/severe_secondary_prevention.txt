@@ -33,12 +33,12 @@ Where you stand
 - 10-year ASCVD risk: 31.42%
 - Known cardiovascular disease is present.
 - About 31 in 100 similar patients may have a heart attack, stroke, or related artery disease event over 10 years.
-- Known cardiovascular disease is present.
+- Coronary plaque: known cardiovascular disease.
 - Care focus: Level 5 - Very high risk
 
 STEP 2
 Why your risk is higher
-- Artery plaque: Known cardiovascular disease. This means prevention decisions should be more treatment-focused.
+- Coronary plaque: Known cardiovascular disease. This means prevention decisions should be more treatment-focused.
 - Cholesterol: ApoB 156; LDL-C 205; non-HDL-C 274 (calculated). These numbers help show plaque-driving cholesterol in the blood.
 - Blood sugar: A1c 7.8%. Improving blood sugar can lower long-term heart, kidney, and metabolic risk.
 - Kidney protection: eGFR 55; UACR 86. Kidney markers also help estimate heart and metabolic risk.
@@ -58,15 +58,15 @@ Your goals
 STEP 4
 Your next steps
 1. Cholesterol: Discuss stronger cholesterol-lowering therapy toward secondary-prevention goals.
-2. Artery plaque: Known cardiovascular disease is present.
-3. Kidneys: Discuss kidney-protective therapy; UACR 86.
+2. Coronary plaque: Known cardiovascular disease is present.
+3. Kidneys: Chronic kidney disease is present (UACR 86).
 4. Blood pressure: Treat toward <130/80.
 5. Blood sugar: Work toward A1c <7.0.
 6. Aspirin: Review antiplatelet therapy.
 
 ACTIONS:
 - Lipid lowering: Secondary-prevention lipid therapy. LDL-C 205; target <55. ApoB 156; target <65.
-- CAC / plaque: CAC 5000.
+- Plaque: CAC 5000.
 - Kidney protection: Optimize kidney protection. UACR 86; ACEi/ARB active. Consider SGLT2 for diabetic CKD.
 - Blood pressure: Treat toward <130/80. Current 138/82.
 - Glycemia / metabolic: Optimize diabetes care. A1c 7.8%; goal <7.0.

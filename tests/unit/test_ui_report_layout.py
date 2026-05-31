@@ -1204,6 +1204,26 @@ def test_default_medication_panel_does_not_show_lipid_supplements_checkbox():
     assert "Lipid supplements" not in checkbox_labels
 
 
+def test_medication_review_fields_are_multiline_textareas():
+    from streamlit.testing.v1 import AppTest
+
+    at = AppTest.from_file("app.py")
+    at.run(timeout=10)
+
+    text_area_labels = {widget.label for widget in at.text_area}
+    text_input_labels = {widget.label for widget in at.text_input}
+
+    assert "Medication list" in text_area_labels
+    assert "Diabetes meds" in text_area_labels
+    assert "Medication list" not in text_input_labels
+    assert "Diabetes meds" not in text_input_labels
+
+    checkbox_labels = {widget.label for widget in at.checkbox}
+    assert {"Lipid lowering", "BP meds", "SGLT2", "GLP1", "ACE/ARB", "Statin intolerance"}.issubset(
+        checkbox_labels
+    )
+
+
 def test_low_actionability_context_fields_are_not_in_default_worksheet():
     from streamlit.testing.v1 import AppTest
 
