@@ -929,6 +929,10 @@ def _build_ckm_kdigo_summary_html(result, patient=None):
         kdigo_help_parts.extend(["", kdigo_interpretation])
     kdigo_help = "\n".join(kdigo_help_parts)
 
+    def _tooltip_html(text):
+        lines = str(text or "").splitlines()
+        return "<br>".join(escape(line) if line else "<br>" for line in lines)
+
     plaque_context = ""
     for driver in ckm_stage.get("drivers") or []:
         driver_text = str(driver)
@@ -993,12 +997,12 @@ def _build_ckm_kdigo_summary_html(result, patient=None):
     text-transform: none;
     width: 15px;
 }
-.ckm-kdigo-help::after {
+.ckm-kdigo-tooltip {
     background: rgba(7,26,47,0.96);
     border-radius: 10px;
     box-shadow: 0 14px 30px rgba(7,26,47,0.22);
     color: #fff;
-    content: attr(data-tooltip);
+    display: block;
     font-size: 0.76rem;
     font-weight: 650;
     left: 0;
@@ -1016,11 +1020,11 @@ def _build_ckm_kdigo_summary_html(result, patient=None):
     transform: translateY(4px);
     transition: opacity 120ms ease, transform 120ms ease;
     visibility: hidden;
-    white-space: pre-line;
+    white-space: normal;
     z-index: 9999;
 }
-.ckm-kdigo-help:hover::after,
-.ckm-kdigo-help:focus::after {
+.ckm-kdigo-help:hover .ckm-kdigo-tooltip,
+.ckm-kdigo-help:focus .ckm-kdigo-tooltip {
     opacity: 1;
     transform: translateY(0);
     visibility: visible;
@@ -1060,14 +1064,20 @@ def _build_ckm_kdigo_summary_html(result, patient=None):
         '<div class="ckm-kdigo-strip">'
         '<div class="ckm-kdigo-item">'
         '<div class="ckm-kdigo-label">CKM'
-        f'<span class="ckm-kdigo-help" role="button" tabindex="0" aria-label="{escape(ckm_help, quote=True)}" data-tooltip="{escape(ckm_help, quote=True)}">i</span>'
+        '<span class="ckm-kdigo-help" role="button" tabindex="0" aria-label="CKM staging help">'
+        '&#9432;'
+        f'<span class="ckm-kdigo-tooltip">{_tooltip_html(ckm_help)}</span>'
+        '</span>'
         '</div>'
         f'<div class="ckm-kdigo-value">{escape(ckm_value)}</div>'
         f'<div class="ckm-kdigo-desc">{escape(ckm_desc)}</div>'
         '</div>'
         '<div class="ckm-kdigo-item">'
         '<div class="ckm-kdigo-label">KDIGO'
-        f'<span class="ckm-kdigo-help" role="button" tabindex="0" aria-label="{escape(kdigo_help, quote=True)}" data-tooltip="{escape(kdigo_help, quote=True)}">i</span>'
+        '<span class="ckm-kdigo-help" role="button" tabindex="0" aria-label="KDIGO classification help">'
+        '&#9432;'
+        f'<span class="ckm-kdigo-tooltip">{_tooltip_html(kdigo_help)}</span>'
+        '</span>'
         '</div>'
         f'<div class="ckm-kdigo-value">{escape(str(kdigo))}</div>'
         f'<div class="ckm-kdigo-desc">{escape(kidney_desc)}</div>'
