@@ -132,7 +132,7 @@
       "Context: Gestational diabetes.",
       "Prediabetes",
       "Hypertriglyceridemia",
-      "1. Lipids: No lipid escalation.",
+      "1. Lipids: No lipid-lowering medication indicated.",
       "6. Aspirin: Not routine for primary prevention."
     ],
     "forbidden_phrases": [
@@ -224,7 +224,6 @@
     "required_phrases": [
       "Level: 3A - elevated long-term risk trajectory.",
       "PREVENT: ASCVD 10y 1.2% (Low); 30y 10.5%.",
-      "1. Lipids: No lipid escalation.",
       "2. Plaque: CAC may clarify risk."
     ],
     "forbidden_phrases": [
@@ -271,7 +270,7 @@
       "Level: 2B - converging early risk signals.",
       "Lp(a) 188 nmol/L",
       "premature family history",
-      "1. Lipids: No lipid escalation.",
+      "1. Lipids: No lipid-lowering medication indicated.",
       "2. Plaque: CAC may clarify risk.",
       "6. Aspirin: Not routine for primary prevention."
     ],

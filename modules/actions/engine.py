@@ -487,6 +487,76 @@ def _on_statin_therapy(patient):
     return any(name in medication_text for name in statin_names)
 
 
+def _on_lipid_lowering_therapy(patient):
+    if bool(getattr(patient, "lipid_lowering", False)):
+        return True
+    medication_text = str(getattr(patient, "medications_raw", "") or "").lower()
+    lipid_med_names = (
+        "atorvastatin",
+        "rosuvastatin",
+        "pravastatin",
+        "simvastatin",
+        "lovastatin",
+        "fluvastatin",
+        "pitavastatin",
+        "ezetimibe",
+        "evolocumab",
+        "alirocumab",
+        "bempedoic",
+        "inclisiran",
+    )
+    return any(name in medication_text for name in lipid_med_names)
+
+
+def _level3b_atherogenic_discussion_path(result):
+    classification = getattr(result, "level_classification", None) or {}
+    if str(classification.get("level") or "") != "3B":
+        return False
+    text = " ".join(
+        str(classification.get(key) or "")
+        for key in ("label", "short_reason", "treatment_posture")
+    ).lower()
+    return any(
+        phrase in text
+        for phrase in (
+            "hidden",
+            "occult",
+            "clustered",
+            "actionable early ckm / atherogenic risk",
+            "atherogenic risk",
+            "risk-enhancer",
+            "risk enhancer",
+            "biologic burden",
+        )
+    )
+
+
+def _off_treatment_level3b_lipid_discussion(patient, result):
+    if result is None or _on_lipid_lowering_therapy(patient):
+        return False
+    prevent_10y = _prevent_10y_ascvd_value(result)
+    prevent_30y = getattr(result, "prevent_30y_ascvd", None)
+    try:
+        prevent_30y = float(prevent_30y) if prevent_30y is not None else None
+    except (TypeError, ValueError):
+        prevent_30y = None
+    ldl_c = getattr(patient, "ldl_c", None)
+    apob = getattr(patient, "apob", None)
+    return bool(
+        _level3b_atherogenic_discussion_path(result)
+        and (
+            _prevent_low(result)
+            or (prevent_10y is not None and prevent_10y < PREVENT_ASCVD_EARLY_DISCUSSION_THRESHOLD)
+        )
+        and (prevent_30y is None or prevent_30y < 10)
+        and (
+            (ldl_c is not None and ldl_c >= 130)
+            or (apob is not None and apob >= 100)
+            or _has_elevated_lpa(patient)
+        )
+    )
+
+
 def _has_heart_failure(patient):
     return bool(getattr(patient, "heart_failure", False)) or bool(
         getattr(patient, "hf", False)
@@ -680,6 +750,8 @@ def _lipid_action_text(patient, result):
         return "Lipid-lowering therapy is indicated; treat toward high-risk targets."
     if _has_hiv_pathway(patient):
         return "Statin therapy recommended/reasonable in HIV; review ART-statin interactions."
+    if _off_treatment_level3b_lipid_discussion(patient, result):
+        return "Discuss lipid-lowering therapy."
     if _hidden_high_risk_enhancer_cluster_path(result):
         if _on_statin_therapy(patient):
             return "Review intensity; atherogenic burden remains elevated."

@@ -213,6 +213,56 @@ def test_cac_guided_primary_prevention_aspirin_branches_align_surfaces():
         assert f"6. Aspirin: {roadmap_fragment}" in render_patient_roadmap_text(patient, result)
 
 
+def test_no_lipid_change_wording_is_medication_state_aware_across_surfaces():
+    untreated = Patient(
+        age=34,
+        sex="female",
+        ldl_c=88,
+        apob=99,
+        lp_a_value=400,
+        lp_a_unit="nmol/L",
+        lipid_lowering=False,
+        prevent_10y_ascvd=0.2,
+        prevent_30y_ascvd=2.0,
+    )
+    untreated_result = evaluate_patient(untreated)
+    untreated_lipids = next(
+        item for item in build_action_instrument_panel(untreated, untreated_result)
+        if item.domain_id == "lipid_lowering"
+    )
+    untreated_emr = render_emr_note(untreated, untreated_result)
+    untreated_roadmap = render_patient_roadmap_text(untreated, untreated_result)
+
+    assert untreated_lipids.status == "No lipid-lowering medication indicated"
+    assert "1. Lipids: No lipid-lowering medication indicated." in untreated_emr
+    assert "1. Cholesterol: No medication indicated." in untreated_roadmap
+    assert "No cholesterol medicine change" not in untreated_roadmap
+    assert "Continue current lipid treatment" not in untreated_roadmap
+    assert "No lipid escalation" not in untreated_roadmap
+
+    treated = Patient(
+        age=55,
+        sex="male",
+        ldl_c=75,
+        apob=70,
+        lipid_lowering=True,
+        statin_intensity="moderate",
+        prevent_10y_ascvd=1.0,
+        prevent_30y_ascvd=4.0,
+    )
+    treated_result = evaluate_patient(treated)
+    treated_lipids = next(
+        item for item in build_action_instrument_panel(treated, treated_result)
+        if item.domain_id == "lipid_lowering"
+    )
+    treated_emr = render_emr_note(treated, treated_result)
+    treated_roadmap = render_patient_roadmap_text(treated, treated_result)
+
+    assert treated_lipids.status == "Continue current lipid treatment"
+    assert "1. Lipids: Continue current lipid treatment." in treated_emr
+    assert "1. Cholesterol: Continue current lipid treatment." in treated_roadmap
+
+
 def test_clinical_ascvd_uses_secondary_prevention_antiplatelet_wording():
     patient = Patient(age=55, sex="male", clinical_ascvd=True, cac=None)
     result = evaluate_patient(patient)
@@ -770,7 +820,7 @@ def test_low_risk_complete_data_below_cac_age_threshold_stays_calm_without_cac_r
     assert _section(sections, "Aspirin").line == "Aspirin not routine for primary prevention."
     assert not any(section.label == "Coronary calcium" for section in sections)
     assert "- No diagnosis candidates generated." in note
-    assert "1. Lipids: No lipid escalation." in recommendations
+    assert "1. Lipids: No lipid-lowering medication indicated." in recommendations
     assert "6. Aspirin: Not routine for primary prevention." in recommendations
     assert "CAC reasonable" not in recommendations
     assert "CAC not performed" not in recommendations

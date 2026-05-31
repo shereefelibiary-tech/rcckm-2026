@@ -95,10 +95,17 @@ def build_continuum_bar_html(patient, result):
 .rc-shell * {{
     box-sizing: border-box;
 }}
+div[data-testid="stMarkdownContainer"]:has(.rc-shell),
+div[data-testid="stElementContainer"]:has(.rc-shell),
+div[data-testid="stVerticalBlock"]:has(.rc-shell) {{
+    overflow: visible !important;
+    position: relative;
+    z-index: 30;
+}}
 .rc-shell {{
     width: 100%;
-    padding: 16px 14px 14px;
-    margin: 18px 0 20px;
+    padding: 16px 14px 96px;
+    margin: 18px 0 26px;
     overflow: visible !important;
     font-family: var(--rc-font-body);
     position: relative;
@@ -137,8 +144,10 @@ def build_continuum_bar_html(patient, result):
     grid-template-columns: repeat(5, minmax(118px, 1fr));
     gap: clamp(6px, 0.76vw, 12px);
     align-items: stretch;
+    margin-bottom: 4px;
     overflow: visible !important;
     position: relative;
+    z-index: 20;
 }}
 .rc-card-wrap {{
     position: relative;
@@ -198,6 +207,7 @@ def build_continuum_bar_html(patient, result):
 .rc-card-active::after {{
     background: rgba(7, 26, 47, 0.96);
     border-radius: 9px;
+    bottom: auto;
     top: calc(100% + 12px);
     box-shadow: 0 12px 26px rgba(7, 26, 47, 0.20);
     color: #ffffff;
@@ -298,10 +308,13 @@ def build_continuum_bar_html(patient, result):
     font-size: 0.82rem;
     font-weight: 700;
     margin-top: 16px;
+    position: relative;
+    z-index: 1;
 }}
 @media (max-width: 760px) {{
     .rc-shell {{
         padding-left: 10px;
+        padding-bottom: 108px;
         padding-right: 10px;
     }}
     .rc-grid {{

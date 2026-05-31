@@ -225,10 +225,17 @@ def test_report_uses_component_html_for_custom_renderers():
     assert "wpf-card" in inline_html
     assert "clarifier-card" not in inline_html
     assert "ckm-kdigo-strip" in inline_html
-    ckm_html = inline_html.split('class="ckm-kdigo-strip"', 1)[1][:1000]
+    ckm_html = inline_html.split('class="ckm-kdigo-strip"', 1)[1][:5000]
     assert "CKM Stage 3" in ckm_html
     assert "Subclinical cardiovascular disease or CKD is present." in ckm_html
-    assert ckm_html.count("G3aA2") == 1
+    assert "CKM STAGING" in ckm_html
+    assert "Stage 0" in ckm_html
+    assert "Current stage:" in ckm_html
+    assert "KDIGO CKD CLASSIFICATION" in ckm_html
+    assert "G3a: eGFR 45-59" in ckm_html
+    assert "A2: UACR 30-299 mg/g" in ckm_html
+    assert "Moderately reduced kidney function; moderately increased albuminuria." in ckm_html
+    assert ckm_html.count("G3aA2") >= 1
     assert "eGFR 55; UACR 45 mg/g" in ckm_html
     assert "CAC 350 indicates high plaque burden." in ckm_html
     assert "Cardiometabolic-kidney context" not in inline_html
@@ -519,8 +526,9 @@ def test_targets_card_prioritizes_ldl_and_apob_by_default():
     assert "Calculated from total cholesterol minus HDL-C." not in html
     assert html.count('<span class="target-item">') == 2
     assert html.count('<span class="target-main">') == 2
-    assert html.index("LDL-C") < html.index("132 mg/dL") < html.index("-&gt; &lt;70 mg/dL")
-    assert html.index("ApoB") < html.index("110 mg/dL") < html.index("-&gt; &lt;80 mg/dL")
+    assert html.index("LDL-C") < html.index("&lt;70 mg/dL") < html.index("132 mg/dL")
+    assert html.index("ApoB") < html.index("&lt;80 mg/dL") < html.index("110 mg/dL")
+    assert "-&gt;" not in html
     assert 'content: "•"' not in html
     assert "ApoB is shown as an RCCKM advanced particle target." not in html
     assert "Show target rationale" in html
@@ -630,7 +638,7 @@ def test_assessment_candidates_are_compact_and_deduped():
     combined = "\n".join(str(message) for message in fake_st.messages)
     assert "detail-section-title" in combined
     assert "Data-derived diagnoses" in combined
-    assert "Diagnoses and coding supported by the current data." in combined
+    assert "Diagnoses supported by current data." in combined
     assert "Assessment candidates" not in combined
     assert "Clinical diagnoses and coding support" not in combined
     assert "Candidate diagnoses" not in combined
@@ -640,11 +648,11 @@ def test_assessment_candidates_are_compact_and_deduped():
     assert "dx-panel" in combined
     assert "dx-compact-list" in combined
     assert "<div class='dx-column-panel'>" not in combined
-    assert "Accepted" in combined
+    assert "Accepted" not in combined
     assert "Confirmed / accepted" not in combined
     assert "Confirmed by data" not in combined
-    assert "Needs review" in combined
-    assert "Needs review:</strong> none" in combined
+    assert "Needs review" not in combined
+    assert "Needs review:</strong> none" not in combined
     assert "Review suggested" not in combined
     assert "ICD:" in combined
     assert "dx-code-chip" in combined

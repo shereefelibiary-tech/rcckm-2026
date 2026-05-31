@@ -8,7 +8,7 @@ Assessment:
 - No diagnosis candidates generated.
 
 Recommendations:
-1. Lipids: No lipid escalation.
+1. Lipids: No lipid-lowering medication indicated.
 2. Plaque: CAC 0.
 3. Kidney: Kidney context not available.
 4. BP: BP needed.

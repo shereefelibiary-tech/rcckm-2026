@@ -863,6 +863,72 @@ def _build_ckm_kdigo_summary_html(result, patient=None):
             kdigo = f"KDIGO partial: {result.egfr_stage}; UACR not available"
     kidney_desc = "; ".join(kidney_values) if kidney_values else "Kidney staging not available."
 
+    current_stage = f"Stage {stage}" if stage is not None else "not available"
+    ckm_help = (
+        "CKM STAGING\n\n"
+        "Stage 0\nNo major CKM risk factors.\n\n"
+        "Stage 1\nRisk factors present (obesity, hypertension, dyslipidemia, prediabetes).\n\n"
+        "Stage 2\nMetabolic disease present (diabetes or significant metabolic disease).\n\n"
+        "Stage 3\nSubclinical cardiovascular disease or CKD present.\n\n"
+        "Stage 4\nClinical cardiovascular disease present.\n\n"
+        f"Current stage:\n{current_stage}"
+    )
+
+    def _kdigo_interpretation(kdigo_value):
+        text = str(kdigo_value or "")
+        g_phrase = ""
+        a_phrase = ""
+        if "G1" in text:
+            g_phrase = "Normal kidney function"
+        elif "G2" in text:
+            g_phrase = "Mildly reduced kidney function"
+        elif "G3a" in text:
+            g_phrase = "Moderately reduced kidney function"
+        elif "G3b" in text:
+            g_phrase = "Moderately to severely reduced kidney function"
+        elif "G4" in text:
+            g_phrase = "Severely reduced kidney function"
+        elif "G5" in text:
+            g_phrase = "Kidney failure range"
+        if "A1" in text:
+            a_phrase = "normal albuminuria"
+        elif "A2" in text:
+            a_phrase = "moderately increased albuminuria"
+        elif "A3" in text:
+            a_phrase = "severely increased albuminuria"
+        if g_phrase and a_phrase:
+            return f"{g_phrase}; {a_phrase}."
+        if g_phrase:
+            return f"{g_phrase}."
+        if a_phrase:
+            return f"{a_phrase.capitalize()}."
+        return ""
+
+    kdigo_interpretation = _kdigo_interpretation(kdigo_raw)
+    kdigo_help_parts = [
+        "KDIGO CKD CLASSIFICATION",
+        "",
+        "G1: eGFR >=90",
+        "G2: eGFR 60-89",
+        "G3a: eGFR 45-59",
+        "G3b: eGFR 30-44",
+        "G4: eGFR 15-29",
+        "G5: eGFR <15",
+        "",
+        "A1: UACR <30 mg/g",
+        "A2: UACR 30-299 mg/g",
+        "A3: UACR >=300 mg/g",
+        "",
+        f"Current:\n{kdigo}",
+        "",
+        f"eGFR:\n{float(egfr):g}" if egfr is not None else "eGFR:\nnot available",
+        "",
+        f"UACR:\n{float(uacr):g} mg/g" if uacr is not None else "UACR:\nnot available",
+    ]
+    if kdigo_interpretation:
+        kdigo_help_parts.extend(["", kdigo_interpretation])
+    kdigo_help = "\n".join(kdigo_help_parts)
+
     plaque_context = ""
     for driver in ckm_stage.get("drivers") or []:
         driver_text = str(driver)
@@ -888,17 +954,79 @@ def _build_ckm_kdigo_summary_html(result, patient=None):
     grid-template-columns: 1fr 1fr;
     gap: 10px 16px;
     padding: 10px 12px;
+    overflow: visible;
+    position: relative;
+    z-index: 1;
 }
 .ckm-kdigo-item {
     min-width: 0;
+    overflow: visible;
 }
 .ckm-kdigo-label {
+    align-items: center;
     color: rgba(47,95,143,0.88);
+    display: inline-flex;
+    gap: 5px;
     font-size: 0.68rem;
     font-weight: 900;
     letter-spacing: 0.08em;
     line-height: 1;
+    overflow: visible;
+    position: relative;
     text-transform: uppercase;
+}
+.ckm-kdigo-help {
+    align-items: center;
+    border: 1px solid rgba(47,95,143,0.34);
+    border-radius: 999px;
+    color: rgba(47,95,143,0.88);
+    cursor: help;
+    display: inline-flex;
+    font-size: 0.62rem;
+    font-weight: 900;
+    height: 15px;
+    justify-content: center;
+    letter-spacing: 0;
+    line-height: 1;
+    outline: none;
+    position: relative;
+    text-transform: none;
+    width: 15px;
+}
+.ckm-kdigo-help::after {
+    background: rgba(7,26,47,0.96);
+    border-radius: 10px;
+    box-shadow: 0 14px 30px rgba(7,26,47,0.22);
+    color: #fff;
+    content: attr(data-tooltip);
+    font-size: 0.76rem;
+    font-weight: 650;
+    left: 0;
+    letter-spacing: 0;
+    line-height: 1.34;
+    max-width: min(360px, 78vw);
+    min-width: min(300px, 78vw);
+    opacity: 0;
+    padding: 11px 12px;
+    pointer-events: none;
+    position: absolute;
+    text-align: left;
+    text-transform: none;
+    top: calc(100% + 9px);
+    transform: translateY(4px);
+    transition: opacity 120ms ease, transform 120ms ease;
+    visibility: hidden;
+    white-space: pre-line;
+    z-index: 9999;
+}
+.ckm-kdigo-help:hover::after,
+.ckm-kdigo-help:focus::after {
+    opacity: 1;
+    transform: translateY(0);
+    visibility: visible;
+}
+.ckm-kdigo-help:focus-visible {
+    box-shadow: 0 0 0 3px rgba(47,95,143,0.18);
 }
 .ckm-kdigo-value {
     color: var(--rc-black);
@@ -931,12 +1059,16 @@ def _build_ckm_kdigo_summary_html(result, patient=None):
 """
         '<div class="ckm-kdigo-strip">'
         '<div class="ckm-kdigo-item">'
-        '<div class="ckm-kdigo-label">CKM</div>'
+        '<div class="ckm-kdigo-label">CKM'
+        f'<span class="ckm-kdigo-help" role="button" tabindex="0" aria-label="{escape(ckm_help, quote=True)}" data-tooltip="{escape(ckm_help, quote=True)}">i</span>'
+        '</div>'
         f'<div class="ckm-kdigo-value">{escape(ckm_value)}</div>'
         f'<div class="ckm-kdigo-desc">{escape(ckm_desc)}</div>'
         '</div>'
         '<div class="ckm-kdigo-item">'
-        '<div class="ckm-kdigo-label">KDIGO</div>'
+        '<div class="ckm-kdigo-label">KDIGO'
+        f'<span class="ckm-kdigo-help" role="button" tabindex="0" aria-label="{escape(kdigo_help, quote=True)}" data-tooltip="{escape(kdigo_help, quote=True)}">i</span>'
+        '</div>'
         f'<div class="ckm-kdigo-value">{escape(str(kdigo))}</div>'
         f'<div class="ckm-kdigo-desc">{escape(kidney_desc)}</div>'
         '</div>'

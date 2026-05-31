@@ -873,7 +873,7 @@ ACTION_PANEL_DOMAIN_ORDER = [
 ]
 
 
-def _line_to_lipid_readout(line: str) -> tuple[str, str, str, str]:
+def _line_to_lipid_readout(line: str, patient: Any | None = None) -> tuple[str, str, str, str]:
     lowered = str(line or "").lower()
     if "secondary-prevention" in lowered:
         return "Secondary-prevention lipid therapy", "Treat toward ASCVD targets.", "high", "action"
@@ -885,6 +885,8 @@ def _line_to_lipid_readout(line: str) -> tuple[str, str, str, str]:
         return "Review intensity; atherogenic burden remains elevated", "", "moderate", "consider"
     if "intensify" in lowered or "above target" in lowered:
         return "Intensify lipid-lowering", "Treat toward lipid targets.", "high", "action"
+    if lowered.strip() == "discuss lipid-lowering therapy.":
+        return "Discuss lipid-lowering therapy", "", "moderate", "consider"
     if "moderate-intensity" in lowered:
         if "reasonable" in lowered or "may be reasonable" in lowered or "discuss" in lowered:
             return "Discuss moderate-intensity statin", "Review start/intensity.", "moderate", "consider"
@@ -894,6 +896,10 @@ def _line_to_lipid_readout(line: str) -> tuple[str, str, str, str]:
     if "lifestyle" in lowered:
         return "Lifestyle-focused", "No routine lipid escalation.", "low", "neutral"
     if "no escalation" in lowered:
+        if patient is not None:
+            if _is_on_lipid_lowering(patient):
+                return "Continue current lipid treatment", "", "none", "neutral"
+            return "No lipid-lowering medication indicated", "", "none", "neutral"
         return "No lipid escalation", "Current LDL-C/ApoB and risk profile do not support medication change.", "none", "neutral"
     if "lipid-lowering therapy" in lowered or "statin therapy" in lowered:
         return "Intensify lipid-lowering", "Treat toward lipid targets.", "moderate", "action"
@@ -954,16 +960,52 @@ def _lipid_emr_line(line: str, patient: Any | None = None, result: Any | None = 
     return text
 
 
-def _lipid_patient_line(status: str, detail: str, source_line: str) -> str:
+def _is_on_lipid_lowering(patient: Any) -> bool:
+    if bool(getattr(patient, "lipid_lowering", False)):
+        return True
+    medication_text = str(getattr(patient, "medications_raw", "") or "").lower()
+    lipid_med_names = (
+        "atorvastatin",
+        "rosuvastatin",
+        "pravastatin",
+        "simvastatin",
+        "lovastatin",
+        "fluvastatin",
+        "pitavastatin",
+        "ezetimibe",
+        "evolocumab",
+        "alirocumab",
+        "bempedoic",
+        "inclisiran",
+    )
+    return any(name in medication_text for name in lipid_med_names)
+
+
+def _lipid_patient_line(patient: Any, status: str, detail: str, source_line: str) -> str:
     lowered = f"{status} {detail} {source_line}".lower()
+    on_lipid_lowering = _is_on_lipid_lowering(patient)
     if "secondary-prevention" in lowered or "very-high-risk ascvd" in lowered:
-        return "Discuss stronger cholesterol-lowering therapy toward secondary-prevention goals."
+        if on_lipid_lowering:
+            return "Discuss stronger cholesterol-lowering therapy toward secondary-prevention goals."
+        return "Discuss starting cholesterol-lowering therapy toward secondary-prevention goals."
     if "high-intensity" in lowered or "intensify" in lowered:
-        return "Discuss stronger cholesterol-lowering therapy."
+        if on_lipid_lowering:
+            return "Discuss stronger cholesterol-lowering therapy."
+        return "Discuss starting high-intensity cholesterol-lowering therapy."
+    if "discuss lipid-lowering therapy" in lowered:
+        if on_lipid_lowering:
+            return "Discuss stronger cholesterol-lowering therapy."
+        return "Discuss starting cholesterol-lowering therapy."
     if "moderate-intensity" in lowered:
-        return "Discuss cholesterol-lowering therapy."
-    if "no lipid escalation" in lowered or "no escalation" in lowered:
-        return "No lipid escalation based on current cholesterol and risk profile."
+        if on_lipid_lowering:
+            return "Discuss stronger cholesterol-lowering therapy."
+        return "Discuss starting cholesterol-lowering therapy."
+    if "no lipid escalation" in lowered or "no escalation" in lowered or "no lipid-lowering medication indicated" in lowered:
+        if on_lipid_lowering:
+            return "Continue current lipid treatment."
+        return "No medication indicated."
+    if "continue current lipid treatment" in lowered:
+        return "Continue current lipid treatment."
     if "lifestyle" in lowered:
         return "Continue lifestyle-focused prevention."
     return "Review the cholesterol plan with your clinician."
@@ -974,8 +1016,16 @@ def _patient_lipid_line(patient: Any, item: ActionDomainReadout, source_line: st
     # Kept intentionally simple for patient wording; action/EMR carry the exact target semantics.
     lowered = f"{item.status} {item.detail} {source_line}".lower()
     if "no lipid escalation" in lowered or "lifestyle-focused" in lowered or "lifestyle" in lowered:
+        if _is_on_lipid_lowering(patient):
+            return "Continue current lipid treatment."
+        if "lifestyle" in lowered:
+            return "Continue lifestyle-focused prevention."
+        return "No medication indicated."
+    if "no lipid-lowering medication indicated" in lowered:
+        return "No medication indicated."
+    if "continue current lipid treatment" in lowered:
         return "Continue current lipid treatment."
-    return _lipid_patient_line(item.status, item.detail, source_line)
+    return _lipid_patient_line(patient, item.status, item.detail, source_line)
 
 
 def _patient_plaque_line(patient: Any, item: ActionDomainReadout) -> str:
@@ -1611,7 +1661,7 @@ def build_action_instrument_panel(patient: Any, result: Any) -> list[ActionDomai
     by_label = {section.label: section for section in sections}
     triglycerides = _triglycerides(patient)
     lipid_line = _clean_readout_text(getattr(by_label.get("Lipid therapy"), "line", "") or _lipid_line(patient, result))
-    lipid_status, lipid_detail, lipid_priority, lipid_state = _line_to_lipid_readout(lipid_line)
+    lipid_status, lipid_detail, lipid_priority, lipid_state = _line_to_lipid_readout(lipid_line, patient)
     if "moderate-intensity" in lipid_line.lower():
         lipid_detail = _compact_lipid_rationale(lipid_line)
     if triglycerides is not None and triglycerides >= 1000:

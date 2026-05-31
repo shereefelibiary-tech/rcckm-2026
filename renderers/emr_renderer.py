@@ -783,6 +783,10 @@ def _short_lipid_action(item, patient, result):
         action = "Intensify lipid-lowering"
     elif "moderate-intensity" in lowered:
         action = "Discuss moderate-intensity statin"
+    elif "continue current lipid treatment" in lowered:
+        action = "Continue current lipid treatment"
+    elif "no lipid-lowering medication indicated" in lowered:
+        action = "No lipid-lowering medication indicated"
     elif "no lipid escalation" in lowered or "lifestyle" in lowered:
         action = "No lipid escalation"
     else:

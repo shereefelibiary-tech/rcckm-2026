@@ -362,16 +362,14 @@ def render_diagnosis_confirm_panel(st, result, include_title=True):
     if include_title and not visible_review and not extra_review:
         accepted_html = _candidate_rows_html(confirmed, confirmed=True)
         if not accepted_html:
-            accepted_html = "<div class='dx-empty'>Accepted: none</div>"
+            accepted_html = "<div class='dx-empty'>No data-derived diagnoses.</div>"
         render_html(
             st,
             "<div class='dx-panel'><div class='dx-panel-head'>"
             "<div class='dx-title rc-card-title'>Data-derived diagnoses</div>"
-            "<div class='dx-note'>Diagnoses and coding supported by the current data.</div>"
+            "<div class='dx-note'>Diagnoses supported by current data.</div>"
             "</div>"
-            "<div class='dx-col-title'>Accepted</div>"
             f"{accepted_html}"
-            "<div class='dx-review-inline'><strong>Needs review:</strong> none</div>"
             "</div>",
         )
         return
@@ -381,7 +379,7 @@ def render_diagnosis_confirm_panel(st, result, include_title=True):
             st,
             "<div class='dx-panel'><div class='dx-panel-head'>"
             "<div class='dx-title rc-card-title'>Data-derived diagnoses</div>"
-            "<div class='dx-note'>Diagnoses and coding supported by the current data.</div>"
+            "<div class='dx-note'>Diagnoses supported by current data.</div>"
             "</div></div>",
         )
 

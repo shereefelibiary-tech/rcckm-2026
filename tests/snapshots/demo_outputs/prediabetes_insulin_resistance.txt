@@ -14,7 +14,7 @@ Assessment:
 - Prediabetes (ICD: R73.03)
 
 Recommendations:
-1. Lipids: No lipid escalation.
+1. Lipids: No lipid-lowering medication indicated; LDL-C <100, ApoB <90, non-HDL-C <130.
 2. Plaque: CAC may clarify risk.
 3. Kidney: No kidney action.
 4. BP: At goal.
@@ -55,7 +55,7 @@ Your goals
 
 STEP 4
 Your next steps
-1. Cholesterol: Continue current lipid treatment.
+1. Cholesterol: No medication indicated.
 2. Coronary plaque: Calcium scan may clarify treatment.
 3. Kidneys: Stable.
 4. Blood pressure: At goal.
@@ -63,7 +63,7 @@ Your next steps
 6. Aspirin: Not indicated.
 
 ACTIONS:
-- Lipid lowering: No lipid escalation. LDL-C 122; target <100. ApoB 92; target <90.
+- Lipid lowering: No lipid-lowering medication indicated. LDL-C 122; target <100. ApoB 92; target <90.
 - Plaque: CAC may clarify risk.
 - Kidney protection: No kidney action.
 - Blood pressure: At goal. Current 128/78; goal <130/80.

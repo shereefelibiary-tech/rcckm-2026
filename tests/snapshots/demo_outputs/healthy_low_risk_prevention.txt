@@ -12,7 +12,7 @@ Assessment:
 - No diagnosis candidates generated.
 
 Recommendations:
-1. Lipids: No lipid escalation.
+1. Lipids: No lipid-lowering medication indicated.
 2. Plaque: CAC not measured.
 3. Kidney: No kidney action.
 4. BP: At goal.
@@ -47,7 +47,7 @@ Your goals
 
 STEP 4
 Your next steps
-1. Cholesterol: Continue current lipid treatment.
+1. Cholesterol: No medication indicated.
 2. Coronary plaque: Not measured.
 3. Kidneys: Stable.
 4. Blood pressure: At goal.
@@ -55,7 +55,7 @@ Your next steps
 6. Aspirin: Not indicated.
 
 ACTIONS:
-- Lipid lowering: No lipid escalation. LDL-C 88. ApoB 70.
+- Lipid lowering: No lipid-lowering medication indicated. LDL-C 88. ApoB 70.
 - Plaque: Not measured.
 - Kidney protection: No kidney action.
 - Blood pressure: At goal. Current 108/68; goal <130/80.

@@ -205,7 +205,7 @@ def test_rheumatoid_arthritis_demo_is_inflammatory_context_without_overtreatment
     assert "Context: RA; father MI age 49." in text
     assert "Existing rheumatoid arthritis; chronic inflammatory disease risk enhancer." not in text
     assert "No new cardiometabolic diagnosis candidates generated." in text
-    assert "1. Lipids: No lipid escalation." in text
+    assert "1. Lipids: No lipid-lowering medication indicated." in text
     assert "2. Plaque: CAC not measured." in text
     assert "6. Aspirin: Not routine for primary prevention." in text
     assert "Level 3B - actionable early CKM / atherogenic risk" not in text
@@ -267,7 +267,7 @@ def _demo_action_and_emr(case_name):
         (
             "rheumatoid_arthritis_risk_enhancer",
             ("Inflammatory risk enhancer", "RA is a risk enhancer"),
-            ("Context: RA", "No lipid escalation"),
+            ("Context: RA", "No lipid-lowering medication indicated"),
         ),
         (
             "south_asian_ancestry_context",

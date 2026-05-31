@@ -13,7 +13,7 @@ Assessment:
 - Elevated lipoprotein(a) (ICD: E78.41)
 
 Recommendations:
-1. Lipids: No lipid escalation.
+1. Lipids: No lipid-lowering medication indicated.
 2. Plaque: CAC may clarify risk.
 3. Kidney: No kidney action.
 4. BP: At goal.
@@ -50,7 +50,7 @@ Your goals
 
 STEP 4
 Your next steps
-1. Cholesterol: Continue current lipid treatment.
+1. Cholesterol: No medication indicated.
 2. Coronary plaque: Calcium scan may clarify treatment.
 3. Kidneys: Stable.
 4. Blood pressure: At goal.
@@ -58,7 +58,7 @@ Your next steps
 6. Aspirin: Not indicated.
 
 ACTIONS:
-- Lipid lowering: No lipid escalation. LDL-C 124. ApoB 86.
+- Lipid lowering: No lipid-lowering medication indicated. LDL-C 124. ApoB 86.
 - Plaque: CAC may clarify risk.
 - Kidney protection: No kidney action.
 - Blood pressure: At goal. Current 118/72; goal <130/80.

@@ -475,8 +475,8 @@ def test_hidden_high_risk_cluster_upgrades_young_low_prevent_patient():
     assert "inflammatory disease" in classification.drivers
     assert "South Asian ancestry" in classification.drivers
     assert "gestational diabetes" in classification.drivers
-    assert "Discuss moderate-intensity statin therapy" in actions
-    assert panel["lipid_lowering"].status == "Discuss moderate-intensity statin"
+    assert "Discuss lipid-lowering therapy" in actions
+    assert panel["lipid_lowering"].status == "Discuss lipid-lowering therapy"
     assert panel["plaque_cac"].status == "CAC may clarify treatment"
     assert "Coronary plaque: Calcium scan may clarify treatment." in roadmap
     assert (
@@ -537,6 +537,39 @@ def test_hidden_high_risk_cluster_requires_at_least_two_enhancers():
     assert classification.label != "Level 3B - hidden atherogenic risk burden"
 
 
+def test_off_treatment_level3b_atherogenic_risk_discusses_lipid_lowering():
+    from renderers.emr_renderer import render_emr_note
+    from renderers.patient_roadmap import render_patient_roadmap_text
+
+    patient = Patient(
+        age=51,
+        sex="female",
+        ldl_c=137,
+        apob=112,
+        lp_a_value=176.8,
+        lp_a_unit="nmol/L",
+        family_history_premature_ascvd=True,
+        family_history_relationship="mother",
+        family_history_event_type="MI",
+        family_history_age_at_event=54,
+        gestational_hypertension=True,
+        cac=None,
+        lipid_lowering=False,
+        prevent_10y_ascvd=0.7,
+        prevent_30y_ascvd=5.2,
+    )
+    result, classification, actions, _diagnoses = _case(patient)
+    note = render_emr_note(patient, result)
+    roadmap = render_patient_roadmap_text(patient, result)
+
+    assert classification.level == "3B"
+    assert "Discuss lipid-lowering therapy" in actions
+    assert "1. Lipids: Discuss lipid-lowering therapy." in note
+    assert "No lipid escalation" not in note
+    assert "1. Cholesterol: Discuss starting cholesterol-lowering therapy." in roadmap
+    assert "Continue current lipid treatment" not in roadmap
+
+
 def test_level_2b_converging_early_signals_low_prevent_uses_formal_taxonomy():
     patient = Patient(
         age=44,
@@ -570,7 +603,7 @@ def test_level_2b_converging_early_signals_low_prevent_uses_formal_taxonomy():
     assert "kidney G1A1" in note
     assert "Atherogenic/metabolic burden:" not in note
     assert "Context: OSA; Preeclampsia." in note
-    assert "Lipids: No lipid escalation" in note
+    assert "Lipids: No lipid-lowering medication indicated" in note
 
 
 def test_level_2b_near_level_3_threshold_uses_shared_decision_wording():

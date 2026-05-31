@@ -147,7 +147,7 @@ def test_render_patient_roadmap_groups_full_clinical_story_without_raw_html():
     assert "below 70 mg/dL" in html
     assert "Current 132 mg/dL" in html
     assert "Cholesterol" in html
-    assert "Discuss stronger cholesterol-lowering therapy." in html
+    assert "Discuss starting high-intensity cholesterol-lowering therapy." in html
     assert "No repeat calcium scan is needed for today&#x27;s decision." not in html
     assert "Aspirin" in html
     assert "May be considered if bleeding risk is low." in html
@@ -252,7 +252,7 @@ def test_render_patient_roadmap_text_is_copy_ready_plain_text():
     assert "Your goals" in text
     assert "STEP 4" in text
     assert "Your next steps" in text
-    assert "1. Cholesterol: Discuss stronger cholesterol-lowering therapy." in text
+    assert "1. Cholesterol: Discuss starting high-intensity cholesterol-lowering therapy." in text
     assert "2. Coronary plaque: Very high burden (CAC 350)." in text
     assert "3. Kidneys: Chronic kidney disease is present (UACR 45)." in text
     assert "6. Aspirin: May be considered if bleeding risk is low." in text
@@ -294,6 +294,114 @@ def test_patient_roadmap_uses_coronary_plaque_language_for_low_positive_cac():
 
     assert "Coronary plaque: Present (CAC 12)." in text
     assert "Artery plaque" not in text
+
+
+def _next_step_lines(text: str) -> list[str]:
+    return [line for line in text.splitlines() if line[:1].isdigit()]
+
+
+def test_lipid_roadmap_starts_high_intensity_therapy_when_severe_ldl_untreated():
+    patient = Patient(age=45, sex="male", ldl_c=212, cac=0, lipid_lowering=False)
+    roadmap = render_patient_roadmap_text(patient, evaluate_patient(patient))
+    next_steps = "\n".join(_next_step_lines(roadmap))
+
+    assert "Cholesterol: Discuss starting high-intensity cholesterol-lowering therapy." in next_steps
+    assert "stronger" not in next_steps.lower()
+    assert "continue current lipid treatment" not in next_steps.lower()
+
+
+def test_lipid_roadmap_uses_stronger_therapy_when_treated_above_target():
+    patient = Patient(
+        age=45,
+        sex="male",
+        ldl_c=212,
+        cac=0,
+        lipid_lowering=True,
+        statin_intensity="moderate",
+    )
+    roadmap = render_patient_roadmap_text(patient, evaluate_patient(patient))
+
+    assert "Cholesterol: Discuss stronger cholesterol-lowering therapy." in roadmap
+
+
+def test_lipid_roadmap_starts_therapy_for_hidden_risk_when_untreated():
+    patient = Patient(
+        age=51,
+        sex="female",
+        ldl_c=137,
+        apob=112,
+        lp_a_value=176.8,
+        lp_a_unit="nmol/L",
+        family_history_premature_ascvd=True,
+        family_history_relationship="mother",
+        family_history_event_type="MI",
+        family_history_age_at_event=54,
+        gestational_hypertension=True,
+        cac=None,
+        lipid_lowering=False,
+        prevent_10y_ascvd=0.7,
+        prevent_30y_ascvd=5.2,
+    )
+    roadmap = render_patient_roadmap_text(patient, evaluate_patient(patient))
+    next_steps = "\n".join(_next_step_lines(roadmap))
+
+    assert "Cholesterol: Discuss starting cholesterol-lowering therapy." in next_steps
+    assert "Continue current lipid treatment" not in next_steps
+    assert "No lipid escalation" not in next_steps
+
+
+def test_lipid_roadmap_uses_no_medication_indicated_when_untreated_without_lipid_indication():
+    patient = Patient(
+        age=34,
+        sex="female",
+        ldl_c=88,
+        apob=99,
+        lp_a_value=400,
+        lp_a_unit="nmol/L",
+        lipid_lowering=False,
+        prevent_10y_ascvd=0.2,
+        prevent_30y_ascvd=2.0,
+    )
+    roadmap = render_patient_roadmap_text(patient, evaluate_patient(patient))
+    next_steps = "\n".join(_next_step_lines(roadmap))
+
+    assert "Cholesterol: No medication indicated." in next_steps
+    assert "No cholesterol medicine change" not in next_steps
+    assert "Continue current lipid treatment" not in next_steps
+    assert "No lipid escalation" not in next_steps
+    assert "stronger cholesterol-lowering therapy" not in next_steps.lower()
+
+
+def test_lipid_roadmap_continues_treatment_only_when_active_and_near_target():
+    patient = Patient(
+        age=55,
+        sex="male",
+        ldl_c=75,
+        apob=70,
+        lipid_lowering=True,
+        statin_intensity="moderate",
+        prevent_10y_ascvd=1.0,
+        prevent_30y_ascvd=4.0,
+    )
+    roadmap = render_patient_roadmap_text(patient, evaluate_patient(patient))
+
+    assert "Cholesterol: Continue current lipid treatment." in roadmap
+
+
+def test_lipid_roadmap_keeps_treated_above_target_as_stronger_therapy():
+    patient = Patient(
+        age=58,
+        sex="male",
+        ldl_c=132,
+        apob=104,
+        lipid_lowering=True,
+        statin_intensity="moderate",
+        prevent_10y_ascvd=8.0,
+        prevent_30y_ascvd=18.0,
+    )
+    roadmap = render_patient_roadmap_text(patient, evaluate_patient(patient))
+
+    assert "Cholesterol: Discuss stronger cholesterol-lowering therapy." in roadmap
 
 
 def test_render_printable_patient_roadmap_uses_dedicated_print_html():
@@ -348,7 +456,7 @@ def test_35f_diabetes_albuminuria_patient_roadmap_is_action_domain_aligned():
     assert "Review kidney protection" not in roadmap
     assert "Kidneys: Significant albuminuria is present (UACR 362)." in roadmap
     assert "Aspirin: Not indicated." in roadmap
-    assert "Cholesterol: Continue current lipid treatment." in roadmap
+    assert "Cholesterol: No medication indicated." in roadmap
 
 
 def test_patient_risk_summary_is_secondary_prevention_aware():

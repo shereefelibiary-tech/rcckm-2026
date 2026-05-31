@@ -8,7 +8,7 @@ Assessment:
 - Type 2 diabetes mellitus with CKD G3aA2 and albuminuria (ICD: E11.22; CKD stage 3a ICD: N18.31)
 
 Recommendations:
-1. Lipids: No lipid escalation.
+1. Lipids: No lipid-lowering medication indicated; LDL-C <70, non-HDL-C <100.
 2. Plaque: CAC not measured.
 3. Kidney: UACR 210; eGFR 52.
 4. BP: BP needed.
