@@ -22,6 +22,7 @@ from ui.input_worksheet import (
 )
 from ui.html import render_html
 from ui.report_layout import demo_patient, render_report, run_patient
+from ui.qa_export import render_qa_export
 from ui.report_state import (
     clear_report_state,
     hash_worksheet_state,
@@ -238,6 +239,7 @@ def main():
             st.session_state.active_patient,
             st.session_state.active_patient_source,
         )
+        render_qa_export(st, st.session_state)
     else:
         message = "Review the worksheet, then click Interpret risk."
         if worksheet_changed or (
