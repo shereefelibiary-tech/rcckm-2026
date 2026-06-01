@@ -6,7 +6,7 @@ RISK CONTINUUM CKM
 
 Level: 3B - actionable early CKM / atherogenic risk.
 PREVENT: ASCVD 10y 5.76% (Intermediate); 30y 23.61%.
-CKM/Kidney/Plaque: CKM 2; kidney G1A1; CAC not measured.
+CKM/Kidney/Plaque: CKM stage 2; kidney G1A1; CAC not measured.
 
 Assessment:
 - Type 2 diabetes mellitus (ICD: E11.9)

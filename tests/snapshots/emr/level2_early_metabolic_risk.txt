@@ -2,7 +2,7 @@ RISK CONTINUUM CKM
 
 Level: 2B - converging early risk signals.
 PREVENT: ASCVD 10y 0.74% (Low); 30y 5.38%.
-CKM/Kidney/Plaque: CKM 2; kidney G1A1; CAC not measured.
+CKM/Kidney/Plaque: CKM stage 2; kidney G1A1; CAC not measured.
 Context: Gestational diabetes.
 
 Assessment:

@@ -2,7 +2,7 @@ RISK CONTINUUM CKM
 
 Level: 3B - actionable early CKM / atherogenic risk.
 PREVENT: ASCVD 10y 5.41% (Intermediate); 30y 22.55%.
-CKM/Kidney/Plaque: CKM 2; kidney G2; UACR not available; CAC not measured.
+CKM/Kidney/Plaque: CKM stage 2; kidney G2; UACR not available; CAC not measured.
 
 Assessment:
 - Essential hypertension (ICD: I10)

@@ -6,7 +6,7 @@ RISK CONTINUUM CKM
 
 Level: 3B - CKM stage 3 with albuminuria-mediated kidney and ASCVD risk.
 PREVENT: ASCVD 10y 17.6% (High); 30y 35.64%.
-CKM/Kidney/Plaque: CKM 3; kidney G3aA3; CAC not measured.
+CKM/Kidney/Plaque: CKM stage 3; kidney G3aA3; CAC not measured.
 
 Assessment:
 - Type 2 diabetes mellitus with CKD G3aA3 and albuminuria (ICD: E11.22; CKD stage 3a ICD: N18.31)

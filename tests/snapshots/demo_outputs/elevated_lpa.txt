@@ -6,7 +6,7 @@ RISK CONTINUUM CKM
 
 Level: 2B - converging early risk signals.
 PREVENT: ASCVD 10y 0.7% (Low); 30y 5.29%.
-CKM/Kidney/Plaque: CKM 0; kidney G1A1; CAC not measured.
+CKM/Kidney/Plaque: CKM stage 0; kidney G1A1; CAC not measured.
 Context: elevated Lp(a); Preeclampsia.
 
 Assessment:

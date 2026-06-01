@@ -681,7 +681,7 @@ def test_severe_ckd_diabetes_actions_are_active_med_aware():
 
     assert "LDL-C unavailable due to TG 478" in panel["lipid_lowering"].detail
     assert "ApoB 80; target <80" in panel["lipid_lowering"].detail
-    assert "CKM/Kidney/Plaque: CKM 3; kidney G4A3; CAC not measured." in note
+    assert "CKM/Kidney/Plaque: CKM stage 3; kidney G4A3; CAC not measured." in note
     assert "1. Lipids: High-intensity lipid-lowering active; ApoB 80, target <80" in note
     assert "LDL-C unavailable due to TG" in note
     assert "3. Kidney: eGFR 16; UACR 2417; ACEi/ARB + SGLT2 active." in note

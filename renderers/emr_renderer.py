@@ -645,9 +645,9 @@ def _emr_ckm_line(patient, result):
         cac_driven = any(driver.startswith("cac ") for driver in drivers)
         ckd_driven = any(driver.startswith("ckd ") for driver in drivers)
         if stage == 3 and cac_driven and not ckd_driven and not kdigo_ckd_signal:
-            parts.append("CKM 3 by subclinical atherosclerosis")
+            parts.append("CKM stage 3 by subclinical atherosclerosis")
         else:
-            parts.append(f"CKM {stage}")
+            parts.append(f"CKM stage {stage}")
     if kdigo:
         parts.append(f"kidney {kdigo}")
         if getattr(patient, "uacr", None) is None and _uacr_completion_relevant(patient, result):
@@ -772,6 +772,30 @@ def _lipid_target_phrase(patient, result):
     return ", ".join(parts)
 
 
+def _needs_high_intensity_ldl_reduction(patient, result):
+    """High-intensity statin is required when reaching the LDL-C target needs >50% reduction.
+
+    High-intensity statin therapy is defined by an expected LDL-C reduction of >=50%;
+    a moderate-intensity statin (30-49%) cannot get a patient to goal when the gap from
+    current LDL-C to target exceeds 50%.
+    """
+    ldl = _emr_float(getattr(patient, "ldl_c", None))
+    target = (getattr(result, "targets", None) or [None])[0]
+    ldl_target = _emr_float(getattr(target, "ldl_c_target", None)) if target else None
+    if ldl is None or ldl_target is None or ldl <= 0:
+        return False
+    return (ldl - ldl_target) / ldl > 0.50
+
+
+# Generic lipid actions that should be sharpened to a high-intensity statin when the
+# patient needs >50% LDL-C reduction to reach target.
+_HIGH_INTENSITY_UPGRADEABLE_ACTIONS = {
+    "Lipid-lowering therapy indicated",
+    "Discuss moderate-intensity statin",
+    "Intensify lipid-lowering",
+}
+
+
 def _short_lipid_action(item, patient, result):
     status = str(getattr(item, "status", "") or "")
     lowered = status.lower()
@@ -795,6 +819,8 @@ def _short_lipid_action(item, patient, result):
         action = "No lipid escalation"
     else:
         action = status.rstrip(".") or "Review lipids"
+    if action in _HIGH_INTENSITY_UPGRADEABLE_ACTIONS and _needs_high_intensity_ldl_reduction(patient, result):
+        action = "High-intensity statin therapy indicated"
     triglycerides = getattr(patient, "triglycerides", None)
     apob = getattr(patient, "apob", None)
     target = (getattr(result, "targets", None) or [None])[0]

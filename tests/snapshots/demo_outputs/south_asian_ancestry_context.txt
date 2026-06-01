@@ -6,7 +6,7 @@ RISK CONTINUUM CKM
 
 Level: 3B - actionable early CKM / atherogenic risk.
 PREVENT: ASCVD 10y 3.8% (Borderline); 30y 22%.
-CKM/Kidney/Plaque: CKM 2; kidney G1A1; CAC not measured.
+CKM/Kidney/Plaque: CKM stage 2; kidney G1A1; CAC not measured.
 Context: South Asian ancestry.
 
 Assessment:

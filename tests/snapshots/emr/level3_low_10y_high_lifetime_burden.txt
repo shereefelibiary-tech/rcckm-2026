@@ -2,7 +2,7 @@ RISK CONTINUUM CKM
 
 Level: 3B - elevated lifetime cardiometabolic risk despite low short-term event risk.
 PREVENT: ASCVD 10y 1.37% (Low); 30y 9.09%.
-CKM/Kidney/Plaque: CKM 2; UACR not available; CAC not measured.
+CKM/Kidney/Plaque: CKM stage 2; UACR not available; CAC not measured.
 Context: premature family history.
 
 Assessment:

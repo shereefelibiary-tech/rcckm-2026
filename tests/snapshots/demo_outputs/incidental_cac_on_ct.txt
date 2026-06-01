@@ -6,7 +6,7 @@ RISK CONTINUUM CKM
 
 Level: 3B - actionable early CKM / atherogenic risk.
 PREVENT: ASCVD 10y 5.84% (Intermediate).
-CKM/Kidney/Plaque: CKM 2; kidney G2A1; Moderate incidental coronary artery calcification noted on CT.
+CKM/Kidney/Plaque: CKM stage 2; kidney G2A1; Moderate incidental coronary artery calcification noted on CT.
 
 Assessment:
 - Essential hypertension (ICD: I10)
