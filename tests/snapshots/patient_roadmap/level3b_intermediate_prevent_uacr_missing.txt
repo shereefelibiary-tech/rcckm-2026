@@ -20,7 +20,7 @@ STEP 3
 Your goals
 - LDL-C: - to <100 mg/dL
 - ApoB: 102 mg/dL to <90 mg/dL
-- A1c: 5.9% to prediabetes range
+- A1c: 5.9% to <5.7%
 - Kidney: eGFR 76; UACR not available to repeat eGFR/UACR if due
 
 STEP 4

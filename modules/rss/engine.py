@@ -22,7 +22,7 @@ class SignalContribution:
 class RssContextItem:
     label: str
     detail: str
-    note: str = "Shown as context; not included in RSS points."
+    note: str = "Shown as context; not included in Risk Signal Score points."
 
 
 def build_rss_contributions(patient, result) -> List[SignalContribution]:

@@ -68,7 +68,7 @@ def test_render_prevent_card_context_uses_discordance_when_plaque_exceeds_risk()
     html = render_prevent_card(result)
 
     assert "About 4 in 100 similar patients may have a heart attack, stroke, or related artery disease event over 10 years." in html
-    assert "CAC 350 shows high plaque burden, so treatment intensity should not rely on PREVENT alone." in html
+    assert "CAC 350 shows high plaque burden, so PREVENT should not be used alone." in html
 
 
 def test_render_prevent_card_handles_unavailable_prevent_risk():

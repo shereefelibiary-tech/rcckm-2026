@@ -14,7 +14,7 @@ def test_cac_zero_missing_and_positive_plaque_states_do_not_cross():
     zero = "\n".join([zero_outputs["emr"], zero_outputs["roadmap"], zero_outputs["actions"]])
     positive = "\n".join([positive_outputs["emr"], positive_outputs["roadmap"], positive_outputs["actions"]])
     assert "CAC 0" not in missing
-    assert "plaque unmeasured" in missing.lower() or "CAC not performed" in missing
+    assert "plaque unmeasured" in missing.lower() or "CAC not performed" in missing or "CAC not measured" in missing
     assert "no calcified plaque detected" in zero.lower()
     assert "CAC not performed" not in zero
     assert "mild plaque" in positive.lower() or "plaque present" in positive.lower()
@@ -46,7 +46,7 @@ def test_cac_percentile_context_never_overpowers_absolute_score():
     assert format_cac_percentile_context(20, -1) is None
 
 
-def test_young_cac_missing_recommendation_is_conditional():
+def test_young_cac_missing_with_major_signals_may_clarify_risk():
     bundle = render_case_output(
         Patient(
             age=38,
@@ -63,8 +63,8 @@ def test_young_cac_missing_recommendation_is_conditional():
             prevent_30y_ascvd=7.53,
         )
     )
-    assert_present(bundle["outputs"]["visible"], ("CAC not routinely recommended at this age",))
-    assert_absent(bundle["outputs"]["visible"], ("CAC reasonable for risk clarification",))
+    assert_present(bundle["outputs"]["visible"], ("CAC may clarify risk",))
+    assert_absent(bundle["outputs"]["visible"], ("CAC not routinely recommended at this age",))
 
 
 def test_cac_interpretation_helper_rejects_invalid_values():

@@ -44,7 +44,6 @@ STEP 3
 Your goals
 - LDL-C: 172 mg/dL to <100 mg/dL
 - non-HDL-C: 200 mg/dL calculated to <130 mg/dL
-- A1c: 5.6% to normal range
 - BP: 130/78 mmHg to <130/80
 - Kidney / albuminuria: 9 mg/g; G1A1 to reduce albuminuria / preserve eGFR
 - Weight: BMI 29.0 to individualized
@@ -67,6 +66,6 @@ ACTIONS:
 - Aspirin / antiplatelet: Not indicated.
 - Additional information that may help clarify risk: ApoB, Lp(a).
 
-RSS: 4
-RSS CONTRIBUTORS:
+Risk Signal Score: 4
+RISK SIGNAL CONTRIBUTORS:
 - Hypertriglyceridemia: 165.0 (+4)

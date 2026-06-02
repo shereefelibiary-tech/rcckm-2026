@@ -13,12 +13,11 @@ Assessment:
 - Severely increased albuminuria (ICD: R80.9)
 - Essential hypertension (ICD: I10)
 - Hypertriglyceridemia (ICD: E78.1)
-- Obesity (ICD: E66.9)
-- Adult BMI 31.0-31.9 (ICD: Z68.31)
+- Obesity, BMI 31.0-31.9 (ICD: E66.9, Z68.31)
 
 Recommendations:
 1. Lipids: Discuss moderate-intensity statin; LDL-C <70, ApoB <80, non-HDL-C <100.
-2. Plaque: CAC not measured.
+2. Plaque: CAC may clarify risk.
 3. Kidney: UACR 320; eGFR 48.
 4. BP: Treat toward <130/80.
 5. Glycemia: Optimize diabetes care; A1c 6.8%; goal <7.0.
@@ -57,7 +56,7 @@ Your goals
 STEP 4
 Your next steps
 1. Cholesterol: Discuss starting cholesterol-lowering therapy.
-2. Coronary plaque: Not measured.
+2. Coronary plaque: Calcium scan may clarify treatment.
 3. Kidneys: Chronic kidney disease is present (UACR 320).
 4. Blood pressure: Treat toward <130/80.
 5. Blood sugar: Work toward A1c <7.0.
@@ -65,14 +64,14 @@ Your next steps
 
 ACTIONS:
 - Lipid lowering: Discuss moderate-intensity statin. LDL-C 128; target <70. ApoB 106; target <80.
-- Plaque: Not measured.
+- Plaque: CAC may clarify risk.
 - Kidney protection: Add SGLT2 if no contraindication. UACR 320; eGFR 48.
 - Blood pressure: Treat toward <130/80. Current 136/82.
 - Glycemia / metabolic: Optimize diabetes care. A1c 6.8%; goal <7.0.
 - Aspirin / antiplatelet: Not indicated.
 
-RSS: 35
-RSS CONTRIBUTORS:
+Risk Signal Score: 35
+RISK SIGNAL CONTRIBUTORS:
 - ApoB elevation: 106.0 (+8)
 - Reduced eGFR: 48.0 (+5)
 - Albuminuria: 320.0 (+10)

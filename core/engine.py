@@ -1,4 +1,5 @@
 from core.results import RCCKMResult
+from core.diagnosis_workflow import prepare_diagnosis_display_entries
 from modules.actions.engine import build_action_plan
 from modules.cac_recommendation.engine import build_cac_recommendation
 from modules.clarification.engine import build_clarification_ladder
@@ -137,6 +138,7 @@ def evaluate_patient(patient):
     rcckm_result.rule_traces = [
         trace.to_dict() for trace in build_rule_traces(patient, rcckm_result)
     ]
+    rcckm_result.diagnosis_entries = prepare_diagnosis_display_entries(rcckm_result)
     rcckm_result.snapshot_lines = build_snapshot_lines(rcckm_result)
 
     return rcckm_result

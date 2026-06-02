@@ -72,6 +72,53 @@ def test_render_emr_note_outputs_plain_text_sections_in_order():
     assert note.index(lipid_line) < note.index(aspirin_line)
 
 
+def test_render_emr_note_combines_obesity_and_bmi_z_code_in_assessment():
+    cases = [
+        (
+            33.4,
+            "Obesity",
+            "E66.9",
+            "Adult BMI 33.0-33.9",
+            "Z68.33",
+            "- Obesity, BMI 33.0-33.9 (ICD: E66.9, Z68.33)",
+        ),
+        (
+            36.2,
+            "Obesity",
+            "E66.9",
+            "Adult BMI 36.0-36.9",
+            "Z68.36",
+            "- Obesity, BMI 36.0-36.9 (ICD: E66.9, Z68.36)",
+        ),
+    ]
+
+    for bmi, obesity_label, obesity_code, bmi_label, bmi_code, combined_line in cases:
+        patient = Patient(age=42, sex="female", bmi=bmi)
+        result = RCCKMResult(
+            diagnosis_candidates=[
+                DiagnosisCandidate(
+                    name=obesity_label,
+                    icd10_code=obesity_code,
+                    status="data-derived",
+                    source="BMI >=30 kg/m²",
+                ),
+                DiagnosisCandidate(
+                    name=bmi_label,
+                    icd10_code=bmi_code,
+                    status="data-derived",
+                    source=f"BMI {bmi_label.removeprefix('Adult BMI ')} kg/m²",
+                ),
+            ],
+            recommendations=["No lipid-lowering medication indicated."],
+        )
+
+        note = render_emr_note(patient, result)
+
+        assert combined_line in note
+        assert f"- {obesity_label} (ICD: {obesity_code})" not in note
+        assert f"- {bmi_label} (ICD: {bmi_code})" not in note
+
+
 def test_stress_smartphrase_emr_uses_extracted_uacr_and_concise_surface_lines():
     fixture = Path("tests/fixtures/ingest/rcckm_parser_stress_smartphrase.txt")
     report = parse_ingest_report(fixture.read_text(encoding="utf-8"))
@@ -275,7 +322,7 @@ def test_emr_note_is_materially_shorter_than_legacy_risk_summary_shape():
             "- PREVENT 30-year atherosclerotic event risk: 30.65%",
             "- Plaque: CAC 350",
             "- Kidney: G3aA2",
-            "- RSS: 74/100",
+            "- Risk Signal Score: 74/100",
             "- TG: 180 mg/dL.",
             "- Atherogenic burden: ApoB 110 mg/dL; LDL-C 132 mg/dL; non-HDL-C 157 mg/dL.",
             "- Lp(a): 80 nmol/L.",

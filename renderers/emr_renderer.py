@@ -543,7 +543,6 @@ def _short_recommendation_line(recommendation):
         "Optimize kidney-protective therapy and confirm albuminuria persistence.": "Confirm albuminuria persistence and optimize kidney-protective therapy.",
         "Treat blood pressure toward individualized goal.": "Treat BP toward goal <130/80.",
         "Optimize BP to <130/80.": "Treat BP toward goal <130/80.",
-        "CAC reasonable for risk clarification if treatment decision remains uncertain.": "CAC may clarify risk if treatment decision remains uncertain.",
         "Aspirin may be considered only if bleeding risk is low after shared decision-making.": "Aspirin only if bleeding risk is low.",
         "Obtain hsCRP if inflammatory risk clarification would change management.": "Obtain hsCRP only if inflammatory risk clarification would change management.",
     }
@@ -556,7 +555,7 @@ def _young_family_metabolic_recommendations(patient, result):
     return [
         "Focus on early risk reduction given metabolic risk signals and strong family history.",
         "Discuss moderate-intensity statin if ApoB/LDL-C burden, family history, or clinician judgment supports treatment.",
-        "CAC not routinely recommended at this age; consider only if results would change management.",
+        "CAC may clarify risk.",
         "Aspirin not indicated for routine primary prevention.",
         "Additional information: ApoB, Lp(a), and hsCRP if results would change management.",
     ]

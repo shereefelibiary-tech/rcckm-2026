@@ -31,7 +31,7 @@ from ui.export_print import contains_html_tags, normalize_export_text
 from renderers.clarifier_renderer import build_clarifier_card_html
 from renderers.continuum_bar import build_continuum_bar_html
 from renderers.prevent_card import render_prevent_card
-from renderers.patient_roadmap import render_patient_roadmap
+from renderers.patient_roadmap import render_patient_roadmap, render_patient_roadmap_text
 from renderers.rss_renderer import (
     build_rss_panel_html,
     format_tower_value,
@@ -85,6 +85,8 @@ class _FakeStreamlit:
         self.components = _FakeComponents(self)
         self.clicked_key = clicked_key
         self.rerun_requested = False
+        self.columns_calls = []
+        self.container_calls = []
 
     def write(self, value):
         self.messages.append(("write", value))
@@ -98,10 +100,15 @@ class _FakeStreamlit:
     def code(self, value, language=None):
         self.messages.append(("code", value, language))
 
-    def columns(self, count):
+    def columns(self, count, **kwargs):
+        self.columns_calls.append((count, kwargs))
         if isinstance(count, int):
             return [_Column() for _ in range(count)]
         return [_Column() for _ in count]
+
+    def container(self, **kwargs):
+        self.container_calls.append(kwargs)
+        return _Column()
 
     def button(self, label, key=None, **kwargs):
         self.messages.append(("button", label, key, kwargs))
@@ -189,6 +196,29 @@ def test_custom_html_renderers_return_html_strings():
     assert "Additional information that may help clarify risk:" in clarifier_html
 
 
+def test_patient_roadmap_prediabetes_a1c_goal_targets_normal_range():
+    for a1c in (5.8, 6.1, 6.4):
+        patient = Patient(age=55, sex="female", a1c=a1c, diabetes=False)
+        result, _, _ = run_patient(patient)
+
+        text = render_patient_roadmap_text(patient, result)
+        html = render_patient_roadmap(patient, result)
+
+        assert f"- A1c: {a1c:.1f}% to <5.7%" in text
+        assert f"A1c: {a1c:.1f}% to prediabetes range" not in text
+        assert "<span>A1c</span> below 5.7%" in html
+        assert "to prediabetes range" not in html
+
+
+def test_patient_roadmap_normal_a1c_does_not_create_improvement_goal():
+    patient = Patient(age=55, sex="female", a1c=5.4, diabetes=False)
+    result, _, _ = run_patient(patient)
+
+    text = render_patient_roadmap_text(patient, result)
+
+    assert "- A1c: 5.4% to normal range" not in text
+
+
 def test_report_uses_component_html_for_custom_renderers():
     fake_st = _FakeStreamlit()
 
@@ -210,7 +240,7 @@ def test_report_uses_component_html_for_custom_renderers():
     assert "prevent-card" in inline_html
     assert "roadmap-card" in inline_html
     assert "rss-module" in inline_html
-    assert "Where the Risk Is Coming From" in inline_html
+    assert "Risk Signal Score" in inline_html
     assert "grid-template-columns: 220px minmax(0, 1fr)" in inline_html
     assert "rss-tower-zone" in inline_html
     assert "rss-list-zone" in inline_html
@@ -256,7 +286,7 @@ def test_report_uses_component_html_for_custom_renderers():
         "Largest contribution first",
         "ordered by contribution size",
         "contributors largest first",
-        "RSS support view",
+        "Risk Signal Score support view",
         "confirmed by data",
         "YOU ARE HERE",
         "Cardiometabolic-kidney context",
@@ -406,7 +436,7 @@ def test_unified_rss_module_returns_unescaped_contributor_rows():
     html = build_rss_panel_html(rss_total, contributions)
 
     assert "rss-module" in html
-    assert "Where the Risk Is Coming From" in html
+    assert "Risk Signal Score" in html
     assert "rss-driver-row" in html
     assert "grid-template-columns: 220px minmax(0, 1fr)" in html
     assert "rss-tower-zone" in html
@@ -419,7 +449,7 @@ def test_unified_rss_module_returns_unescaped_contributor_rows():
     assert html.count("rss-driver-row") >= 5
     assert "Contributor explanations" not in html
     assert "Key Contributors" not in html
-    assert "RSS tower and contributor explanations" not in html
+    assert "Risk Signal Score tower and contributor explanations" not in html
     assert "&lt;div" not in html
 
 
@@ -665,6 +695,34 @@ def test_assessment_candidates_are_compact_and_deduped():
     assert "Suppress" not in button_labels
 
 
+def test_render_report_uses_combined_obesity_bmi_diagnosis_in_visible_outputs():
+    cases = [
+        (
+            Patient(age=42, sex="female", bmi=33.4),
+            "Obesity, BMI 33.0-33.9",
+            "ICD: E66.9, Z68.33",
+            "Adult BMI 33.0-33.9",
+        ),
+        (
+            Patient(age=42, sex="female", bmi=36.2),
+            "Obesity, BMI 36.0-36.9",
+            "ICD: E66.9, Z68.36",
+            "Adult BMI 36.0-36.9",
+        ),
+    ]
+
+    for patient, combined_label, combined_codes, standalone_bmi_label in cases:
+        fake_st = _FakeStreamlit()
+
+        render_report(fake_st, patient)
+
+        combined = "\n".join(str(message) for message in fake_st.messages)
+        assert combined_label in combined
+        assert combined_codes in combined
+        assert standalone_bmi_label not in combined
+        assert "Obesity (ICD: E66.9)" not in combined
+
+
 def test_assessment_candidate_rows_use_chips_and_clean_evidence():
     from core.engine import evaluate_patient
     from core.patient import Patient
@@ -786,6 +844,45 @@ def test_assessment_confirmed_rows_do_not_render_review_or_suppress_controls():
     assert "Review" not in button_labels
     assert "Suppress" not in button_labels
     assert "Confirm" not in button_labels
+
+
+def test_review_diagnosis_confirm_button_is_centered_in_each_review_row():
+    from ui.diagnosis_confirm_panel import _render_candidate_list
+
+    rows = [
+        {
+            "dx_id": "possible_fh",
+            "label": "Possible familial hypercholesterolemia",
+            "label_display": "Possible familial hypercholesterolemia",
+            "status": "needs_review",
+            "icd10_suggested": ["E78.01"],
+            "evidence": "LDL-C 170 mg/dL; father MI age 49",
+        },
+        {
+            "dx_id": "ascvd_review",
+            "label": "Clinical ASCVD found in problem list; confirm",
+            "label_display": "Clinical ASCVD found in problem list",
+            "status": "needs_review",
+            "icd10_suggested": ["I25.10"],
+            "evidence": "Problem list CAD",
+        },
+    ]
+
+    fake_st = _FakeStreamlit()
+    _render_candidate_list(fake_st, rows, confirmed=False)
+
+    combined = "\n".join(str(message) for message in fake_st.messages)
+    button_keys = [message[2] for message in fake_st.messages if message[0] == "button"]
+
+    assert combined.count("dx-review-item") == 2
+    assert combined.count("dx-review-text-block") == 2
+    assert combined.count("confirm-button-wrapper") == 2
+    assert fake_st.columns_calls == []
+    assert fake_st.container_calls == [
+        {"horizontal": True, "horizontal_alignment": "left", "vertical_alignment": "center", "gap": "medium"},
+        {"horizontal": True, "horizontal_alignment": "left", "vertical_alignment": "center", "gap": "medium"},
+    ]
+    assert button_keys == ["dx_accept__possible_fh", "dx_accept__ascvd_review"]
 
 
 def test_prioritize_linked_diagnoses_suppresses_fragment_duplicates():

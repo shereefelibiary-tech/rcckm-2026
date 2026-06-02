@@ -31,9 +31,10 @@ RISK_IMPACT_LABELS = {
     "plaque present": "Contributes",
     "mild/context": "Context only",
     "enhancer context": "Context only",
-    "missing": "Context only",
-    "clarifier": "Context only",
-    "needed": "Context only",
+    "missing": "Missing / needed",
+    "clarifier": "Missing / needed",
+    "needed": "Missing / needed",
+    "cac clarifier": "Not measured / may clarify risk",
     "no major signal": "Not active",
     "no active signal": "Not active",
 }
@@ -41,8 +42,10 @@ RISK_IMPACT_LABELS = {
 RISK_IMPACT_PRIORITY = {
     "Major driver": 0,
     "Contributes": 1,
-    "Context only": 2,
-    "Not active": 3,
+    "Missing / needed": 2,
+    "Not measured / may clarify risk": 2,
+    "Context only": 3,
+    "Not active": 4,
 }
 
 
@@ -491,7 +494,7 @@ def _row(marker, threshold, values, effect, active=False):
     impact_class = _risk_impact_class(effect) if effect and effect != "none" else ""
     row_impact_class = f" marker-row-{impact_class.removeprefix('risk-impact-')}" if impact_class else ""
     effect_html = _chip(effect) if effect and effect != "none" else ""
-    missing = effect in {"missing", "clarifier"}
+    missing = effect in {"missing", "clarifier", "needed", "cac clarifier"}
     uacr_attention = "UACR not available" in {str(value).strip() for value in values} and effect in {
         "needed",
         "major driver",
@@ -778,7 +781,7 @@ def _build_grouped_rows(patient, result, *, show_not_active=False):
         effect = "very high risk"
     elif cac is None:
         value = "No CAC performed" if getattr(patient, "cac_not_done", False) else "Plaque unmeasured"
-        effect = "missing"
+        effect = "cac clarifier" if getattr(result, "cac_recommendation", None) else "missing"
     elif cac >= 300:
         value = f"CAC {_fmt_num(cac)}"
         effect = "very high risk"

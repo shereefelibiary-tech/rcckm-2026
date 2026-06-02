@@ -48,7 +48,6 @@ Your goals
 - LDL-C: 108 mg/dL to <100 mg/dL
 - non-HDL-C: 142 mg/dL calculated to <130 mg/dL
 - ApoB: 125 mg/dL to <90 mg/dL
-- A1c: 5.5% to normal range
 - BP: 126/76 mmHg to <130/80
 - Kidney / albuminuria: 8 mg/g; G1A1 to reduce albuminuria / preserve eGFR
 - Weight: BMI 28.1 to individualized
@@ -70,8 +69,8 @@ ACTIONS:
 - Glycemia / metabolic: No glycemic action. A1c 5.5.
 - Aspirin / antiplatelet: Not indicated.
 
-RSS: 15
-RSS CONTRIBUTORS:
+Risk Signal Score: 15
+RISK SIGNAL CONTRIBUTORS:
 - ApoB elevation: 125.0 (+8)
 - Hypertriglyceridemia: 170.0 (+4)
 - Premature family history: Father MI age 49 (+3)

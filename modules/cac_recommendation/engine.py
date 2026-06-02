@@ -20,24 +20,14 @@ def meets_cac_age_gate(patient):
     age = getattr(patient, "age", None)
     if age is None:
         return False
-    sex = _sex_key(patient)
-    if sex == "male":
-        return age >= 40
-    if sex == "female":
-        return age >= 45
-    return False
+    return age >= 40
 
 
 def _below_cac_age_gate(patient):
     age = getattr(patient, "age", None)
     if age is None:
         return False
-    sex = _sex_key(patient)
-    if sex == "male":
-        return age < 40
-    if sex == "female":
-        return age < 45
-    return False
+    return age < 40
 
 
 def _has_diabetes(patient):
@@ -125,6 +115,52 @@ def _has_albuminuria(patient):
     return uacr is not None and uacr >= 30
 
 
+def has_meaningful_cac_risk_signal(patient, result):
+    apob = getattr(patient, "apob", None)
+    ldl_c = getattr(patient, "ldl_c", None)
+    triglycerides = getattr(patient, "triglycerides", None)
+    non_hdl_c = getattr(patient, "non_hdl_c", None)
+    hscrp = getattr(patient, "hscrp", None)
+    a1c = getattr(patient, "a1c", None)
+    bmi = getattr(patient, "bmi", None)
+    ckm_stage = getattr(result, "ckm_stage", None)
+    if isinstance(ckm_stage, dict):
+        ckm_value = ckm_stage.get("stage")
+    else:
+        ckm_value = ckm_stage
+    risk_category = _risk_value(getattr(result, "prevent_risk_category", None))
+    return bool(
+        (apob is not None and apob >= 100)
+        or (ldl_c is not None and ldl_c >= 130)
+        or (triglycerides is not None and triglycerides >= 175)
+        or (non_hdl_c is not None and non_hdl_c >= 130)
+        or getattr(patient, "premature_fhx_ascvd", False)
+        or getattr(patient, "family_history_premature_ascvd", False)
+        or (hscrp is not None and hscrp >= 2)
+        or bool(getattr(patient, "prediabetes_context", False))
+        or (a1c is not None and 5.7 <= a1c < 6.5)
+        or (bmi is not None and bmi >= 30)
+        or bool(getattr(patient, "osa", False))
+        or bool(getattr(patient, "masld", False))
+        or bool(getattr(patient, "smoker", False))
+        or bool(getattr(patient, "smoking", False))
+        or _has_diabetes(patient)
+        or _has_ckd_stage_3_or_higher(patient, result)
+        or _has_albuminuria(patient)
+        or (ckm_value is not None and ckm_value >= 1)
+        or bool(getattr(patient, "inflammatory_disease", False))
+        or bool(getattr(patient, "rheumatoid_arthritis", False))
+        or bool(getattr(patient, "sle", False))
+        or bool(getattr(patient, "psoriasis", False))
+        or bool(getattr(patient, "ibd", False))
+        or risk_category in {
+            RiskLevel.BORDERLINE.value,
+            RiskLevel.INTERMEDIATE.value,
+            RiskLevel.HIGH.value,
+        }
+    )
+
+
 def _has_elevated_30y_trajectory(patient, result):
     age = getattr(patient, "age", None)
     prevent_30y = getattr(result, "prevent_30y_ascvd", None)
@@ -174,14 +210,6 @@ def _cac_available_for_decision(patient, result):
         return False
     if getattr(patient, "clinical_ascvd", False):
         return False
-    ldl_c = getattr(patient, "ldl_c", None)
-    if ldl_c is not None and ldl_c >= 190:
-        return False
-    age = getattr(patient, "age", None)
-    if age is not None and age > 40 and _has_diabetes(patient):
-        return False
-    if _has_ckd_stage_3_or_higher(patient, result):
-        return False
     return True
 
 
@@ -189,7 +217,7 @@ def build_cac_age_gate_note(patient, result):
     if not _cac_available_for_decision(patient, result):
         return None
     if _below_cac_age_gate(patient) and _has_strong_enhancer(patient):
-        return "CAC not routinely recommended at this age; consider only if results would change management."
+        return "CAC may clarify risk."
     return None
 
 
@@ -197,23 +225,26 @@ def build_cac_recommendation(patient, result):
     if not _cac_available_for_decision(patient, result):
         return None
     if _hidden_risk_cluster(patient, result) or has_occult_lipid_discussion_path(patient, result):
-        return "CAC may clarify treatment."
+        return "CAC may clarify risk."
     if not meets_cac_age_gate(patient):
-        return None
+        return "CAC may clarify risk." if has_meaningful_cac_risk_signal(patient, result) else None
+
+    if has_meaningful_cac_risk_signal(patient, result):
+        return "CAC may clarify risk."
 
     risk_category = _risk_value(getattr(result, "prevent_risk_category", None))
     if risk_category == RiskLevel.INTERMEDIATE.value:
-        return "CAC scoring may help refine preventive risk classification."
+        return "CAC may clarify risk."
 
     if risk_category == RiskLevel.BORDERLINE.value and (
         _has_strong_enhancer(patient) or _has_albuminuria(patient)
     ):
-        return "CAC scoring may help refine preventive risk classification."
+        return "CAC may clarify risk."
 
     if risk_category == RiskLevel.LOW.value and (
         _has_lpa_plus_family_history(patient) or _has_lpa_plus_reproductive_marker(patient)
     ):
-        return "CAC reasonable for risk clarification if treatment decision remains uncertain."
+        return "CAC may clarify risk."
 
     if risk_category == RiskLevel.LOW.value and _has_treatment_relevant_lipid_trajectory(patient, result):
         apob = getattr(patient, "apob", None)
@@ -225,18 +256,16 @@ def build_cac_recommendation(patient, result):
                 or bool(getattr(patient, "premature_fhx_ascvd", False))
             )
         ):
-            return "CAC may clarify plaque burden if the patient is hesitant or if treatment intensity remains uncertain."
-        return "CAC may clarify plaque burden if treatment intensity remains uncertain."
+            return "CAC may clarify risk."
+        return "CAC may clarify risk."
 
     if risk_category == RiskLevel.LOW.value and _has_elevated_30y_trajectory(patient, result):
-        return "CAC reasonable for risk clarification if treatment decision remains uncertain."
+        return "CAC may clarify risk."
 
     if risk_category == RiskLevel.LOW.value and _has_near_level3_lipid_trajectory(patient, result):
-        return "CAC reasonable if treatment decision remains uncertain."
+        return "CAC may clarify risk."
 
     if risk_category == RiskLevel.HIGH.value:
-        return (
-            "CAC scoring may help clarify plaque burden but should not delay treatment of high estimated risk."
-        )
+        return "CAC may clarify risk."
 
     return None

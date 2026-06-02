@@ -5,6 +5,14 @@ from ui.theme import component_theme_css
 
 CLARIFIER_DEFS = [
     {
+        "key": "a1c",
+        "label": "A1c",
+        "domain": "a1c_testing",
+        "clarification_flag": "recommend_a1c",
+        "reason": "current glycemia assessment",
+        "priority": "High",
+    },
+    {
         "key": "apob",
         "label": "ApoB",
         "domain": "apob_testing",
@@ -97,7 +105,7 @@ def build_clarifier_items(result, patient=None):
 
 def get_missing_clarification_tests(patient, result):
     items = build_clarifier_items(result, patient=patient)
-    priority = {"ApoB": 1, "Lp(a)": 2, "CAC": 3, "UACR": 4, "hsCRP": 5}
+    priority = {"A1c": 1, "ApoB": 2, "Lp(a)": 3, "CAC": 4, "UACR": 5, "hsCRP": 6}
     return [
         item["label"]
         for item in sorted(

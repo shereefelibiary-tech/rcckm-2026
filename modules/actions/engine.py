@@ -670,22 +670,7 @@ def _add_action(actions, domains, domain, recommendation):
 
 
 def _cac_testing_action_text(cac_recommendation, lipid_treatment_forward=False):
-    if cac_recommendation == "CAC may clarify treatment.":
-        return cac_recommendation
-    if (
-        cac_recommendation
-        == "CAC may clarify plaque burden if the patient is hesitant or if treatment intensity remains uncertain."
-    ):
-        return cac_recommendation
-    if lipid_treatment_forward:
-        return "CAC may clarify plaque burden if treatment intensity remains uncertain."
-    if cac_recommendation in {
-        "CAC reasonable if treatment decision remains uncertain.",
-        "CAC may clarify plaque burden if treatment intensity remains uncertain.",
-        "CAC may clarify plaque burden if the patient is hesitant or if treatment intensity remains uncertain.",
-    }:
-        return cac_recommendation
-    return "CAC reasonable for risk clarification if treatment decision remains uncertain."
+    return "CAC may clarify risk."
 
 
 def _lipid_line_is_treatment_forward(lipid_line):
@@ -1117,6 +1102,13 @@ def _build_testing_actions(patient, result):
                 "uacr_testing",
                 "Obtain UACR to complete kidney-risk assessment.",
             )
+        if clarification.get("recommend_a1c"):
+            _add_action(
+                recommendations,
+                domains,
+                "a1c_testing",
+                "Obtain A1c to assess glycemia.",
+            )
 
     return recommendations, domains
 
@@ -1143,6 +1135,10 @@ def build_action_plan(patient, result):
             8
             if (
                 _level_3b_intermediate_uacr_missing_path(patient, result)
+                or bool((getattr(result, "clarification", None) or {}).get("recommend_a1c"))
+                or bool((getattr(result, "clarification", None) or {}).get("recommend_uacr"))
+                or "a1c_testing" in testing_domains
+                or "uacr_testing" in testing_domains
                 or (
                     _has_albuminuria(patient, result)
                     and not _treatment_should_not_wait(patient, result)

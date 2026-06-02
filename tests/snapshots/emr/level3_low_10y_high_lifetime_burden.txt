@@ -11,7 +11,7 @@ Assessment:
 
 Recommendations:
 1. Lipids: Discuss moderate-intensity statin; LDL-C <100, ApoB <90, non-HDL-C <130.
-2. Plaque: CAC not needed.
+2. Plaque: CAC may clarify risk.
 3. Kidney: UACR not available; obtain UACR.
 4. BP: BP needed.
 5. Glycemia: Prediabetes prevention; A1c 5.9%.

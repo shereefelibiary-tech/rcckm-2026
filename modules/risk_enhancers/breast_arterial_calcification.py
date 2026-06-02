@@ -17,7 +17,7 @@ BAC_CLINICIAN_CONTEXT_TEXT = (
 
 BAC_CAC_CLARIFICATION_TEXT = (
     "Breast arterial calcification is a non-coronary vascular calcification marker. "
-    "CAC may clarify coronary plaque burden if results would change lipid-treatment intensity."
+    "CAC may clarify coronary plaque burden."
 )
 
 

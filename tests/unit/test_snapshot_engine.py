@@ -37,7 +37,7 @@ def test_build_snapshot_lines_returns_concise_clinical_synthesis_in_order():
         "PREVENT 30-year ASCVD risk: 24.5%",
         "Plaque: CAC 350",
         "Kidney: G3aA2",
-        "RSS: 57/100 (High)",
+        "Risk Signal Score: 57/100 (High)",
         "Top drivers: CAC 350; ApoB 110 mg/dL; UACR 45 mg/g; A1c 7.1%",
         "Clarification: Next useful clarifier(s): CAC.",
         "Discordance: High estimated risk with plaque unmeasured.",

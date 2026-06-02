@@ -11,9 +11,8 @@ Context: Gestational diabetes.
 
 Assessment:
 - Hypertriglyceridemia (ICD: E78.1)
-- Obesity (ICD: E66.9)
+- Obesity, BMI 31.0-31.9 (ICD: E66.9, Z68.31)
 - Prediabetes (ICD: R73.03)
-- Adult BMI 31.0-31.9 (ICD: Z68.31)
 
 Recommendations:
 1. Lipids: No lipid-lowering medication indicated; LDL-C <100, ApoB <90, non-HDL-C <130.
@@ -50,7 +49,7 @@ Your goals
 - LDL-C: 122 mg/dL to <100 mg/dL
 - non-HDL-C: 152 mg/dL calculated to <130 mg/dL
 - ApoB: 92 mg/dL to <90 mg/dL
-- A1c: 6.1% to prediabetes range
+- A1c: 6.1% to <5.7%
 - BP: 128/78 mmHg to <130/80
 - Kidney / albuminuria: 12 mg/g; G2A1 to reduce albuminuria / preserve eGFR
 - Weight: BMI 31.6 to individualized
@@ -72,8 +71,8 @@ ACTIONS:
 - Glycemia / metabolic: Prediabetes prevention. A1c 6.1%; weight/activity focus.
 - Aspirin / antiplatelet: Not indicated.
 
-RSS: 12
-RSS CONTRIBUTORS:
+Risk Signal Score: 12
+RISK SIGNAL CONTRIBUTORS:
 - ApoB elevation: 92.0 (+4)
 - Hypertriglyceridemia: 168.0 (+4)
 - A1c elevation: 6.1 (+2)

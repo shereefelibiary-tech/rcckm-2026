@@ -49,7 +49,6 @@ STEP 3
 Your goals
 - LDL-C: 212 mg/dL to <70 mg/dL
 - non-HDL-C: 244 mg/dL calculated to <100 mg/dL
-- A1c: 5.4% to normal range
 - BP: 122/74 mmHg to <130/80
 - Kidney / albuminuria: 6 mg/g; G1A1 to reduce albuminuria / preserve eGFR
 - Weight: BMI 26.2 to individualized
@@ -72,8 +71,8 @@ ACTIONS:
 - Aspirin / antiplatelet: Not indicated.
 - Additional information that may help clarify risk: ApoB, Clarification testing should not delay treatment..
 
-RSS: 25
-RSS CONTRIBUTORS:
+Risk Signal Score: 25
+RISK SIGNAL CONTRIBUTORS:
 - LDL-C: 212.0 (+10)
 - Hypertriglyceridemia: 155.0 (+4)
 - Premature family history: Father MI age 52 (+3)

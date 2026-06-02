@@ -329,11 +329,8 @@ def test_build_action_plan_uses_clarification_when_no_treatment_escalation():
     plan = build_action_plan(Patient(age=60, sex="male"), result)
 
     assert plan["dominant_action"] == "Check Lp(a) once."
-    assert "CAC reasonable for risk clarification if treatment decision remains uncertain." in plan["recommendations"]
-    assert (
-        plan["domains"]["cac_testing"]
-        == "CAC reasonable for risk clarification if treatment decision remains uncertain."
-    )
+    assert "CAC may clarify risk." in plan["recommendations"]
+    assert plan["domains"]["cac_testing"] == "CAC may clarify risk."
 
 
 def test_build_action_plan_returns_domain_specific_neutral_status_when_no_signal():
@@ -392,9 +389,10 @@ def test_build_action_plan_adds_testing_after_treatment_actions():
         "Optimize diabetes care.",
         "Obtain ApoB to define atherogenic particle burden.",
         "Check Lp(a) once.",
+        "CAC may clarify risk.",
         "Obtain UACR to complete kidney-risk assessment.",
     ]
-    assert "cac_testing" not in plan["domains"]
+    assert plan["domains"]["cac_testing"] == "CAC may clarify risk."
 
 
 def test_build_action_plan_adds_cac_for_borderline_risk_with_premature_family_history():
@@ -409,8 +407,8 @@ def test_build_action_plan_adds_cac_for_borderline_risk_with_premature_family_hi
 
     plan = build_action_plan(patient, RCCKMResult(prevent_risk_category="BORDERLINE"))
 
-    assert plan["dominant_action"] == "CAC reasonable for risk clarification if treatment decision remains uncertain."
-    assert plan["domains"]["cac_testing"] == "CAC reasonable for risk clarification if treatment decision remains uncertain."
+    assert plan["dominant_action"] == "CAC may clarify risk."
+    assert plan["domains"]["cac_testing"] == "CAC may clarify risk."
 
 
 def test_build_action_plan_adds_uacr_for_diabetes_and_kidney_uncertainty():

@@ -11,12 +11,11 @@ CKM/Kidney/Plaque: CKM 2; kidney G1A1; CAC not measured.
 Assessment:
 - Type 2 diabetes mellitus (ICD: E11.9)
 - Hypertriglyceridemia (ICD: E78.1)
-- Obesity (ICD: E66.9)
-- Adult BMI 31.0-31.9 (ICD: Z68.31)
+- Obesity, BMI 31.0-31.9 (ICD: E66.9, Z68.31)
 
 Recommendations:
 1. Lipids: Discuss moderate-intensity statin; LDL-C <70, ApoB <80, non-HDL-C <100.
-2. Plaque: CAC not measured.
+2. Plaque: CAC may clarify risk.
 3. Kidney: Stable.
 4. BP: At goal.
 5. Glycemia: Optimize diabetes care; A1c 7.1%; goal <7.0.
@@ -55,7 +54,7 @@ Your goals
 STEP 4
 Your next steps
 1. Cholesterol: Discuss starting cholesterol-lowering therapy.
-2. Coronary plaque: Not measured.
+2. Coronary plaque: Calcium scan may clarify treatment.
 3. Kidneys: Stable.
 4. Blood pressure: At goal.
 5. Blood sugar: Work toward A1c <7.0.
@@ -63,14 +62,14 @@ Your next steps
 
 ACTIONS:
 - Lipid lowering: Discuss moderate-intensity statin. LDL-C 122; target <70. ApoB 104; target <80.
-- Plaque: Not measured.
+- Plaque: CAC may clarify risk.
 - Kidney protection: Stable.
 - Blood pressure: At goal. Current 128/78; goal <130/80.
 - Glycemia / metabolic: Optimize diabetes care. A1c 7.1%; goal <7.0.
 - Aspirin / antiplatelet: Not indicated.
 
-RSS: 20
-RSS CONTRIBUTORS:
+Risk Signal Score: 20
+RISK SIGNAL CONTRIBUTORS:
 - ApoB elevation: 104.0 (+8)
 - Hypertriglyceridemia: 190.0 (+4)
 - Diabetes: 7.1 (+8)

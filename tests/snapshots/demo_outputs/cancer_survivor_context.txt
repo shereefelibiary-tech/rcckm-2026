@@ -44,7 +44,6 @@ STEP 3
 Your goals
 - LDL-C: 136 mg/dL to <100 mg/dL
 - ApoB: 98 mg/dL to <90 mg/dL
-- A1c: 5.6% to normal range
 - BP: 128/78 mmHg to <130/80
 - Kidney / albuminuria: 8 mg/g; G2A1 to reduce albuminuria / preserve eGFR
 - Weight: BMI 27.8 to individualized
@@ -66,6 +65,6 @@ ACTIONS:
 - Glycemia / metabolic: No glycemic action. A1c 5.6.
 - Aspirin / antiplatelet: Not indicated.
 
-RSS: 4
-RSS CONTRIBUTORS:
+Risk Signal Score: 4
+RISK SIGNAL CONTRIBUTORS:
 - ApoB elevation: 98.0 (+4)

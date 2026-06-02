@@ -9,7 +9,7 @@ Assessment:
 
 Recommendations:
 1. Lipids: No lipid-lowering medication indicated; LDL-C <70, non-HDL-C <100.
-2. Plaque: CAC not measured.
+2. Plaque: CAC may clarify risk.
 3. Kidney: UACR 210; eGFR 52.
 4. BP: BP needed.
 5. Glycemia: Optimize diabetes care; A1c 7.4%; goal <7.0.

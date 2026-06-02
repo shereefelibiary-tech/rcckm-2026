@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 import re
 from typing import Any
 
-from modules.cac_recommendation.engine import build_cac_age_gate_note
+from modules.cac_recommendation.engine import build_cac_age_gate_note, has_meaningful_cac_risk_signal
 from modules.prevention_context.engine import (
     PREVENTION_CONTEXT_SECONDARY_ASCVD,
     classify_prevention_context,
@@ -51,6 +51,7 @@ ActionDomain = ActionDomainReadout
 
 
 TESTING_LABELS = {
+    "a1c_testing": "A1c",
     "apob_testing": "ApoB - particle burden clarification",
     "lpa_testing": "Lp(a) - one-time risk assessment",
     "uacr_testing": "Obtain UACR to complete kidney-risk assessment.",
@@ -115,6 +116,8 @@ def _domains(result: Any) -> dict[str, str]:
             domains["uacr_testing"] = recommendation
         elif low.startswith("obtain apob") and "apob_testing" not in domains:
             domains["apob_testing"] = recommendation
+        elif low.startswith("obtain a1c") and "a1c_testing" not in domains:
+            domains["a1c_testing"] = recommendation
         elif low.startswith("check lp(a)") and "lpa_testing" not in domains:
             domains["lpa_testing"] = recommendation
         elif low.startswith("consider hscrp") and "hscrp_testing" not in domains:
@@ -399,26 +402,26 @@ def _cac_line(patient: Any, result: Any) -> str | None:
         line = "Plaque burden unmeasured."
 
     if _ra_low_short_term_context(patient, result):
-        return "CAC is not routinely needed at this risk level; use only if results would change lipid-treatment decisions."
+        return "CAC may clarify risk."
 
     if cac_testing and not _clinical_ascvd(patient):
-        return _domain_line(result, "cac_testing") or "CAC reasonable for risk clarification if treatment decision remains uncertain."
+        return _domain_line(result, "cac_testing") or "CAC may clarify risk."
     elif not cac_testing:
         age_gate_note = build_cac_age_gate_note(patient, result)
         if age_gate_note:
             if getattr(patient, "cac_not_done", False):
-                line = "CAC not routinely recommended at this age; consider only if results would change management."
+                line = "CAC not needed."
             else:
                 line += f" {age_gate_note}"
+        elif has_meaningful_cac_risk_signal(patient, result):
+            return "CAC may clarify risk."
         elif _prevent_low(result) and _num(getattr(patient, "age", None)) is not None:
-            sex = str(getattr(patient, "sex", "") or "").strip().lower()
             age = _num(getattr(patient, "age", None))
-            below_usual_age = (
-                (sex.startswith("f") and age < 45)
-                or (sex.startswith("m") and age < 40)
-            )
+            below_usual_age = age < 40
             if below_usual_age:
-                return None
+                return "CAC not needed."
+        else:
+            return "CAC not needed."
     return line
 
 
@@ -763,7 +766,7 @@ def _compact_cac_item(section: ActionSection | None) -> CompactActionItem | None
     if "cac 0 is discordant" in lowered:
         return CompactActionItem("Do not de-risk from CAC 0", "Clinical ASCVD drives treatment decisions.", line, "cac")
     if "cac reasonable" in lowered or "cac may clarify" in lowered or "plaque burden unmeasured" in lowered:
-        return CompactActionItem("Clarify plaque if needed", "CAC may help if treatment intensity remains uncertain.", "", "cac")
+        return CompactActionItem("Clarify plaque", "CAC may clarify risk.", "", "cac")
     if "plaque present" in lowered:
         return CompactActionItem("Account for measured plaque", line, "", "cac")
     return None
@@ -1335,17 +1338,15 @@ def _plaque_readout(patient: Any, result: Any, section: ActionSection | None) ->
         return _make_readout("plaque_cac", "Plaque", label, detail, priority="moderate", state="consider")
     if line:
         lowered = line.lower()
-        if "not routinely recommended at this age" in lowered:
-            return _make_readout("plaque_cac", "Plaque", "CAC not needed", priority="low", state="neutral", hover_detail="Consider only if results change management.")
+        if "cac not needed" in lowered or "not routinely recommended at this age" in lowered:
+            return _make_readout("plaque_cac", "Plaque", "CAC not needed", priority="low", state="neutral")
         if "cac may clarify treatment" in lowered:
             return _make_readout(
                 "plaque_cac",
                 "Plaque",
-                "CAC may clarify treatment",
+                "CAC may clarify risk",
                 priority="low",
                 state="consider",
-                hover_detail="Use only if it would change lipid-treatment intensity.",
-                expanded_detail_lines=["Use only if it would change lipid-treatment intensity."],
             )
         if "cac reasonable" in lowered or "cac may clarify" in lowered:
             return _make_readout(
@@ -1354,10 +1355,10 @@ def _plaque_readout(patient: Any, result: Any, section: ActionSection | None) ->
                 "CAC may clarify risk",
                 priority="low",
                 state="consider",
-                hover_detail="Use only if it would change lipid-treatment intensity.",
-                expanded_detail_lines=["Use only if it would change lipid-treatment intensity."],
             )
-    return _make_readout("plaque_cac", "Plaque", "Not measured", state="neutral")
+    if has_meaningful_cac_risk_signal(patient, result):
+        return _make_readout("plaque_cac", "Plaque", "CAC may clarify risk", priority="low", state="consider")
+    return _make_readout("plaque_cac", "Plaque", "CAC not needed", priority="low", state="neutral")
 
 
 def _kidney_readout(sections: list[ActionSection], patient: Any, result: Any) -> ActionDomainReadout:
@@ -1381,6 +1382,15 @@ def _kidney_readout(sections: list[ActionSection], patient: Any, result: Any) ->
             "Kidney protection",
             "Obtain UACR",
             "UACR not available.",
+            priority="low",
+            state="consider",
+        )
+    if uacr is None and egfr is not None:
+        return _make_readout(
+            "kidney_protection",
+            "Kidney protection",
+            "Obtain UACR",
+            f"eGFR {egfr:g}; UACR not available.",
             priority="low",
             state="consider",
         )
@@ -1463,15 +1473,6 @@ def _kidney_readout(sections: list[ActionSection], patient: Any, result: Any) ->
         detail += _kidney_bp_phrase(patient)
         status = "Monitor albuminuria" if ace_arb else "Repeat UACR to confirm persistence"
         return _make_readout("kidney_protection", "Kidney protection", status, detail, priority="moderate", state="action")
-    if egfr is not None and egfr < 60 and uacr is None:
-        return _make_readout(
-            "kidney_protection",
-            "Kidney protection",
-            "Complete kidney testing",
-            f"eGFR {egfr:g}; UACR not available.",
-            priority="low",
-            state="consider",
-        )
     if egfr is not None or uacr is not None:
         return _make_readout("kidney_protection", "Kidney protection", "Stable", state="complete")
     return _make_readout("kidney_protection", "Kidney protection", "Kidney context not available", priority="low", state="neutral")

@@ -13,9 +13,8 @@ Assessment:
 - Severe subclinical coronary atherosclerosis / high CAC burden (ICD: I25.10)
 - Essential hypertension (ICD: I10)
 - Hypertriglyceridemia (ICD: E78.1)
-- Obesity (ICD: E66.9)
+- Obesity, BMI 30.0-30.9 (ICD: E66.9, Z68.30)
 - Prediabetes (ICD: R73.03)
-- Adult BMI 30.0-30.9 (ICD: Z68.30)
 - Elevated lipoprotein(a) (ICD: E78.41)
 
 Recommendations:
@@ -50,7 +49,7 @@ Your goals
 - LDL-C: 126 mg/dL to <70 mg/dL
 - non-HDL-C: 168 mg/dL calculated to <100 mg/dL
 - ApoB: 110 mg/dL to <80 mg/dL
-- A1c: 6.0% to prediabetes range
+- A1c: 6.0% to <5.7%
 - BP: 136/82 mmHg; treated to <130/80
 - Kidney / albuminuria: 18 mg/g; G2A1 to reduce albuminuria / preserve eGFR
 - Weight: BMI 30.1 to individualized
@@ -72,8 +71,8 @@ ACTIONS:
 - Glycemia / metabolic: Prediabetes prevention. A1c 6%; weight/activity focus.
 - Aspirin / antiplatelet: Consider if bleeding risk is low. High plaque burden.
 
-RSS: 55
-RSS CONTRIBUTORS:
+Risk Signal Score: 55
+RISK SIGNAL CONTRIBUTORS:
 - CAC plaque burden: 350.0 (+30)
 - ApoB elevation: 110.0 (+8)
 - Elevated Lp(a): 160.0 nmol/L (+8)

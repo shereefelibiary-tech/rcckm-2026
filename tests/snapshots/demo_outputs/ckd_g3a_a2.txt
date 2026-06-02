@@ -11,13 +11,12 @@ CKM/Kidney/Plaque: CKM 3; kidney G3aA2; CAC not measured.
 Assessment:
 - Moderately increased albuminuria (ICD: R80.9)
 - Essential hypertension (ICD: I10)
-- Obesity (ICD: E66.9)
+- Obesity, BMI 31.0-31.9 (ICD: E66.9, Z68.31)
 - Prediabetes (ICD: R73.03)
-- Adult BMI 31.0-31.9 (ICD: Z68.31)
 
 Recommendations:
 1. Lipids: Discuss moderate-intensity statin; LDL-C <70, ApoB <80, non-HDL-C <100.
-2. Plaque: CAC not measured.
+2. Plaque: CAC may clarify risk.
 3. Kidney: UACR 72; ACEi/ARB active.
 4. BP: Treat toward <130/80.
 5. Glycemia: Prediabetes prevention; A1c 5.8%.
@@ -46,7 +45,7 @@ Your goals
 - LDL-C: 118 mg/dL to <70 mg/dL
 - non-HDL-C: 146 mg/dL calculated to <100 mg/dL
 - ApoB: 94 mg/dL to <80 mg/dL
-- A1c: 5.8% to prediabetes range
+- A1c: 5.8% to <5.7%
 - BP: 138/78 mmHg; treated to <130/80
 - Kidney / albuminuria: 72 mg/g; G3aA2 to reduce albuminuria / preserve eGFR
 - Weight: BMI 31.2 to individualized
@@ -54,7 +53,7 @@ Your goals
 STEP 4
 Your next steps
 1. Cholesterol: Discuss starting cholesterol-lowering therapy.
-2. Coronary plaque: Not measured.
+2. Coronary plaque: Calcium scan may clarify treatment.
 3. Kidneys: Chronic kidney disease is present (UACR 72).
 4. Blood pressure: Treat toward <130/80.
 5. Blood sugar: Prediabetes range; focus on weight/activity.
@@ -62,14 +61,14 @@ Your next steps
 
 ACTIONS:
 - Lipid lowering: Discuss moderate-intensity statin. LDL-C 118; target <70. ApoB 94; target <80.
-- Plaque: Not measured.
+- Plaque: CAC may clarify risk.
 - Kidney protection: Monitor albuminuria. UACR 72; ACEi/ARB active.
 - Blood pressure: Treat toward <130/80. Current 138/78.
 - Glycemia / metabolic: Prediabetes prevention. A1c 5.8%; weight/activity focus.
 - Aspirin / antiplatelet: Not indicated.
 
-RSS: 17
-RSS CONTRIBUTORS:
+Risk Signal Score: 17
+RISK SIGNAL CONTRIBUTORS:
 - ApoB elevation: 94.0 (+4)
 - Reduced eGFR: 55.0 (+5)
 - Albuminuria: 72.0 (+6)

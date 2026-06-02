@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import Any, Optional
 
 from core.enums import DecisionStability, PlaqueCategory, RiskLevel
 
@@ -80,3 +80,4 @@ class RCCKMResult:
     snapshot_lines: list[str] = field(default_factory=list)
     emr_lines: list[str] = field(default_factory=list)
     diagnosis_candidates: list[DiagnosisCandidate] = field(default_factory=list)
+    diagnosis_entries: list[dict[str, Any]] = field(default_factory=list)

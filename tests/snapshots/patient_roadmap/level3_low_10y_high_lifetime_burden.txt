@@ -22,12 +22,12 @@ Your goals
 - LDL-C: 164 mg/dL to <100 mg/dL
 - non-HDL-C: 188 mg/dL calculated to <130 mg/dL
 - ApoB: 118 mg/dL to <90 mg/dL
-- A1c: 5.9% to prediabetes range
+- A1c: 5.9% to <5.7%
 
 STEP 4
 Your next steps
 1. Cholesterol: Discuss starting cholesterol-lowering therapy.
-2. Coronary plaque: Calcium scan not needed right now.
+2. Coronary plaque: Calcium scan may clarify treatment.
 3. Kidneys: Repeat kidney urine testing; UACR not available.
 4. Blood pressure: Reading needed.
 5. Blood sugar: Prediabetes range; focus on weight/activity.

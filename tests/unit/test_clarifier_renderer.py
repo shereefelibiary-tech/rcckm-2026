@@ -16,6 +16,7 @@ def test_build_clarifier_items_marks_action_domain_recommendations():
             "lpa_testing": "Check Lp(a) once.",
             "cac_testing": "Coronary calcium reasonable for plaque clarification.",
             "uacr_testing": "Obtain UACR to complete kidney-risk assessment.",
+            "a1c_testing": "Obtain A1c to assess glycemia.",
             "hscrp_testing": "Consider hsCRP to clarify inflammatory biomarker context.",
             "fasting_lipids": "Repeat fasting lipid panel to confirm severe hypertriglyceridemia.",
         }
@@ -24,7 +25,8 @@ def test_build_clarifier_items_marks_action_domain_recommendations():
     items = build_clarifier_items(result)
 
     assert all(item["status"] == "recommended" for item in items)
-    assert items[0] == {
+    items_by_label = {item["label"]: item for item in items}
+    assert items_by_label["ApoB"] == {
         "label": "ApoB",
         "status": "recommended",
         "reason": "LDL present but particle burden unmeasured",
@@ -39,12 +41,14 @@ def test_build_clarifier_items_uses_clarification_flags():
             "recommend_lpa": True,
             "recommend_cac": True,
             "recommend_uacr": True,
+            "recommend_a1c": True,
         }
     )
 
     items = build_clarifier_items(result)
 
     statuses = {item["label"]: item["status"] for item in items}
+    assert statuses["A1c"] == "recommended"
     assert statuses["ApoB"] == "recommended"
     assert statuses["Lp(a)"] == "recommended"
     assert statuses["CAC"] == "recommended"

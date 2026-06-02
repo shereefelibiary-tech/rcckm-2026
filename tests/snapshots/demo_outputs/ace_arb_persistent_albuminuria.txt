@@ -12,12 +12,11 @@ Assessment:
 - Type 2 diabetes mellitus with CKD G3aA2 and albuminuria (ICD: E11.22; CKD stage 3a ICD: N18.31)
 - Essential hypertension (ICD: I10)
 - Hypertriglyceridemia (ICD: E78.1)
-- Obesity (ICD: E66.9)
-- Adult BMI 30.0-30.9 (ICD: Z68.30)
+- Obesity, BMI 30.0-30.9 (ICD: E66.9, Z68.30)
 
 Recommendations:
 1. Lipids: Discuss moderate-intensity statin; LDL-C <70, ApoB <80, non-HDL-C <100.
-2. Plaque: CAC not measured.
+2. Plaque: CAC may clarify risk.
 3. Kidney: UACR 180; ACEi/ARB active. Consider SGLT2 for diabetic CKD.
 4. BP: Treat toward <130/80.
 5. Glycemia: Optimize diabetes care; A1c 6.6%; goal <7.0.
@@ -56,7 +55,7 @@ Your goals
 STEP 4
 Your next steps
 1. Cholesterol: Discuss starting cholesterol-lowering therapy.
-2. Coronary plaque: Not measured.
+2. Coronary plaque: Calcium scan may clarify treatment.
 3. Kidneys: Chronic kidney disease is present (UACR 180).
 4. Blood pressure: Treat toward <130/80.
 5. Blood sugar: Work toward A1c <7.0.
@@ -64,14 +63,14 @@ Your next steps
 
 ACTIONS:
 - Lipid lowering: Discuss moderate-intensity statin. LDL-C 124; target <70. ApoB 100; target <80.
-- Plaque: Not measured.
+- Plaque: CAC may clarify risk.
 - Kidney protection: Optimize kidney protection. UACR 180; ACEi/ARB active. Consider SGLT2 for diabetic CKD.
 - Blood pressure: Treat toward <130/80. Current 132/78.
 - Glycemia / metabolic: Optimize diabetes care. A1c 6.6%; goal <7.0.
 - Aspirin / antiplatelet: Not indicated.
 
-RSS: 31
-RSS CONTRIBUTORS:
+Risk Signal Score: 31
+RISK SIGNAL CONTRIBUTORS:
 - ApoB elevation: 100.0 (+8)
 - Reduced eGFR: 58.0 (+5)
 - Albuminuria: 180.0 (+6)

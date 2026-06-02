@@ -44,7 +44,7 @@ Your goals
 - LDL-C: 146 mg/dL to <100 mg/dL
 - non-HDL-C: 172 mg/dL calculated to <130 mg/dL
 - ApoB: 116 mg/dL to <90 mg/dL
-- A1c: 5.7% to prediabetes range
+- A1c: 5.7% to <5.7%
 - BP: 128/76 mmHg; treated to <130/80
 - Kidney / albuminuria: 10 mg/g; G2A1 to reduce albuminuria / preserve eGFR
 - Weight: BMI 29.2 to individualized
@@ -66,8 +66,8 @@ ACTIONS:
 - Glycemia / metabolic: Prediabetes prevention. A1c 5.7%; weight/activity focus.
 - Aspirin / antiplatelet: Not indicated.
 
-RSS: 22
-RSS CONTRIBUTORS:
+Risk Signal Score: 22
+RISK SIGNAL CONTRIBUTORS:
 - CAC plaque burden: 90.0 (+10)
 - ApoB elevation: 116.0 (+8)
 - Elevated Lp(a): 120.0 nmol/L (+2)

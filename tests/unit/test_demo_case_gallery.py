@@ -159,7 +159,7 @@ def test_younger_premature_family_history_demo_output_uses_lifetime_trajectory_l
     assert "- 10-year ASCVD risk:" in roadmap
     assert "- 30-year ASCVD risk:" in roadmap
     assert "total cardiovascular risk" not in combined.lower()
-    assert "2. Plaque: CAC not routinely recommended." in emr
+    assert "2. Plaque: CAC may clarify risk." in emr
     assert "hsCRP - inflammatory residual risk" not in combined
     assert "6. Aspirin: Not indicated." in emr
     assert "Context: father MI age 49." in emr

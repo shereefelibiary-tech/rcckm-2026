@@ -75,6 +75,32 @@ def _panel_css():
 .dx-row-shell {
     margin: 0;
 }
+.dx-review-item {
+    align-items: center;
+    display: flex;
+    gap: 16px;
+    justify-content: space-between;
+}
+.dx-review-text-block {
+    flex: 1;
+    min-width: 0;
+}
+.confirm-button-wrapper {
+    align-items: center;
+    align-self: center;
+    display: flex;
+    flex-shrink: 0;
+    justify-content: center;
+    min-height: 100%;
+}
+div[data-testid="stHorizontalBlock"]:has(.dx-review-text-block) {
+    align-items: center;
+}
+div[data-testid="stHorizontalBlock"]:has(.dx-review-text-block) div[data-testid="column"]:last-child {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+}
 .dx-action-row {
     display: flex;
     justify-content: flex-end;
@@ -169,12 +195,31 @@ div[data-testid="stButton"] > button[kind="secondary"] {
     white-space: nowrap;
     font-size: 0.72rem;
 }
+div[data-testid="stHorizontalBlock"]:has(.dx-review-item) {
+    align-items: center;
+}
+div[data-testid="stHorizontalBlock"]:has(.dx-review-item) div[data-testid="stButton"] {
+    align-items: center;
+    display: flex;
+    height: 100%;
+    justify-content: center;
+}
 @media (max-width: 760px) {
     .dx-panel {
         padding: 12px;
     }
     .dx-column-panel {
         margin-bottom: 10px;
+    }
+    .dx-review-item {
+        align-items: flex-start;
+        display: block;
+    }
+    .confirm-button-wrapper {
+        align-items: flex-start;
+        justify-content: flex-start;
+        margin-top: 6px;
+        width: 100%;
     }
 }
 </style>
@@ -312,8 +357,23 @@ def _render_action_buttons(st, entry, *, confirmed=False, suppressed=False):
     dx_id = diagnosis_entry_id(entry)
     if not dx_id or confirmed or suppressed:
         return
-    if st.button("Confirm", key=f"dx_accept__{dx_id}", help="Move to confirmed / accepted"):
+    render_html(st, "<div class='confirm-button-wrapper'>")
+    clicked = st.button("Confirm", key=f"dx_accept__{dx_id}", help="Move to confirmed / accepted")
+    render_html(st, "</div>")
+    if clicked:
         _apply_action(st, entry, "accept")
+
+
+def _review_item_container(st):
+    try:
+        return st.container(
+            horizontal=True,
+            horizontal_alignment="left",
+            vertical_alignment="center",
+            gap="medium",
+        )
+    except TypeError:
+        return None
 
 
 def _render_candidate_list(st, rows, *, confirmed=False, suppressed=False):
@@ -330,15 +390,25 @@ def _render_candidate_list(st, rows, *, confirmed=False, suppressed=False):
                 + "</div>",
             )
         else:
-            left, right = st.columns([5.2, 1.0])
-            with left:
+            review_item = _review_item_container(st)
+            if review_item is not None:
+                with review_item:
+                    render_html(
+                        st,
+                        "<div class='dx-row dx-row-shell dx-review-item'>"
+                        "<div class='dx-review-text-block'>"
+                        + _candidate_html(row, confirmed=confirmed, include_row=False)
+                        + "</div></div>",
+                    )
+                    _render_action_buttons(st, row, confirmed=confirmed, suppressed=suppressed)
+            else:
                 render_html(
                     st,
-                    "<div class='dx-row dx-row-shell'>"
+                    "<div class='dx-row dx-row-shell dx-review-item'>"
+                    "<div class='dx-review-text-block'>"
                     + _candidate_html(row, confirmed=confirmed, include_row=False)
-                    + "</div>",
+                    + "</div></div>",
                 )
-            with right:
                 _render_action_buttons(st, row, confirmed=confirmed, suppressed=suppressed)
 
 

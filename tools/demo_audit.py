@@ -65,7 +65,7 @@ CONTRADICTIONS = (
     ("aspirin not indicated", "aspirin may be considered"),
 )
 
-AGE_AWARE_CAC_LINE = "Plaque: CAC not needed."
+AGE_AWARE_CAC_LINE = "Plaque: CAC may clarify risk."
 
 EXPECTED_SHOWCASE = {
     "healthy_low_risk_prevention": ("low-risk complete data", "lifestyle prevention"),
@@ -293,8 +293,8 @@ def render_demo_output_snapshot(case_name: str) -> str:
             "ACTIONS:",
             "\n".join(f"- {line}" for line in render_domain_actions_for_surface(domains, surface="action_card")),
             "",
-            f"RSS: {rss_total:g}",
-            "RSS CONTRIBUTORS:",
+            f"Risk Signal Score: {rss_total:g}",
+            "RISK SIGNAL CONTRIBUTORS:",
             "\n".join(
                 f"- {item.label}: {item.actual_value} (+{item.points:g})"
                 for item in rss_contributions
@@ -486,10 +486,10 @@ def audit_demo_case(label: str, case_name: str) -> DemoCaseAudit:
         finding.patient_readability_score -= 30
 
     if len(rss_contributions) == 0 and case_name not in {"healthy_low_risk_prevention"}:
-        finding.warnings.append("demo has no RSS point contributors")
+        finding.warnings.append("demo has no Risk Signal Score point contributors")
         finding.showcase_value_score -= 12
     if rss_total == 0 and case_name not in {"healthy_low_risk_prevention"}:
-        finding.warnings.append("demo may feel visually underwhelming: RSS is 0")
+        finding.warnings.append("demo may feel visually underwhelming: Risk Signal Score is 0")
         finding.showcase_value_score -= 12
 
     for concept in finding.showcase_concepts:

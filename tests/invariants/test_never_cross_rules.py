@@ -25,7 +25,11 @@ def test_cac_missing_never_generates_plaque_diagnosis_or_zero_language():
 
     assert_absent(diagnosis_text(result), ["Subclinical coronary atherosclerosis"])
     assert "plaque" in outputs["visible"].lower()
-    assert "unmeasured" in outputs["visible"].lower() or "CAC not performed" in outputs["visible"]
+    assert (
+        "unmeasured" in outputs["visible"].lower()
+        or "CAC not performed" in outputs["visible"]
+        or "CAC not needed" in outputs["visible"]
+    )
     assert_absent(outputs["emr"], ["CAC 0"])
 
 

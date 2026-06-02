@@ -819,12 +819,13 @@ def _target_rows(patient, result):
         if bool(getattr(patient, "diabetes", False)):
             a1c_goal = "<7.0%"
         elif a1c_value is not None and a1c_value < 5.7:
-            a1c_goal = "normal range"
+            a1c_goal = None
         elif a1c_value is not None and a1c_value < 6.5:
-            a1c_goal = "prediabetes range"
+            a1c_goal = "<5.7%"
         else:
             a1c_goal = "individualized"
-        rows.append(("A1c", a1c, a1c_goal))
+        if a1c_goal:
+            rows.append(("A1c", a1c, a1c_goal))
     bp = _bp_value(patient)
     if bp:
         rows.append(("BP", bp, "<130/80"))

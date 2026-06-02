@@ -250,6 +250,11 @@ def _raw_diagnosis_sources(out: Any) -> list[Any]:
     if out is None:
         return []
 
+    if hasattr(out, "diagnosis_entries"):
+        entries = getattr(out, "diagnosis_entries") or []
+        if entries:
+            return [_object_diagnosis_to_dict(x) for x in entries]
+
     if hasattr(out, "diagnosis_candidates"):
         candidates = getattr(out, "diagnosis_candidates") or []
         if candidates:
@@ -355,7 +360,72 @@ def normalize_diagnosis_entries(out: Any) -> list[dict[str, Any]]:
             }
         )
 
-    return diagnoses
+    return _merge_obesity_and_bmi_z_code(diagnoses)
+
+
+def _bmi_range_from_label(label: str) -> str:
+    text = str(label or "").strip()
+    return re.sub(r"^Adult\s+BMI\s+", "", text, flags=re.I).strip()
+
+
+def _is_obesity_row(row: dict[str, Any]) -> bool:
+    label = str(row.get("label_display") or row.get("label") or "").strip().lower()
+    codes = set(_extract_code_list(row.get("icd10_suggested"))) | set(
+        _extract_code_list(row.get("icd10_confirmed"))
+    )
+    return bool(label in {"obesity", "morbid obesity"} or codes.intersection({"E66.9", "E66.01"}))
+
+
+def _is_adult_bmi_row(row: dict[str, Any]) -> bool:
+    label = str(row.get("label_display") or row.get("label") or "").strip()
+    codes = set(_extract_code_list(row.get("icd10_suggested"))) | set(
+        _extract_code_list(row.get("icd10_confirmed"))
+    )
+    return bool(label.lower().startswith("adult bmi ") or any(code.startswith("Z68.") for code in codes))
+
+
+def _merge_obesity_and_bmi_z_code(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    obesity_index = next((i for i, row in enumerate(rows) if _is_obesity_row(row)), None)
+    bmi_index = next((i for i, row in enumerate(rows) if _is_adult_bmi_row(row)), None)
+    if obesity_index is None or bmi_index is None:
+        return rows
+    if obesity_index == bmi_index:
+        return rows
+
+    obesity = dict(rows[obesity_index])
+    bmi = rows[bmi_index]
+    obesity_label = str(obesity.get("label_display") or obesity.get("label") or "Obesity").strip()
+    bmi_range = _bmi_range_from_label(str(bmi.get("label_display") or bmi.get("label") or ""))
+    if bmi_range:
+        combined_label = f"{obesity_label}, BMI {bmi_range}"
+        obesity["label"] = combined_label
+        obesity["diagnosis"] = combined_label
+        obesity["label_display"] = combined_label
+
+    obesity["icd10_suggested"] = _dedupe(
+        _extract_code_list(obesity.get("icd10_suggested"))
+        + _extract_code_list(bmi.get("icd10_suggested"))
+    )
+    obesity["icd10_confirmed"] = _dedupe(
+        _extract_code_list(obesity.get("icd10_confirmed"))
+        + _extract_code_list(bmi.get("icd10_confirmed"))
+    )
+    obesity["hcc_suggested"] = _dedupe(
+        _extract_code_list(obesity.get("hcc_suggested"))
+        + _extract_code_list(bmi.get("hcc_suggested"))
+    )
+    obesity["hcc_confirmed"] = _dedupe(
+        _extract_code_list(obesity.get("hcc_confirmed"))
+        + _extract_code_list(bmi.get("hcc_confirmed"))
+    )
+
+    merged: list[dict[str, Any]] = []
+    for index, row in enumerate(rows):
+        if index == obesity_index:
+            merged.append(obesity)
+        elif index != bmi_index:
+            merged.append(row)
+    return merged
 
 
 def _normalize_status(status_raw: str, label: str, source: str = "") -> str:
@@ -435,7 +505,16 @@ def prioritize_linked_diagnoses(candidates: list[Any]) -> list[Any]:
         suppressed.add("hyperglycemia")
 
     visible = [candidate for candidate in rows if _diagnosis_key(candidate) not in suppressed]
-    return sorted(visible, key=lambda candidate: DIAGNOSIS_DISPLAY_PRIORITY.get(_diagnosis_key(candidate), 50))
+    return sorted(visible, key=lambda candidate: _diagnosis_priority(_diagnosis_key(candidate)))
+
+
+def _diagnosis_priority(key: str) -> int:
+    normalized = str(key or "").strip().lower()
+    if normalized.startswith("morbid obesity, bmi"):
+        return DIAGNOSIS_DISPLAY_PRIORITY["morbid obesity"]
+    if normalized.startswith("obesity, bmi"):
+        return DIAGNOSIS_DISPLAY_PRIORITY["obesity"]
+    return DIAGNOSIS_DISPLAY_PRIORITY.get(normalized, 50)
 
 
 def _result_kdigo_stage(out: Any) -> str:

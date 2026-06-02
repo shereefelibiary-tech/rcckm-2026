@@ -14,7 +14,7 @@ Assessment:
 
 Recommendations:
 1. Lipids: No lipid escalation.
-2. Plaque: CAC not measured.
+2. Plaque: CAC may clarify risk.
 3. Kidney: Stable.
 4. BP: At goal.
 5. Glycemia: No glycemic action; A1c 5.4.
@@ -43,7 +43,6 @@ Why your risk is higher
 
 STEP 3
 Your goals
-- A1c: 5.4% to normal range
 - BP: 124/76 mmHg to <130/80
 - Kidney / albuminuria: 7 mg/g; G2A1 to reduce albuminuria / preserve eGFR
 - Weight: BMI 27.8 to individualized
@@ -51,7 +50,7 @@ Your goals
 STEP 4
 Your next steps
 1. Cholesterol: Continue lifestyle-focused prevention.
-2. Coronary plaque: Not measured.
+2. Coronary plaque: Calcium scan may clarify treatment.
 3. Kidneys: Stable.
 4. Blood pressure: At goal.
 5. Blood sugar: Normal range.
@@ -59,15 +58,15 @@ Your next steps
 
 ACTIONS:
 - Lipid lowering: Lifestyle-focused. LDL-C 132. ApoB 94.
-- Plaque: Not measured.
+- Plaque: CAC may clarify risk.
 - Kidney protection: Stable.
 - Blood pressure: At goal. Current 124/76; goal <130/80.
 - Glycemia / metabolic: No glycemic action. A1c 5.4.
 - Inflammation: Inflammatory risk enhancer. RA is a risk enhancer; ensure inflammation is clinically controlled and avoid undertreating traditional risk factors.
 - Aspirin / antiplatelet: Not indicated.
 
-RSS: 9
-RSS CONTRIBUTORS:
+Risk Signal Score: 9
+RISK SIGNAL CONTRIBUTORS:
 - ApoB elevation: 94.0 (+4)
 - Premature family history: Father MI age 49 (+3)
 - RA: True (+2)

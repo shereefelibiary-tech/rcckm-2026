@@ -105,6 +105,45 @@ def test_where_patient_falls_surfaces_missing_clarifiers():
     assert "not available" in html
 
 
+def test_where_patient_falls_does_not_label_missing_needed_data_as_context_only():
+    patient = Patient(
+        age=43,
+        sex="female",
+        ldl_c=146,
+        apob=122,
+        sbp=124,
+        dbp=76,
+        bmi=28.1,
+        egfr=96,
+        a1c=None,
+        uacr=None,
+        lp_a_value=None,
+        cac=None,
+        cac_not_done=True,
+    )
+    result, _rss_total, _contributions = run_patient(patient)
+
+    html = build_where_patient_falls_html(patient, result, show_not_active=True)
+
+    a1c_row = _row_snippet(html, "A1c / diabetes")
+    kidney_row = _row_snippet(html, "eGFR / UACR")
+    lpa_row = _row_snippet(html, "Lp(a)")
+    cac_row = _row_snippet(html, "No CAC performed")
+
+    assert "A1c not available" in a1c_row
+    assert "Missing / needed" in a1c_row
+    assert "Context only" not in a1c_row
+    assert "UACR not available" in kidney_row
+    assert "Missing / needed" in kidney_row
+    assert "Context only" not in kidney_row
+    assert "Lp(a) not available" in lpa_row
+    assert "Missing / needed" in lpa_row
+    assert "Context only" not in lpa_row
+    assert "No CAC performed" in cac_row
+    assert "Not measured / may clarify risk" in cac_row
+    assert "Context only" not in cac_row
+
+
 def test_where_patient_falls_shows_cac_percentile_as_clinician_detail_when_useful():
     patient = Patient(age=45, sex="male", cac=38, cac_percentile=82)
     result, _rss_total, _contributions = run_patient(patient)
@@ -160,7 +199,7 @@ def test_where_patient_falls_marks_level_defining_cac_as_major_driver():
     assert "Major driver" in _row_snippet(html, "Premature family history")
     assert "Contributes" in _row_snippet(html, "A1c / diabetes")
     assert "Contributes" in _row_snippet(html, "eGFR / UACR")
-    assert "Context only" in _row_snippet(html, "hsCRP")
+    assert "Missing / needed" in _row_snippet(html, "hsCRP")
 
 
 def test_where_patient_falls_normalizes_risk_impact_labels():
@@ -316,7 +355,7 @@ def test_where_patient_falls_keeps_missing_clarifiers_visible_by_default():
     assert "Lp(a) not available" in html
     assert "UACR not available" in html
     assert "Plaque unmeasured" in html
-    assert "Context only" in html
+    assert "Missing / needed" in html
 
 
 def test_where_patient_falls_shows_hiv_separately_from_inflammatory_disease():
@@ -378,7 +417,7 @@ def test_where_patient_falls_lpa_missing_shows_clarifier_and_thresholds():
     row = _row_snippet(html, "Lp(a)")
 
     assert "Lp(a) not available" in row
-    assert ">Context only<" in row
+    assert ">Missing / needed<" in row
     assert "nmol/L: &lt;75 reference; 75-124 mild; &gt;=125 elevated; &gt;=250 high; &gt;=430 very high" in row
     assert "mg/dL: &lt;30 reference; 30-49 mild; &gt;=50 elevated; &gt;=100 high; &gt;=180 very high" in row
     assert "genetics" not in row.lower()

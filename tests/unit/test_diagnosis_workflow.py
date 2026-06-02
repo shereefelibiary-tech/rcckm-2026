@@ -1,3 +1,5 @@
+from core.engine import evaluate_patient
+from core.patient import Patient
 from core.results import DiagnosisCandidate, RCCKMResult
 from core.diagnosis_workflow import (
     DIAGNOSIS_DISPLAY_PRIORITY,
@@ -297,6 +299,70 @@ def test_augment_diagnoses_with_bmi_glp1_adds_obesity_or_overweight():
     assert any(row["dx_id"] == "dx_obesity" for row in obesity)
     assert any(row["dx_id"] == "dx_overweight" for row in overweight)
     assert no_overweight == []
+
+
+def test_normalize_diagnosis_entries_combines_obesity_and_bmi_z_code():
+    result = RCCKMResult(
+        diagnosis_candidates=[
+            DiagnosisCandidate(
+                name="Obesity",
+                icd10_code="E66.9",
+                status="data-derived",
+                source="BMI >=30 kg/m²",
+            ),
+            DiagnosisCandidate(
+                name="Adult BMI 33.0-33.9",
+                icd10_code="Z68.33",
+                status="data-derived",
+                source="BMI 33.0-33.9 kg/m²",
+            ),
+        ]
+    )
+
+    rows = normalize_diagnosis_entries(result)
+    labels = [row["label_display"] for row in rows]
+
+    assert labels == ["Obesity, BMI 33.0-33.9"]
+    assert rows[0]["icd10_confirmed"] == ["E66.9", "Z68.33"]
+    assert "Obesity" not in labels
+    assert "Adult BMI 33.0-33.9" not in labels
+
+
+def test_evaluate_patient_exposes_normalized_obesity_bmi_entries_for_renderers():
+    cases = [
+        (33.4, "Obesity, BMI 33.0-33.9", ["E66.9", "Z68.33"], "Adult BMI 33.0-33.9"),
+        (36.2, "Obesity, BMI 36.0-36.9", ["E66.9", "Z68.36"], "Adult BMI 36.0-36.9"),
+    ]
+
+    for bmi, combined_label, codes, standalone_bmi_label in cases:
+        result = evaluate_patient(Patient(age=42, sex="female", bmi=bmi))
+
+        labels = [row["label_display"] for row in result.diagnosis_entries]
+
+        assert combined_label in labels
+        assert standalone_bmi_label not in labels
+        assert "Obesity" not in labels
+        row = next(row for row in result.diagnosis_entries if row["label_display"] == combined_label)
+        assert row["icd10_confirmed"] == codes
+        assert prepare_diagnosis_display_entries(result) == result.diagnosis_entries
+
+
+def test_normalize_diagnosis_entries_keeps_bmi_z_code_without_obesity():
+    result = RCCKMResult(
+        diagnosis_candidates=[
+            DiagnosisCandidate(
+                name="Adult BMI 33.0-33.9",
+                icd10_code="Z68.33",
+                status="data-derived",
+                source="BMI 33.0-33.9 kg/m²",
+            ),
+        ]
+    )
+
+    rows = normalize_diagnosis_entries(result)
+
+    assert [row["label_display"] for row in rows] == ["Adult BMI 33.0-33.9"]
+    assert rows[0]["icd10_confirmed"] == ["Z68.33"]
 
 
 def test_augment_diagnoses_with_bmi_glp1_overweight_gate_rejects_unrelated_fields():

@@ -125,7 +125,7 @@
       "ckm_stage": 2,
       "prevent_category": "LOW",
       "required_diagnosis": "Prediabetes",
-      "required_action": "No active domain changes from current risk profile"
+      "required_action": "CAC may clarify risk"
     },
     "required_phrases": [
       "Level: 2B - converging early risk signals.",
@@ -181,7 +181,7 @@
       "Level: 3B - elevated lifetime cardiometabolic risk despite low short-term event risk.",
       "PREVENT: ASCVD 10y 1.37% (Low); 30y 9.09%.",
       "1. Lipids: Discuss moderate-intensity statin",
-      "2. Plaque: CAC not needed.",
+      "2. Plaque: CAC may clarify risk.",
       "6. Aspirin: Not indicated.",
       "premature family history",
       "Prediabetes"
@@ -218,7 +218,7 @@
       "risk_continuum_level": 3,
       "risk_continuum_sublevel": "3A",
       "prevent_category": "LOW",
-      "required_action": "CAC may clarify plaque burden if treatment intensity remains uncertain",
+      "required_action": "CAC may clarify risk",
       "forbidden_diagnosis": "subclinical"
     },
     "required_phrases": [
@@ -263,7 +263,7 @@
       "ckm_stage": 2,
       "prevent_category": "LOW",
       "required_diagnosis": "Elevated lipoprotein(a)",
-      "required_action": "CAC reasonable for risk clarification",
+      "required_action": "CAC may clarify risk",
       "forbidden_diagnosis": "subclinical"
     },
     "required_phrases": [
@@ -378,7 +378,6 @@
       "6. Aspirin: Not indicated."
     ],
     "forbidden_phrases": [
-      "CAC reasonable for risk clarification if treatment decision remains uncertain",
       "Subclinical coronary atherosclerosis",
       "Severe hypercholesterolemia",
       "<div class=",
@@ -1253,7 +1252,6 @@
       "6. Aspirin: Not indicated."
     ],
     "forbidden_phrases": [
-      "CAC reasonable for risk clarification if treatment decision remains uncertain",
       "Subclinical coronary atherosclerosis",
       "phenotype"
     ]

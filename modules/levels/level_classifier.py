@@ -325,6 +325,40 @@ def _young_family_metabolic_trajectory(patient, result) -> bool:
     )
 
 
+def _early_atherogenic_metabolic_cluster(patient, result) -> bool:
+    """Return True when low short-term risk still has treatment-aligned ApoB/CKM clustering."""
+    prevent_10y = _num(getattr(result, "prevent_10y_ascvd", None))
+    prevent_category = _risk_value(getattr(result, "prevent_risk_category", None))
+    cac = _num(getattr(patient, "cac", None))
+    apob = _num(getattr(patient, "apob", None))
+    ldl_c = _num(getattr(patient, "ldl_c", None))
+    tg = _num(getattr(patient, "triglycerides", None))
+    low_prevent = bool(
+        (prevent_10y is not None and prevent_10y < 3)
+        or str(prevent_category or "").upper() == "LOW"
+    )
+    metabolic_signals = sum(
+        1
+        for present in (
+            _has_prediabetes(patient),
+            tg is not None and tg >= 150,
+            ldl_c is not None and ldl_c >= 130,
+            _ckm_context_signal(patient),
+        )
+        if present
+    )
+    return bool(
+        _age_40_to_59(patient)
+        and not bool(getattr(patient, "clinical_ascvd", False))
+        and cac is None
+        and low_prevent
+        and apob is not None
+        and apob >= 100
+        and _has_premature_family_history(patient)
+        and metabolic_signals >= 2
+    )
+
+
 def _mild_signal_drivers(patient, result) -> list[str]:
     drivers = []
     if _has_prediabetes(patient):
@@ -556,6 +590,17 @@ def classify_rcckm_level(patient, prevent_result=None, rss_result=None, diagnosi
             "Level 3B - hidden atherogenic risk burden",
             "Low short-term PREVENT risk with clustered atherogenic and risk-enhancer burden.",
             _hidden_risk_drivers(patient),
+            result,
+            patient,
+            "treatment discussion",
+        )
+
+    if _early_atherogenic_metabolic_cluster(patient, result):
+        return _classification(
+            "3B",
+            "Level 3B - actionable early CKM / atherogenic risk",
+            "ApoB >=100 with premature family history and converging metabolic risk signals supports lipid treatment discussion.",
+            actionable or mild,
             result,
             patient,
             "treatment discussion",

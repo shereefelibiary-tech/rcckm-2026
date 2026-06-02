@@ -527,7 +527,7 @@ def evidence_note(contribution):
         if value is not None and value < 125:
             return (
                 "Borderline Lp(a) band",
-                "Borderline Lp(a) is shown as a small RSS contributor.",
+                "Borderline Lp(a) is shown as a small risk signal contributor.",
             )
         if value is not None and value >= 430:
             return (
@@ -661,7 +661,7 @@ def format_tower_tooltip(contribution):
     return (
         f"{contribution.label}\n"
         f"{value_label} | {band} | {pearl}\n"
-        f"{contribution.points:g} RSS points"
+        f"{contribution.points:g} risk signal points"
     )
 
 
@@ -711,7 +711,7 @@ def build_rss_tower_html(rss_contributions):
         compact_bits = [str(item["label"])]
         if tower_value and _clean_duplicate_text(tower_value) != _clean_duplicate_text(item["label"]):
             compact_bits.append(str(tower_value))
-        compact_bits.append(f'+{item["points"]:g} RSS points')
+        compact_bits.append(f'+{item["points"]:g} risk signal points')
         compact_title = " - ".join(compact_bits)
         segments.append(
             f'<div class="rss-tower-segment" '
@@ -875,7 +875,7 @@ def render_rss_tower(rss_total, rss_contributions):
 </style>
 <div class="rss-score-header">
     <div>
-        <div class="rss-score-title">Risk Score</div>
+        <div class="rss-score-title">Risk Signal Score</div>
         <div class="rss-score-subtitle">Contribution-weighted clinical burden</div>
     </div>
     <div class="rss-score-value-wrap">
@@ -947,12 +947,12 @@ def build_rss_panel_html(rss_total, rss_contributions, result=None):
         rss_body_content = f"""
 {build_rss_tower_html(display_contributors)}
 <div class="rss-list-zone rss-drivers">
-<div class="rss-contributor-heading rss-driver-heading">RSS contributors</div>
+<div class="rss-contributor-heading rss-driver-heading">Signal contributors</div>
 <div class="{driver_list_class}">{driver_rows}</div>
 </div>
 """
     else:
-        rss_body_content = '<div class="rss-empty-drivers">No active RSS contributors.</div>'
+        rss_body_content = '<div class="rss-empty-drivers">No active risk signal contributors.</div>'
     return f"""
 <style>
 {component_theme_css()}
@@ -1351,7 +1351,7 @@ def build_rss_panel_html(rss_total, rss_contributions, result=None):
 <div class="rss-card rss-module rc-panel">
 <div class="rss-module-head">
 <div>
-<div class="rss-title rss-module-title rc-card-title">Where the Risk Is Coming From</div>
+<div class="rss-title rss-module-title rc-card-title">Risk Signal Score</div>
 </div>
 <div class="rss-score-compact">
 <div class="rss-score rss-score-number">{rss_total:g}<span class="rss-score-den">/100</span></div>
@@ -1383,7 +1383,7 @@ def render_rss_panel(rss_total, rss_contributions):
         reverse=True,
     )
 
-    with st.expander("RSS contribution details", expanded=False):
+    with st.expander("Risk Signal Score details", expanded=False):
         st.dataframe(domain_rows, hide_index=True, width="stretch")
         st.dataframe(
             [

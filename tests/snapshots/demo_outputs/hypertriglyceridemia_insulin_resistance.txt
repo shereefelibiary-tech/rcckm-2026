@@ -11,11 +11,10 @@ Context: OSA; MASLD.
 
 Assessment:
 - Hypertriglyceridemia (ICD: E78.1)
-- Obesity (ICD: E66.9)
+- Obesity, BMI 33.0-33.9 (ICD: E66.9, Z68.33)
 - Metabolic dysfunction-associated steatotic liver disease (ICD: K76.0)
 - Obstructive sleep apnea (ICD: G47.33)
 - Prediabetes (ICD: R73.03)
-- Adult BMI 33.0-33.9 (ICD: Z68.33)
 
 Recommendations:
 1. Lipids: Discuss moderate-intensity statin; LDL-C <100, ApoB <90, non-HDL-C <130.
@@ -51,7 +50,7 @@ Your goals
 - LDL-C: 118 mg/dL to <100 mg/dL
 - non-HDL-C: 198 mg/dL calculated to <130 mg/dL
 - ApoB: 118 mg/dL to <90 mg/dL
-- A1c: 6.2% to prediabetes range
+- A1c: 6.2% to <5.7%
 - BP: 134/84 mmHg to <130/80
 - Kidney / albuminuria: 16 mg/g; G2A1 to reduce albuminuria / preserve eGFR
 - Weight: BMI 33.7 to individualized
@@ -73,8 +72,8 @@ ACTIONS:
 - Glycemia / metabolic: Prediabetes prevention. A1c 6.2%; weight/activity focus.
 - Aspirin / antiplatelet: Not indicated.
 
-RSS: 18
-RSS CONTRIBUTORS:
+Risk Signal Score: 18
+RISK SIGNAL CONTRIBUTORS:
 - ApoB elevation: 118.0 (+8)
 - Hypertriglyceridemia: 360.0 (+4)
 - A1c elevation: 6.2 (+2)

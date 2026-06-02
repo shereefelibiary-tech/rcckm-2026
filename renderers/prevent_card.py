@@ -118,17 +118,15 @@ def _context_line(result):
 
     cac_value = _cac_value_from_result(result)
     cac_missing_line = (
-        "Plaque burden is unmeasured. CAC can clarify structural plaque burden "
-        "if treatment intensity remains uncertain."
+        "Plaque burden is unmeasured. CAC may clarify risk."
     )
     discordance = getattr(result, "discordance_insight", None) or {}
     if discordance.get("type") == "plaque_exceeds_population_risk":
         if cac_value:
             return (
-                f"CAC {cac_value} shows high plaque burden, so treatment intensity "
-                "should not rely on PREVENT alone."
+                f"CAC {cac_value} shows high plaque burden, so PREVENT should not be used alone."
             )
-        return "High plaque burden is present, so treatment intensity should not rely on PREVENT alone."
+        return "High plaque burden is present, so PREVENT should not be used alone."
     if discordance.get("type") == "risk_exceeds_plaque_burden":
         return "CAC 0 suggests low plaque burden despite elevated calculated risk."
     if discordance.get("type") == "high_population_risk_plaque_unmeasured":
@@ -140,10 +138,9 @@ def _context_line(result):
     if plaque_category in {"MILD", "MODERATE", "SEVERE", "HIGH", "EXTENSIVE"}:
         if cac_value:
             return (
-                f"CAC {cac_value} shows high plaque burden, so treatment intensity "
-                "should not rely on PREVENT alone."
+                f"CAC {cac_value} shows high plaque burden, so PREVENT should not be used alone."
             )
-        return "High plaque burden is present, so treatment intensity should not rely on PREVENT alone."
+        return "High plaque burden is present, so PREVENT should not be used alone."
     if plaque_category == "UNKNOWN":
         return cac_missing_line
 

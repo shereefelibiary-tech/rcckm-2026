@@ -1107,7 +1107,7 @@ DEMO_CASE_DESCRIPTIONS = {
         "Mild measured coronary calcium demonstrates the plaque-present pathway."
     ),
     "cac_100_high_plaque_burden": (
-        "CAC >=100 clarifies plaque presence and strengthens lipid-treatment intensity."
+        "CAC >=100 clarifies plaque presence and risk."
     ),
     "cac_300_high_plaque_burden": (
         "CAC 350 demonstrates high plaque burden where plaque status dominates risk interpretation."
@@ -1286,7 +1286,7 @@ DEMO_CASE_METADATA = {
         "expected_showcase_points": ("CAC >=100", "treatment escalation"),
         "expected_primary_action": "Plaque-driven lipid lowering.",
         "expected_level_or_level_range": "Level 4-5",
-        "expected_risk_framing": "Moderate/high plaque burden clarifies treatment intensity.",
+        "expected_risk_framing": "Moderate/high plaque burden clarifies risk.",
     },
     "cac_300_high_plaque_burden": {
         "category": "Plaque and imaging",

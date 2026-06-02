@@ -395,7 +395,7 @@ def test_level_3b_albuminuria_case_action_and_clarifiers_are_treatment_forward()
     assert "albuminuria" in " ".join(classification.drivers).lower()
     assert "optimize kidney-protective therapy" in actions
     assert "Short-term ASCVD risk is low, but albuminuria and longer-term risk make lipid-lowering worth discussing" in actions
-    assert "CAC reasonable for risk clarification if treatment decision remains uncertain" in actions
+    assert "CAC may clarify risk" in actions
     assert "subclinical coronary atherosclerosis" not in diagnoses.lower()
 
 
@@ -419,7 +419,7 @@ def test_lpa_family_history_pattern_stays_level_2b_without_plaque_diagnosis():
     assert classification.level == "2B"
     assert classification.prevent_category == "LOW"
     assert "Plaque unmeasured" in classification.plaque_status
-    assert "CAC reasonable for risk clarification" in actions
+    assert "CAC may clarify risk" in actions
     assert "subclinical coronary atherosclerosis" not in diagnoses.lower()
 
 
@@ -451,7 +451,7 @@ def test_high_lpa_reproductive_low_prevent_stays_level_2b_with_cac_clarification
     assert "Level: 2B - converging early risk signals." in note
     assert "Elevated lipoprotein(a)" in note
     assert "Context: elevated Lp(a); Early menopause 44; Preeclampsia." in note
-    assert "CAC reasonable for risk clarification if treatment decision remains uncertain" in actions
+    assert "CAC may clarify risk" in actions
     assert "Lipid lowering: no escalation today; document elevated Lp(a) and reproductive risk markers as risk enhancers" in actions
     assert "Aspirin: Not indicated" in note
     assert "kidney-protective" not in actions
@@ -555,6 +555,45 @@ def test_hidden_risk_cac_zero_does_not_force_cac_clarification():
 
     assert panel["plaque_cac"].status == "CAC 0"
     assert "CAC may clarify treatment" not in panel["plaque_cac"].action_card_line
+
+
+def test_apob_premature_family_metabolic_cluster_promotes_to_level3b():
+    from modules.actions.scaffold import build_action_instrument_panel
+
+    patient = Patient(
+        age=42,
+        sex="female",
+        ldl_c=136,
+        apob=112,
+        triglycerides=178,
+        a1c=6.1,
+        bmi=33.4,
+        osa=True,
+        masld=True,
+        family_history_premature_ascvd=True,
+        family_history_relationship="father",
+        family_history_event_type="MI",
+        family_history_age_at_event=49,
+        cac=None,
+        prevent_10y_ascvd=0.89,
+        prevent_30y_ascvd=6.44,
+        egfr=96,
+        uacr=5,
+    )
+
+    result, classification, actions, _diagnoses = _case(patient)
+    panel = {item.domain_id: item for item in build_action_instrument_panel(patient, result)}
+
+    assert classification.level == "3B"
+    assert classification.label == "Level 3B - actionable early CKM / atherogenic risk"
+    assert "ApoB/non-HDL burden" in classification.drivers
+    assert "premature family history" in classification.drivers
+    assert "CKM context" in classification.drivers
+    assert "Discuss lipid-lowering therapy" in actions
+    assert panel["lipid_lowering"].status == "Discuss lipid-lowering therapy"
+    assert result.targets[0].ldl_c_target == 100
+    assert result.targets[0].apob_target == 90
+    assert result.level_classification["level"] == "3B"
 
 
 def test_hidden_high_risk_cluster_does_not_fire_when_cac_zero():
@@ -763,7 +802,7 @@ def test_level_3b_atherogenic_30y_ldl_apob_uses_intensity_cac_wording():
     assert "Level: 3B - actionable early CKM / atherogenic risk." in note
     assert "PREVENT: ASCVD 10y 1.73% (Low); 30y 11.85%." in note
     assert "Moderate-intensity statin therapy is reasonable to reduce cumulative atherogenic exposure" in actions
-    assert "CAC may clarify plaque burden if treatment intensity remains uncertain" in actions
+    assert "CAC may clarify risk" in actions
     assert "CAC reasonable for risk clarification if treatment decision remains uncertain" not in actions
     assert "Aspirin: Not indicated" in note
     assert "subclinical coronary atherosclerosis" not in diagnoses.lower()

@@ -54,7 +54,7 @@ def build_snapshot_lines(result):
 
     if result.rss_total is not None:
         rss_category = result.rss_category or _rss_category(result.rss_total)
-        lines.append(f"RSS: {result.rss_total:g}/100 ({rss_category})")
+        lines.append(f"Risk Signal Score: {result.rss_total:g}/100 ({rss_category})")
 
     if result.top_drivers:
         lines.append(f"Top drivers: {'; '.join(result.top_drivers)}")

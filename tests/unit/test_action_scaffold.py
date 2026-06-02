@@ -37,15 +37,86 @@ def _visible_action_readout_text(html):
     return " ".join(readout.split())
 
 
+def _domain(panel, domain_id):
+    return next(item for item in panel if item.domain_id == domain_id)
+
+
 def test_cac_missing_intermediate_prevent_frames_cac_as_clarifier():
     patient = Patient(age=55, sex="male", cac=None, prevent_10y_ascvd=6.0)
     result = evaluate_patient(patient)
 
     sections = build_action_scaffold(patient, result)
 
-    assert _section(sections, "Coronary calcium").line == (
-        "CAC reasonable for risk clarification if treatment decision remains uncertain."
+    assert _section(sections, "Coronary calcium").line == "CAC may clarify risk."
+
+
+def test_cac_unmeasured_age_40_or_older_with_meaningful_signal_clarifies_risk():
+    cases = [
+        Patient(age=42, sex="female", apob=100),
+        Patient(age=42, sex="female", ldl_c=130),
+        Patient(age=42, sex="female", triglycerides=175),
+        Patient(age=42, sex="female", non_hdl_c=130),
+        Patient(age=42, sex="female", family_history_premature_ascvd=True),
+        Patient(age=42, sex="female", hscrp=2.0),
+        Patient(age=42, sex="female", a1c=5.7),
+        Patient(age=42, sex="female", bmi=30),
+        Patient(age=42, sex="female", osa=True),
+        Patient(age=42, sex="female", masld=True),
+        Patient(age=42, sex="female", smoker=True),
+        Patient(age=42, sex="female", diabetes=True),
+        Patient(age=42, sex="female", uacr=30),
+        Patient(age=42, sex="female", rheumatoid_arthritis=True),
+        Patient(age=42, sex="female", prevent_10y_ascvd=5.0),
+    ]
+
+    for patient in cases:
+        result = evaluate_patient(patient)
+        plaque = _domain(build_action_instrument_panel(patient, result), "plaque_cac")
+        assert plaque.status == "CAC may clarify risk"
+        assert "treatment intensity" not in plaque.action_card_line.lower()
+        assert "statin intensity" not in plaque.action_card_line.lower()
+
+
+def test_cac_unmeasured_pristine_cases_can_say_not_needed():
+    pristine_age_40 = Patient(age=42, sex="female", prevent_10y_ascvd=0.3)
+    pristine_under_40 = Patient(age=35, sex="female", prevent_10y_ascvd=0.2)
+
+    for patient in (pristine_age_40, pristine_under_40):
+        result = evaluate_patient(patient)
+        plaque = _domain(build_action_instrument_panel(patient, result), "plaque_cac")
+        assert plaque.status == "CAC not needed"
+
+
+def test_cac_unmeasured_under_40_with_major_signal_can_clarify_risk():
+    patient = Patient(age=35, sex="female", ldl_c=170, family_history_premature_ascvd=True)
+    result = evaluate_patient(patient)
+
+    plaque = _domain(build_action_instrument_panel(patient, result), "plaque_cac")
+
+    assert plaque.status == "CAC may clarify risk"
+
+
+def test_cac_unmeasured_clustered_early_risk_case_clarifies_risk():
+    patient = Patient(
+        age=42,
+        sex="female",
+        ldl_c=136,
+        apob=112,
+        triglycerides=178,
+        hscrp=2.8,
+        a1c=6.1,
+        bmi=33.4,
+        osa=True,
+        masld=True,
+        family_history_premature_ascvd=True,
     )
+    result = evaluate_patient(patient)
+
+    plaque = _domain(build_action_instrument_panel(patient, result), "plaque_cac")
+
+    assert plaque.status == "CAC may clarify risk"
+    assert "CAC not needed" not in plaque.action_card_line
+    assert "treatment intensity" not in plaque.action_card_line.lower()
 
 
 def test_below_cac_age_gate_soft_note_without_routine_cac_clarifier():
@@ -61,9 +132,7 @@ def test_below_cac_age_gate_soft_note_without_routine_cac_clarifier():
     sections = build_action_scaffold(patient, result)
     all_clarifiers = " ".join(item for section in sections for item in section.items)
 
-    assert _section(sections, "Coronary calcium").line == (
-        "Plaque burden unmeasured. CAC not routinely recommended at this age; consider only if results would change management."
-    )
+    assert _section(sections, "Coronary calcium").line == "CAC may clarify risk."
     assert "CAC - plaque burden clarification" not in all_clarifiers
 
 
@@ -76,7 +145,7 @@ def test_cac_missing_clear_treatment_indication_keeps_lipid_action_first():
     assert sections[0].label == "Lipid therapy"
     assert sections[0].line == "Moderate-intensity statin therapy is generally favored for primary prevention."
     cac_section = next(section for section in sections if section.label == "Coronary calcium")
-    assert cac_section.line == "CAC may clarify plaque burden if treatment intensity remains uncertain."
+    assert cac_section.line == "CAC may clarify risk."
 
 
 def test_cac_zero_does_not_recommend_cac():
@@ -495,7 +564,7 @@ def test_action_card_suppresses_low_value_cac_kidney_and_aspirin_details():
 
     assert panel["plaque_cac"].status == "CAC may clarify risk"
     assert panel["plaque_cac"].detail == ""
-    assert "Use only if it would change lipid-treatment intensity" in panel["plaque_cac"].hover_detail
+    assert panel["plaque_cac"].hover_detail == ""
     assert panel["kidney_protection"].status == "Stable"
     assert panel["kidney_protection"].detail == ""
     assert panel["aspirin_antiplatelet"].status == "Not indicated"
@@ -562,6 +631,35 @@ def test_action_instrument_panel_shows_decision_relevant_clarifiers():
 
     assert panel["data_to_clarify"].label == "Additional information that may help clarify risk"
     assert "ApoB" in panel["data_to_clarify"].status
+
+
+def test_missing_data_priority_layer_surfaces_needed_a1c_uacr_and_lpa():
+    patient = Patient(
+        age=43,
+        sex="female",
+        ldl_c=146,
+        apob=122,
+        sbp=124,
+        dbp=76,
+        bmi=28.1,
+        egfr=96,
+        a1c=None,
+        uacr=None,
+        lp_a_value=None,
+        cac=None,
+        cac_not_done=True,
+    )
+    result = evaluate_patient(patient)
+    panel = {item.domain_id: item for item in build_action_instrument_panel(patient, result)}
+
+    assert panel["kidney_protection"].status in {"Obtain UACR", "UACR needed"}
+    assert "Stable" not in panel["kidney_protection"].action_card_line
+    assert panel["glycemia_metabolic"].status == "A1c needed"
+    assert panel["plaque_cac"].status == "CAC may clarify risk"
+    assert panel["data_to_clarify"].status == "A1c, Lp(a), UACR"
+    assert "A1c" in panel["data_to_clarify"].detail_lines
+    assert any("Lp(a)" in line for line in panel["data_to_clarify"].detail_lines)
+    assert any("UACR" in line for line in panel["data_to_clarify"].detail_lines)
 
 
 def test_action_instrument_panel_keeps_kidney_and_bp_messages_separate():
@@ -885,7 +983,7 @@ def test_low_risk_complete_data_below_cac_age_threshold_stays_calm_without_cac_r
     assert _section(sections, "Lipid therapy").line == "Lipid lowering: no escalation based on current LDL-C/ApoB and ASCVD risk profile."
     assert _section(sections, "Lifestyle").line == "Continue lifestyle-based prevention."
     assert _section(sections, "Aspirin").line == "Not indicated."
-    assert not any(section.label == "Coronary calcium" for section in sections)
+    assert _section(sections, "Coronary calcium").line == "CAC not needed."
     assert "- No diagnosis candidates generated." in note
     assert "1. Lipids: No lipid-lowering medication indicated." in recommendations
     assert "6. Aspirin: Not indicated." in recommendations

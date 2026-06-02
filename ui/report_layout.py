@@ -254,7 +254,7 @@ def _snapshot_synthesis_lines(result):
 def _build_snapshot_card_html(patient, result):
     metrics = [
         _metric("Risk level", _display_value(result.risk_level) or "-"),
-        _metric("RSS", f"{_fmt(result.rss_total)}/100", result.rss_category or ""),
+        _metric("Risk Signal Score", f"{_fmt(result.rss_total)}/100", result.rss_category or ""),
         _metric("PREVENT", _fmt(result.prevent_10y_ascvd, "%"), "10-year artery-event"),
         _metric("CAC", _fmt(getattr(patient, "cac", None)), "plaque burden"),
         _metric("ApoB", _fmt(getattr(patient, "apob", None), " mg/dL"), "particle burden"),
@@ -1109,7 +1109,7 @@ def render_report(st, patient):
 
     _safe_panel(
         st,
-        "Where the Risk Is Coming From",
+        "Risk Signal Score",
         lambda: _build_rss_html(rss_total, rss_contributions, result),
     )
 

@@ -43,7 +43,6 @@ Why your risk is higher
 
 STEP 3
 Your goals
-- A1c: 5.3% to normal range
 - BP: 118/72 mmHg to <130/80
 - Kidney / albuminuria: 5 mg/g; G1A1 to reduce albuminuria / preserve eGFR
 - Weight: BMI 24.2 to individualized
@@ -65,8 +64,8 @@ ACTIONS:
 - Glycemia / metabolic: No glycemic action. A1c 5.3.
 - Aspirin / antiplatelet: Not indicated.
 
-RSS: 14
-RSS CONTRIBUTORS:
+Risk Signal Score: 14
+RISK SIGNAL CONTRIBUTORS:
 - ApoB elevation: 86.0 (+4)
 - Elevated Lp(a): 188.0 nmol/L (+8)
 - Preeclampsia: History of preeclampsia (+2)

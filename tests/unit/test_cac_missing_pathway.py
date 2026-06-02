@@ -35,14 +35,14 @@ def test_cac_missing_high_prevent_shows_plaque_unmeasured_without_plaque_diagnos
     assert position["level"] != 4
     assert "subclinical coronary atherosclerosis" not in " ".join(_diagnosis_names(result)).lower()
     assert "Plaque burden is unmeasured" in prevent_html
-    assert "Plaque status has not been measured." in roadmap_html
+    assert "Coronary plaque: Not measured." in roadmap_html
     assert "CAC not measured" in emr_note
     assert "Plaque unmeasured" in wpf_html
     assert "wpf-chip-missing" in wpf_html
     assert all(contribution.label != "CAC plaque burden" for contribution in rss_contributions)
     assert rss_total == 0
     assert result.dominant_action == "Moderate-intensity statin therapy is generally favored for primary prevention."
-    assert "CAC may clarify plaque burden if treatment intensity remains uncertain." in result.recommendations
+    assert "CAC may clarify risk." in result.recommendations
 
 
 def test_cac_missing_borderline_prevent_family_history_recommends_cac_without_plaque_diagnosis():
@@ -62,9 +62,9 @@ def test_cac_missing_borderline_prevent_family_history_recommends_cac_without_pl
     result, _rss_total, _rss_contributions = run_patient(patient)
 
     assert result.prevent_risk_category == RiskLevel.BORDERLINE
-    assert result.cac_recommendation == "CAC scoring may help refine preventive risk classification."
+    assert result.cac_recommendation == "CAC may clarify risk."
     assert result.clarification["recommend_cac"] is True
-    assert "CAC reasonable for risk clarification if treatment decision remains uncertain." in result.recommendations
+    assert "CAC may clarify risk." in result.recommendations
     assert "subclinical coronary atherosclerosis" not in " ".join(_diagnosis_names(result)).lower()
 
 
@@ -141,5 +141,5 @@ def test_cac_not_recommended_to_derisk_clinical_ascvd_or_ldl_190():
 
     assert build_cac_recommendation(clinical, clinical_result) is None
     assert clinical_result.clarification["recommend_cac"] is False
-    assert build_cac_recommendation(severe_ldl, severe_ldl_result) is None
-    assert severe_ldl_result.clarification["recommend_cac"] is False
+    assert build_cac_recommendation(severe_ldl, severe_ldl_result) == "CAC may clarify risk."
+    assert severe_ldl_result.clarification["recommend_cac"] is True

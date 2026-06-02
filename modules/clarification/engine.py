@@ -121,6 +121,8 @@ def _uacr_completion_relevant(patient, result):
     dbp = getattr(patient, "dbp", None)
     bmi = getattr(patient, "bmi", None)
     triglycerides = getattr(patient, "triglycerides", None)
+    ldl_c = getattr(patient, "ldl_c", None)
+    apob = getattr(patient, "apob", None)
 
     return bool(
         getattr(patient, "diabetes", False)
@@ -132,6 +134,8 @@ def _uacr_completion_relevant(patient, result):
         or (dbp is not None and dbp >= 80)
         or (egfr is not None and egfr < 90)
         or (bmi is not None and bmi >= 30)
+        or (ldl_c is not None and ldl_c >= 130)
+        or (apob is not None and apob >= 100)
         or (triglycerides is not None and triglycerides >= 150)
         or getattr(patient, "masld", False)
         or getattr(patient, "osa", False)
@@ -148,6 +152,45 @@ def _add_uacr_completion_if_needed(ladder, patient, result):
             ladder["reasons"].append(reason)
 
 
+def _a1c_completion_relevant(patient, result):
+    prevent_category = getattr(result, "prevent_risk_category", None)
+    ldl_c = _num(getattr(patient, "ldl_c", None))
+    apob = _num(getattr(patient, "apob", None))
+    triglycerides = _num(getattr(patient, "triglycerides", None))
+    bmi = _num(getattr(patient, "bmi", None))
+    uacr = _num(getattr(patient, "uacr", None))
+    egfr = _num(getattr(patient, "egfr", None))
+    sbp = _num(getattr(patient, "sbp", None))
+    dbp = _num(getattr(patient, "dbp", None))
+
+    return bool(
+        getattr(patient, "diabetes", False)
+        or getattr(patient, "gestational_diabetes", False)
+        or (bmi is not None and bmi >= 25)
+        or (triglycerides is not None and triglycerides >= 150)
+        or (uacr is not None and uacr >= 30)
+        or (egfr is not None and egfr < 90)
+        or (ldl_c is not None and ldl_c >= 130)
+        or (apob is not None and apob >= 100)
+        or getattr(patient, "masld", False)
+        or getattr(patient, "osa", False)
+        or getattr(patient, "hypertension", False)
+        or getattr(patient, "bp_treated", False)
+        or (sbp is not None and sbp >= 130)
+        or (dbp is not None and dbp >= 80)
+        or prevent_category in {RiskLevel.BORDERLINE, RiskLevel.INTERMEDIATE, RiskLevel.HIGH}
+    )
+
+
+def _add_a1c_completion_if_needed(ladder, patient, result):
+    if getattr(patient, "a1c", None) is None and _a1c_completion_relevant(patient, result):
+        ladder["recommend_a1c"] = True
+        ladder["tier"] = max(ladder["tier"], 2)
+        reason = "A1c is missing; obtain to assess glycemia."
+        if reason not in ladder["reasons"]:
+            ladder["reasons"].append(reason)
+
+
 def build_clarification_ladder(patient, result):
     ladder = {
         "tier": 0,
@@ -155,6 +198,7 @@ def build_clarification_ladder(patient, result):
         "recommend_lpa": False,
         "recommend_cac": False,
         "recommend_uacr": False,
+        "recommend_a1c": False,
         "summary": "No major clarification testing recommended from current signals.",
         "reasons": [],
     }
@@ -170,6 +214,7 @@ def build_clarification_ladder(patient, result):
             "Clinical ASCVD or CAC >=300 supports very high-risk management."
         )
         _add_uacr_completion_if_needed(ladder, patient, result)
+        _add_a1c_completion_if_needed(ladder, patient, result)
         return ladder
 
     ldl_c = getattr(patient, "ldl_c", None)
@@ -203,8 +248,11 @@ def build_clarification_ladder(patient, result):
         ladder["reasons"].append("Lp(a) may change inherited-risk counseling or treatment intensity.")
 
     _add_uacr_completion_if_needed(ladder, patient, result)
+    _add_a1c_completion_if_needed(ladder, patient, result)
 
     recommendations = []
+    if ladder["recommend_a1c"]:
+        recommendations.append("A1c")
     if ladder["recommend_cac"]:
         recommendations.append("CAC")
     if ladder["recommend_apob"]:

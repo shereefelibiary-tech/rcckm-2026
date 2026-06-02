@@ -12,9 +12,8 @@ Assessment:
 - Moderately increased albuminuria (ICD: R80.9)
 - Essential hypertension (ICD: I10)
 - Hypertriglyceridemia (ICD: E78.1)
-- Obesity (ICD: E66.9)
+- Obesity, BMI 31.0-31.9 (ICD: E66.9, Z68.31)
 - Prediabetes (ICD: R73.03)
-- Adult BMI 31.0-31.9 (ICD: Z68.31)
 
 Recommendations:
 1. Lipids: Discuss moderate-intensity statin; LDL-C <70, ApoB <80, non-HDL-C <100.
@@ -49,7 +48,7 @@ Your goals
 - LDL-C: 126 mg/dL to <70 mg/dL
 - non-HDL-C: 156 mg/dL calculated to <100 mg/dL
 - ApoB: 96 mg/dL to <80 mg/dL
-- A1c: 6.0% to prediabetes range
+- A1c: 6.0% to <5.7%
 - BP: 142/86 mmHg; treated to <130/80
 - Kidney / albuminuria: 48 mg/g; G2A2 to reduce albuminuria / preserve eGFR
 - Weight: BMI 31.0 to individualized
@@ -71,8 +70,8 @@ ACTIONS:
 - Glycemia / metabolic: Prediabetes prevention. A1c 6%; weight/activity focus.
 - Aspirin / antiplatelet: Not indicated.
 
-RSS: 16
-RSS CONTRIBUTORS:
+Risk Signal Score: 16
+RISK SIGNAL CONTRIBUTORS:
 - ApoB elevation: 96.0 (+4)
 - Albuminuria: 48.0 (+6)
 - Hypertriglyceridemia: 150.0 (+4)

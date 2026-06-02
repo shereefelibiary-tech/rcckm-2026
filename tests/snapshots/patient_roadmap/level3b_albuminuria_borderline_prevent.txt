@@ -21,7 +21,7 @@ Your goals
 - LDL-C: 126 mg/dL to <70 mg/dL
 - non-HDL-C: 156 mg/dL calculated to <100 mg/dL
 - ApoB: 92 mg/dL to <80 mg/dL
-- A1c: 6.1% to prediabetes range
+- A1c: 6.1% to <5.7%
 - Kidney / albuminuria: 34 mg/g; G2A2 to reduce albuminuria / preserve eGFR
 
 STEP 4
