@@ -1,0 +1,551 @@
+{
+  "raw_input_text": "=== CARDIOVASCULAR RISK ASSESSMENT ===\n\nAge: 68 y.o.\nSex: female\nRace/Ethnicity: Filipino\n\nSmoking status: Never smoker\n\nBlood pressure (most recent):\nBP: 131/92\nBMI: 34.4\n\nClinical ASCVD: No\nClinical ASCVD details:\nNo known ASCVD.\n\nFamily History:\nNo premature ASCVD in first-degree relative.\n\nLipids:\nLDL-C 137 mg/dL\nHDL-C 39 mg/dL\nTriglycerides 227 mg/dL\n\nA1c:\nHEMOGLOBIN A1C 6.3%\n\nApoB:\nAPOB 116 mg/dL\n\nLp(a):\nLp(a) not checked\n\neGFR:\nLABGLOM 90 mL/min/1.73m2\n\nUrine ACR:\nALBCREAT 65 mg/g\n\nCoronary artery calcium (CAC) score: Not available\nCAC percentile:\n\nRisk enhancers:\nInflammatory disease: No\nReproductive history: No\n\nMedications:\nNo active cardiometabolic medications.\n\nProblem list:\nObesity\nAlbuminuria\n",
+  "parsed_patient_json": {
+    "age": 68,
+    "sex": "female",
+    "tc": null,
+    "ldl_c": 137.0,
+    "hdl_c": 39.0,
+    "triglycerides": 227.0,
+    "non_hdl_c": null,
+    "apob": 116.0,
+    "lp_a_value": null,
+    "lp_a_unit": "nmol/L",
+    "cac": null,
+    "cac_not_done": true,
+    "egfr": 90.0,
+    "uacr": 65.0,
+    "a1c": 6.3,
+    "height_in": null,
+    "weight_lb": null,
+    "bmi": 34.4,
+    "creatinine": null,
+    "diabetes": false,
+    "diabetes_duration_years": null,
+    "diabetic_retinopathy": null,
+    "diabetic_neuropathy": null,
+    "abi": null,
+    "abi_lt_0_9": null,
+    "hypertension": false,
+    "sbp": 131.0,
+    "dbp": 92.0,
+    "bp_treated": false,
+    "elevated_bp": null,
+    "smoker": false,
+    "smoking": false,
+    "clinical_ascvd": false,
+    "clinical_ascvd_context": null,
+    "heart_failure": null,
+    "hscrp": null,
+    "ckd": null,
+    "inflammatory_disease": false,
+    "rheumatoid_arthritis": false,
+    "sle": false,
+    "psoriasis": false,
+    "inflammatory_arthritis": false,
+    "ibd": false,
+    "hiv": false,
+    "stable_art": false,
+    "osa": false,
+    "masld": false,
+    "south_asian_ancestry": false,
+    "filipino_ancestry": true,
+    "higher_risk_ancestry_context": null,
+    "active_cancer": false,
+    "cancer_survivor": false,
+    "cancer_life_expectancy_gt_2y": false,
+    "suspected_fh_hefh": false,
+    "incidental_cac": false,
+    "incidental_cac_severity": null,
+    "breast_arterial_calcification": "unknown",
+    "cac_percentile": null,
+    "zip_code": null,
+    "neighborhood_sdoh_context": null,
+    "family_history_premature_ascvd": false,
+    "premature_fhx_ascvd": false,
+    "family_history_relationship": null,
+    "family_history_event_type": null,
+    "family_history_age_at_event": null,
+    "family_history_summary": null,
+    "early_menopause": false,
+    "menopause_age": null,
+    "premature_menopause": false,
+    "preeclampsia": false,
+    "gestational_hypertension": false,
+    "gestational_diabetes": false,
+    "preterm_delivery": false,
+    "small_for_gestational_age": false,
+    "recurrent_pregnancy_loss": false,
+    "pcos_or_irregular_menses": false,
+    "early_menarche": false,
+    "menarche_age": null,
+    "lipid_lowering": false,
+    "lipid_supplements": false,
+    "medications_raw": null,
+    "dm_meds_raw": null,
+    "statin_intensity": null,
+    "statin_intolerance": false,
+    "aspirin": null,
+    "aspirin_bleeding_risk_high": null,
+    "aspirin_bleeding_risk_low": null,
+    "sglt2": false,
+    "glp1": false,
+    "ace_arb": false,
+    "prevent_10y_ascvd": null,
+    "prevent_10y_total_cvd": null,
+    "prevent_30y_ascvd": null,
+    "prevent_30y_total_cvd": null,
+    "prevent_age": null,
+    "prevent_percentile": null,
+    "total_cholesterol": null,
+    "ldl": 137.0,
+    "hdl": 39.0,
+    "tg": 227.0,
+    "lpa": null,
+    "lpa_unit": "nmol/L",
+    "premature_family_history": false,
+    "mammary_artery_calcification": "unknown",
+    "breast_artery_calcification": "unknown"
+  },
+  "engine_output_json": {
+    "plaque_category": "UNKNOWN",
+    "risk_level": "BORDERLINE",
+    "clinical_ascvd": false,
+    "prevention_context": "primary_prevention",
+    "prevention_context_primary_reason": "No documented clinical ASCVD.",
+    "prevention_context_supporting_findings": [],
+    "prevention_context_rule_id": "prevention_context_primary_no_clinical_ascvd",
+    "severe_hypercholesterolemia": false,
+    "possible_fh_pathway": false,
+    "prevent_available": false,
+    "prevent_missing_inputs": [
+      "total cholesterol"
+    ],
+    "prevent_unsupported_reason": "PREVENT inputs not available.",
+    "prevent_10y_ascvd": null,
+    "prevent_10y_total_cvd": null,
+    "prevent_10y_hf": null,
+    "prevent_10y_chd": null,
+    "prevent_10y_stroke": null,
+    "prevent_30y_ascvd": null,
+    "prevent_30y_total_cvd": null,
+    "prevent_30y_hf": null,
+    "prevent_30y_chd": null,
+    "prevent_30y_stroke": null,
+    "prevent_5y_ascvd": null,
+    "prevent_5y_total_cvd": null,
+    "prevent_5y_hf": null,
+    "prevent_age": null,
+    "prevent_percentile": null,
+    "prevent_model_used": "uacr",
+    "prevent_warnings": [
+      "30-year PREVENT is only available for ages 30-59."
+    ],
+    "prevent_risk_category": null,
+    "cac_recommendation": null,
+    "egfr_stage": "G1",
+    "albuminuria_stage": "A2",
+    "kdigo_stage": "G1A2",
+    "clarification": {
+      "tier": 1,
+      "recommend_apob": false,
+      "recommend_lpa": true,
+      "recommend_cac": false,
+      "recommend_uacr": false,
+      "summary": "Next useful clarifier(s): Lp(a).",
+      "reasons": [
+        "Lp(a) may change inherited-risk counseling or treatment intensity."
+      ]
+    },
+    "discordance_insight": null,
+    "ckm_stage": {
+      "stage": 3,
+      "drivers": [
+        "CKD G1A2"
+      ],
+      "headline": "Subclinical cardiovascular or kidney disease present."
+    },
+    "top_drivers": [
+      "ApoB 116 mg/dL",
+      "CKD G1A2",
+      "UACR 65 mg/g"
+    ],
+    "rss_total": 22,
+    "rss_category": "Low",
+    "level_classification": {
+      "level": "3B",
+      "label": "Level 3B - CKM stage 3 with albuminuria-mediated kidney and ASCVD risk",
+      "short_reason": "Albuminuria plus cardiometabolic burden is actionable early kidney risk.",
+      "drivers": [
+        "albuminuria",
+        "BP-treated/elevated BP",
+        "ApoB/non-HDL burden",
+        "prediabetes",
+        "triglycerides >=150",
+        "CKM context"
+      ],
+      "prevent_category": null,
+      "plaque_status": "Plaque unmeasured / CAC not performed",
+      "treatment_posture": "domain action"
+    },
+    "family_history_summary": null,
+    "premature_fhx_ascvd": false,
+    "decision_stability": "MODERATE",
+    "targets": [
+      {
+        "ldl_c_target": null,
+        "non_hdl_c_target": null,
+        "apob_target": null,
+        "rationale": "No target pathway assigned yet."
+      }
+    ],
+    "dominant_action": "Discuss moderate-intensity statin therapy.",
+    "recommendations": [
+      "Discuss moderate-intensity statin therapy.",
+      "Confirm persistent albuminuria with repeat UACR if not already confirmed; optimize kidney-protective therapy.",
+      "Treat BP toward goal <130/80.",
+      "Check Lp(a) once."
+    ],
+    "action_domains": {
+      "lipids": "Discuss moderate-intensity statin therapy.",
+      "kidney": "Confirm persistent albuminuria with repeat UACR if not already confirmed; optimize kidney-protective therapy.",
+      "blood_pressure": "Treat BP toward goal <130/80.",
+      "lpa_testing": "Check Lp(a) once."
+    },
+    "rule_traces": [
+      {
+        "recommendation_id": "diagnostic_completion:lipids",
+        "recommendation_text": "Discuss moderate-intensity statin therapy.",
+        "domain": "lipid",
+        "triggering_inputs": {
+          "age": 68,
+          "ldl_c": 137.0,
+          "apob": 116.0,
+          "triglycerides": 227.0,
+          "clinical_ascvd": false,
+          "risk_10yr_ascvd": null,
+          "risk_30yr_ascvd": null,
+          "prevent_10yr_lipid_band": "unknown",
+          "prevent_30yr_band": "unknown",
+          "enhancers_present": [
+            "albuminuria",
+            "apob_ge_100",
+            "ldl_c_ge_130",
+            "persistent_hypertriglyceridemia",
+            "prediabetes"
+          ],
+          "hard_indications": [],
+          "major_enhancers": [
+            "albuminuria"
+          ],
+          "supporting_enhancers": [
+            "apob_ge_100",
+            "ldl_c_ge_130",
+            "persistent_hypertriglyceridemia",
+            "prediabetes"
+          ],
+          "recommendation_strength": "lifestyle",
+          "rule_id": "prevent_lipid_unknown"
+        },
+        "rule_id": "diagnostic_completion",
+        "evidence_basis": "Missing ApoB, Lp(a), UACR, CAC, or hsCRP may clarify risk when clinically relevant.",
+        "strength_language": "consider",
+        "uncertainty_flags": [],
+        "missing_data_that_could_change_decision": [
+          "CAC",
+          "Lp(a)",
+          "total cholesterol"
+        ],
+        "patient_facing_allowed": true,
+        "emr_allowed": true
+      },
+      {
+        "recommendation_id": "kidney_albuminuria_confirm_persistence:kidney",
+        "recommendation_text": "Confirm persistent albuminuria with repeat UACR if not already confirmed; optimize kidney-protective therapy.",
+        "domain": "kidney",
+        "triggering_inputs": {
+          "egfr": 90.0,
+          "uacr": 65.0,
+          "albuminuria_stage": "A2",
+          "egfr_stage": "G1",
+          "diabetes": false,
+          "bp_treated": false,
+          "sbp": 131.0,
+          "dbp": 92.0,
+          "ace_arb": false
+        },
+        "rule_id": "kidney_albuminuria_confirm_persistence",
+        "evidence_basis": "UACR >=30 mg/g is an albuminuria signal; persistence should be confirmed unless already documented.",
+        "strength_language": "consider",
+        "uncertainty_flags": [],
+        "missing_data_that_could_change_decision": [
+          "total cholesterol"
+        ],
+        "patient_facing_allowed": true,
+        "emr_allowed": true
+      },
+      {
+        "recommendation_id": "bp_albuminuria_goal_130_80:blood_pressure",
+        "recommendation_text": "Treat BP toward goal <130/80.",
+        "domain": "BP",
+        "triggering_inputs": {
+          "sbp": 131.0,
+          "dbp": 92.0,
+          "bp_treated": false,
+          "hypertension": false,
+          "uacr": 65.0
+        },
+        "rule_id": "bp_albuminuria_goal_130_80",
+        "evidence_basis": "Albuminuria/CKM risk with elevated or treated BP supports BP treatment toward <130/80 when tolerated.",
+        "strength_language": "recommended",
+        "uncertainty_flags": [],
+        "missing_data_that_could_change_decision": [
+          "total cholesterol"
+        ],
+        "patient_facing_allowed": true,
+        "emr_allowed": true
+      },
+      {
+        "recommendation_id": "diagnostic_completion:lpa_testing",
+        "recommendation_text": "Check Lp(a) once.",
+        "domain": "diagnostics",
+        "triggering_inputs": {
+          "age": 68,
+          "sex": "female",
+          "egfr": 90.0,
+          "uacr": 65.0,
+          "a1c": 6.3,
+          "diabetes": false
+        },
+        "rule_id": "diagnostic_completion",
+        "evidence_basis": "Missing ApoB, Lp(a), UACR, CAC, or hsCRP may clarify risk when clinically relevant.",
+        "strength_language": "consider",
+        "uncertainty_flags": [],
+        "missing_data_that_could_change_decision": [
+          "CAC",
+          "Lp(a)",
+          "total cholesterol"
+        ],
+        "patient_facing_allowed": true,
+        "emr_allowed": true
+      }
+    ],
+    "snapshot_lines": [
+      "RCCKM level: BORDERLINE",
+      "CKM stage: Stage 3 \u2014 CKD G1A2",
+      "Kidney: G1A2",
+      "RSS: 22/100 (Low)",
+      "Top drivers: ApoB 116 mg/dL; CKD G1A2; UACR 65 mg/g"
+    ],
+    "emr_lines": [],
+    "diagnosis_candidates": [
+      {
+        "name": "Elevated blood pressure reading",
+        "icd10_code": "R03.0",
+        "status": "review_suggested",
+        "source": "single elevated office BP",
+        "hcc_relevant": false,
+        "diagnosis": "Elevated blood pressure reading",
+        "hcc_supported": false,
+        "hcc_label": null,
+        "confidence": "review-needed",
+        "review_status": "review_suggested"
+      },
+      {
+        "name": "Prediabetes",
+        "icd10_code": "R73.03",
+        "status": "data-derived",
+        "source": "A1c 5.7-6.4%",
+        "hcc_relevant": false,
+        "diagnosis": "Prediabetes",
+        "hcc_supported": false,
+        "hcc_label": null,
+        "confidence": "data-supported",
+        "review_status": "review_suggested"
+      },
+      {
+        "name": "Hyperglycemia",
+        "icd10_code": "R73.9",
+        "status": "data-derived",
+        "source": "A1c >=5.7%",
+        "hcc_relevant": false,
+        "diagnosis": "Hyperglycemia",
+        "hcc_supported": false,
+        "hcc_label": null,
+        "confidence": "data-supported",
+        "review_status": "review_suggested"
+      },
+      {
+        "name": "Obesity",
+        "icd10_code": "E66.9",
+        "status": "data-derived",
+        "source": "BMI >=30 kg/m\u00b2",
+        "hcc_relevant": false,
+        "diagnosis": "Obesity",
+        "hcc_supported": false,
+        "hcc_label": null,
+        "confidence": "data-supported",
+        "review_status": "review_suggested"
+      },
+      {
+        "name": "Adult BMI 34.0-34.9",
+        "icd10_code": "Z68.34",
+        "status": "data-derived",
+        "source": "BMI 34.0-34.9 kg/m\u00b2",
+        "hcc_relevant": false,
+        "diagnosis": "Adult BMI 34.0-34.9",
+        "hcc_supported": false,
+        "hcc_label": null,
+        "confidence": "data-supported",
+        "review_status": "review_suggested"
+      },
+      {
+        "name": "Moderately increased albuminuria",
+        "icd10_code": "R80.9",
+        "status": "data-derived",
+        "source": "UACR 30-299 mg/g",
+        "hcc_relevant": false,
+        "diagnosis": "Moderately increased albuminuria",
+        "hcc_supported": false,
+        "hcc_label": null,
+        "confidence": "data-supported",
+        "review_status": "review_suggested"
+      },
+      {
+        "name": "Hypertriglyceridemia",
+        "icd10_code": "E78.1",
+        "status": "data-derived",
+        "source": "triglycerides >=150 mg/dL",
+        "hcc_relevant": false,
+        "diagnosis": "Hypertriglyceridemia",
+        "hcc_supported": false,
+        "hcc_label": null,
+        "confidence": "data-supported",
+        "review_status": "review_suggested"
+      }
+    ]
+  },
+  "final_report_text": "RISK CONTINUUM CKM\n\nLevel: 3B - CKM stage 3 with albuminuria-mediated kidney and ASCVD risk.\nPREVENT: unavailable.\nCKM/Kidney/Plaque: CKM stage 3; kidney G1A2; CAC not measured.\nContext: Filipino ancestry.\n\nAssessment:\n- Moderately increased albuminuria (ICD: R80.9)\n- Hypertriglyceridemia (ICD: E78.1)\n- Obesity (ICD: E66.9)\n- Prediabetes (ICD: R73.03)\n- Adult BMI 34.0-34.9 (ICD: Z68.34)\n\nRecommendations:\n1. Lipids: Discuss moderate-intensity statin.\n2. Plaque: CAC not measured.\n3. Kidney: UACR 65; optimize ACEi-ARB.\n4. BP: Treat toward <130/80.\n5. Glycemia: Prediabetes prevention; A1c 6.3%.\n6. Aspirin: Not indicated.\n7. Additional information: Lp(a).",
+  "recommendations_text": "Discuss moderate-intensity statin therapy.\nConfirm persistent albuminuria with repeat UACR if not already confirmed; optimize kidney-protective therapy.\nTreat BP toward goal <130/80.\nCheck Lp(a) once.",
+  "diagnoses": [
+    {
+      "name": "Elevated blood pressure reading",
+      "icd10_code": "R03.0",
+      "status": "review_suggested",
+      "source": "single elevated office BP",
+      "hcc_relevant": false,
+      "diagnosis": "Elevated blood pressure reading",
+      "hcc_supported": false,
+      "hcc_label": null,
+      "confidence": "review-needed",
+      "review_status": "review_suggested"
+    },
+    {
+      "name": "Prediabetes",
+      "icd10_code": "R73.03",
+      "status": "data-derived",
+      "source": "A1c 5.7-6.4%",
+      "hcc_relevant": false,
+      "diagnosis": "Prediabetes",
+      "hcc_supported": false,
+      "hcc_label": null,
+      "confidence": "data-supported",
+      "review_status": "review_suggested"
+    },
+    {
+      "name": "Hyperglycemia",
+      "icd10_code": "R73.9",
+      "status": "data-derived",
+      "source": "A1c >=5.7%",
+      "hcc_relevant": false,
+      "diagnosis": "Hyperglycemia",
+      "hcc_supported": false,
+      "hcc_label": null,
+      "confidence": "data-supported",
+      "review_status": "review_suggested"
+    },
+    {
+      "name": "Obesity",
+      "icd10_code": "E66.9",
+      "status": "data-derived",
+      "source": "BMI >=30 kg/m\u00b2",
+      "hcc_relevant": false,
+      "diagnosis": "Obesity",
+      "hcc_supported": false,
+      "hcc_label": null,
+      "confidence": "data-supported",
+      "review_status": "review_suggested"
+    },
+    {
+      "name": "Adult BMI 34.0-34.9",
+      "icd10_code": "Z68.34",
+      "status": "data-derived",
+      "source": "BMI 34.0-34.9 kg/m\u00b2",
+      "hcc_relevant": false,
+      "diagnosis": "Adult BMI 34.0-34.9",
+      "hcc_supported": false,
+      "hcc_label": null,
+      "confidence": "data-supported",
+      "review_status": "review_suggested"
+    },
+    {
+      "name": "Moderately increased albuminuria",
+      "icd10_code": "R80.9",
+      "status": "data-derived",
+      "source": "UACR 30-299 mg/g",
+      "hcc_relevant": false,
+      "diagnosis": "Moderately increased albuminuria",
+      "hcc_supported": false,
+      "hcc_label": null,
+      "confidence": "data-supported",
+      "review_status": "review_suggested"
+    },
+    {
+      "name": "Hypertriglyceridemia",
+      "icd10_code": "E78.1",
+      "status": "data-derived",
+      "source": "triglycerides >=150 mg/dL",
+      "hcc_relevant": false,
+      "diagnosis": "Hypertriglyceridemia",
+      "hcc_supported": false,
+      "hcc_label": null,
+      "confidence": "data-supported",
+      "review_status": "review_suggested"
+    }
+  ],
+  "targets": [
+    {
+      "ldl_c_target": null,
+      "non_hdl_c_target": null,
+      "apob_target": null,
+      "rationale": "No target pathway assigned yet."
+    }
+  ],
+  "ckm_stage": {
+    "stage": 3,
+    "drivers": [
+      "CKD G1A2"
+    ],
+    "headline": "Subclinical cardiovascular or kidney disease present."
+  },
+  "risk_level": {
+    "level": "3B",
+    "label": "Level 3B - CKM stage 3 with albuminuria-mediated kidney and ASCVD risk",
+    "short_reason": "Albuminuria plus cardiometabolic burden is actionable early kidney risk.",
+    "drivers": [
+      "albuminuria",
+      "BP-treated/elevated BP",
+      "ApoB/non-HDL burden",
+      "prediabetes",
+      "triglycerides >=150",
+      "CKM context"
+    ],
+    "prevent_category": null,
+    "plaque_status": "Plaque unmeasured / CAC not performed",
+    "treatment_posture": "domain action"
+  },
+  "visible_ui_text": "RCCKM level: BORDERLINE\nCKM stage: Stage 3 \u2014 CKD G1A2\nKidney: G1A2\nRSS: 22/100 (Low)\nTop drivers: ApoB 116 mg/dL; CKD G1A2; UACR 65 mg/g",
+  "app_version": "0.1.0-beta",
+  "git_commit": "8df6803",
+  "timestamp": "2026-06-01T02:44:25+00:00"
+}

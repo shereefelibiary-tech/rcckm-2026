@@ -390,7 +390,7 @@ def _build_targets_html(result, patient=None, *, clinician_detail_mode=False):
         if target_number is not None:
             target_html = f'<span class="target-goal">&lt;{escape(target_number)} {escape(unit)}</span>'
         else:
-            target_html = '<span class="target-goal target-goal-unset">Not set</span>'
+            target_html = '<span class="target-goal target-goal-unset">No target indicated</span>'
         current_html = ""
         status_text = ""
         if current_value is not None:

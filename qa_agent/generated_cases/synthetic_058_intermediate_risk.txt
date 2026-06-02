@@ -1,0 +1,52 @@
+=== CARDIOVASCULAR RISK ASSESSMENT ===
+
+Age: 49 y.o.
+Sex: male
+Race/Ethnicity: White
+
+Smoking status: Never smoker
+
+Blood pressure (most recent):
+BP: 134/81
+BMI: 30.0
+
+Clinical ASCVD: No
+Clinical ASCVD details:
+No known ASCVD.
+
+Family History:
+Sister MI age 51.
+
+Lipids:
+LDL-C 147 mg/dL
+HDL-C 36 mg/dL
+Triglycerides 150 mg/dL
+
+A1c:
+HEMOGLOBIN A1C 5.7%
+
+ApoB:
+APOB 127 mg/dL
+
+Lp(a):
+Lp(a) not checked
+
+eGFR:
+LABGLOM 82 mL/min/1.73m2
+
+Urine ACR:
+ALBCREAT 84 mg/g
+
+Coronary artery calcium (CAC) score: Not available
+CAC percentile:
+
+Risk enhancers:
+Inflammatory disease: No
+Reproductive history: No
+
+Medications:
+No active cardiometabolic medications.
+
+Problem list:
+Obesity
+Albuminuria

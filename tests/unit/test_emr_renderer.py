@@ -72,6 +72,17 @@ def test_render_emr_note_outputs_plain_text_sections_in_order():
     assert note.index(lipid_line) < note.index(aspirin_line)
 
 
+def test_render_emr_note_combines_obesity_and_adult_bmi_assessment_line():
+    patient = Patient(age=55, sex="female", bmi=36.2)
+    result = evaluate_patient(patient)
+
+    note = render_emr_note(patient, result)
+
+    assert "- Obesity, BMI 36.0-36.9 (ICD: E66.9, Z68.36)" in note
+    assert "- Obesity (ICD: E66.9)" not in note
+    assert "- Adult BMI 36.0-36.9 (ICD: Z68.36)" not in note
+
+
 def test_stress_smartphrase_emr_uses_extracted_uacr_and_concise_surface_lines():
     fixture = Path("tests/fixtures/ingest/rcckm_parser_stress_smartphrase.txt")
     report = parse_ingest_report(fixture.read_text(encoding="utf-8"))

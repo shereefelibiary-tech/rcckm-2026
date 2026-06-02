@@ -36,7 +36,7 @@ def test_target_card_renders_target_first_without_arrow_text():
 
 
 def test_target_card_always_renders_when_targets_are_not_set():
-    patient = Patient(age=55, sex="male", ldl_c=88, apob=None, cac=0)
+    patient = Patient(age=55, sex="male", ldl_c=88, apob=70, cac=0)
     result, _rss_total, _contributions = run_patient(patient)
 
     html = _build_targets_html(result, patient)
@@ -45,9 +45,10 @@ def test_target_card_always_renders_when_targets_are_not_set():
     assert "LDL-C" in html
     assert "ApoB" in html
     assert html.count('<span class="target-item">') == 2
-    assert html.count("Not set") == 2
+    assert html.count("No target indicated") == 2
+    assert "Not set" not in html
     assert "Current 88 mg/dL" in html
-    assert "Current not available" in html
+    assert "Current 70 mg/dL" in html
     assert "At goal" not in html
     assert "Above goal" not in html
 

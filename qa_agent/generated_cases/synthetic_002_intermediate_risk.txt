@@ -1,0 +1,52 @@
+=== CARDIOVASCULAR RISK ASSESSMENT ===
+
+Age: 68 y.o.
+Sex: female
+Race/Ethnicity: Filipino
+
+Smoking status: Never smoker
+
+Blood pressure (most recent):
+BP: 131/92
+BMI: 34.4
+
+Clinical ASCVD: No
+Clinical ASCVD details:
+No known ASCVD.
+
+Family History:
+No premature ASCVD in first-degree relative.
+
+Lipids:
+LDL-C 137 mg/dL
+HDL-C 39 mg/dL
+Triglycerides 227 mg/dL
+
+A1c:
+HEMOGLOBIN A1C 6.3%
+
+ApoB:
+APOB 116 mg/dL
+
+Lp(a):
+Lp(a) not checked
+
+eGFR:
+LABGLOM 90 mL/min/1.73m2
+
+Urine ACR:
+ALBCREAT 65 mg/g
+
+Coronary artery calcium (CAC) score: Not available
+CAC percentile:
+
+Risk enhancers:
+Inflammatory disease: No
+Reproductive history: No
+
+Medications:
+No active cardiometabolic medications.
+
+Problem list:
+Obesity
+Albuminuria

@@ -1,0 +1,54 @@
+=== CARDIOVASCULAR RISK ASSESSMENT ===
+
+Age: 63 y.o.
+Sex: female
+Race/Ethnicity: White
+
+Smoking status: Never smoker
+
+Blood pressure (most recent):
+BP: 139/93
+BMI: 37.4
+
+Clinical ASCVD: No
+Clinical ASCVD details:
+No known ASCVD.
+
+Family History:
+No premature ASCVD in first-degree relative.
+
+Lipids:
+LDL-C 88 mg/dL
+HDL-C 47 mg/dL
+Triglycerides 312 mg/dL
+
+A1c:
+HEMOGLOBIN A1C 6.3%
+
+ApoB:
+APOB 123 mg/dL
+
+Lp(a):
+Lp(a) not checked
+
+eGFR:
+LABGLOM 48 mL/min/1.73m2
+
+Urine ACR:
+ALBCREAT 433 mg/g
+
+Coronary artery calcium (CAC) score: 176
+CAC percentile:
+
+Risk enhancers:
+Inflammatory disease: No
+Reproductive history: No
+
+Medications:
+Losartan 50 mg daily
+
+Problem list:
+Essential hypertension
+Obesity
+Chronic kidney disease
+Albuminuria

@@ -255,6 +255,11 @@ def main():
             </div>
             """,
         )
+        render_qa_export(
+            st,
+            st.session_state,
+            patient=build_patient_from_inputs(inputs),
+        )
 
 
 if __name__ == "__main__":

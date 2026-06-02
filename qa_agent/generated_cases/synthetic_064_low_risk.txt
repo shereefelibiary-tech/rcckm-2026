@@ -1,0 +1,51 @@
+=== CARDIOVASCULAR RISK ASSESSMENT ===
+
+Age: 41 y.o.
+Sex: female
+Race/Ethnicity: Hispanic / Latino
+
+Smoking status: Never smoker
+
+Blood pressure (most recent):
+BP: 114/71
+BMI: 23.9
+
+Clinical ASCVD: No
+Clinical ASCVD details:
+No known ASCVD.
+
+Family History:
+Brother stroke age 48.
+
+Lipids:
+LDL-C 89 mg/dL
+HDL-C 72 mg/dL
+Triglycerides 98 mg/dL
+
+A1c:
+HEMOGLOBIN A1C 5.0%
+
+ApoB:
+APOB 80 mg/dL
+
+Lp(a):
+Lp(a) not checked
+
+eGFR:
+LABGLOM 103 mL/min/1.73m2
+
+Urine ACR:
+ALBCREAT 6 mg/g
+
+Coronary artery calcium (CAC) score: Not available
+CAC percentile:
+
+Risk enhancers:
+Inflammatory disease: No
+Reproductive history: No
+
+Medications:
+No active cardiometabolic medications.
+
+Problem list:
+No active cardiometabolic diagnoses listed.

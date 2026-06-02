@@ -1,0 +1,39 @@
+{
+  "total_cases": 1,
+  "pass": 0,
+  "warn": 0,
+  "fail": 1,
+  "top_discrepancy_categories": {
+    "ui": 1
+  },
+  "severity_counts": {
+    "high": 1
+  },
+  "ui_quality": {
+    "finding_count": 0,
+    "top_categories": {},
+    "severity_counts": {}
+  },
+  "cases": [
+    {
+      "case_id": "synthetic_001_low_risk",
+      "phenotype": "low_risk",
+      "status": "FAIL",
+      "oracle": null,
+      "finding_count": 1
+    }
+  ],
+  "findings": [
+    {
+      "case_id": "synthetic_001_low_risk",
+      "status": "FAIL",
+      "category": "ui",
+      "severity": "high",
+      "key": "browser_run",
+      "expected": "successful QA export",
+      "actual": "Could not capture interpreted QA export for synthetic_001_low_risk.",
+      "explanation": "Browser QA run did not complete."
+    }
+  ],
+  "ui_findings": []
+}

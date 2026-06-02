@@ -1,0 +1,953 @@
+Navigation
+
+Worksheet
+
+Validation & Safety
+
+Worksheet
+
+Reset to demo patient
+
+Demo Case Gallery
+
+Load a realistic primary-care scenario with standard vitals and lipids to see how RCCKM structures risk, action, EMR documentation, and the patient roadmap.
+
+Demo category
+
+All
+
+Demo case
+
+Low-risk clean prevention
+
+Clean baseline prevention visit with low ASCVD risk and complete reassuring data.
+
+Load demo case
+
+Debug
+
+Show raw renderer HTML
+
+RCCKM 0.1.0-beta beta
+
+CARDIOVASCULAR · KIDNEY · METABOLIC
+Risk Continuum CKM
+Structured clinical interpretation layer
+Paste EMR text
+Paste EMR text. Parsed values fill the worksheet below.
+
+Expand paste box
+
+keyboard_arrow_right
+
+Preview Epic template
+
+Parse and apply
+
+Clear
+
+Recognized
+✓
+Age 55
+✓
+Sex male
+✓
+BP 138/84
+✓
+LDL-C 142 mg/dL
+✓
+A1c 6.3%
+✓
+eGFR 72
+✓
+BMI 31
+✓
+Meds detected
+✓
+ApoB 116 mg/dL
+✓
+UACR 84 mg/g
+✓
+CAC 0
+⚠
+Family history unclear
+⚠
+Possible ASCVD history; review
+
+Review parsed values in the worksheet before interpretation.
+
+Developer parser debug
+
+Review / Edit Worksheet
+Parsed values fill the worksheet. Edited values are used for interpretation.
+Core inputs
+
+Age
+
+Sex
+
+male
+
+SBP mmHg
+
+DBP mmHg
+
+BP treated
+
+Smoking
+
+Clinical ASCVD
+
+Lipids
+
+TC mg/dL
+
+LDL-C mg/dL
+
+HDL-C mg/dL
+
+TG mg/dL
+
+ApoB mg/dL
+
+Lp(a) value
+
+Lp(a) unit
+
+nmol/L
+
+US lipid units shown; convert mmol/L before entry.
+
+Metabolic / Kidney
+
+BMI kg/m²
+
+A1c %
+
+eGFR mL/min/1.73m²
+
+UACR mg/g
+
+Diabetes
+
+keyboard_arrow_right
+
+Edit height/weight source
+
+Calcification / plaque imaging
+
+CAC score Agatston
+
+No CAC
+
+Clear
+
+CAC percentile
+
+CAC 0 entered.
+
+Incidental CAC on CT
+
+Severity:
+
+not applicable
+
+Breast arterial calcification
+
+Unknown
+Family history / lipid genetics
+
+Premature family history
+
+Father <55
+
+Father MI age 49
+
+Suspected FH / HeFH
+
+Ancestry context
+
+None / not specified
+Inflammation / immune context
+Inflammatory, autoimmune, HIV, cancer, and related risk modifiers.
+
+hsCRP mg/L
+
+OSA
+
+MASLD
+
+keyboard_arrow_right
+
+More immune / inflammatory context
+
+Medications
+
+Lipid lowering
+
+BP meds
+
+SGLT2
+
+GLP1
+
+ACE/ARB
+
+Medication list
+
+Diabetes meds
+
+Statin intensity
+
+Statin intolerance
+
+Interpret risk
+
+PREVENT population model
+10-Year Cardiovascular Risk
+Calculated risk before plaque and treatment context.
+--
+unavailable
+PREVENT estimate unavailable
+Complete the missing worksheet inputs to calculate risk.
+RCCKM: Level 3B - CKM stage 3 with albuminuria-mediated kidney and ASCVD risk
+10-year PREVENT risk: Low <3% · Borderline 3–<5% · Intermediate 5–<10% · High ≥10%
+PREVENT unavailable: total cholesterol, HDL-C not available.
+Not available:
+total cholesterol
+HDL-C
+Where the Risk Is Coming From
+19/100
+Low
+100
+50
+0
+UACR 84 mg/g
+ApoB 116 mg/dL
+Top: ApoB 116 mg/dL (+8)
+4 contributors total
+RSS contributors
+A1c 6.3%
++2
+Premature family history
+Father MI age 49
++3
+Albuminuria, UACR 84 mg/g
++6
+ApoB 116 mg/dL
+Particle burden
++8
+CKM / KDIGO
+CKM
+ⓘ
+CKM Stage 3
+Subclinical cardiovascular disease or CKD is present.
+KDIGO
+ⓘ
+G2A2
+eGFR 72; UACR 84 mg/g
+
+Show not-active markers
+
+Where this patient falls
+Inputs, available data, and level-driving findings.
+Risk impact: Major = changes level/action · Contributes = supports risk · Context = background · Not active = audit only.
+Level 3 (3B)
+Marker	Patient	Risk impact
+KIDNEY (EGFR/UACR)
+
+eGFR / UACR
+mild: UACR 10-29; major: eGFR <60 or UACR >=30
+	eGFR 72
+UACR 84 mg/g
+	Major driver
+FAMILY HISTORY
+
+Premature family history
+male first-degree <55; female first-degree <65
+	Father MI age 49	Major driver
+ATHEROGENIC BURDEN
+
+ApoB / LDL-C
+<80 optimal/goal if treated; 80-99 mild; 100-119 elevated; >=120 risk-enhancing; >=140 severe. LDL-C fallback if ApoB unavailable.
+	ApoB 116 mg/dL
+LDL-C 142 mg/dL
+	Contributes
+GLYCEMIA
+
+A1c / diabetes
+Prediabetes 5.7-6.4%; diabetes >=6.5%
+	A1c 6.3%	Contributes
+LP(A)
+
+Lp(a)
+nmol/L: <75 reference; 75-124 mild; >=125 elevated; >=250 high; >=430 very high. mg/dL: <30 reference; 30-49 mild; >=50 elevated; >=100 high; >=180 very high
+	Lp(a) not available	Context only
+HSCRP
+
+hsCRP
+>=2 mg/L is interpreted in clinical context
+	hsCRP not available	Context only
+Data-derived diagnoses
+Diagnoses supported by current data.
+Moderately increased albuminuria
+ICD: R80.9
+Evidence: UACR 30-299 mg/g; albuminuria present
+Essential hypertension
+ICD: I10
+Evidence: antihypertensive therapy active
+Obesity
+ICD: E66.9
+Evidence: BMI ≥30 kg/m²
+Prediabetes
+ICD: R73.03
+Evidence: A1c 5.7-6.4%
+Adult BMI 31.0-31.9
+ICD: Z68.31
+Evidence: BMI 31.0-31.9 kg/m²
+Targets
+LDL-C
+Not set
+Current 142 mg/dL
+ApoB
+Not set
+Current 116 mg/dL
+Show target rationale
+Action
+1
+Lipid lowering
+Discuss moderate-intensity statin
+LDL-C 142. ApoB 116.
+2
+Plaque
+CAC 0
+3
+Kidney protection
+Monitor albuminuria
+UACR 84; ACEi/ARB active.
+4
+Blood pressure
+Treat toward <130/80
+Current 138/84.
+5
+Glycemia / metabolic
+Prediabetes prevention
+A1c 6.3%; weight/activity focus.
+6
+Aspirin / antiplatelet
+Not indicated
+7
+Additional information that may help clarify risk
+Lp(a)
+Show details
+Additional information that may help clarify risk:
+Lp(a)
+EMR note
+Copy-ready clinical text
+Patient roadmap
+Patient-facing handout
+Your Prevention Roadmap
+Review with your clinician
+STEP 1
+Where you stand
+10-year ASCVD risk
+ASCVD risk: heart attack, stroke, or related artery disease event
+Unavailable
+More information is needed to calculate this estimate.
+Not available: total cholesterol, HDL-C
+Coronary plaque: Not detected (CAC 0).
+Care focus: Level 3 (3B) - Actionable early CKM / atherogenic risk
+STEP 2
+Why your risk is higher
+Elevated cholesterol particles (ApoB 116)
+Current values: ApoB 116; LDL-C 142.
+Blood sugar and kidneys
+Current values: A1c 6.3%; eGFR 72; UACR 84; KDIGO G2A2.
+Other context
+Father MI age 49
+STEP 3
+Your goals
+A1c prediabetes range
+Current 6.3%
+BP <130/80
+Current 138/84
+STEP 4
+Your next steps
+Cholesterol: Discuss starting cholesterol-lowering therapy.
+Coronary plaque: Not detected (CAC 0).
+Kidneys: Albuminuria present (UACR 84).
+Blood pressure: Treat toward <130/80.
+Blood sugar: Prediabetes range; focus on weight/activity.
+Aspirin: Not indicated.
+Export / Print
+Copy the EMR note for clinical documentation or print the patient roadmap for patient counseling.
+Review all copied or printed output before use. Public/demo use should not include patient-identifiable information.
+keyboard_arrow_right
+
+Debug: patient payload
+
+keyboard_arrow_right
+
+Debug: PREVENT result
+
+RCCKM QA EXPORT
+{
+  "raw_input_text": "55-year-old male here for cardiometabolic risk review.\n\nPMH:\nHypertension.\nPrediabetes.\nNo known ASCVD.\nNo prior MI, stroke, TIA, PAD, or revascularization.\n\nFamily history:\nFather had myocardial infarction at age 49.\n\nVitals:\nBP 138/84\nBMI 31\n\nLabs:\nLDL-C 142 mg/dL\nApoB 116 mg/dL\nA1c 6.3%\nCreatinine 1.1\neGFR 72 mL/min/1.73m2\nUrine albumin/creatinine ratio 84 mg/g\nLp(a) not checked\n\nImaging:\nCoronary artery calcium score 0\n\nMedications:\nLosartan 50 mg daily.\nNo statin.\nNo aspirin.\n\n",
+  "parsed_patient_json": {
+    "age": 55,
+    "sex": "male",
+    "tc": null,
+    "ldl_c": 142.0,
+    "hdl_c": null,
+    "triglycerides": null,
+    "non_hdl_c": null,
+    "apob": 116.0,
+    "lp_a_value": null,
+    "lp_a_unit": "nmol/L",
+    "cac": 0.0,
+    "cac_not_done": false,
+    "egfr": 72.0,
+    "uacr": 84.0,
+    "a1c": 6.3,
+    "height_in": null,
+    "weight_lb": null,
+    "bmi": 31.0,
+    "creatinine": null,
+    "diabetes": false,
+    "diabetes_duration_years": null,
+    "diabetic_retinopathy": null,
+    "diabetic_neuropathy": null,
+    "abi": null,
+    "abi_lt_0_9": null,
+    "hypertension": false,
+    "sbp": 138.0,
+    "dbp": 84.0,
+    "bp_treated": true,
+    "elevated_bp": null,
+    "smoker": false,
+    "smoking": false,
+    "clinical_ascvd": false,
+    "clinical_ascvd_context": null,
+    "heart_failure": null,
+    "hscrp": null,
+    "ckd": null,
+    "inflammatory_disease": false,
+    "rheumatoid_arthritis": false,
+    "sle": false,
+    "psoriasis": false,
+    "inflammatory_arthritis": false,
+    "ibd": false,
+    "hiv": false,
+    "stable_art": false,
+    "osa": false,
+    "masld": false,
+    "south_asian_ancestry": false,
+    "filipino_ancestry": false,
+    "higher_risk_ancestry_context": null,
+    "active_cancer": false,
+    "cancer_survivor": false,
+    "cancer_life_expectancy_gt_2y": false,
+    "suspected_fh_hefh": false,
+    "incidental_cac": false,
+    "incidental_cac_severity": null,
+    "breast_arterial_calcification": "unknown",
+    "cac_percentile": null,
+    "zip_code": null,
+    "neighborhood_sdoh_context": null,
+    "family_history_premature_ascvd": true,
+    "premature_fhx_ascvd": true,
+    "family_history_relationship": "father",
+    "family_history_event_type": "MI",
+    "family_history_age_at_event": 49.0,
+    "family_history_summary": "Father MI age 49",
+    "early_menopause": false,
+    "menopause_age": null,
+    "premature_menopause": false,
+    "preeclampsia": false,
+    "gestational_hypertension": false,
+    "gestational_diabetes": false,
+    "preterm_delivery": false,
+    "small_for_gestational_age": false,
+    "recurrent_pregnancy_loss": false,
+    "pcos_or_irregular_menses": false,
+    "early_menarche": false,
+    "menarche_age": null,
+    "lipid_lowering": false,
+    "lipid_supplements": false,
+    "medications_raw": "losartan",
+    "dm_meds_raw": null,
+    "statin_intensity": null,
+    "statin_intolerance": false,
+    "aspirin": null,
+    "aspirin_bleeding_risk_high": null,
+    "aspirin_bleeding_risk_low": null,
+    "sglt2": false,
+    "glp1": false,
+    "ace_arb": true,
+    "prevent_10y_ascvd": null,
+    "prevent_10y_total_cvd": null,
+    "prevent_30y_ascvd": null,
+    "prevent_30y_total_cvd": null,
+    "prevent_age": null,
+    "prevent_percentile": null,
+    "total_cholesterol": null,
+    "ldl": 142.0,
+    "hdl": null,
+    "tg": null,
+    "lpa": null,
+    "lpa_unit": "nmol/L",
+    "premature_family_history": true,
+    "mammary_artery_calcification": "unknown",
+    "breast_artery_calcification": "unknown"
+  },
+  "engine_output_json": {
+    "plaque_category": "NONE",
+    "risk_level": "LOW",
+    "clinical_ascvd": false,
+    "prevention_context": "primary_prevention",
+    "prevention_context_primary_reason": "No documented clinical ASCVD.",
+    "prevention_context_supporting_findings": [],
+    "prevention_context_rule_id": "prevention_context_primary_no_clinical_ascvd",
+    "severe_hypercholesterolemia": false,
+    "possible_fh_pathway": false,
+    "prevent_available": false,
+    "prevent_missing_inputs": [
+      "total cholesterol",
+      "HDL-C"
+    ],
+    "prevent_unsupported_reason": "PREVENT inputs not available.",
+    "prevent_10y_ascvd": null,
+    "prevent_10y_total_cvd": null,
+    "prevent_10y_hf": null,
+    "prevent_10y_chd": null,
+    "prevent_10y_stroke": null,
+    "prevent_30y_ascvd": null,
+    "prevent_30y_total_cvd": null,
+    "prevent_30y_hf": null,
+    "prevent_30y_chd": null,
+    "prevent_30y_stroke": null,
+    "prevent_5y_ascvd": null,
+    "prevent_5y_total_cvd": null,
+    "prevent_5y_hf": null,
+    "prevent_age": null,
+    "prevent_percentile": null,
+    "prevent_model_used": "uacr",
+    "prevent_warnings": [],
+    "prevent_risk_category": null,
+    "cac_recommendation": null,
+    "egfr_stage": "G2",
+    "albuminuria_stage": "A2",
+    "kdigo_stage": "G2A2",
+    "clarification": {
+      "tier": 1,
+      "recommend_apob": false,
+      "recommend_lpa": true,
+      "recommend_cac": false,
+      "recommend_uacr": false,
+      "summary": "Next useful clarifier(s): Lp(a).",
+      "reasons": [
+        "Lp(a) may change inherited-risk counseling or treatment intensity."
+      ]
+    },
+    "discordance_insight": null,
+    "ckm_stage": {
+      "stage": 3,
+      "drivers": [
+        "CKD G2A2"
+      ],
+      "headline": "Subclinical cardiovascular or kidney disease present."
+    },
+    "top_drivers": [
+      "ApoB 116 mg/dL",
+      "CKD G2A2",
+      "UACR 84 mg/g",
+      "Father MI age 49"
+    ],
+    "rss_total": 19,
+    "rss_category": "Low",
+    "level_classification": {
+      "level": "3B",
+      "label": "Level 3B - CKM stage 3 with albuminuria-mediated kidney and ASCVD risk",
+      "short_reason": "Albuminuria plus cardiometabolic burden is actionable early kidney risk.",
+      "drivers": [
+        "albuminuria",
+        "BP-treated/elevated BP",
+        "ApoB/non-HDL burden",
+        "premature family history",
+        "prediabetes",
+        "CKM context"
+      ],
+      "prevent_category": null,
+      "plaque_status": "CAC 0 measured",
+      "treatment_posture": "domain action"
+    },
+    "family_history_summary": "Father MI age 49",
+    "premature_fhx_ascvd": true,
+    "decision_stability": "MODERATE",
+    "targets": [
+      {
+        "ldl_c_target": null,
+        "non_hdl_c_target": null,
+        "apob_target": null,
+        "rationale": "No target pathway assigned yet."
+      }
+    ],
+    "dominant_action": "Discuss moderate-intensity statin therapy.",
+    "recommendations": [
+      "Discuss moderate-intensity statin therapy.",
+      "Confirm persistent albuminuria with repeat UACR if not already confirmed; optimize kidney-protective therapy.",
+      "Continue or optimize ACEi/ARB therapy if hypertension and persistent albuminuria are present.",
+      "Treat BP toward goal <130/80.",
+      "Check Lp(a) once."
+    ],
+    "action_domains": {
+      "lipids": "Discuss moderate-intensity statin therapy.",
+      "kidney": "Confirm persistent albuminuria with repeat UACR if not already confirmed; optimize kidney-protective therapy.",
+      "ace_arb": "Continue or optimize ACEi/ARB therapy if hypertension and persistent albuminuria are present.",
+      "blood_pressure": "Treat BP toward goal <130/80.",
+      "lpa_testing": "Check Lp(a) once."
+    },
+    "rule_traces": [
+      {
+        "recommendation_id": "diagnostic_completion:lipids",
+        "recommendation_text": "Discuss moderate-intensity statin therapy.",
+        "domain": "lipid",
+        "triggering_inputs": {
+          "age": 55,
+          "ldl_c": 142.0,
+          "apob": 116.0,
+          "cac": 0.0,
+          "clinical_ascvd": false,
+          "risk_10yr_ascvd": null,
+          "risk_30yr_ascvd": null,
+          "prevent_10yr_lipid_band": "unknown",
+          "prevent_30yr_band": "unknown",
+          "enhancers_present": [
+            "albuminuria",
+            "premature_family_history",
+            "apob_ge_100",
+            "ldl_c_ge_130",
+            "prediabetes",
+            "hypertension"
+          ],
+          "hard_indications": [],
+          "major_enhancers": [
+            "albuminuria",
+            "premature_family_history"
+          ],
+          "supporting_enhancers": [
+            "apob_ge_100",
+            "ldl_c_ge_130",
+            "prediabetes",
+            "hypertension"
+          ],
+          "recommendation_strength": "lifestyle",
+          "rule_id": "prevent_lipid_unknown"
+        },
+        "rule_id": "diagnostic_completion",
+        "evidence_basis": "Missing ApoB, Lp(a), UACR, CAC, or hsCRP may clarify risk when clinically relevant.",
+        "strength_language": "consider",
+        "uncertainty_flags": [],
+        "missing_data_that_could_change_decision": [
+          "HDL-C",
+          "Lp(a)",
+          "total cholesterol"
+        ],
+        "patient_facing_allowed": true,
+        "emr_allowed": true
+      },
+      {
+        "recommendation_id": "kidney_albuminuria_confirm_persistence:kidney",
+        "recommendation_text": "Confirm persistent albuminuria with repeat UACR if not already confirmed; optimize kidney-protective therapy.",
+        "domain": "kidney",
+        "triggering_inputs": {
+          "egfr": 72.0,
+          "uacr": 84.0,
+          "albuminuria_stage": "A2",
+          "egfr_stage": "G2",
+          "diabetes": false,
+          "bp_treated": true,
+          "sbp": 138.0,
+          "dbp": 84.0,
+          "ace_arb": true
+        },
+        "rule_id": "kidney_albuminuria_confirm_persistence",
+        "evidence_basis": "UACR >=30 mg/g is an albuminuria signal; persistence should be confirmed unless already documented.",
+        "strength_language": "consider",
+        "uncertainty_flags": [],
+        "missing_data_that_could_change_decision": [
+          "HDL-C",
+          "total cholesterol"
+        ],
+        "patient_facing_allowed": true,
+        "emr_allowed": true
+      },
+      {
+        "recommendation_id": "kidney_ace_arb_albuminuria_bp:ace_arb",
+        "recommendation_text": "Continue or optimize ACEi/ARB therapy if hypertension and persistent albuminuria are present.",
+        "domain": "kidney",
+        "triggering_inputs": {
+          "egfr": 72.0,
+          "uacr": 84.0,
+          "albuminuria_stage": "A2",
+          "egfr_stage": "G2",
+          "diabetes": false,
+          "bp_treated": true,
+          "sbp": 138.0,
+          "dbp": 84.0,
+          "ace_arb": true
+        },
+        "rule_id": "kidney_ace_arb_albuminuria_bp",
+        "evidence_basis": "Albuminuria with hypertension supports ACEi/ARB and BP-directed kidney protection when tolerated.",
+        "strength_language": "continue",
+        "uncertainty_flags": [],
+        "missing_data_that_could_change_decision": [
+          "HDL-C",
+          "total cholesterol"
+        ],
+        "patient_facing_allowed": true,
+        "emr_allowed": true
+      },
+      {
+        "recommendation_id": "bp_albuminuria_goal_130_80:blood_pressure",
+        "recommendation_text": "Treat BP toward goal <130/80.",
+        "domain": "BP",
+        "triggering_inputs": {
+          "sbp": 138.0,
+          "dbp": 84.0,
+          "bp_treated": true,
+          "hypertension": false,
+          "uacr": 84.0
+        },
+        "rule_id": "bp_albuminuria_goal_130_80",
+        "evidence_basis": "Albuminuria/CKM risk with elevated or treated BP supports BP treatment toward <130/80 when tolerated.",
+        "strength_language": "recommended",
+        "uncertainty_flags": [],
+        "missing_data_that_could_change_decision": [
+          "HDL-C",
+          "total cholesterol"
+        ],
+        "patient_facing_allowed": true,
+        "emr_allowed": true
+      },
+      {
+        "recommendation_id": "diagnostic_completion:lpa_testing",
+        "recommendation_text": "Check Lp(a) once.",
+        "domain": "diagnostics",
+        "triggering_inputs": {
+          "age": 55,
+          "sex": "male",
+          "egfr": 72.0,
+          "uacr": 84.0,
+          "a1c": 6.3,
+          "diabetes": false
+        },
+        "rule_id": "diagnostic_completion",
+        "evidence_basis": "Missing ApoB, Lp(a), UACR, CAC, or hsCRP may clarify risk when clinically relevant.",
+        "strength_language": "consider",
+        "uncertainty_flags": [],
+        "missing_data_that_could_change_decision": [
+          "HDL-C",
+          "Lp(a)",
+          "total cholesterol"
+        ],
+        "patient_facing_allowed": true,
+        "emr_allowed": true
+      }
+    ],
+    "snapshot_lines": [
+      "RCCKM level: LOW",
+      "CKM stage: Stage 3 \u2014 CKD G2A2",
+      "Kidney: G2A2",
+      "RSS: 19/100 (Low)",
+      "Top drivers: ApoB 116 mg/dL; CKD G2A2; UACR 84 mg/g; Father MI age 49",
+      "Family history: Father MI age 49"
+    ],
+    "emr_lines": [],
+    "diagnosis_candidates": [
+      {
+        "name": "Essential hypertension",
+        "icd10_code": "I10",
+        "status": "data-derived",
+        "source": "antihypertensive therapy active",
+        "hcc_relevant": false,
+        "diagnosis": "Essential hypertension",
+        "hcc_supported": false,
+        "hcc_label": null,
+        "confidence": "data-supported",
+        "review_status": "review_suggested"
+      },
+      {
+        "name": "Prediabetes",
+        "icd10_code": "R73.03",
+        "status": "data-derived",
+        "source": "A1c 5.7-6.4%",
+        "hcc_relevant": false,
+        "diagnosis": "Prediabetes",
+        "hcc_supported": false,
+        "hcc_label": null,
+        "confidence": "data-supported",
+        "review_status": "review_suggested"
+      },
+      {
+        "name": "Hyperglycemia",
+        "icd10_code": "R73.9",
+        "status": "data-derived",
+        "source": "A1c >=5.7%",
+        "hcc_relevant": false,
+        "diagnosis": "Hyperglycemia",
+        "hcc_supported": false,
+        "hcc_label": null,
+        "confidence": "data-supported",
+        "review_status": "review_suggested"
+      },
+      {
+        "name": "Obesity",
+        "icd10_code": "E66.9",
+        "status": "data-derived",
+        "source": "BMI >=30 kg/m\u00b2",
+        "hcc_relevant": false,
+        "diagnosis": "Obesity",
+        "hcc_supported": false,
+        "hcc_label": null,
+        "confidence": "data-supported",
+        "review_status": "review_suggested"
+      },
+      {
+        "name": "Adult BMI 31.0-31.9",
+        "icd10_code": "Z68.31",
+        "status": "data-derived",
+        "source": "BMI 31.0-31.9 kg/m\u00b2",
+        "hcc_relevant": false,
+        "diagnosis": "Adult BMI 31.0-31.9",
+        "hcc_supported": false,
+        "hcc_label": null,
+        "confidence": "data-supported",
+        "review_status": "review_suggested"
+      },
+      {
+        "name": "Moderately increased albuminuria",
+        "icd10_code": "R80.9",
+        "status": "data-derived",
+        "source": "UACR 30-299 mg/g",
+        "hcc_relevant": false,
+        "diagnosis": "Moderately increased albuminuria",
+        "hcc_supported": false,
+        "hcc_label": null,
+        "confidence": "data-supported",
+        "review_status": "review_suggested"
+      }
+    ]
+  },
+  "final_report_text": "RISK CONTINUUM CKM\n\nLevel: 3B - CKM stage 3 with albuminuria-mediated kidney and ASCVD risk.\nPREVENT: unavailable.\nCKM/Kidney/Plaque: CKM stage 3; kidney G2A2; CAC 0.\nContext: father MI age 49.\n\nAssessment:\n- Moderately increased albuminuria (ICD: R80.9)\n- Essential hypertension (ICD: I10)\n- Obesity (ICD: E66.9)\n- Prediabetes (ICD: R73.03)\n- Adult BMI 31.0-31.9 (ICD: Z68.31)\n\nRecommendations:\n1. Lipids: Discuss moderate-intensity statin.\n2. Plaque: CAC 0.\n3. Kidney: UACR 84; ACEi/ARB active.\n4. BP: Treat toward <130/80.\n5. Glycemia: Prediabetes prevention; A1c 6.3%.\n6. Aspirin: Not indicated.\n7. Additional information: Lp(a).",
+  "recommendations_text": "Discuss moderate-intensity statin therapy.\nConfirm persistent albuminuria with repeat UACR if not already confirmed; optimize kidney-protective therapy.\nContinue or optimize ACEi/ARB therapy if hypertension and persistent albuminuria are present.\nTreat BP toward goal <130/80.\nCheck Lp(a) once.",
+  "diagnoses": [
+    {
+      "name": "Essential hypertension",
+      "icd10_code": "I10",
+      "status": "data-derived",
+      "source": "antihypertensive therapy active",
+      "hcc_relevant": false,
+      "diagnosis": "Essential hypertension",
+      "hcc_supported": false,
+      "hcc_label": null,
+      "confidence": "data-supported",
+      "review_status": "review_suggested"
+    },
+    {
+      "name": "Prediabetes",
+      "icd10_code": "R73.03",
+      "status": "data-derived",
+      "source": "A1c 5.7-6.4%",
+      "hcc_relevant": false,
+      "diagnosis": "Prediabetes",
+      "hcc_supported": false,
+      "hcc_label": null,
+      "confidence": "data-supported",
+      "review_status": "review_suggested"
+    },
+    {
+      "name": "Hyperglycemia",
+      "icd10_code": "R73.9",
+      "status": "data-derived",
+      "source": "A1c >=5.7%",
+      "hcc_relevant": false,
+      "diagnosis": "Hyperglycemia",
+      "hcc_supported": false,
+      "hcc_label": null,
+      "confidence": "data-supported",
+      "review_status": "review_suggested"
+    },
+    {
+      "name": "Obesity",
+      "icd10_code": "E66.9",
+      "status": "data-derived",
+      "source": "BMI >=30 kg/m\u00b2",
+      "hcc_relevant": false,
+      "diagnosis": "Obesity",
+      "hcc_supported": false,
+      "hcc_label": null,
+      "confidence": "data-supported",
+      "review_status": "review_suggested"
+    },
+    {
+      "name": "Adult BMI 31.0-31.9",
+      "icd10_code": "Z68.31",
+      "status": "data-derived",
+      "source": "BMI 31.0-31.9 kg/m\u00b2",
+      "hcc_relevant": false,
+      "diagnosis": "Adult BMI 31.0-31.9",
+      "hcc_supported": false,
+      "hcc_label": null,
+      "confidence": "data-supported",
+      "review_status": "review_suggested"
+    },
+    {
+      "name": "Moderately increased albuminuria",
+      "icd10_code": "R80.9",
+      "status": "data-derived",
+      "source": "UACR 30-299 mg/g",
+      "hcc_relevant": false,
+      "diagnosis": "Moderately increased albuminuria",
+      "hcc_supported": false,
+      "hcc_label": null,
+      "confidence": "data-supported",
+      "review_status": "review_suggested"
+    }
+  ],
+  "targets": [
+    {
+      "ldl_c_target": null,
+      "non_hdl_c_target": null,
+      "apob_target": null,
+      "rationale": "No target pathway assigned yet."
+    }
+  ],
+  "ckm_stage": {
+    "stage": 3,
+    "drivers": [
+      "CKD G2A2"
+    ],
+    "headline": "Subclinical cardiovascular or kidney disease present."
+  },
+  "risk_level": {
+    "level": "3B",
+    "label": "Level 3B - CKM stage 3 with albuminuria-mediated kidney and ASCVD risk",
+    "short_reason": "Albuminuria plus cardiometabolic burden is actionable early kidney risk.",
+    "drivers": [
+      "albuminuria",
+      "BP-treated/elevated BP",
+      "ApoB/non-HDL burden",
+      "premature family history",
+      "prediabetes",
+      "CKM context"
+    ],
+    "prevent_category": null,
+    "plaque_status": "CAC 0 measured",
+    "treatment_posture": "domain action"
+  },
+  "visible_ui_text": "RCCKM level: LOW\nCKM stage: Stage 3 \u2014 CKD G2A2\nKidney: G2A2\nRSS: 19/100 (Low)\nTop drivers: ApoB 116 mg/dL; CKD G2A2; UACR 84 mg/g; Father MI age 49\nFamily history: Father MI age 49",
+  "app_version": "0.1.0-beta",
+  "git_commit": "8df6803",
+  "timestamp": "2026-06-01T02:17:00+00:00"
+}

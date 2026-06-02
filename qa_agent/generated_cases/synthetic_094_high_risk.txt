@@ -1,0 +1,56 @@
+=== CARDIOVASCULAR RISK ASSESSMENT ===
+
+Age: 77 y.o.
+Sex: male
+Race/Ethnicity: Filipino
+
+Smoking status: Current smoker
+
+Blood pressure (most recent):
+BP: 163/99
+BMI: 42.0
+
+Clinical ASCVD: No
+Clinical ASCVD details:
+No known ASCVD.
+
+Family History:
+No premature ASCVD in first-degree relative.
+
+Lipids:
+LDL-C 182 mg/dL
+HDL-C 42 mg/dL
+Triglycerides 366 mg/dL
+
+A1c:
+HEMOGLOBIN A1C 8.1%
+
+ApoB:
+APOB 122 mg/dL
+
+Lp(a):
+Lp(a) not checked
+
+eGFR:
+LABGLOM 66 mL/min/1.73m2
+
+Urine ACR:
+ALBCREAT 132 mg/g
+
+Coronary artery calcium (CAC) score: 491
+CAC percentile:
+
+Risk enhancers:
+Inflammatory disease: No
+Reproductive history: No
+
+Medications:
+Losartan 50 mg daily
+Metformin ER 1000 mg daily
+Empagliflozin 10 mg daily
+
+Problem list:
+Type 2 diabetes mellitus
+Essential hypertension
+Morbid obesity
+Albuminuria

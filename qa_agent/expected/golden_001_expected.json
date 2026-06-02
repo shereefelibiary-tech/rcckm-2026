@@ -1,0 +1,22 @@
+{
+  "age": 55,
+  "sex": "male",
+  "ldl_c": 142,
+  "apob": 116,
+  "a1c": 6.3,
+  "egfr": 72,
+  "uacr_mg_g": 84,
+  "cac_score": 0,
+  "family_history_premature_ascvd": true,
+  "known_ascvd": false,
+  "albuminuria_category": "A2",
+  "diabetes_range": false,
+  "prediabetes_range": true,
+  "aspirin_primary_prevention_indicated": false,
+  "lipid_therapy_reasonable": true,
+  "ckm_stage": 3,
+  "risk_level": "3B",
+  "kdigo_stage": "G2A2",
+  "aspirin_recommendation": "Not indicated",
+  "lipid_recommendation_contains": "Discuss moderate-intensity statin"
+}

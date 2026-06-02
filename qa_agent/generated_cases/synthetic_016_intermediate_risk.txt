@@ -1,0 +1,52 @@
+=== CARDIOVASCULAR RISK ASSESSMENT ===
+
+Age: 54 y.o.
+Sex: male
+Race/Ethnicity: White
+
+Smoking status: Never smoker
+
+Blood pressure (most recent):
+BP: 128/80
+BMI: 34.7
+
+Clinical ASCVD: No
+Clinical ASCVD details:
+No known ASCVD.
+
+Family History:
+Father PCI age 46.
+
+Lipids:
+LDL-C 160 mg/dL
+HDL-C 38 mg/dL
+Triglycerides 236 mg/dL
+
+A1c:
+HEMOGLOBIN A1C 5.9%
+
+ApoB:
+APOB 116 mg/dL
+
+Lp(a):
+Lp(a) not checked
+
+eGFR:
+LABGLOM 61 mL/min/1.73m2
+
+Urine ACR:
+ALBCREAT 16 mg/g
+
+Coronary artery calcium (CAC) score: 69
+CAC percentile:
+
+Risk enhancers:
+Inflammatory disease: No
+Reproductive history: No
+
+Medications:
+Losartan 50 mg daily
+
+Problem list:
+Essential hypertension
+Obesity
