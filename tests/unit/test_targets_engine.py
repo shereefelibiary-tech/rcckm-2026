@@ -200,6 +200,17 @@ def test_build_target_result_low_prevent_with_30_year_risk_uses_moderate_target(
     assert result.apob_target == 90
 
 
+def test_build_target_result_apob_discussion_path_uses_moderate_target():
+    patient = Patient(age=55, sex="male", ldl_c=146, apob=122)
+
+    result = build_target_result(patient)
+
+    assert result.ldl_c_target == 100
+    assert result.non_hdl_c_target == 130
+    assert result.apob_target == 90
+    assert "ApoB >=100" in result.rationale
+
+
 def test_build_target_result_diabetes_age_40_to_75_uses_diabetes_target():
     patient = Patient(age=55, sex="male", diabetes=True)
 

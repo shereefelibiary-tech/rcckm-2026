@@ -1,4 +1,5 @@
 from core.patient import Patient
+from modules.actions.scaffold import build_action_instrument_panel
 from ui.report_layout import _build_targets_html, run_patient
 
 
@@ -51,6 +52,26 @@ def test_target_card_always_renders_when_targets_are_not_set():
     assert "Current 70 mg/dL" in html
     assert "At goal" not in html
     assert "Above goal" not in html
+
+
+def test_lipid_action_present_never_crosses_with_no_target_indicated():
+    patient = Patient(age=55, sex="male", ldl_c=146, apob=122)
+    result, _rss_total, _contributions = run_patient(patient)
+
+    lipid = next(
+        item
+        for item in build_action_instrument_panel(patient, result)
+        if item.domain_id == "lipid_lowering"
+    )
+    html = _build_targets_html(result, patient)
+
+    assert "Discuss moderate-intensity statin" in lipid.action_card_line
+    assert "&lt;100 mg/dL" in html
+    assert "&lt;90 mg/dL" in html
+    assert "Current 146 mg/dL" in html
+    assert "Current 122 mg/dL" in html
+    assert "Above goal" in html
+    assert "No target indicated" not in html
 
 
 def test_target_card_shows_apob_65_for_very_high_risk_when_advanced_target_shown():
