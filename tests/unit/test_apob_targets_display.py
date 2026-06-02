@@ -1,4 +1,5 @@
 from core.patient import Patient
+from modules.actions.scaffold import build_action_instrument_panel
 from ui.report_layout import _build_targets_html, run_patient
 
 
@@ -36,20 +37,48 @@ def test_target_card_renders_target_first_without_arrow_text():
 
 
 def test_target_card_always_renders_when_targets_are_not_set():
-    patient = Patient(age=55, sex="male", ldl_c=88, apob=None, cac=0)
+    patient = Patient(age=55, sex="male", ldl_c=88, apob=70, cac=0)
     result, _rss_total, _contributions = run_patient(patient)
+    lipid = next(
+        item
+        for item in build_action_instrument_panel(patient, result)
+        if item.domain_id == "lipid_lowering"
+    )
 
     html = _build_targets_html(result, patient)
 
+    assert "No lipid-lowering medication indicated" in lipid.action_card_line
     assert "targets-compact" in html
     assert "LDL-C" in html
     assert "ApoB" in html
     assert html.count('<span class="target-item">') == 2
-    assert html.count("Not set") == 2
+    assert html.count("No target indicated") == 2
+    assert "Not set" not in html
     assert "Current 88 mg/dL" in html
-    assert "Current not available" in html
+    assert "Current 70 mg/dL" in html
     assert "At goal" not in html
     assert "Above goal" not in html
+
+
+def test_elevated_apob_discussion_gets_targets_even_when_ldl_under_primary_target():
+    patient = Patient(age=55, sex="male", ldl_c=95, apob=122)
+    result, _rss_total, _contributions = run_patient(patient)
+    lipid = next(
+        item
+        for item in build_action_instrument_panel(patient, result)
+        if item.domain_id == "lipid_lowering"
+    )
+
+    html = _build_targets_html(result, patient)
+
+    assert "Discuss" in lipid.action_card_line
+    assert "At LDL-C goal" not in lipid.action_card_line
+    assert "&lt;100 mg/dL" in html
+    assert "&lt;90 mg/dL" in html
+    assert "Current 95 mg/dL" in html
+    assert "Current 122 mg/dL" in html
+    assert "Above goal" in html
+    assert "No target indicated" not in html
 
 
 def test_target_card_shows_apob_65_for_very_high_risk_when_advanced_target_shown():

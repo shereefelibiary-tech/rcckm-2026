@@ -200,14 +200,25 @@ def test_build_target_result_low_prevent_with_30_year_risk_uses_moderate_target(
     assert result.apob_target == 90
 
 
-def test_build_target_result_diabetes_age_40_to_75_uses_diabetes_target():
-    patient = Patient(age=55, sex="male", diabetes=True)
+def test_build_target_result_apob_discussion_path_uses_moderate_target():
+    patient = Patient(age=55, sex="male", ldl_c=95, apob=122)
 
     result = build_target_result(patient)
 
     assert result.ldl_c_target == 100
     assert result.non_hdl_c_target == 130
     assert result.apob_target == 90
+    assert "ApoB >=100" in result.rationale
+
+
+def test_build_target_result_diabetes_age_40_to_75_uses_diabetes_target():
+    patient = Patient(age=55, sex="male", diabetes=True)
+
+    result = build_target_result(patient)
+
+    assert result.ldl_c_target == 70
+    assert result.non_hdl_c_target == 100
+    assert result.apob_target == 80
     assert "Diabetes age 40-75" in result.rationale
 
 
@@ -219,18 +230,29 @@ def test_build_target_result_diabetes_with_albuminuria_uses_high_risk_target():
     assert result.ldl_c_target == 70
     assert result.non_hdl_c_target == 100
     assert result.apob_target == 80
-    assert "additional risk factors" in result.rationale
+    assert "Diabetes age 40-75" in result.rationale
 
 
-def test_build_target_result_ckd_stage_3_age_40_to_75_uses_moderate_target():
+def test_build_target_result_ckd_stage_3_age_40_to_75_uses_high_risk_target():
     patient = Patient(age=55, sex="male", egfr=55)
 
     result = build_target_result(patient)
 
-    assert result.ldl_c_target == 100
-    assert result.non_hdl_c_target == 130
-    assert result.apob_target == 90
-    assert "CKD stage 3 or higher" in result.rationale
+    assert result.ldl_c_target == 70
+    assert result.non_hdl_c_target == 100
+    assert result.apob_target == 80
+    assert "CKD or albuminuria" in result.rationale
+
+
+def test_build_target_result_albuminuria_age_40_to_75_uses_high_risk_target():
+    patient = Patient(age=55, sex="male", egfr=92, uacr=84)
+
+    result = build_target_result(patient)
+
+    assert result.ldl_c_target == 70
+    assert result.non_hdl_c_target == 100
+    assert result.apob_target == 80
+    assert "CKD or albuminuria" in result.rationale
 
 
 def test_build_target_result_cac_zero_does_not_derisk_diabetes_age_over_40():
@@ -238,6 +260,6 @@ def test_build_target_result_cac_zero_does_not_derisk_diabetes_age_over_40():
 
     result = build_target_result(patient)
 
-    assert result.ldl_c_target == 100
-    assert result.non_hdl_c_target == 130
-    assert result.apob_target == 90
+    assert result.ldl_c_target == 70
+    assert result.non_hdl_c_target == 100
+    assert result.apob_target == 80

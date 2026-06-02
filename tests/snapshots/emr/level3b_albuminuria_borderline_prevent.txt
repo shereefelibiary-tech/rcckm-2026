@@ -11,7 +11,7 @@ Assessment:
 - Prediabetes (ICD: R73.03)
 
 Recommendations:
-1. Lipids: Review lipid plan; LDL-C <100, ApoB <90, non-HDL-C <130.
+1. Lipids: Review lipid plan; LDL-C <70, ApoB <80, non-HDL-C <100.
 2. Plaque: CAC may clarify risk.
 3. Kidney: UACR 34; optimize ACEi-ARB.
 4. BP: BP needed.

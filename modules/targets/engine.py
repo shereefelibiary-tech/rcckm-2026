@@ -234,6 +234,75 @@ def _primary_prevention_target(rationale):
     )
 
 
+def _target_is_empty(target):
+    return bool(
+        target is None
+        or (
+            getattr(target, "ldl_c_target", None) is None
+            and getattr(target, "non_hdl_c_target", None) is None
+            and getattr(target, "apob_target", None) is None
+        )
+    )
+
+
+def _lipid_action_requires_targets(action_text):
+    text = str(action_text or "").strip().lower()
+    if not text:
+        return False
+    if (
+        text.startswith("no medication")
+        or text.startswith("no lipid")
+        or text.startswith("no escalation")
+        or "no lipid-lowering medication indicated" in text
+        or "no target" in text
+    ):
+        return False
+    return bool(
+        "moderate-intensity statin" in text
+        or "lipid-lowering therapy indicated" in text
+        or "lipid-lowering therapy recommended" in text
+        or "discuss lipid-lowering therapy" in text
+        or "discuss starting lipid-lowering therapy" in text
+        or "intensify lipid" in text
+        or "review intensity" in text
+        or "review lipid-lowering intensity" in text
+        or "statin therapy is reasonable" in text
+        or "statin therapy recommended" in text
+        or "statin therapy indicated" in text
+    )
+
+
+def _lipid_action_implies_high_risk_targets(action_text):
+    text = str(action_text or "").strip().lower()
+    return bool(
+        "high-risk targets" in text
+        or "ldl-c <70" in text
+        or "non-hdl-c <100" in text
+        or "very-high-risk" in text
+    )
+
+
+def ensure_lipid_targets_for_action(patient, result, action_plan):
+    """Lipid treatment action and empty targets must never cross."""
+    targets = list(getattr(result, "targets", None) or [])
+    current = targets[0] if targets else None
+    lipid_action = (action_plan.get("domains") or {}).get("lipids")
+    if not (_target_is_empty(current) and _lipid_action_requires_targets(lipid_action)):
+        return current or TargetResult(
+            ldl_c_target=None,
+            non_hdl_c_target=None,
+            apob_target=None,
+            rationale="No target pathway assigned yet.",
+        )
+    if _lipid_action_implies_high_risk_targets(lipid_action):
+        return _high_risk_primary_prevention_target(
+            "Lipid action specifies high-risk treatment targets."
+        )
+    return _primary_prevention_target(
+        "Moderate-intensity lipid discussion: primary-prevention treatment targets."
+    )
+
+
 def assign_lipid_targets(patient, engine_context=None):
     if patient.clinical_ascvd:
         if is_very_high_risk_ascvd(patient, engine_context):
@@ -288,17 +357,18 @@ def assign_lipid_targets(patient, engine_context=None):
         )
 
     if _has_diabetes(patient) and _age_40_to_75(patient):
-        if _has_diabetes_risk_enhancer(patient):
-            return _high_risk_primary_prevention_target(
-                "Diabetes age 40-75 with additional risk factors: high-intensity statin pathway; high-risk targets."
-            )
-        return _primary_prevention_target(
-            "Diabetes age 40-75: moderate-intensity statin target range."
+        return _high_risk_primary_prevention_target(
+            "Diabetes age 40-75: diabetes-driven high-risk primary-prevention targets."
         )
 
-    if _has_ckd_stage_3_or_higher(patient) and _age_40_to_75(patient):
+    if _has_ckd_or_albuminuria(patient) and _age_40_to_75(patient):
+        return _high_risk_primary_prevention_target(
+            "CKD or albuminuria age 40-75: kidney-risk high-risk primary-prevention targets."
+        )
+
+    if patient.apob is not None and patient.apob >= 100:
         return _primary_prevention_target(
-            "CKD stage 3 or higher age 40-75: moderate-intensity statin or statin plus ezetimibe pathway."
+            "ApoB >=100 mg/dL with lipid-lowering discussion: primary-prevention treatment target range."
         )
 
     if patient.cac is None and patient.prevent_10y_ascvd is not None:

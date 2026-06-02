@@ -16,7 +16,7 @@ Assessment:
 - Adult BMI 31.0-31.9 (ICD: Z68.31)
 
 Recommendations:
-1. Lipids: Discuss moderate-intensity statin; LDL-C <100, ApoB <90, non-HDL-C <130.
+1. Lipids: Discuss moderate-intensity statin; LDL-C <70, ApoB <80, non-HDL-C <100.
 2. Plaque: CAC not measured.
 3. Kidney: UACR 72; ACEi/ARB active.
 4. BP: Treat toward <130/80.
@@ -43,9 +43,9 @@ Why your risk is higher
 
 STEP 3
 Your goals
-- LDL-C: 118 mg/dL to <100 mg/dL
-- non-HDL-C: 146 mg/dL calculated to <130 mg/dL
-- ApoB: 94 mg/dL to <90 mg/dL
+- LDL-C: 118 mg/dL to <70 mg/dL
+- non-HDL-C: 146 mg/dL calculated to <100 mg/dL
+- ApoB: 94 mg/dL to <80 mg/dL
 - A1c: 5.8% to prediabetes range
 - BP: 138/78 mmHg; treated to <130/80
 - Kidney / albuminuria: 72 mg/g; G3aA2 to reduce albuminuria / preserve eGFR
@@ -61,7 +61,7 @@ Your next steps
 6. Aspirin: Not indicated.
 
 ACTIONS:
-- Lipid lowering: Discuss moderate-intensity statin. LDL-C 118; target <100. ApoB 94; target <90.
+- Lipid lowering: Discuss moderate-intensity statin. LDL-C 118; target <70. ApoB 94; target <80.
 - Plaque: Not measured.
 - Kidney protection: Monitor albuminuria. UACR 72; ACEi/ARB active.
 - Blood pressure: Treat toward <130/80. Current 138/78.
