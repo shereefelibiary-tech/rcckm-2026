@@ -23,7 +23,7 @@ from modules.prevent.engine import classify_prevent_ascvd_risk
 from modules.risk.engine import assign_risk_level
 from modules.snapshot.engine import build_snapshot_lines
 from modules.stability.engine import assess_decision_stability
-from modules.targets.engine import build_target_result
+from modules.targets.engine import build_target_result, ensure_lipid_targets_for_action
 from rcckm.rule_trace import build_rule_traces
 
 
@@ -128,6 +128,9 @@ def evaluate_patient(patient):
     ).to_dict()
     rcckm_result.top_drivers = build_top_drivers(patient, rcckm_result)
     action_plan = build_action_plan(patient, rcckm_result)
+    rcckm_result.targets = [
+        ensure_lipid_targets_for_action(patient, rcckm_result, action_plan)
+    ]
     rcckm_result.dominant_action = action_plan["dominant_action"]
     rcckm_result.recommendations = action_plan["recommendations"]
     rcckm_result.action_domains = action_plan["domains"]

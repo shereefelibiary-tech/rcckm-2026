@@ -75,6 +75,16 @@ def _panel_css():
 .dx-row-shell {
     margin: 0;
 }
+.dx-review-text {
+    min-width: 0;
+}
+.dx-review-button-cell {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    min-height: 100%;
+    padding: 7px 0 8px;
+}
 .dx-action-row {
     display: flex;
     justify-content: flex-end;
@@ -175,6 +185,13 @@ div[data-testid="stButton"] > button[kind="secondary"] {
     }
     .dx-column-panel {
         margin-bottom: 10px;
+    }
+    .dx-review-button-cell {
+        justify-content: flex-start;
+        padding: 0 0 10px;
+    }
+    .dx-review-button-cell + div[data-testid="stButton"] > button {
+        width: 100%;
     }
 }
 </style>
@@ -312,8 +329,17 @@ def _render_action_buttons(st, entry, *, confirmed=False, suppressed=False):
     dx_id = diagnosis_entry_id(entry)
     if not dx_id or confirmed or suppressed:
         return
+    render_html(st, "<div class='dx-review-button-cell'>")
     if st.button("Confirm", key=f"dx_accept__{dx_id}", help="Move to confirmed / accepted"):
         _apply_action(st, entry, "accept")
+    render_html(st, "</div>")
+
+
+def _diagnosis_review_columns(st):
+    try:
+        return st.columns([5.2, 1.0], gap="medium", vertical_alignment="center")
+    except TypeError:
+        return st.columns([5.2, 1.0])
 
 
 def _render_candidate_list(st, rows, *, confirmed=False, suppressed=False):
@@ -330,11 +356,11 @@ def _render_candidate_list(st, rows, *, confirmed=False, suppressed=False):
                 + "</div>",
             )
         else:
-            left, right = st.columns([5.2, 1.0])
+            left, right = _diagnosis_review_columns(st)
             with left:
                 render_html(
                     st,
-                    "<div class='dx-row dx-row-shell'>"
+                    "<div class='dx-row dx-row-shell dx-review-text'>"
                     + _candidate_html(row, confirmed=confirmed, include_row=False)
                     + "</div>",
                 )

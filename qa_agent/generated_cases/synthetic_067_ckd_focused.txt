@@ -1,0 +1,57 @@
+=== CARDIOVASCULAR RISK ASSESSMENT ===
+
+Age: 53 y.o.
+Sex: female
+Race/Ethnicity: South Asian
+
+Smoking status: Never smoker
+
+Blood pressure (most recent):
+BP: 128/95
+BMI: 37.4
+
+Clinical ASCVD: No
+Clinical ASCVD details:
+No known ASCVD.
+
+Family History:
+No premature ASCVD in first-degree relative.
+
+Lipids:
+LDL-C 95 mg/dL
+HDL-C 40 mg/dL
+Triglycerides 217 mg/dL
+
+A1c:
+HEMOGLOBIN A1C 7.0%
+
+ApoB:
+APOB 89 mg/dL
+
+Lp(a):
+LIPOA 211 nmol/L
+
+eGFR:
+LABGLOM 27 mL/min/1.73m2
+
+Urine ACR:
+ALBCREAT 100 mg/g
+
+Coronary artery calcium (CAC) score: 0
+CAC percentile:
+
+Risk enhancers:
+Inflammatory disease: No
+Reproductive history: No
+
+Medications:
+Losartan 50 mg daily
+Metformin ER 1000 mg daily
+Empagliflozin 10 mg daily
+
+Problem list:
+Type 2 diabetes mellitus
+Essential hypertension
+Obesity
+Chronic kidney disease
+Albuminuria

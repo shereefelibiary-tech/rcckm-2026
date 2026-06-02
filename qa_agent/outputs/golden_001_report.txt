@@ -1,0 +1,22 @@
+RISK CONTINUUM CKM
+
+Level: 3B - CKM stage 3 with albuminuria-mediated kidney and ASCVD risk.
+PREVENT: unavailable.
+CKM/Kidney/Plaque: CKM stage 3; kidney G2A2; CAC 0.
+Context: father MI age 49.
+
+Assessment:
+- Moderately increased albuminuria (ICD: R80.9)
+- Essential hypertension (ICD: I10)
+- Obesity (ICD: E66.9)
+- Prediabetes (ICD: R73.03)
+- Adult BMI 31.0-31.9 (ICD: Z68.31)
+
+Recommendations:
+1. Lipids: Discuss moderate-intensity statin.
+2. Plaque: CAC 0.
+3. Kidney: UACR 84; ACEi/ARB active.
+4. BP: Treat toward <130/80.
+5. Glycemia: Prediabetes prevention; A1c 6.3%.
+6. Aspirin: Not indicated.
+7. Additional information: Lp(a).

@@ -54,7 +54,7 @@ def test_render_emr_note_outputs_plain_text_sections_in_order():
     assert "Level: HIGH." in note
     assert "PREVENT: ASCVD 10y 8.2% (Intermediate); 30y 24.5%." in note
     assert note.index("ASCVD 10y 8.2%") < note.index("30y 24.5%")
-    assert "CKM/Kidney/Plaque: CKM 3; kidney G3aA2; UACR not available; CAC 350." in note
+    assert "CKM/Kidney/Plaque: CKM stage 3; kidney G3aA2; UACR not available; CAC 350." in note
     assert "- Clinical ASCVD (ICD: I25.10)" in note
     assert "- Type 2 diabetes mellitus (ICD: E11.9)" in note
 
@@ -72,6 +72,17 @@ def test_render_emr_note_outputs_plain_text_sections_in_order():
     assert note.index(lipid_line) < note.index(aspirin_line)
 
 
+def test_render_emr_note_combines_obesity_and_adult_bmi_assessment_line():
+    patient = Patient(age=55, sex="female", bmi=36.2)
+    result = evaluate_patient(patient)
+
+    note = render_emr_note(patient, result)
+
+    assert "- Obesity, BMI 36.0-36.9 (ICD: E66.9, Z68.36)" in note
+    assert "- Obesity (ICD: E66.9)" not in note
+    assert "- Adult BMI 36.0-36.9 (ICD: Z68.36)" not in note
+
+
 def test_stress_smartphrase_emr_uses_extracted_uacr_and_concise_surface_lines():
     fixture = Path("tests/fixtures/ingest/rcckm_parser_stress_smartphrase.txt")
     report = parse_ingest_report(fixture.read_text(encoding="utf-8"))
@@ -83,7 +94,7 @@ def test_stress_smartphrase_emr_uses_extracted_uacr_and_concise_surface_lines():
 
     assert patient.uacr == 86
     assert result.kdigo_stage == "G3aA2"
-    assert "CKM/Kidney/Plaque: CKM 3; kidney G3aA2; CAC 125." in note
+    assert "CKM/Kidney/Plaque: CKM stage 3; kidney G3aA2; CAC 125." in note
     assert "UACR not available" not in note
     assert "albuminuria not measured" not in note
     assert "Obtain UACR" not in note
@@ -123,10 +134,10 @@ def test_cac_only_level4_emr_names_subclinical_atherosclerosis_driver():
     assert result.ckm_stage["drivers"] == ["CAC 12"]
     assert "Level: 4 - subclinical atherosclerosis." in note
     assert (
-        "CKM/Kidney/Plaque: CKM 3 by subclinical atherosclerosis; kidney G2A1; CAC 12."
+        "CKM/Kidney/Plaque: CKM stage 3 by subclinical atherosclerosis; kidney G2A1; CAC 12."
         in note
     )
-    assert "CKM/Kidney/Plaque: CKM 3; kidney G2A1; CAC 12." not in note
+    assert "CKM/Kidney/Plaque: CKM stage 3; kidney G2A1; CAC 12." not in note
     assert "3. Kidney: Stable." in note
     assert "5. Glycemia: No glycemic action; A1c 4.9." in note
     assert "6. Aspirin: Not indicated." in note

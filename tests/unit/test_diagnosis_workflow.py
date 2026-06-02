@@ -93,6 +93,51 @@ def test_hcc_supported_metadata_normalizes_to_subtle_badge_label():
     assert rows[0]["review_status"] == "review_suggested"
 
 
+def test_prepare_diagnosis_display_entries_combines_obesity_and_adult_bmi_code():
+    result = RCCKMResult(
+        diagnosis_candidates=[
+            DiagnosisCandidate(
+                name="Obesity",
+                icd10_code="E66.9",
+                status="data-derived",
+                source="BMI >=30 kg/m²",
+            ),
+            DiagnosisCandidate(
+                name="Adult BMI 36.0-36.9",
+                icd10_code="Z68.36",
+                status="data-derived",
+                source="BMI 36.0-36.9 kg/m²",
+            ),
+        ]
+    )
+
+    rows = prepare_diagnosis_display_entries(result)
+
+    assert len(rows) == 1
+    assert rows[0]["label_display"] == "Obesity, BMI 36.0-36.9"
+    assert rows[0]["icd10_confirmed"] == ["E66.9", "Z68.36"]
+    assert rows[0]["icd10_suggested"] == ["E66.9", "Z68.36"]
+
+
+def test_prepare_diagnosis_display_entries_keeps_standalone_bmi_without_obesity():
+    result = RCCKMResult(
+        diagnosis_candidates=[
+            DiagnosisCandidate(
+                name="Adult BMI 36.0-36.9",
+                icd10_code="Z68.36",
+                status="data-derived",
+                source="BMI 36.0-36.9 kg/m²",
+            )
+        ]
+    )
+
+    rows = prepare_diagnosis_display_entries(result)
+
+    assert len(rows) == 1
+    assert rows[0]["label_display"] == "Adult BMI 36.0-36.9"
+    assert rows[0]["icd10_confirmed"] == ["Z68.36"]
+
+
 def test_family_history_context_is_not_diagnosis_workflow_item():
     rows = normalize_diagnosis_entries(
         {

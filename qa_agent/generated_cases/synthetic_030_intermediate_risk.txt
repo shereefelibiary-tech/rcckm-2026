@@ -1,0 +1,51 @@
+=== CARDIOVASCULAR RISK ASSESSMENT ===
+
+Age: 60 y.o.
+Sex: female
+Race/Ethnicity: Black / African American
+
+Smoking status: Never smoker
+
+Blood pressure (most recent):
+BP: 127/89
+BMI: 28.8
+
+Clinical ASCVD: No
+Clinical ASCVD details:
+No known ASCVD.
+
+Family History:
+Sister PCI age 53.
+
+Lipids:
+LDL-C 149 mg/dL
+HDL-C 34 mg/dL
+Triglycerides 191 mg/dL
+
+A1c:
+HEMOGLOBIN A1C 6.4%
+
+ApoB:
+APOB 128 mg/dL
+
+Lp(a):
+LIPOA 95 nmol/L
+
+eGFR:
+LABGLOM 78 mL/min/1.73m2
+
+Urine ACR:
+ALBCREAT 102 mg/g
+
+Coronary artery calcium (CAC) score: Not available
+CAC percentile:
+
+Risk enhancers:
+Inflammatory disease: No
+Reproductive history: No
+
+Medications:
+No active cardiometabolic medications.
+
+Problem list:
+Albuminuria

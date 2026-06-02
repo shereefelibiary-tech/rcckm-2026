@@ -328,7 +328,7 @@
     "required_phrases": [
       "Level: 3B - actionable early CKM / atherogenic risk.",
       "PREVENT: ASCVD 10y 3.42% (Borderline); 30y 17.53%.",
-      "CKM/Kidney/Plaque: CKM 2; kidney G2; UACR not available; CAC not measured.",
+      "CKM/Kidney/Plaque: CKM stage 2; kidney G2; UACR not available; CAC not measured.",
       "Early menopause 43; Gestational hypertension; Gestational diabetes.",
       "1. Lipids: Discuss moderate-intensity statin",
       "3. Kidney: UACR not available; obtain UACR.",
@@ -906,7 +906,7 @@
     "required_phrases": [
       "Level: 3B - CKM stage 3 with albuminuria-mediated kidney and ASCVD risk.",
       "PREVENT: ASCVD 10y 3.74% (Borderline); 30y 18.8%.",
-      "CKM/Kidney/Plaque: CKM 3; kidney G2A2; CAC not measured.",
+      "CKM/Kidney/Plaque: CKM stage 3; kidney G2A2; CAC not measured.",
       "Albuminuria",
       "Prediabetes",
       "Hypertriglyceridemia",

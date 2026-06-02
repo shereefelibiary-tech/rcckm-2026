@@ -334,6 +334,40 @@ def test_clinical_ascvd_uses_secondary_prevention_antiplatelet_wording():
     )
 
 
+def test_lipid_action_does_not_start_moderate_statin_when_ldl_already_below_target_and_apob_missing():
+    patient = Patient(
+        age=55,
+        sex="male",
+        ldl_c=59,
+        apob=None,
+        cac=None,
+        diabetes=True,
+        uacr=45,
+        clinical_ascvd=False,
+    )
+    result = evaluate_patient(patient)
+    target = result.targets[0]
+
+    assert target.ldl_c_target == 70
+    assert patient.ldl_c < target.ldl_c_target
+
+    lipid = next(
+        item for item in build_action_instrument_panel(patient, result)
+        if item.domain_id == "lipid_lowering"
+    )
+    note = render_emr_note(patient, result)
+    roadmap = render_patient_roadmap_text(patient, result)
+
+    assert lipid.status == "At LDL-C goal"
+    assert "LDL-C 59; target <70" in lipid.detail
+    assert "Obtain ApoB to assess particle burden" in lipid.detail
+    assert "Start moderate-intensity statin" not in lipid.action_card_line
+    assert "Start moderate-intensity statin" not in note
+    assert "Start moderate-intensity statin" not in roadmap
+    assert "At LDL-C goal" in note
+    assert "1. Cholesterol: At LDL-C goal." in roadmap
+
+
 def test_clinical_ascvd_with_cac_zero_uses_secondary_prevention_not_derisking():
     patient = Patient(
         age=55,
@@ -681,7 +715,7 @@ def test_severe_ckd_diabetes_actions_are_active_med_aware():
 
     assert "LDL-C unavailable due to TG 478" in panel["lipid_lowering"].detail
     assert "ApoB 80; target <80" in panel["lipid_lowering"].detail
-    assert "CKM/Kidney/Plaque: CKM 3; kidney G4A3; CAC not measured." in note
+    assert "CKM/Kidney/Plaque: CKM stage 3; kidney G4A3; CAC not measured." in note
     assert "1. Lipids: High-intensity lipid-lowering active; ApoB 80, target <80" in note
     assert "LDL-C unavailable due to TG" in note
     assert "3. Kidney: eGFR 16; UACR 2417; ACEi/ARB + SGLT2 active." in note

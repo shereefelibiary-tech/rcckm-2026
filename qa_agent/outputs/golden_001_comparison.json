@@ -1,0 +1,227 @@
+{
+  "case_id": "golden_001",
+  "status": "PASS",
+  "counts": {
+    "pass": 24,
+    "warn": 0,
+    "fail": 0
+  },
+  "findings": [
+    {
+      "status": "pass",
+      "category": "parser",
+      "severity": "low",
+      "key": "age",
+      "expected": 55,
+      "actual": 55,
+      "explanation": "Parsed `age` matched expected value."
+    },
+    {
+      "status": "pass",
+      "category": "parser",
+      "severity": "low",
+      "key": "sex",
+      "expected": "male",
+      "actual": "male",
+      "explanation": "Parsed `sex` matched expected value."
+    },
+    {
+      "status": "pass",
+      "category": "parser",
+      "severity": "low",
+      "key": "ldl_c",
+      "expected": 142,
+      "actual": 142.0,
+      "explanation": "Parsed `ldl_c` matched expected value."
+    },
+    {
+      "status": "pass",
+      "category": "parser",
+      "severity": "low",
+      "key": "apob",
+      "expected": 116,
+      "actual": 116.0,
+      "explanation": "Parsed `apob` matched expected value."
+    },
+    {
+      "status": "pass",
+      "category": "parser",
+      "severity": "low",
+      "key": "a1c",
+      "expected": 6.3,
+      "actual": 6.3,
+      "explanation": "Parsed `a1c` matched expected value."
+    },
+    {
+      "status": "pass",
+      "category": "parser",
+      "severity": "low",
+      "key": "egfr",
+      "expected": 72,
+      "actual": 72.0,
+      "explanation": "Parsed `egfr` matched expected value."
+    },
+    {
+      "status": "pass",
+      "category": "parser",
+      "severity": "low",
+      "key": "uacr_mg_g",
+      "expected": 84,
+      "actual": 84.0,
+      "explanation": "Parsed `uacr` matched expected value."
+    },
+    {
+      "status": "pass",
+      "category": "parser",
+      "severity": "low",
+      "key": "cac_score",
+      "expected": 0,
+      "actual": 0.0,
+      "explanation": "Parsed `cac` matched expected value."
+    },
+    {
+      "status": "pass",
+      "category": "parser",
+      "severity": "low",
+      "key": "family_history_premature_ascvd",
+      "expected": true,
+      "actual": true,
+      "explanation": "Parsed `family_history_premature_ascvd` matched expected value."
+    },
+    {
+      "status": "pass",
+      "category": "parser",
+      "severity": "low",
+      "key": "known_ascvd",
+      "expected": false,
+      "actual": false,
+      "explanation": "Parsed `clinical_ascvd` matched expected value."
+    },
+    {
+      "status": "pass",
+      "category": "derived_logic",
+      "severity": "low",
+      "key": "albuminuria_category",
+      "expected": "A2",
+      "actual": "A2",
+      "explanation": "Derived `albuminuria_category` matched expected value."
+    },
+    {
+      "status": "pass",
+      "category": "derived_logic",
+      "severity": "low",
+      "key": "diabetes_range",
+      "expected": false,
+      "actual": false,
+      "explanation": "Derived `diabetes_range` matched expected value."
+    },
+    {
+      "status": "pass",
+      "category": "derived_logic",
+      "severity": "low",
+      "key": "prediabetes_range",
+      "expected": true,
+      "actual": true,
+      "explanation": "Derived `prediabetes_range` matched expected value."
+    },
+    {
+      "status": "pass",
+      "category": "derived_logic",
+      "severity": "low",
+      "key": "aspirin_primary_prevention_indicated",
+      "expected": false,
+      "actual": false,
+      "explanation": "Derived `aspirin_primary_prevention_indicated` matched expected value."
+    },
+    {
+      "status": "pass",
+      "category": "derived_logic",
+      "severity": "low",
+      "key": "lipid_therapy_reasonable",
+      "expected": true,
+      "actual": true,
+      "explanation": "Derived `lipid_therapy_reasonable` matched expected value."
+    },
+    {
+      "status": "pass",
+      "category": "report",
+      "severity": "low",
+      "key": "final_report_text",
+      "expected": "available when interpretation has run",
+      "actual": true,
+      "explanation": "Final report text is available."
+    },
+    {
+      "status": "pass",
+      "category": "report",
+      "severity": "low",
+      "key": "engine_output_json",
+      "expected": "available when interpretation has run",
+      "actual": true,
+      "explanation": "Engine output is available."
+    },
+    {
+      "status": "pass",
+      "category": "report",
+      "severity": "low",
+      "key": "ckm_stage",
+      "expected": 3,
+      "actual": 3,
+      "explanation": "CKM stage matched expected interpretation."
+    },
+    {
+      "status": "pass",
+      "category": "report",
+      "severity": "low",
+      "key": "risk_level",
+      "expected": "3B",
+      "actual": "3B",
+      "explanation": "Risk level matched expected interpretation."
+    },
+    {
+      "status": "pass",
+      "category": "report",
+      "severity": "low",
+      "key": "kdigo_stage",
+      "expected": "G2A2",
+      "actual": "RISK CONTINUUM CKM\n\nLevel: 3B - CKM stage 3 with albuminuria-mediated kidney and ASCVD risk.\nPREVENT: unavailable.\nCKM/Kidney/Plaque: CKM stage 3; kidney G2A2; CAC 0.\nContext: father MI age 49.\n\nAssessment:\n- Moderately increased albuminuria (ICD: R80.9)\n- Essential hypertension (ICD: I10)\n- Obesity (ICD: E66.9)\n- Prediabetes (ICD: R73.03)\n- Adult BMI 31.0-31.9 (ICD: Z68.31)\n\nRecommendations:\n1. Lipids: Discuss moderate-intensity statin.\n2. Plaque: CAC 0.\n3. Kidney: UACR 84; ACEi/ARB active.\n4. BP: Treat toward <130/80.\n5. Glycemia: Prediabetes prevention; A1c 6.3%.\n6. Aspirin: Not indicated.\n7. Additional information: Lp(a).\nDiscuss moderate-intensity statin therapy.\nConfirm persistent albuminuria with repeat UACR if not already confirmed; optimize kidney-protective therapy.\nContinue or optimize ACEi/ARB therapy if hypertension and persistent albuminuria are present.\nTreat BP toward goal <130/80.\nCheck Lp(a) once.",
+      "explanation": "Report text includes expected KDIGO stage."
+    },
+    {
+      "status": "pass",
+      "category": "report",
+      "severity": "low",
+      "key": "aspirin_recommendation",
+      "expected": "Not indicated",
+      "actual": "RISK CONTINUUM CKM\n\nLevel: 3B - CKM stage 3 with albuminuria-mediated kidney and ASCVD risk.\nPREVENT: unavailable.\nCKM/Kidney/Plaque: CKM stage 3; kidney G2A2; CAC 0.\nContext: father MI age 49.\n\nAssessment:\n- Moderately increased albuminuria (ICD: R80.9)\n- Essential hypertension (ICD: I10)\n- Obesity (ICD: E66.9)\n- Prediabetes (ICD: R73.03)\n- Adult BMI 31.0-31.9 (ICD: Z68.31)\n\nRecommendations:\n1. Lipids: Discuss moderate-intensity statin.\n2. Plaque: CAC 0.\n3. Kidney: UACR 84; ACEi/ARB active.\n4. BP: Treat toward <130/80.\n5. Glycemia: Prediabetes prevention; A1c 6.3%.\n6. Aspirin: Not indicated.\n7. Additional information: Lp(a).\nDiscuss moderate-intensity statin therapy.\nConfirm persistent albuminuria with repeat UACR if not already confirmed; optimize kidney-protective therapy.\nContinue or optimize ACEi/ARB therapy if hypertension and persistent albuminuria are present.\nTreat BP toward goal <130/80.\nCheck Lp(a) once.",
+      "explanation": "Aspirin recommendation matched expected wording signal."
+    },
+    {
+      "status": "pass",
+      "category": "report",
+      "severity": "low",
+      "key": "lipid_recommendation_contains",
+      "expected": "Discuss moderate-intensity statin",
+      "actual": "RISK CONTINUUM CKM\n\nLevel: 3B - CKM stage 3 with albuminuria-mediated kidney and ASCVD risk.\nPREVENT: unavailable.\nCKM/Kidney/Plaque: CKM stage 3; kidney G2A2; CAC 0.\nContext: father MI age 49.\n\nAssessment:\n- Moderately increased albuminuria (ICD: R80.9)\n- Essential hypertension (ICD: I10)\n- Obesity (ICD: E66.9)\n- Prediabetes (ICD: R73.03)\n- Adult BMI 31.0-31.9 (ICD: Z68.31)\n\nRecommendations:\n1. Lipids: Discuss moderate-intensity statin.\n2. Plaque: CAC 0.\n3. Kidney: UACR 84; ACEi/ARB active.\n4. BP: Treat toward <130/80.\n5. Glycemia: Prediabetes prevention; A1c 6.3%.\n6. Aspirin: Not indicated.\n7. Additional information: Lp(a).\nDiscuss moderate-intensity statin therapy.\nConfirm persistent albuminuria with repeat UACR if not already confirmed; optimize kidney-protective therapy.\nContinue or optimize ACEi/ARB therapy if hypertension and persistent albuminuria are present.\nTreat BP toward goal <130/80.\nCheck Lp(a) once.",
+      "explanation": "Lipid recommendation matched expected wording signal."
+    },
+    {
+      "status": "pass",
+      "category": "report",
+      "severity": "low",
+      "key": "diagnoses",
+      "expected": "diagnosis candidates available",
+      "actual": true,
+      "explanation": "Diagnosis candidates are available in QA export."
+    },
+    {
+      "status": "pass",
+      "category": "ui",
+      "severity": "low",
+      "key": "visible_ui_text",
+      "expected": "visible UI summary text available",
+      "actual": true,
+      "explanation": "Visible UI summary text is available."
+    }
+  ]
+}

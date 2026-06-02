@@ -6,7 +6,7 @@ RISK CONTINUUM CKM
 
 Level: 5 - very high plaque burden.
 PREVENT: ASCVD 10y 8.32% (Intermediate).
-CKM/Kidney/Plaque: CKM 3 by subclinical atherosclerosis; kidney G2A1; CAC 350.
+CKM/Kidney/Plaque: CKM stage 3 by subclinical atherosclerosis; kidney G2A1; CAC 350.
 Context: elevated Lp(a); brother MI age 50.
 
 Assessment:

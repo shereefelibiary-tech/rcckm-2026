@@ -1,0 +1,52 @@
+=== CARDIOVASCULAR RISK ASSESSMENT ===
+
+Age: 58 y.o.
+Sex: female
+Race/Ethnicity: South Asian
+
+Smoking status: Never smoker
+
+Blood pressure (most recent):
+BP: 133/77
+BMI: 30.5
+
+Clinical ASCVD: No
+Clinical ASCVD details:
+No known ASCVD.
+
+Family History:
+No premature ASCVD in first-degree relative.
+
+Lipids:
+LDL-C 128 mg/dL
+HDL-C 48 mg/dL
+Triglycerides 177 mg/dL
+
+A1c:
+HEMOGLOBIN A1C 6.0%
+
+ApoB:
+APOB 124 mg/dL
+
+Lp(a):
+LIPOA 102 nmol/L
+
+eGFR:
+LABGLOM 81 mL/min/1.73m2
+
+Urine ACR:
+ALBCREAT 76 mg/g
+
+Coronary artery calcium (CAC) score: 0
+CAC percentile:
+
+Risk enhancers:
+Inflammatory disease: No
+Reproductive history: No
+
+Medications:
+No active cardiometabolic medications.
+
+Problem list:
+Obesity
+Albuminuria

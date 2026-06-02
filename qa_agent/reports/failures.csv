@@ -1,0 +1,2 @@
+case_id,status,category,severity,key,expected,actual,explanation
+synthetic_001_low_risk,FAIL,ui,high,browser_run,"""successful QA export""","""Could not capture interpreted QA export for synthetic_001_low_risk.""",Browser QA run did not complete.

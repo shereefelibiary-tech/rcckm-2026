@@ -333,7 +333,7 @@ def test_ckd_albuminuria_demo_is_action_oriented_without_passive_no_escalation()
     )
     assert "Level: 3B - CKM stage 3 with albuminuria-mediated kidney and ASCVD risk." in emr
     assert "PREVENT: ASCVD 10y 6.65% (Intermediate); 30y 26.07%." in emr
-    assert "CKM/Kidney/Plaque: CKM 3; kidney G2A2; CAC not measured." in emr
+    assert "CKM/Kidney/Plaque: CKM stage 3; kidney G2A2; CAC not measured." in emr
     assert "No medication escalation today." not in emr
     assert "1. Lipids: Discuss moderate-intensity statin; LDL-C <100, ApoB <90, non-HDL-C <130." in emr
     assert "3. Kidney: UACR 48; ACEi/ARB active." in emr
@@ -355,7 +355,7 @@ def test_severe_secondary_prevention_demo_uses_very_high_risk_ascvd_targets():
     assert target.ldl_c_target == 55
     assert target.non_hdl_c_target == 85
     assert target.apob_target == 65
-    assert "CKM/Kidney/Plaque: CKM 4; kidney G3aA2; CAC 5000." in emr
+    assert "CKM/Kidney/Plaque: CKM stage 4; kidney G3aA2; CAC 5000." in emr
     assert "1. Lipids: Intensify secondary-prevention lipid-lowering therapy; LDL-C <55, ApoB <65, non-HDL-C <85." in emr
     assert "6. Aspirin: Secondary-prevention antiplatelet therapy." in emr
     assert "PREVENT-informed primary-prevention target" not in emr

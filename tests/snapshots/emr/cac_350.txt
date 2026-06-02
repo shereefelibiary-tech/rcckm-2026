@@ -2,7 +2,7 @@ RISK CONTINUUM CKM
 
 Level: 5 - very high plaque burden.
 PREVENT: unavailable.
-CKM/Kidney/Plaque: CKM 3 by subclinical atherosclerosis; CAC 350.
+CKM/Kidney/Plaque: CKM stage 3 by subclinical atherosclerosis; CAC 350.
 
 Assessment:
 - Severe subclinical coronary atherosclerosis / high CAC burden (ICD: I25.10)

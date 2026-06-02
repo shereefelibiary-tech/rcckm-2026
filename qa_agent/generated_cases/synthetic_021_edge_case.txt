@@ -1,0 +1,51 @@
+=== CARDIOVASCULAR RISK ASSESSMENT ===
+
+Age: 55 y.o.
+Sex: male
+Race/Ethnicity: Black / African American
+
+Smoking status: Never smoker
+
+Blood pressure (most recent):
+BP: 118/74
+BMI: 27.7
+
+Clinical ASCVD: No
+Clinical ASCVD details:
+No known ASCVD.
+
+Family History:
+No premature ASCVD in first-degree relative.
+
+Lipids:
+LDL-C 146 mg/dL
+HDL-C 52 mg/dL
+Triglycerides 110 mg/dL
+
+A1c:
+HEMOGLOBIN A1C 5.6%
+
+ApoB:
+APOB 101 mg/dL
+
+Lp(a):
+LIPOA 254 nmol/L
+
+eGFR:
+LABGLOM 99 mL/min/1.73m2
+
+Urine ACR:
+ALBCREAT 10 mg/g
+
+Coronary artery calcium (CAC) score: 0
+CAC percentile:
+
+Risk enhancers:
+Inflammatory disease: No
+Reproductive history: No
+
+Medications:
+No active cardiometabolic medications.
+
+Problem list:
+No active cardiometabolic diagnoses listed.

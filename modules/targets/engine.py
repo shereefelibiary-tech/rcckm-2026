@@ -234,6 +234,61 @@ def _primary_prevention_target(rationale):
     )
 
 
+def _target_is_empty(target):
+    return bool(
+        target is None
+        or (
+            getattr(target, "ldl_c_target", None) is None
+            and getattr(target, "non_hdl_c_target", None) is None
+            and getattr(target, "apob_target", None) is None
+        )
+    )
+
+
+def _lipid_action_requires_targets(action_text):
+    text = str(action_text or "").strip().lower()
+    if not text:
+        return False
+    if (
+        text.startswith("no medication")
+        or text.startswith("no lipid")
+        or text.startswith("no escalation")
+        or "no lipid-lowering medication indicated" in text
+        or "no target" in text
+    ):
+        return False
+    return bool(
+        "moderate-intensity statin" in text
+        or "lipid-lowering therapy indicated" in text
+        or "lipid-lowering therapy recommended" in text
+        or "discuss lipid-lowering therapy" in text
+        or "discuss starting lipid-lowering therapy" in text
+        or "intensify lipid" in text
+        or "review intensity" in text
+        or "review lipid-lowering intensity" in text
+        or "statin therapy is reasonable" in text
+        or "statin therapy recommended" in text
+        or "statin therapy indicated" in text
+    )
+
+
+def ensure_lipid_targets_for_action(patient, result, action_plan):
+    """Enforce the display invariant: lipid treatment action implies lipid targets."""
+    targets = list(getattr(result, "targets", None) or [])
+    current = targets[0] if targets else None
+    lipid_action = (action_plan.get("domains") or {}).get("lipids")
+    if not (_target_is_empty(current) and _lipid_action_requires_targets(lipid_action)):
+        return current or TargetResult(
+            ldl_c_target=None,
+            non_hdl_c_target=None,
+            apob_target=None,
+            rationale="No target pathway assigned yet.",
+        )
+    return _primary_prevention_target(
+        "Lipid action present: use primary-prevention treatment targets."
+    )
+
+
 def assign_lipid_targets(patient, engine_context=None):
     if patient.clinical_ascvd:
         if is_very_high_risk_ascvd(patient, engine_context):
@@ -285,6 +340,11 @@ def assign_lipid_targets(patient, engine_context=None):
     if has_occult_lipid_discussion_path(patient, engine_context):
         return _primary_prevention_target(
             "Low 10-year PREVENT risk with clustered atherogenic and risk-enhancer burden: lipid-lowering discussion target range."
+        )
+
+    if patient.apob is not None and patient.apob >= 100:
+        return _primary_prevention_target(
+            "ApoB >=100 mg/dL with lipid-lowering discussion: primary-prevention treatment target range."
         )
 
     if _has_diabetes(patient) and _age_40_to_75(patient):

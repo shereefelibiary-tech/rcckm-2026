@@ -2,7 +2,7 @@ RISK CONTINUUM CKM
 
 Level: 3B - actionable early CKM / atherogenic risk.
 PREVENT: unavailable.
-CKM/Kidney/Plaque: CKM 0; CAC not measured.
+CKM/Kidney/Plaque: CKM stage 0; CAC not measured.
 Context: LDL-C >=190 / possible FH pathway.
 
 Assessment:

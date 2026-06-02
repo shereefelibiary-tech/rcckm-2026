@@ -2,7 +2,7 @@ RISK CONTINUUM CKM
 
 Level: 3B - actionable early CKM / atherogenic risk.
 PREVENT: ASCVD 10y 1.73% (Low); 30y 11.85%.
-CKM/Kidney/Plaque: CKM 2; kidney A1; CAC not measured.
+CKM/Kidney/Plaque: CKM stage 2; kidney A1; CAC not measured.
 
 Assessment:
 - Elevated ApoB / atherogenic particle burden (ICD: E78.89)

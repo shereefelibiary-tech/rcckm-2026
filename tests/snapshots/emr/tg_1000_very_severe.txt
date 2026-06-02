@@ -2,7 +2,7 @@ RISK CONTINUUM CKM
 
 Level: 2A - early isolated risk signal.
 PREVENT: unavailable.
-CKM/Kidney/Plaque: CKM 2; UACR not available; CAC not measured.
+CKM/Kidney/Plaque: CKM stage 2; UACR not available; CAC not measured.
 
 Assessment:
 - Severe hypertriglyceridemia (ICD: E78.1)

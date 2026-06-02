@@ -1,0 +1,16 @@
+{
+  "case_id": "golden_001",
+  "status": "WARN",
+  "finding_count": 1,
+  "findings": [
+    {
+      "status": "warn",
+      "severity": "medium",
+      "category": "visual",
+      "finding": "Raw value/object text visible: None",
+      "evidence_excerpt": "ture family history Father <55 Father MI age 49 Suspected FH / HeFH Ancestry context None / not specified Inflammation / immune context Inflammatory, autoimmune, HIV, cancer, and",
+      "suggested_fix_direction": "Render a user-facing fallback instead of raw Python/JS values.",
+      "codex_ready": true
+    }
+  ]
+}

@@ -760,6 +760,33 @@ def test_assessment_candidate_accept_does_not_apply_to_family_history_context():
     assert "dx-status'>Review suggested" not in combined
 
 
+def test_needs_review_confirm_button_uses_row_scoped_centering_layout():
+    from core.results import DiagnosisCandidate, RCCKMResult
+    from ui.diagnosis_confirm_panel import render_diagnosis_confirm_panel
+
+    result = RCCKMResult(
+        diagnosis_candidates=[
+            DiagnosisCandidate(
+                "Possible familial hypercholesterolemia",
+                "E78.01",
+                "review_suggested",
+                "LDL-C / family history pattern",
+            )
+        ]
+    )
+
+    fake_st = _FakeStreamlit()
+    render_diagnosis_confirm_panel(fake_st, result)
+
+    combined = "\n".join(str(message) for message in fake_st.messages)
+    button_labels = [message[1] for message in fake_st.messages if message[0] == "button"]
+
+    assert "dx-review-text" in combined
+    assert "dx-review-button-cell" in combined
+    assert "vertical_alignment=\"center\"" not in combined
+    assert "Confirm" in button_labels
+
+
 def test_assessment_confirmed_rows_do_not_render_review_or_suppress_controls():
     from core.results import DiagnosisCandidate, RCCKMResult
     from ui.diagnosis_confirm_panel import render_diagnosis_confirm_panel

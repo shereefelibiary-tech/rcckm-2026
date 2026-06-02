@@ -6,7 +6,7 @@ RISK CONTINUUM CKM
 
 Level: 3B - elevated lifetime ASCVD risk with ApoB-driven atherogenic burden.
 PREVENT: ASCVD 10y 2.8% (Low); 30y 15.04%.
-CKM/Kidney/Plaque: CKM 2; kidney G1A1; CAC not measured.
+CKM/Kidney/Plaque: CKM stage 2; kidney G1A1; CAC not measured.
 Context: father MI age 49.
 
 Assessment:

@@ -6,7 +6,7 @@ RISK CONTINUUM CKM
 
 Level: 3A - low short-term ASCVD risk with inflammatory risk-enhancer context.
 PREVENT: ASCVD 10y 1.54% (Low); 30y 9.85%.
-CKM/Kidney/Plaque: CKM 0; kidney G2A1; CAC not measured.
+CKM/Kidney/Plaque: CKM stage 0; kidney G2A1; CAC not measured.
 Context: RA; father MI age 49.
 
 Assessment:

@@ -892,6 +892,13 @@ def _line_to_lipid_readout(line: str, patient: Any | None = None, result: Any | 
     if lowered.strip() == "discuss lipid-lowering therapy.":
         return "Discuss lipid-lowering therapy", "", "moderate", "consider"
     if "moderate-intensity" in lowered:
+        if (
+            patient is not None
+            and result is not None
+            and _ldl_at_or_below_target(patient, result)
+            and not _has_higher_intensity_lipid_trigger(patient)
+        ):
+            return "At LDL-C goal", _apob_missing_particle_detail(patient, result), "none", "neutral"
         if "reasonable" in lowered or "may be reasonable" in lowered or "discuss" in lowered:
             return "Discuss moderate-intensity statin", "Review start/intensity.", "moderate", "consider"
         return "Start moderate-intensity statin", "Primary-prevention lipid therapy.", "moderate", "action"
@@ -901,6 +908,8 @@ def _line_to_lipid_readout(line: str, patient: Any | None = None, result: Any | 
         return "Lifestyle-focused", "No routine lipid escalation.", "low", "neutral"
     if "no escalation" in lowered:
         if patient is not None:
+            if result is not None and _ldl_at_or_below_target(patient, result):
+                return "At LDL-C goal", _apob_missing_particle_detail(patient, result), "none", "neutral"
             if _is_on_lipid_lowering(patient):
                 return "Continue current lipid treatment", "", "none", "neutral"
             return "No lipid-lowering medication indicated", "", "none", "neutral"
@@ -1017,6 +1026,37 @@ def _lipids_at_or_below_targets(patient: Any, result: Any) -> bool:
     return checked
 
 
+def _ldl_at_or_below_target(patient: Any, result: Any) -> bool:
+    target = _first_target(result)
+    if not target:
+        return False
+    ldl = _num(getattr(patient, "ldl_c", None))
+    ldl_target = _num(getattr(target, "ldl_c_target", None))
+    return bool(ldl is not None and ldl_target is not None and ldl < ldl_target)
+
+
+def _has_higher_intensity_lipid_trigger(patient: Any) -> bool:
+    cac = _num(getattr(patient, "cac", None))
+    ldl = _num(getattr(patient, "ldl_c", None))
+    return bool(
+        getattr(patient, "clinical_ascvd", False)
+        or getattr(patient, "suspected_fh_hefh", False)
+        or (ldl is not None and ldl >= 190)
+        or (cac is not None and cac >= 100)
+    )
+
+
+def _apob_missing_particle_detail(patient: Any, result: Any) -> str:
+    target = _first_target(result)
+    ldl = _num(getattr(patient, "ldl_c", None))
+    ldl_target = _num(getattr(target, "ldl_c_target", None)) if target else None
+    apob = _num(getattr(patient, "apob", None))
+    apob_target = _num(getattr(target, "apob_target", None)) if target else None
+    if ldl is not None and ldl_target is not None and apob is None and apob_target is not None:
+        return "Obtain ApoB to assess particle burden."
+    return ""
+
+
 def _lipid_patient_line(patient: Any, status: str, detail: str, source_line: str) -> str:
     lowered = f"{status} {detail} {source_line}".lower()
     on_lipid_lowering = _is_on_lipid_lowering(patient)
@@ -1040,6 +1080,8 @@ def _lipid_patient_line(patient: Any, status: str, detail: str, source_line: str
         if on_lipid_lowering:
             return "Discuss stronger cholesterol-lowering therapy."
         return "Discuss starting cholesterol-lowering therapy."
+    if "at ldl-c goal" in lowered:
+        return "At LDL-C goal."
     if "moderate-intensity" in lowered:
         if on_lipid_lowering:
             return "Discuss stronger cholesterol-lowering therapy."
@@ -1263,6 +1305,8 @@ def _lipid_target_detail(patient: Any, result: Any, fallback: str) -> str:
         parts.append(f"ApoB {apob:g}; target <{apob_target:g}.")
     elif apob is not None:
         parts.append(f"ApoB {apob:g}.")
+    elif ldl is not None and ldl_target is not None and ldl < ldl_target and apob_target is not None:
+        parts.append("Obtain ApoB to assess particle burden.")
     if ldl is None and triglycerides is not None and triglycerides >= 400 and non_hdl is not None and non_hdl_target is not None:
         parts.append(f"non-HDL-C {non_hdl:g}; target <{non_hdl_target:g}.")
     elif any("ApoB" in item for item in _clarifier_items(result)):
@@ -1639,7 +1683,10 @@ def _attach_surface_lines(
         if item.domain_id == "lipid_lowering":
             lipid_parts = []
             lipid_parts.extend(section_text.get("Triglycerides") or [])
-            lipid_parts.append(_lipid_emr_line(lipid_line, patient, result))
+            if item.status == "At LDL-C goal":
+                lipid_parts.append(_readout_sentence(item).replace("Lipid lowering: ", ""))
+            else:
+                lipid_parts.append(_lipid_emr_line(lipid_line, patient, result))
             lipid_parts.extend(section_text.get("Lifestyle") or [])
             lipid_parts.extend(section_text.get("Statin intolerance") or [])
             lipid_parts.extend(section_text.get("Secondary causes") or [])

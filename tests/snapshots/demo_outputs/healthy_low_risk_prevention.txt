@@ -6,7 +6,7 @@ RISK CONTINUUM CKM
 
 Level: 1 - minimal risk signal.
 PREVENT: ASCVD 10y 0.16% (Low); 30y 1.23%.
-CKM/Kidney/Plaque: CKM 0; kidney G1A1; CAC not measured.
+CKM/Kidney/Plaque: CKM stage 0; kidney G1A1; CAC not measured.
 
 Assessment:
 - No diagnosis candidates generated.

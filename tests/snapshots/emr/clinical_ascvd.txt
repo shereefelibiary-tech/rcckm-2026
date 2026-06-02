@@ -2,7 +2,7 @@ RISK CONTINUUM CKM
 
 Level: 5 - clinical ASCVD / secondary prevention.
 PREVENT: unavailable.
-CKM/Kidney/Plaque: CKM 4; CAC not measured.
+CKM/Kidney/Plaque: CKM stage 4; CAC not measured.
 
 Assessment:
 - Clinical ASCVD

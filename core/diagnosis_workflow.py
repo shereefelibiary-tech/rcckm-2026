@@ -479,6 +479,64 @@ def _compact_display_label(label: str, out: Any) -> str:
     return str(label or "").strip()
 
 
+def _is_obesity_label(label: str) -> bool:
+    return str(label or "").strip().lower() in {"obesity", "morbid obesity"}
+
+
+def _bmi_range_from_label(label: str) -> str:
+    text = str(label or "").strip()
+    if text.lower().startswith("adult bmi "):
+        return text[len("Adult BMI ") :].strip()
+    return ""
+
+
+def _merge_code_lists(primary: dict[str, Any], secondary: dict[str, Any], key: str) -> list[str]:
+    return _dedupe(_extract_code_list(primary.get(key)) + _extract_code_list(secondary.get(key)))
+
+
+def _combine_obesity_bmi_entries(entries: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Display obesity diagnosis and adult BMI Z-code as one compact row."""
+    obesity_index = None
+    bmi_index = None
+    for index, entry in enumerate(entries):
+        if not isinstance(entry, dict):
+            continue
+        label = str(entry.get("label_display") or entry.get("label") or "").strip()
+        if obesity_index is None and _is_obesity_label(label):
+            obesity_index = index
+        if bmi_index is None and _bmi_range_from_label(label):
+            bmi_index = index
+
+    if obesity_index is None or bmi_index is None:
+        return entries
+
+    obesity = dict(entries[obesity_index])
+    bmi = entries[bmi_index]
+    obesity_label = str(obesity.get("label_display") or obesity.get("label") or "").strip()
+    bmi_range = _bmi_range_from_label(str(bmi.get("label_display") or bmi.get("label") or ""))
+    obesity["label_display"] = f"{obesity_label}, BMI {bmi_range}"
+    obesity["label"] = obesity.get("label") or obesity_label
+    obesity["diagnosis"] = obesity["label_display"]
+    obesity["icd10_suggested"] = _merge_code_lists(obesity, bmi, "icd10_suggested")
+    obesity["icd10_confirmed"] = _merge_code_lists(obesity, bmi, "icd10_confirmed")
+    obesity["hcc_suggested"] = _merge_code_lists(obesity, bmi, "hcc_suggested")
+    obesity["hcc_confirmed"] = _merge_code_lists(obesity, bmi, "hcc_confirmed")
+    obesity["combined_diagnosis_components"] = [
+        str(obesity.get("dx_id") or obesity_label),
+        str(bmi.get("dx_id") or bmi.get("label_display") or bmi.get("label") or ""),
+    ]
+
+    combined: list[dict[str, Any]] = []
+    for index, entry in enumerate(entries):
+        if index == obesity_index:
+            combined.append(obesity)
+        elif index == bmi_index:
+            continue
+        else:
+            combined.append(entry)
+    return combined
+
+
 def prepare_diagnosis_display_entries(out: Any) -> list[dict[str, Any]]:
     """Normalize, dedupe, and compact diagnosis labels for UI/EMR display only."""
     entries = prioritize_linked_diagnoses(normalize_diagnosis_entries(out))
@@ -495,7 +553,7 @@ def prepare_diagnosis_display_entries(out: Any) -> list[dict[str, Any]]:
             row["label_display"] = compact_label
         display_entries.append(row)
 
-    return display_entries
+    return _combine_obesity_bmi_entries(display_entries)
 
 
 def apply_confirmations(all_dx: list[dict[str, Any]], confirmed_ids: set[str] | list[str]) -> list[dict[str, Any]]:

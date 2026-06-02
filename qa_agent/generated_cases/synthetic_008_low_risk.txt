@@ -1,0 +1,51 @@
+=== CARDIOVASCULAR RISK ASSESSMENT ===
+
+Age: 39 y.o.
+Sex: female
+Race/Ethnicity: Filipino
+
+Smoking status: Never smoker
+
+Blood pressure (most recent):
+BP: 118/71
+BMI: 20.2
+
+Clinical ASCVD: No
+Clinical ASCVD details:
+No known ASCVD.
+
+Family History:
+Father CABG age 58.
+
+Lipids:
+LDL-C 105 mg/dL
+HDL-C 64 mg/dL
+Triglycerides 104 mg/dL
+
+A1c:
+HEMOGLOBIN A1C 5.2%
+
+ApoB:
+APOB 88 mg/dL
+
+Lp(a):
+Lp(a) not checked
+
+eGFR:
+LABGLOM 83 mL/min/1.73m2
+
+Urine ACR:
+ALBCREAT 9 mg/g
+
+Coronary artery calcium (CAC) score: 0
+CAC percentile:
+
+Risk enhancers:
+Inflammatory disease: Rheumatoid arthritis
+Reproductive history: No
+
+Medications:
+No active cardiometabolic medications.
+
+Problem list:
+Rheumatoid arthritis

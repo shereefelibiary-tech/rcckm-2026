@@ -1,0 +1,58 @@
+=== CARDIOVASCULAR RISK ASSESSMENT ===
+
+Age: 50 y.o.
+Sex: female
+Race/Ethnicity: Black / African American
+
+Smoking status: Never smoker
+
+Blood pressure (most recent):
+BP: 144/80
+BMI: 28.1
+
+Clinical ASCVD: Yes
+Clinical ASCVD details:
+Documented CAD/MI/PAD/stroke.
+
+Family History:
+No premature ASCVD in first-degree relative.
+
+Lipids:
+LDL-C 75 mg/dL
+HDL-C 59 mg/dL
+Triglycerides 234 mg/dL
+
+A1c:
+HEMOGLOBIN A1C 6.7%
+
+ApoB:
+APOB 76 mg/dL
+
+Lp(a):
+Lp(a) not checked
+
+eGFR:
+LABGLOM 55 mL/min/1.73m2
+
+Urine ACR:
+ALBCREAT 19 mg/g
+
+Coronary artery calcium (CAC) score: Not available
+CAC percentile:
+
+Risk enhancers:
+Inflammatory disease: No
+Reproductive history: No
+
+Medications:
+Losartan 50 mg daily
+Rosuvastatin 20 mg daily
+Metformin ER 1000 mg daily
+Empagliflozin 10 mg daily
+Aspirin 81 mg daily
+
+Problem list:
+History of myocardial infarction
+Type 2 diabetes mellitus
+Essential hypertension
+Chronic kidney disease

@@ -2,7 +2,7 @@ RISK CONTINUUM CKM
 
 Level: 1 - minimal risk signal.
 PREVENT: unavailable.
-CKM/Kidney/Plaque: CKM 0; CAC 0.
+CKM/Kidney/Plaque: CKM stage 0; CAC 0.
 
 Assessment:
 - No diagnosis candidates generated.

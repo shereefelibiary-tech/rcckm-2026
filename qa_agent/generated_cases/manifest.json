@@ -1,0 +1,602 @@
+[
+  {
+    "case_id": "synthetic_001_low_risk",
+    "phenotype": "low_risk",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_001_low_risk.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_001_low_risk.txt"
+  },
+  {
+    "case_id": "synthetic_002_intermediate_risk",
+    "phenotype": "intermediate_risk",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_002_intermediate_risk.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_002_intermediate_risk.txt"
+  },
+  {
+    "case_id": "synthetic_003_high_risk",
+    "phenotype": "high_risk",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_003_high_risk.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_003_high_risk.txt"
+  },
+  {
+    "case_id": "synthetic_004_ckd_focused",
+    "phenotype": "ckd_focused",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_004_ckd_focused.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_004_ckd_focused.txt"
+  },
+  {
+    "case_id": "synthetic_005_diabetes_focused",
+    "phenotype": "diabetes_focused",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_005_diabetes_focused.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_005_diabetes_focused.txt"
+  },
+  {
+    "case_id": "synthetic_006_ascvd_focused",
+    "phenotype": "ascvd_focused",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_006_ascvd_focused.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_006_ascvd_focused.txt"
+  },
+  {
+    "case_id": "synthetic_007_edge_case",
+    "phenotype": "edge_case",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_007_edge_case.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_007_edge_case.txt"
+  },
+  {
+    "case_id": "synthetic_008_low_risk",
+    "phenotype": "low_risk",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_008_low_risk.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_008_low_risk.txt"
+  },
+  {
+    "case_id": "synthetic_009_intermediate_risk",
+    "phenotype": "intermediate_risk",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_009_intermediate_risk.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_009_intermediate_risk.txt"
+  },
+  {
+    "case_id": "synthetic_010_high_risk",
+    "phenotype": "high_risk",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_010_high_risk.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_010_high_risk.txt"
+  },
+  {
+    "case_id": "synthetic_011_ckd_focused",
+    "phenotype": "ckd_focused",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_011_ckd_focused.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_011_ckd_focused.txt"
+  },
+  {
+    "case_id": "synthetic_012_diabetes_focused",
+    "phenotype": "diabetes_focused",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_012_diabetes_focused.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_012_diabetes_focused.txt"
+  },
+  {
+    "case_id": "synthetic_013_ascvd_focused",
+    "phenotype": "ascvd_focused",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_013_ascvd_focused.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_013_ascvd_focused.txt"
+  },
+  {
+    "case_id": "synthetic_014_edge_case",
+    "phenotype": "edge_case",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_014_edge_case.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_014_edge_case.txt"
+  },
+  {
+    "case_id": "synthetic_015_low_risk",
+    "phenotype": "low_risk",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_015_low_risk.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_015_low_risk.txt"
+  },
+  {
+    "case_id": "synthetic_016_intermediate_risk",
+    "phenotype": "intermediate_risk",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_016_intermediate_risk.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_016_intermediate_risk.txt"
+  },
+  {
+    "case_id": "synthetic_017_high_risk",
+    "phenotype": "high_risk",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_017_high_risk.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_017_high_risk.txt"
+  },
+  {
+    "case_id": "synthetic_018_ckd_focused",
+    "phenotype": "ckd_focused",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_018_ckd_focused.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_018_ckd_focused.txt"
+  },
+  {
+    "case_id": "synthetic_019_diabetes_focused",
+    "phenotype": "diabetes_focused",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_019_diabetes_focused.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_019_diabetes_focused.txt"
+  },
+  {
+    "case_id": "synthetic_020_ascvd_focused",
+    "phenotype": "ascvd_focused",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_020_ascvd_focused.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_020_ascvd_focused.txt"
+  },
+  {
+    "case_id": "synthetic_021_edge_case",
+    "phenotype": "edge_case",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_021_edge_case.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_021_edge_case.txt"
+  },
+  {
+    "case_id": "synthetic_022_low_risk",
+    "phenotype": "low_risk",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_022_low_risk.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_022_low_risk.txt"
+  },
+  {
+    "case_id": "synthetic_023_intermediate_risk",
+    "phenotype": "intermediate_risk",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_023_intermediate_risk.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_023_intermediate_risk.txt"
+  },
+  {
+    "case_id": "synthetic_024_high_risk",
+    "phenotype": "high_risk",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_024_high_risk.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_024_high_risk.txt"
+  },
+  {
+    "case_id": "synthetic_025_ckd_focused",
+    "phenotype": "ckd_focused",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_025_ckd_focused.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_025_ckd_focused.txt"
+  },
+  {
+    "case_id": "synthetic_026_diabetes_focused",
+    "phenotype": "diabetes_focused",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_026_diabetes_focused.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_026_diabetes_focused.txt"
+  },
+  {
+    "case_id": "synthetic_027_ascvd_focused",
+    "phenotype": "ascvd_focused",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_027_ascvd_focused.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_027_ascvd_focused.txt"
+  },
+  {
+    "case_id": "synthetic_028_edge_case",
+    "phenotype": "edge_case",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_028_edge_case.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_028_edge_case.txt"
+  },
+  {
+    "case_id": "synthetic_029_low_risk",
+    "phenotype": "low_risk",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_029_low_risk.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_029_low_risk.txt"
+  },
+  {
+    "case_id": "synthetic_030_intermediate_risk",
+    "phenotype": "intermediate_risk",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_030_intermediate_risk.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_030_intermediate_risk.txt"
+  },
+  {
+    "case_id": "synthetic_031_high_risk",
+    "phenotype": "high_risk",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_031_high_risk.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_031_high_risk.txt"
+  },
+  {
+    "case_id": "synthetic_032_ckd_focused",
+    "phenotype": "ckd_focused",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_032_ckd_focused.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_032_ckd_focused.txt"
+  },
+  {
+    "case_id": "synthetic_033_diabetes_focused",
+    "phenotype": "diabetes_focused",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_033_diabetes_focused.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_033_diabetes_focused.txt"
+  },
+  {
+    "case_id": "synthetic_034_ascvd_focused",
+    "phenotype": "ascvd_focused",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_034_ascvd_focused.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_034_ascvd_focused.txt"
+  },
+  {
+    "case_id": "synthetic_035_edge_case",
+    "phenotype": "edge_case",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_035_edge_case.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_035_edge_case.txt"
+  },
+  {
+    "case_id": "synthetic_036_low_risk",
+    "phenotype": "low_risk",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_036_low_risk.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_036_low_risk.txt"
+  },
+  {
+    "case_id": "synthetic_037_intermediate_risk",
+    "phenotype": "intermediate_risk",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_037_intermediate_risk.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_037_intermediate_risk.txt"
+  },
+  {
+    "case_id": "synthetic_038_high_risk",
+    "phenotype": "high_risk",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_038_high_risk.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_038_high_risk.txt"
+  },
+  {
+    "case_id": "synthetic_039_ckd_focused",
+    "phenotype": "ckd_focused",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_039_ckd_focused.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_039_ckd_focused.txt"
+  },
+  {
+    "case_id": "synthetic_040_diabetes_focused",
+    "phenotype": "diabetes_focused",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_040_diabetes_focused.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_040_diabetes_focused.txt"
+  },
+  {
+    "case_id": "synthetic_041_ascvd_focused",
+    "phenotype": "ascvd_focused",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_041_ascvd_focused.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_041_ascvd_focused.txt"
+  },
+  {
+    "case_id": "synthetic_042_edge_case",
+    "phenotype": "edge_case",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_042_edge_case.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_042_edge_case.txt"
+  },
+  {
+    "case_id": "synthetic_043_low_risk",
+    "phenotype": "low_risk",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_043_low_risk.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_043_low_risk.txt"
+  },
+  {
+    "case_id": "synthetic_044_intermediate_risk",
+    "phenotype": "intermediate_risk",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_044_intermediate_risk.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_044_intermediate_risk.txt"
+  },
+  {
+    "case_id": "synthetic_045_high_risk",
+    "phenotype": "high_risk",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_045_high_risk.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_045_high_risk.txt"
+  },
+  {
+    "case_id": "synthetic_046_ckd_focused",
+    "phenotype": "ckd_focused",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_046_ckd_focused.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_046_ckd_focused.txt"
+  },
+  {
+    "case_id": "synthetic_047_diabetes_focused",
+    "phenotype": "diabetes_focused",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_047_diabetes_focused.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_047_diabetes_focused.txt"
+  },
+  {
+    "case_id": "synthetic_048_ascvd_focused",
+    "phenotype": "ascvd_focused",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_048_ascvd_focused.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_048_ascvd_focused.txt"
+  },
+  {
+    "case_id": "synthetic_049_edge_case",
+    "phenotype": "edge_case",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_049_edge_case.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_049_edge_case.txt"
+  },
+  {
+    "case_id": "synthetic_050_low_risk",
+    "phenotype": "low_risk",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_050_low_risk.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_050_low_risk.txt"
+  },
+  {
+    "case_id": "synthetic_051_intermediate_risk",
+    "phenotype": "intermediate_risk",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_051_intermediate_risk.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_051_intermediate_risk.txt"
+  },
+  {
+    "case_id": "synthetic_052_high_risk",
+    "phenotype": "high_risk",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_052_high_risk.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_052_high_risk.txt"
+  },
+  {
+    "case_id": "synthetic_053_ckd_focused",
+    "phenotype": "ckd_focused",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_053_ckd_focused.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_053_ckd_focused.txt"
+  },
+  {
+    "case_id": "synthetic_054_diabetes_focused",
+    "phenotype": "diabetes_focused",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_054_diabetes_focused.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_054_diabetes_focused.txt"
+  },
+  {
+    "case_id": "synthetic_055_ascvd_focused",
+    "phenotype": "ascvd_focused",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_055_ascvd_focused.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_055_ascvd_focused.txt"
+  },
+  {
+    "case_id": "synthetic_056_edge_case",
+    "phenotype": "edge_case",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_056_edge_case.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_056_edge_case.txt"
+  },
+  {
+    "case_id": "synthetic_057_low_risk",
+    "phenotype": "low_risk",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_057_low_risk.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_057_low_risk.txt"
+  },
+  {
+    "case_id": "synthetic_058_intermediate_risk",
+    "phenotype": "intermediate_risk",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_058_intermediate_risk.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_058_intermediate_risk.txt"
+  },
+  {
+    "case_id": "synthetic_059_high_risk",
+    "phenotype": "high_risk",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_059_high_risk.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_059_high_risk.txt"
+  },
+  {
+    "case_id": "synthetic_060_ckd_focused",
+    "phenotype": "ckd_focused",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_060_ckd_focused.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_060_ckd_focused.txt"
+  },
+  {
+    "case_id": "synthetic_061_diabetes_focused",
+    "phenotype": "diabetes_focused",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_061_diabetes_focused.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_061_diabetes_focused.txt"
+  },
+  {
+    "case_id": "synthetic_062_ascvd_focused",
+    "phenotype": "ascvd_focused",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_062_ascvd_focused.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_062_ascvd_focused.txt"
+  },
+  {
+    "case_id": "synthetic_063_edge_case",
+    "phenotype": "edge_case",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_063_edge_case.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_063_edge_case.txt"
+  },
+  {
+    "case_id": "synthetic_064_low_risk",
+    "phenotype": "low_risk",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_064_low_risk.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_064_low_risk.txt"
+  },
+  {
+    "case_id": "synthetic_065_intermediate_risk",
+    "phenotype": "intermediate_risk",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_065_intermediate_risk.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_065_intermediate_risk.txt"
+  },
+  {
+    "case_id": "synthetic_066_high_risk",
+    "phenotype": "high_risk",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_066_high_risk.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_066_high_risk.txt"
+  },
+  {
+    "case_id": "synthetic_067_ckd_focused",
+    "phenotype": "ckd_focused",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_067_ckd_focused.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_067_ckd_focused.txt"
+  },
+  {
+    "case_id": "synthetic_068_diabetes_focused",
+    "phenotype": "diabetes_focused",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_068_diabetes_focused.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_068_diabetes_focused.txt"
+  },
+  {
+    "case_id": "synthetic_069_ascvd_focused",
+    "phenotype": "ascvd_focused",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_069_ascvd_focused.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_069_ascvd_focused.txt"
+  },
+  {
+    "case_id": "synthetic_070_edge_case",
+    "phenotype": "edge_case",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_070_edge_case.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_070_edge_case.txt"
+  },
+  {
+    "case_id": "synthetic_071_low_risk",
+    "phenotype": "low_risk",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_071_low_risk.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_071_low_risk.txt"
+  },
+  {
+    "case_id": "synthetic_072_intermediate_risk",
+    "phenotype": "intermediate_risk",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_072_intermediate_risk.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_072_intermediate_risk.txt"
+  },
+  {
+    "case_id": "synthetic_073_high_risk",
+    "phenotype": "high_risk",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_073_high_risk.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_073_high_risk.txt"
+  },
+  {
+    "case_id": "synthetic_074_ckd_focused",
+    "phenotype": "ckd_focused",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_074_ckd_focused.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_074_ckd_focused.txt"
+  },
+  {
+    "case_id": "synthetic_075_diabetes_focused",
+    "phenotype": "diabetes_focused",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_075_diabetes_focused.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_075_diabetes_focused.txt"
+  },
+  {
+    "case_id": "synthetic_076_ascvd_focused",
+    "phenotype": "ascvd_focused",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_076_ascvd_focused.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_076_ascvd_focused.txt"
+  },
+  {
+    "case_id": "synthetic_077_edge_case",
+    "phenotype": "edge_case",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_077_edge_case.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_077_edge_case.txt"
+  },
+  {
+    "case_id": "synthetic_078_low_risk",
+    "phenotype": "low_risk",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_078_low_risk.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_078_low_risk.txt"
+  },
+  {
+    "case_id": "synthetic_079_intermediate_risk",
+    "phenotype": "intermediate_risk",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_079_intermediate_risk.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_079_intermediate_risk.txt"
+  },
+  {
+    "case_id": "synthetic_080_high_risk",
+    "phenotype": "high_risk",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_080_high_risk.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_080_high_risk.txt"
+  },
+  {
+    "case_id": "synthetic_081_ckd_focused",
+    "phenotype": "ckd_focused",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_081_ckd_focused.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_081_ckd_focused.txt"
+  },
+  {
+    "case_id": "synthetic_082_diabetes_focused",
+    "phenotype": "diabetes_focused",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_082_diabetes_focused.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_082_diabetes_focused.txt"
+  },
+  {
+    "case_id": "synthetic_083_ascvd_focused",
+    "phenotype": "ascvd_focused",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_083_ascvd_focused.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_083_ascvd_focused.txt"
+  },
+  {
+    "case_id": "synthetic_084_edge_case",
+    "phenotype": "edge_case",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_084_edge_case.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_084_edge_case.txt"
+  },
+  {
+    "case_id": "synthetic_085_low_risk",
+    "phenotype": "low_risk",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_085_low_risk.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_085_low_risk.txt"
+  },
+  {
+    "case_id": "synthetic_086_intermediate_risk",
+    "phenotype": "intermediate_risk",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_086_intermediate_risk.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_086_intermediate_risk.txt"
+  },
+  {
+    "case_id": "synthetic_087_high_risk",
+    "phenotype": "high_risk",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_087_high_risk.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_087_high_risk.txt"
+  },
+  {
+    "case_id": "synthetic_088_ckd_focused",
+    "phenotype": "ckd_focused",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_088_ckd_focused.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_088_ckd_focused.txt"
+  },
+  {
+    "case_id": "synthetic_089_diabetes_focused",
+    "phenotype": "diabetes_focused",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_089_diabetes_focused.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_089_diabetes_focused.txt"
+  },
+  {
+    "case_id": "synthetic_090_ascvd_focused",
+    "phenotype": "ascvd_focused",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_090_ascvd_focused.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_090_ascvd_focused.txt"
+  },
+  {
+    "case_id": "synthetic_091_edge_case",
+    "phenotype": "edge_case",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_091_edge_case.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_091_edge_case.txt"
+  },
+  {
+    "case_id": "synthetic_092_low_risk",
+    "phenotype": "low_risk",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_092_low_risk.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_092_low_risk.txt"
+  },
+  {
+    "case_id": "synthetic_093_intermediate_risk",
+    "phenotype": "intermediate_risk",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_093_intermediate_risk.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_093_intermediate_risk.txt"
+  },
+  {
+    "case_id": "synthetic_094_high_risk",
+    "phenotype": "high_risk",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_094_high_risk.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_094_high_risk.txt"
+  },
+  {
+    "case_id": "synthetic_095_ckd_focused",
+    "phenotype": "ckd_focused",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_095_ckd_focused.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_095_ckd_focused.txt"
+  },
+  {
+    "case_id": "synthetic_096_diabetes_focused",
+    "phenotype": "diabetes_focused",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_096_diabetes_focused.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_096_diabetes_focused.txt"
+  },
+  {
+    "case_id": "synthetic_097_ascvd_focused",
+    "phenotype": "ascvd_focused",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_097_ascvd_focused.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_097_ascvd_focused.txt"
+  },
+  {
+    "case_id": "synthetic_098_edge_case",
+    "phenotype": "edge_case",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_098_edge_case.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_098_edge_case.txt"
+  },
+  {
+    "case_id": "synthetic_099_low_risk",
+    "phenotype": "low_risk",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_099_low_risk.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_099_low_risk.txt"
+  },
+  {
+    "case_id": "synthetic_100_intermediate_risk",
+    "phenotype": "intermediate_risk",
+    "patient_json": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_100_intermediate_risk.json",
+    "smartphrase_text": "C:\\Users\\shere\\Documents\\GitHub\\rcckm-2026\\qa_agent\\generated_cases\\synthetic_100_intermediate_risk.txt"
+  }
+]
